@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Settings</h1>
+    <p>Welcome to the settings page. Customize your preferences here.</p>
+
+    <!-- Add a form for uploading a CV -->
+    <form method="post" enctype="multipart/form-data" action="/Home/UploadCv">
+        <div class="mb-3">
+            <label for="cvFile" class="form-label">Upload your CV</label>
+            <input type="file" class="form-control" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
+
+<!-- 
+    Changes to implement file upload functionality:
+
+    1. Add an `UploadCv` action in the `HomeController`:
+       - This action should handle the uploaded file and save it to a specific location on the server or a database.
+
+       Example:
+       [HttpPost]
+       public IActionResult UploadCv(IFormFile cvFile)
+       {
+           if (cvFile != null && cvFile.Length > 0)
+           {
+               var filePath = Path.Combine("wwwroot/uploads", cvFile.FileName);
+               using (var stream = new FileStream(filePath, FileMode.Create))
+               {
+                   cvFile.CopyTo(stream);
+               }
+               ViewData["Message"] = "CV uploaded successfully.";
+           }
+           else
+           {
+               ViewData["Message"] = "Please select a valid file.";
+           }
+           return View("Settings");
+       }
+
+    2. Create a folder for storing uploaded files:
+       - Create a folder named `uploads` inside the `wwwroot` directory to store the uploaded CVs.
+
+    3. Add validation for file types and size:
+       - Ensure only valid file types (e.g., `.pdf`, `.doc`, `.docx`) and sizes are accepted.
+
+    4. Display success or error messages:
+       - Use `ViewData["Message"]` to display feedback to the user after uploading.
+
+    After implementing these changes, users will be able to upload their CVs from the settings page.
+-->
