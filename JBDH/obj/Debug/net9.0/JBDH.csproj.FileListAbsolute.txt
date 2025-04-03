@@ -1,0 +1,291 @@
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\appsettings.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.runtime.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.endpoints.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.exe
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.deps.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.runtimeconfig.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.pdb
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfoInputs.cache
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfo.cs
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.csproj.CoreCompileInputs.cache
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cache
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cs
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\bundle\JBDH.styles.css
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\projectbundle\JBDH.bundle.scp.css
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\dqub7wf2uz-b9sayid5wm.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\qcdolfqvbx-61n19gt1b8.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\8kod6anyfc-xtxxf3hu2r.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ltgg9rjzo7-bqjiyaj88i.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\at6qjixiff-c2jlpeoesf.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bp9ufxvuco-erw9l3u2r3.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\7ja7cwpyyl-aexeepp0ev.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tsjdlkjwdh-d7shbmvgxk.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tnwtsnsm45-ausgxo2sd3.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\oicmud3ee5-k8d9w2qqmf.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\hdpau7mupx-cosvhxvwiu.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\b0ngw1ytou-ub07r2b239.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0neaa75jnl-fvhpjtyr6v.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ayvq6mjir2-b7pk76d08c.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t8l80mjmi3-fsbi9cje9m.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\zvrsz1lqd4-rzd6atqjts.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\vhda1ly4w8-ee0r1s7dh0.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\xjcq0xaz9m-dxx9fxp4il.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t41ukq237m-jd9uben2k1.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\m449nqapgw-khv3u5hwcm.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\jo3vsdeqz3-r4e9w2rdcm.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\v66bnnrkpc-lcd1t2u6c8.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\v4kg97zprn-c2oey78nd0.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\q970os13c2-tdbxkamptv.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\cb4dpv5t81-j5mq2jizvt.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ozmlejh73b-06098lyss8.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\egnxk0vcql-nvvlpmu67g.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\fy7qbj2nay-s35ty4nyc5.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\gxz9ctpnk3-pj5nd1wqec.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\slxw4g33be-46ein0sx1k.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\y1u7bwh0qq-v0zj4ognzu.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\yknjhdk3k2-37tfw0ft22.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ocum5gji77-hrwsygsryq.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\2y6npf70n4-pk9g2wxc8p.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\y8apxpiqva-ft3s53vfgj.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\5hlpotn9q0-6cfz1n2cew.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t1sjd3j1bg-6pdc2jztkx.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\mippkll4oz-493y06b0oq.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\kmstym5hao-iovd86k7lj.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\c1t8cy786j-vr1egmr9el.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\6wuxmaq9vi-kbrnm935zg.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ek840cnbsa-jj8uyg4cgr.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\uzi1iuxdd5-y7v9cxd14o.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\h0fo2f3xfu-notf2xhcfb.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\x14c18z89i-h1s4sie4z3.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bip26qnr5g-63fj8s7r0e.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\2tsiazeqnr-0j3bgjxly4.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\lvdeb7ob6p-47otxtyo56.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\hull510knf-4v8eqarkd7.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\yg3u33xkpp-356vix0kms.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bpnys91cv0-83jwlth58m.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\dbcmvlqp0g-mrlpezrjn3.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t5k85lkeyj-lzl9nlhx6b.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bxnmyzgi9y-ag7o75518u.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tsm865t3t0-x0q3zqp4vz.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\6at0yrvx0k-0i3buxo5is.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\oz5q4xbpd8-o1o13a6vjx.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0c5u54tvn9-ttgo8qnofa.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\jb0ao6rn2v-2z0ns9nrw6.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\avgxev1ynp-muycvpuwrr.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\60s0pxptqd-87fc7y1x7t.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\f87vj52syo-mlv21k5csn.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0ry8z671mt-dqwpcvk4d6.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\compressed\n58fmhpopk-dqwpcvk4d6.gz
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.build.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.development.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.build.JBDH.props
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.JBDH.props
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.JBDH.props
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.pack.json
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\refint\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.pdb
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.genruntimeconfig.cache
+C:\Users\yazda\OneDrive\Documents\D&H(MVC)APP\JBDH\JBDH\obj\Debug\net9.0\ref\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\appsettings.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.endpoints.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.runtime.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.exe
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.deps.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.runtimeconfig.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.pdb
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfoInputs.cache
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfo.cs
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.csproj.CoreCompileInputs.cache
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cache
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cs
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\bundle\JBDH.styles.css
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\projectbundle\JBDH.bundle.scp.css
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\dqub7wf2uz-b9sayid5wm.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\qcdolfqvbx-61n19gt1b8.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\8kod6anyfc-xtxxf3hu2r.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ltgg9rjzo7-bqjiyaj88i.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\at6qjixiff-c2jlpeoesf.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bp9ufxvuco-erw9l3u2r3.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\7ja7cwpyyl-aexeepp0ev.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tsjdlkjwdh-d7shbmvgxk.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tnwtsnsm45-ausgxo2sd3.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\oicmud3ee5-k8d9w2qqmf.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\hdpau7mupx-cosvhxvwiu.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\b0ngw1ytou-ub07r2b239.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0neaa75jnl-fvhpjtyr6v.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ayvq6mjir2-b7pk76d08c.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t8l80mjmi3-fsbi9cje9m.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\zvrsz1lqd4-rzd6atqjts.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\vhda1ly4w8-ee0r1s7dh0.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\xjcq0xaz9m-dxx9fxp4il.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t41ukq237m-jd9uben2k1.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\m449nqapgw-khv3u5hwcm.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\jo3vsdeqz3-r4e9w2rdcm.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\v66bnnrkpc-lcd1t2u6c8.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\v4kg97zprn-c2oey78nd0.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\q970os13c2-tdbxkamptv.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\cb4dpv5t81-j5mq2jizvt.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ozmlejh73b-06098lyss8.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\egnxk0vcql-nvvlpmu67g.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\fy7qbj2nay-s35ty4nyc5.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\gxz9ctpnk3-pj5nd1wqec.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\slxw4g33be-46ein0sx1k.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\y1u7bwh0qq-v0zj4ognzu.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\yknjhdk3k2-37tfw0ft22.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ocum5gji77-hrwsygsryq.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\2y6npf70n4-pk9g2wxc8p.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\y8apxpiqva-ft3s53vfgj.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\5hlpotn9q0-6cfz1n2cew.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t1sjd3j1bg-6pdc2jztkx.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\mippkll4oz-493y06b0oq.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\kmstym5hao-iovd86k7lj.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\c1t8cy786j-vr1egmr9el.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\6wuxmaq9vi-kbrnm935zg.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ek840cnbsa-jj8uyg4cgr.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\uzi1iuxdd5-y7v9cxd14o.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\h0fo2f3xfu-notf2xhcfb.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\x14c18z89i-h1s4sie4z3.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bip26qnr5g-63fj8s7r0e.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\2tsiazeqnr-0j3bgjxly4.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\lvdeb7ob6p-47otxtyo56.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\hull510knf-4v8eqarkd7.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\yg3u33xkpp-356vix0kms.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bpnys91cv0-83jwlth58m.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\dbcmvlqp0g-mrlpezrjn3.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t5k85lkeyj-lzl9nlhx6b.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bxnmyzgi9y-ag7o75518u.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tsm865t3t0-x0q3zqp4vz.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\6at0yrvx0k-0i3buxo5is.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\oz5q4xbpd8-o1o13a6vjx.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0c5u54tvn9-ttgo8qnofa.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\jb0ao6rn2v-2z0ns9nrw6.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\avgxev1ynp-muycvpuwrr.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\60s0pxptqd-87fc7y1x7t.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\f87vj52syo-mlv21k5csn.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0ry8z671mt-dqwpcvk4d6.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\compressed\n58fmhpopk-dqwpcvk4d6.gz
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.build.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.development.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.build.JBDH.props
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.JBDH.props
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.JBDH.props
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.pack.json
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\refint\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.pdb
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.genruntimeconfig.cache
+C:\Users\yazda\OneDrive\Documents\DH MVC APP\JBDH\JBDH\obj\Debug\net9.0\ref\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\appsettings.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.endpoints.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.runtime.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.exe
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.deps.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.runtimeconfig.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\JBDH.pdb
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfoInputs.cache
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfo.cs
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.csproj.CoreCompileInputs.cache
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cache
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cs
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\bundle\JBDH.styles.css
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\scopedcss\projectbundle\JBDH.bundle.scp.css
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\dqub7wf2uz-b9sayid5wm.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\qcdolfqvbx-61n19gt1b8.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\8kod6anyfc-xtxxf3hu2r.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ltgg9rjzo7-bqjiyaj88i.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\at6qjixiff-c2jlpeoesf.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bp9ufxvuco-erw9l3u2r3.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\7ja7cwpyyl-aexeepp0ev.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tsjdlkjwdh-d7shbmvgxk.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tnwtsnsm45-ausgxo2sd3.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\oicmud3ee5-k8d9w2qqmf.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\hdpau7mupx-cosvhxvwiu.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\b0ngw1ytou-ub07r2b239.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0neaa75jnl-fvhpjtyr6v.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ayvq6mjir2-b7pk76d08c.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t8l80mjmi3-fsbi9cje9m.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\zvrsz1lqd4-rzd6atqjts.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\vhda1ly4w8-ee0r1s7dh0.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\xjcq0xaz9m-dxx9fxp4il.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t41ukq237m-jd9uben2k1.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\m449nqapgw-khv3u5hwcm.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\jo3vsdeqz3-r4e9w2rdcm.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\v66bnnrkpc-lcd1t2u6c8.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\v4kg97zprn-c2oey78nd0.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\q970os13c2-tdbxkamptv.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\cb4dpv5t81-j5mq2jizvt.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ozmlejh73b-06098lyss8.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\egnxk0vcql-nvvlpmu67g.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\fy7qbj2nay-s35ty4nyc5.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\gxz9ctpnk3-pj5nd1wqec.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\slxw4g33be-46ein0sx1k.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\y1u7bwh0qq-v0zj4ognzu.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\yknjhdk3k2-37tfw0ft22.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ocum5gji77-hrwsygsryq.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\2y6npf70n4-pk9g2wxc8p.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\y8apxpiqva-ft3s53vfgj.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\5hlpotn9q0-6cfz1n2cew.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t1sjd3j1bg-6pdc2jztkx.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\mippkll4oz-493y06b0oq.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\kmstym5hao-iovd86k7lj.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\c1t8cy786j-vr1egmr9el.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\6wuxmaq9vi-kbrnm935zg.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\ek840cnbsa-jj8uyg4cgr.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\uzi1iuxdd5-y7v9cxd14o.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\h0fo2f3xfu-notf2xhcfb.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\x14c18z89i-h1s4sie4z3.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bip26qnr5g-63fj8s7r0e.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\2tsiazeqnr-0j3bgjxly4.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\lvdeb7ob6p-47otxtyo56.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\hull510knf-4v8eqarkd7.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\yg3u33xkpp-356vix0kms.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bpnys91cv0-83jwlth58m.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\dbcmvlqp0g-mrlpezrjn3.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\t5k85lkeyj-lzl9nlhx6b.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\bxnmyzgi9y-ag7o75518u.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\tsm865t3t0-x0q3zqp4vz.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\6at0yrvx0k-0i3buxo5is.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\oz5q4xbpd8-o1o13a6vjx.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0c5u54tvn9-ttgo8qnofa.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\jb0ao6rn2v-2z0ns9nrw6.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\avgxev1ynp-muycvpuwrr.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\60s0pxptqd-87fc7y1x7t.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\f87vj52syo-mlv21k5csn.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\0ry8z671mt-dqwpcvk4d6.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\compressed\n58fmhpopk-dqwpcvk4d6.gz
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.build.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.development.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.build.JBDH.props
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.JBDH.props
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.JBDH.props
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\staticwebassets.pack.json
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\refint\JBDH.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.pdb
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.genruntimeconfig.cache
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\ref\JBDH.dll
