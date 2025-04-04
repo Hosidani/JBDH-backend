@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews(); // Add MVC controllers and views
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -35,12 +35,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // Enable serving static files (e.g., CSS, JS, images)
 app.UseRouting();
 
 app.UseAuthorization();
 app.UseCors();
 app.UseSession(); // Enable session middleware
 
-app.MapControllers();
+// Map default route for MVC controllers and views
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route
 
 app.Run();
