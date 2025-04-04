@@ -37,12 +37,12 @@ public class HomeController : Controller
     {
         // Query the database for the user
         var user = _context.Users
-            .FirstOrDefault(u => u.Username == username && u.Password == password);
+            .FirstOrDefault(u => u.Username == username && u.PasswordHash == password);
 
         if (user != null)
         {
             // Set session or authentication cookie
-            HttpContext.Session.SetString("Username", user.Username);
+            HttpContext.Session.SetString("Username", user.Username ?? string.Empty);
             return RedirectToAction("Index", "Home");
         }
 

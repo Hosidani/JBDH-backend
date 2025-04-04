@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JBDH.Models;
+using System.Globalization;
 
 namespace JBDH.Controllers
 {
@@ -55,6 +56,10 @@ namespace JBDH.Controllers
                     int? jobPriority = null;
                     // TODO: POSSIBLE CRASH HERE IF JOB TITLE OR LOCATION IS NULL
                     // Check if jobTitle and jobLocation are not null or empty
+                    if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
+                    {
+                        continue; // Skip this job if title or location is invalid
+                    }
                     if (processedDescription.ToLower() == jobTitle.ToLower() && processedLocation == jobLocation)
                     {
                         jobPriority = 1;
