@@ -26,7 +26,7 @@ public class HomeController : Controller
     public IActionResult SearchJobs(string description, string location)
     {
         // Call the SearchApi to filter jobs
-        var jobAds = SearchApi.FetchJobAdsAsync("your-api-url").Result;
+        var jobAds = SearchApi.FetchJobAdsAsync("https://jobstream.api.jobtechdev.se").Result;
         var filteredJobs = SearchApi.FilterJobs(jobAds, description, location);
 
         // Pass the filtered jobs to the view
