@@ -47,8 +47,8 @@ class SearchApi
         foreach (var job in jobAds)
         {
             var title = job.GetValueOrDefault("headline", "").ToString().ToLower();
-            var description = job.GetValueOrDefault("description", new Dictionary<string, object>())
-                .GetValueOrDefault("text", "").ToString().ToLower();
+            var descriptionDict = job.GetValueOrDefault("description", null) as Dictionary<string, object>;
+            var description = descriptionDict?.GetValueOrDefault("text", "").ToString().ToLower() ?? "";
  
             if (title.Contains("systemutvecklare") || description.Contains("systemutvecklare"))
             {
@@ -66,8 +66,9 @@ class SearchApi
         Console.WriteLine($"Location: {((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>()))
             .GetValueOrDefault("municipality", "N/A")}");
         Console.WriteLine($"Application deadline: {job.GetValueOrDefault("application_deadline", "N/A")}");
-        Console.WriteLine($"Description: {job.GetValueOrDefault("description", new Dictionary<string, object>())
-            .GetValueOrDefault("text", "").ToString().Substring(0, 200)}...");
+        var descriptionDict = job.GetValueOrDefault("description", null) as Dictionary<string, object>;
+        var description = descriptionDict?.GetValueOrDefault("text", "")?.ToString();
+        Console.WriteLine($"Description: {description?.Substring(0, Math.Min(200, description.Length))}...");
         Console.WriteLine(new string('-', 50));
     }
  
