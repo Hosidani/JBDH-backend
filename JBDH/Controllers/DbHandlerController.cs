@@ -14,6 +14,7 @@ class DbHandler
         LoggingConfig.ReturnInfo("Starting up Job database handler...\nSetting up connection...");
         LoggingConfig.ReturnInfo("Connection established...");
         EtlPipeline.RunEtlPipeline(JsonFile);
+        //TODO: HERE WE SHOULD DELETE JSON FILE AFTER THE ETL PROCESS
         LoggingConfig.ReturnInfo("Starting sorting queries...");
         // InternalSorting.TestInternalSorting(); // Placeholder for sorting queries
         LoggingConfig.ReturnInfo("Closing application...");
