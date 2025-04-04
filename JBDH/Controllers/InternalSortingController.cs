@@ -10,13 +10,7 @@ class InternalSorting
     private const string LOCATION = "stockholm";
     private const string TITLE = "Java-utvecklare";
     private const string DESCRIPTION = "fullstack";
- 
-    public static MySqlConnection EstablishConnection()
-    {
-        LoggingConfig.ReturnInfo("Establishing database connection...");
-        return Settings.SetupConnection();
-    }
- 
+
     public static void CloseConnection(MySqlConnection conn, MySqlCommand cmd)
     {
         LoggingConfig.ReturnInfo("Closing connection...");
@@ -49,7 +43,8 @@ class InternalSorting
  
     public static List<Dictionary<string, object>> ExecuteQuery(string query, object[] parameters)
     {
-        using var conn = EstablishConnection();
+        using var conn = new MySqlConnection(Settings.SetupConnection());
+        conn.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = query;
  
