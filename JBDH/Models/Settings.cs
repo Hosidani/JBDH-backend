@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 using JBDH.Models; // Assuming this is the namespace for your models
 using JBDH.Controllers;
  
-namespace JBDH.Models;
+namespace JBDH.Models
 {
     public static class Settings
     {
