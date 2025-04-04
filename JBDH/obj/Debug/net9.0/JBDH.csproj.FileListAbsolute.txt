@@ -412,3 +412,4 @@ C:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.csproj.AssemblyRef
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.csproj.Up2Date
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.csproj.AssemblyReference.cache
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.sourcelink.json
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\NLog.dll

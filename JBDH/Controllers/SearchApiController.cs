@@ -14,7 +14,7 @@ class SearchApi
     private const string DbTableName = "jobads";
     private const string DbFileName = "jobads_database_20220127.db";
     private const string TimestampFile = "timestamp2.txt";
-    private const string JsonFile = "systemutvecklare_jobs.json";
+    private const string JsonFile = "jobs.json";
  
     private const string BaseUrl = "https://jobstream.api.jobtechdev.se";
     private const string StreamUrl = $"{BaseUrl}/stream";
@@ -41,20 +41,26 @@ class SearchApi
         }
     }
  
-    public static List<Dictionary<string, object>> FilterSystemutvecklareJobs(List<Dictionary<string, object>> jobAds)
+    public static List<Dictionary<string, object>> FilterJobs(
+        List<Dictionary<string, object>> jobAds, string description = "", string location = "")
     {
         var filteredJobs = new List<Dictionary<string, object>>();
+
         foreach (var job in jobAds)
         {
             var title = job.GetValueOrDefault("headline", "").ToString().ToLower();
             var descriptionDict = job.GetValueOrDefault("description", null) as Dictionary<string, object>;
-            var description = descriptionDict?.GetValueOrDefault("text", "").ToString().ToLower() ?? "";
- 
-            if (title.Contains("systemutvecklare") || description.Contains("systemutvecklare"))
+            var jobDescription = descriptionDict?.GetValueOrDefault("text", "").ToString().ToLower() ?? "";
+            var locationDict = job.GetValueOrDefault("workplace_address", null) as Dictionary<string, object>;
+            var jobLocation = locationDict?.GetValueOrDefault("municipality", "").ToString().ToLower() ?? "";
+
+            if ((string.IsNullOrEmpty(description) || title.Contains(description.ToLower()) || jobDescription.Contains(description.ToLower())) &&
+                (string.IsNullOrEmpty(location) || jobLocation.Contains(location.ToLower())))
             {
                 filteredJobs.Add(job);
             }
         }
+
         return filteredJobs;
     }
  
@@ -104,16 +110,16 @@ class SearchApi
  
         if (jobAds != null)
         {
-            var systemutvecklareJobs = FilterSystemutvecklareJobs(jobAds);
+            var Jobs = FilterJobs(jobAds);
  
-            if (systemutvecklareJobs.Count > 0)
+            if (Jobs.Count > 0)
             {
-                SaveToJson(systemutvecklareJobs, JsonFile);
-                LoggingConfig.ReturnInfo($"Saved {systemutvecklareJobs.Count} 'systemutvecklare' jobs to {JsonFile}");
+                SaveToJson(Jobs, JsonFile);
+                LoggingConfig.ReturnInfo($"Saved {Jobs.Count} jobs to {JsonFile}");
             }
             else
             {
-                LoggingConfig.ReturnWarning("No 'systemutvecklare' jobs found in the data.");
+                LoggingConfig.ReturnWarning("No jobs found in the database.");
             }
         }
         else
