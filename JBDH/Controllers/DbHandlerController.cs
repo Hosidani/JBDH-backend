@@ -11,8 +11,7 @@ class DbHandler
     public static void Main(string[] args)
     {
         LoggingConfig.ConfigLogging();
-        LoggingConfig.ReturnInfo("Starting up Job database handler...\nSetting up connection...\nTesting connection...");
-        Settings.TestConnection();
+        LoggingConfig.ReturnInfo("Starting up Job database handler...\nSetting up connection...");
         LoggingConfig.ReturnInfo("Connection established...");
         EtlPipeline.RunEtlPipeline(JsonFile);
         LoggingConfig.ReturnInfo("Starting sorting queries...");

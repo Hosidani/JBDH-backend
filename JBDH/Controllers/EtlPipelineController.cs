@@ -21,7 +21,8 @@ class EtlPipeline
         try
         {
             var jsonData = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonData);
+            var result = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonData);
+            return result ?? new List<Dictionary<string, object>>(); // Handle possible null return
         }
         catch (Exception e)
         {
@@ -39,13 +40,13 @@ class EtlPipeline
             {
                 transformed.Add(new Dictionary<string, object>
                 {
-                    { "job_id", job.GetValueOrDefault("id") },
+                    { "job_id", job.GetValueOrDefault("id") ?? "Unknown ID" }, // Provide a default value
                     { "title", job.GetValueOrDefault("headline", "Unknown Title") },
                     { "description", ((Dictionary<string, object>)job.GetValueOrDefault("description", new Dictionary<string, object>())).GetValueOrDefault("text", "No Description") },
                     { "company", ((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>())).GetValueOrDefault("name", "Unknown Company") },
                     { "location", ((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>())).GetValueOrDefault("municipality", "Unknown Location") },
-                    { "posted_date", job.GetValueOrDefault("publication_date") },
-                    { "webpage_url", job.GetValueOrDefault("webpage_url") }
+                    { "posted_date", job.GetValueOrDefault("publication_date") ?? DateTime.MinValue }, // Default to DateTime.MinValue
+                    { "webpage_url", job.GetValueOrDefault("webpage_url") ?? "Unknown URL" } // Provide a default value
                 });
             }
             catch (Exception e)
@@ -60,6 +61,8 @@ class EtlPipeline
     {
         using var conn = new MySqlConnection(Settings.SetupConnection());
         conn.Open();
+        LoggingConfig.ReturnInfo("Database connection established.");
+        
         using var cmd = conn.CreateCommand();
  
         cmd.CommandText = SqlQueries.SqlQuery(1);
@@ -101,4 +104,3 @@ class EtlPipeline
         LoadData(sqlData);
     }
 }
- 

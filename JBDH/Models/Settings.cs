@@ -7,15 +7,12 @@ namespace JBDH.Models
 {
     public static class Settings
     {
-        public static MySqlConnection SetupConnection()
+        public static string SetupConnection()
         {
             try
             {
                 LoggingConfig.ReturnInfo("Setting up database connection...");
-                var connection = new MySqlConnection(DbConfig.DB_CONFIG);
-                connection.Open();
-                LoggingConfig.ReturnInfo("Database connection established.");
-                return connection;
+                return DbConfig.DB_CONFIG;
             }
             catch (MySqlException e)
             {
@@ -63,23 +60,6 @@ namespace JBDH.Models
             catch (Exception e)
             {
                 LoggingConfig.ReturnError($"Failed to commit transaction: {e.Message}");
-                throw;
-            }
-        }
- 
-        public static void TestConnection()
-        {
-            try
-            {
-                using (var connection = SetupConnection())
-                {
-                    LoggingConfig.ReturnInfo("Testing database connection...");
-                    LoggingConfig.ReturnInfo("Database connection test successful.");
-                }
-            }
-            catch (Exception e)
-            {
-                LoggingConfig.ReturnError($"Database connection test failed: {e.Message}");
                 throw;
             }
         }
