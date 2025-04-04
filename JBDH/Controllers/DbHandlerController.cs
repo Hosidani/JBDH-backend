@@ -6,7 +6,7 @@ namespace JBDH.Controllers; // Assuming this is the namespace for your controlle
 class DbHandler
 {
     private static readonly string ConnectionString = DbConfig.DB_CONFIG;
-    private const string JsonFile = "systemutvecklare_jobs.json";
+    private const string JsonFile = "jobs.json";
  
     public static void Main(string[] args)
     {

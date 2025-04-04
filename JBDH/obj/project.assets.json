@@ -387,6 +387,15 @@
           }
         }
       },
+      "NLog/1.0.0.505": {
+        "type": "package",
+        "compile": {
+          "lib/NLog.dll": {}
+        },
+        "runtime": {
+          "lib/NLog.dll": {}
+        }
+      },
       "System.Buffers/4.5.1": {
         "type": "package",
         "compile": {
@@ -1263,6 +1272,18 @@
         "logo-mysql-170x115.png",
         "mysql.entityframeworkcore.9.0.0.nupkg.sha512",
         "mysql.entityframeworkcore.nuspec"
+      ]
+    },
+    "NLog/1.0.0.505": {
+      "sha512": "7dnEHYmlfAho9gbM0KvjcfSej419aevcYyDNFcQf6ALcj+ZEkns64ZAN1KOOQK0lL20WHWXbKML4aA088BENTg==",
+      "type": "package",
+      "path": "nlog/1.0.0.505",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/NLog.dll",
+        "nlog.1.0.0.505.nupkg.sha512",
+        "nlog.nuspec"
       ]
     },
     "System.Buffers/4.5.1": {
@@ -2187,28 +2208,36 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "MySql.EntityFrameworkCore >= 9.0.0"
+      "MySql.EntityFrameworkCore >= 9.0.0",
+      "NLog >= 1.0.0.505"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\danie\\.nuget\\packages\\": {}
+    "C:\\Users\\yazda\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj",
+      "projectUniqueName": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj",
       "projectName": "JBDH",
-      "projectPath": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj",
-      "packagesPath": "C:\\Users\\danie\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\obj\\",
+      "projectPath": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj",
+      "packagesPath": "C:\\Users\\yazda\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\danie\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\yazda\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -2236,6 +2265,10 @@
           "MySql.EntityFrameworkCore": {
             "target": "Package",
             "version": "[9.0.0, )"
+          },
+          "NLog": {
+            "target": "Package",
+            "version": "[1.0.0.505, )"
           }
         },
         "imports": [
@@ -2257,8 +2290,20 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.202/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'NLog 1.0.0.505' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0'. This package may not be fully compatible with your project.",
+      "libraryId": "NLog",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
- 
-namespace JBDH.Models;
+using NLog;
+
+
+namespace JBDH.Models
 {
     public static class LoggingConfig
     {
@@ -11,13 +13,20 @@ namespace JBDH.Models;
         {
             var config = new NLog.Config.LoggingConfiguration();
  
-            var logConsole = new NLog.Targets.ConsoleTarget("logConsole")
+            var logConsole = new NLog.Targets.ConsoleTarget
             {
+                Name = "logConsole",
                 Layout = "${longdate} ${level:uppercase=true} ${message}"
             };
- 
-            config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, logConsole);
- 
+
+            // Add the target to the configuration
+            config.AddTarget("logConsole", logConsole);
+
+            // Define a logging rule for all levels
+            var rule = new NLog.Config.LoggingRule("*", NLog.LogLevel.Trace, logConsole);
+config.LoggingRules.Add(rule);
+
+            // Apply the configuration
             NLog.LogManager.Configuration = config;
         }
  
@@ -46,14 +55,14 @@ namespace JBDH.Models;
             Logger.Debug(info);
         }
  
-        public static void ReturnException(string info, Exception ex)
+        public static void ReturnException(string info)
         {
-            Logger.Error(ex, info);
+            Logger.Error(info);
         }
  
-        public static void ReturnFatal(string info, Exception ex)
+        public static void ReturnFatal(string info)
         {
-            Logger.Fatal(ex, info);
+            Logger.Fatal(info);
         }
  
         public static int InitCounter()
