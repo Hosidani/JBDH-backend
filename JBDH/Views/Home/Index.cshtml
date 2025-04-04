@@ -3,12 +3,17 @@
 @* The Job Database Handler is a web application that allows users to manage job listings, applications, and related data. *@
 
 @{
-    ViewData["Title"] = "Job search";
+    ViewData["Title"] = "Home";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Hello User</h1>
-    <p>Welcome to Job Database Handler.</p>
+    <h1 class="display-4">Job Search</h1>
+    <p>Search for jobs by description and location.</p>
+    <form method="get" action="/Home/SearchJobs">
+        <input type="text" name="description" placeholder="Enter job description">
+        <input type="text" name="location" placeholder="Enter location">
+        <button type="submit">Search</button>
+    </form>
 </div>
 
 @*
