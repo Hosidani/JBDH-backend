@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "K0vjaum7j0o=",
+  "dgSpecHash": "n1kZ4wGuPYM=",
   "success": true,
   "projectFilePath": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj",
   "expectedPackageFiles": [
@@ -26,9 +26,11 @@
     "C:\\Users\\danie\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\mysql.data\\9.2.0\\mysql.data.9.2.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\mysql.entityframeworkcore\\9.0.0\\mysql.entityframeworkcore.9.0.0.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\mysqlconnector\\2.3.5\\mysqlconnector.2.3.5.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\nlog\\5.0.0\\nlog.5.0.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\nlog.config\\4.7.15\\nlog.config.4.7.15.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\nlog.schema\\4.7.15\\nlog.schema.4.7.15.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\8.0.3\\pomelo.entityframeworkcore.mysql.8.0.3.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\system.configuration.configurationmanager\\8.0.0\\system.configuration.configurationmanager.8.0.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\system.diagnostics.diagnosticsource\\8.0.1\\system.diagnostics.diagnosticsource.8.0.1.nupkg.sha512",
@@ -50,5 +52,16 @@
     "C:\\Users\\danie\\.nuget\\packages\\system.windows.extensions\\8.0.0\\system.windows.extensions.8.0.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\zstdsharp.port\\0.8.0\\zstdsharp.port.0.8.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1608",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Detected package version outside of dependency constraint: Pomelo.EntityFrameworkCore.MySql 8.0.3 requires Microsoft.EntityFrameworkCore.Relational (>= 8.0.13 && <= 8.0.999) but version Microsoft.EntityFrameworkCore.Relational 9.0.0 was resolved.",
+      "libraryId": "Microsoft.EntityFrameworkCore.Relational",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
 }

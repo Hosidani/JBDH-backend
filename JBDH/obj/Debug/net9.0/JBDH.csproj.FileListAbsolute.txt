@@ -438,3 +438,5 @@ C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\runtimes
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\obj\Debug\net9.0\JBDH.csproj.Up2Date
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\NLog.config
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\NLog.config
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\MySqlConnector.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll

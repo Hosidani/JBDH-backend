@@ -59,6 +59,10 @@
             "NLog.Config": {
               "target": "Package",
               "version": "[4.7.15, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[8.0.3, )"
             }
           },
           "imports": [
