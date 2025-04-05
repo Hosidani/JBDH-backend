@@ -46,6 +46,11 @@ class SearchApi
     {
         var filteredJobs = new List<Dictionary<string, object>>();
 
+        if (jobAds == null)
+        {
+            return filteredJobs; // Return an empty list if jobAds is null
+        }
+
         foreach (var job in jobAds)
         {
             var title = job.GetValueOrDefault("headline", "").ToString().ToLower();
