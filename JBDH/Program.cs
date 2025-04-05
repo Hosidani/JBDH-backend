@@ -4,8 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+await Task.Run(async () =>
+{
+    try
+    {
+        await SearchApi.Main(args);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error in SearchApi.Main: {ex.Message}");
+    }
+});
 // Run DbHandler.Main synchronously before starting the web application
-Task.Run(() =>
+await Task.Run(() =>
 {
     try
     {
@@ -16,6 +27,8 @@ Task.Run(() =>
         Console.WriteLine($"Error in DbHandler.Main: {ex.Message}");
     }
 });
+
+
 
 // Add services to the container
 builder.Services.AddControllersWithViews();

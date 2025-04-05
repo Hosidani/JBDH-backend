@@ -11,8 +11,8 @@ namespace JBDH.Controllers; // Assuming this is the namespace for your controlle
 
 class SearchApi
 {
-    private const string DbTableName = "jobads";
-    private const string DbFileName = "jobads_database_20220127.db";
+    private const string DbTableName = "testing_purposes";
+    private const string DbFileName = "testing_purposes.db";
     private const string TimestampFile = "timestamp2.txt";
     private const string JsonFile = "jobs.json";
  
