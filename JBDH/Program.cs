@@ -1,9 +1,9 @@
 using JBDH.Controllers;
 using JBDH.Models;
 using Microsoft.EntityFrameworkCore;
-
+using MySql.Data.MySqlClient;
+using DbHandler = JBDH.Controllers.DbHandler;
 var builder = WebApplication.CreateBuilder(args);
-
 await Task.Run(async () =>
 {
     try
@@ -15,6 +15,7 @@ await Task.Run(async () =>
         Console.WriteLine($"Error in PlatsbankenApi.Main: {ex.Message}");
     }
 });
+
 // Run DbHandler.Main synchronously before starting the web application
 await Task.Run(() =>
 {
@@ -27,8 +28,6 @@ await Task.Run(() =>
         Console.WriteLine($"Error in DbHandler.Main: {ex.Message}");
     }
 });
-
-
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
@@ -71,5 +70,16 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Add a shutdown hook to flush the database
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+lifetime.ApplicationStopping.Register(() =>
+{
+    Console.WriteLine("Application is shutting down. Flushing the database...");
+    using var connection = new MySqlConnection(DbHandler.ConnectionString);
+    connection.Open();
+    DbHandler.FlushDatabase(connection);
+    Console.WriteLine("Database flushed successfully.");
+});
 
 app.Run();

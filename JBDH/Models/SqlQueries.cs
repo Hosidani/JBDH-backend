@@ -13,7 +13,9 @@ namespace JBDH.Models
             { 6, "DELETE FROM raw_table WHERE job_id IN (SELECT job_id FROM clean_table);" },
             { 8, "SELECT * FROM clean_table WHERE posted_date LIKE @param1 ORDER BY posted_date DESC;" },
             { 9, "SELECT * FROM clean_table WHERE LOWER(title) LIKE @param1 OR LOWER(description) LIKE @param1;" },
-            { 10, "SELECT * FROM clean_table WHERE LOWER(location) LIKE @param1;" }
+            { 10, "SELECT * FROM clean_table WHERE LOWER(location) LIKE @param1;" },
+            { 11, "DELETE FROM raw_table;" },
+            { 12, "DELETE FROM clean_table;" }
         };
  
         public static string SqlQuery(int queryId)

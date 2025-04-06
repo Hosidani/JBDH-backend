@@ -440,4 +440,3 @@ C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\NLog.con
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\NLog.config
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\MySqlConnector.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll
-C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\jobs.json

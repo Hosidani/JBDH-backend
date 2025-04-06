@@ -92,6 +92,7 @@ public static void LoadData(List<Dictionary<string, object>> rawJobs)
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
             {
+                LoggingConfig.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
                 var command = new MySqlCommand(SqlQueries.SqlQuery(3), connection);
                 command.Parameters.AddWithValue("@job_id", job["job_id"]);
                 command.Parameters.AddWithValue("@title", job["title"]);

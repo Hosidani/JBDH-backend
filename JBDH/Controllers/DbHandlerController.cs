@@ -8,7 +8,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
 {
     class DbHandler
     {
-        private static readonly string ConnectionString = DbConfig.DB_CONFIG; // Ensure this is a valid MySQL connection string
+        public static readonly string ConnectionString = DbConfig.DB_CONFIG; // Ensure this is a valid MySQL connection string
         private const string JsonFile = "jobs.json";
 
         public static void Main(string[] args)
@@ -24,7 +24,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 LoggingConfig.ReturnInfo("ETL pipeline completed...");
                 
                 // Delete the JSON file after the ETL process
-                DeleteJsonFile(JsonFile);
+                //DeleteJsonFile(JsonFile);
 
                 LoggingConfig.ReturnInfo("Starting sorting queries...");
                 // InternalSorting.TestInternalSorting(); // Placeholder for sorting queries
@@ -96,6 +96,30 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Error ensuring tables exist: {e.Message}");
+            }
+        }
+
+        public static void FlushDatabase(MySqlConnection connection)
+        {
+            try
+            {
+                Console.WriteLine("Flushing database...");
+
+                // Delete all rows from raw_table
+                var deleteRawTableCommand = new MySqlCommand(SqlQueries.SqlQuery(11), connection);
+                var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
+                Console.WriteLine($"Deleted {rawRowsDeleted} rows from raw_table.");
+
+                // Delete all rows from clean_table
+                var deleteCleanTableCommand = new MySqlCommand(SqlQueries.SqlQuery(12), connection);
+                var cleanRowsDeleted = deleteCleanTableCommand.ExecuteNonQuery();
+                Console.WriteLine($"Deleted {cleanRowsDeleted} rows from clean_table.");
+
+                Console.WriteLine("Database flushed successfully.");
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Error flushing database: {e.Message}");
             }
         }
 
