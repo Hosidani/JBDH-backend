@@ -25,12 +25,16 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult SearchJobs(string description, string location)
     {
-        // Call the SearchApi to filter jobs
-        var jobAds = SearchApi.FetchJobAdsAsync("https://jobstream.api.jobtechdev.se").Result;
-        var filteredJobs = SearchApi.FilterJobs(jobAds, description, location);
-
-        // Pass the filtered jobs to the view
-        return View("SearchResults", filteredJobs);
+        try
+        {
+            var jobs = InternalSorting.GetJobs(description, location);
+            return View("SearchResults", jobs);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error fetching or filtering jobs: {ex.Message}");
+            return View("Error", new { Message = "An error occurred while searching for jobs." });
+        }
     }
 
     public IActionResult Privacy()

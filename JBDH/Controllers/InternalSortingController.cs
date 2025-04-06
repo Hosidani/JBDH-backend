@@ -7,9 +7,7 @@ namespace JBDH.Controllers; // Assuming this is the namespace for your controlle
 
 class InternalSorting
 {
-    private const string LOCATION = "stockholm";
-    private const string TITLE = "Java-utvecklare";
-    private const string DESCRIPTION = "fullstack";
+    private static readonly string ConnectionString = DbConfig.DB_CONFIG;
 
     public static void CloseConnection(MySqlConnection conn, MySqlCommand cmd)
     {
@@ -127,6 +125,39 @@ class InternalSorting
             throw;
         }
     }
+
+    public static List<Dictionary<string, object>> GetJobs(string description, string location)
+    {
+        var jobs = new List<Dictionary<string, object>>();
+
+        try
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            var query = "SELECT * FROM clean_table WHERE (@description = 'default' OR title LIKE @description) AND (@location = 'default' OR location LIKE @location)";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@description", string.IsNullOrEmpty(description) ? "default" : $"%{description}%");
+            command.Parameters.AddWithValue("@location", string.IsNullOrEmpty(location) ? "default" : $"%{location}%");
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var job = new Dictionary<string, object>
+                {
+                    { "title", reader["title"] },
+                    { "location", reader["location"] },
+                    { "description", reader["description"] }
+                };
+                jobs.Add(job);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"Error retrieving jobs: {e.Message}");
+        }
+
+        return jobs;
+    }
 }
- 
- 
+

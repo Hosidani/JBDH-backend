@@ -8,11 +8,11 @@ await Task.Run(async () =>
 {
     try
     {
-        await SearchApi.Main(args);
+        await PlatsbankenApi.Main(args);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error in SearchApi.Main: {ex.Message}");
+        Console.WriteLine($"Error in PlatsbankenApi.Main: {ex.Message}");
     }
 });
 // Run DbHandler.Main synchronously before starting the web application
