@@ -35,27 +35,53 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
     {
+        int index = 0;
         var transformed = new List<Dictionary<string, object>>();
         foreach (var job in rawJobs)
         {
+            
             try
             {
+                //Console.WriteLine("Starting transformation for a job...");
+                var jobId = job.GetValueOrDefault("id") ?? "Unknown ID";
+                //Console.WriteLine($"Job ID: {jobId}");
+                var title = job.GetValueOrDefault("headline", "Unknown Title");
+                //Console.WriteLine($" Title: {title}");
+                
+                var rawDescription = job.GetValueOrDefault("description") as Dictionary<string, object>;
+                Console.WriteLine($"Type of Raw description: {rawDescription.GetType()}");
+                Console.WriteLine($"Raw description: {rawDescription["text"]}");
+                var description = rawDescription?.GetValueOrDefault("text", "No description available") ?? "No description available";
+                //Console.WriteLine($" Description: {description}");
+                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}");
+                index++;
+                var company = ((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>())).GetValueOrDefault("name", "Unknown Company");
+                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}");
+                var location = ((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>())).GetValueOrDefault("municipality", "Unknown Location");
+                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}, Location: {location}");
+                var postedDate = job.GetValueOrDefault("publication_date") ?? DateTime.MinValue;
+                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}, Location: {location}, Posted Date: {postedDate}");
+                var webpageUrl = job.GetValueOrDefault("webpage_url") ?? "Unknown URL";
+
+                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}, Location: {location}, Posted Date: {postedDate}, Webpage URL: {webpageUrl}");
+
                 transformed.Add(new Dictionary<string, object>
                 {
-                    { "job_id", job.GetValueOrDefault("id") ?? "Unknown ID" }, // Provide a default value
-                    { "title", job.GetValueOrDefault("headline", "Unknown Title") },
-                    { "description", ((Dictionary<string, object>)job.GetValueOrDefault("description", new Dictionary<string, object>())).GetValueOrDefault("text", "No Description") },
-                    { "company", ((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>())).GetValueOrDefault("name", "Unknown Company") },
-                    { "location", ((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>())).GetValueOrDefault("municipality", "Unknown Location") },
-                    { "posted_date", job.GetValueOrDefault("publication_date") ?? DateTime.MinValue }, // Default to DateTime.MinValue
-                    { "webpage_url", job.GetValueOrDefault("webpage_url") ?? "Unknown URL" } // Provide a default value
+                    { "job_id", jobId },
+                    { "title", title },
+                    { "description", description },
+                    { "company", company },
+                    { "location", location },
+                    { "posted_date", postedDate },
+                    { "webpage_url", webpageUrl }
                 });
             }
             catch (Exception e)
             {
-                LoggingConfig.ReturnInfo($"Skipping invalid job entry: {e.Message}");
+                //LoggingConfig.ReturnInfo($"Skipping invalid job entry: {e.Message}");
             }
         }
+        Console.WriteLine($"Transformed {index} jobs successfully.");
         return transformed;
     }
 
@@ -80,7 +106,7 @@ public class EtlPipeline
         return transformedJobs;
     }
 
-public static void LoadData(List<Dictionary<string, object>> rawJobs)
+    public static void LoadData(List<Dictionary<string, object>> rawJobs)
     {
         try
         {
@@ -88,6 +114,11 @@ public static void LoadData(List<Dictionary<string, object>> rawJobs)
             connection.Open();
 
             Console.WriteLine("Starting ETL process...");
+            Console.WriteLine($"Number of jobs to insert: {rawJobs.Count}");
+            foreach (var job in rawJobs)
+            {
+                Console.WriteLine($"Job ID: {job.GetValueOrDefault("job_id", "N/A")}, Title: {job.GetValueOrDefault("title", "N/A")}");
+            }
 
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
@@ -131,6 +162,7 @@ public static void LoadData(List<Dictionary<string, object>> rawJobs)
             Console.Error.WriteLine($"Error in ETL process: {e.Message}");
         }
     }
+
     public static void RunEtlPipeline(string jsonFile)
     {
         LoggingConfig.ReturnInfo("Starting ETL pipeline...\nExtracting raw data from JSON file...");

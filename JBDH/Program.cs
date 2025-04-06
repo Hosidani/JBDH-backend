@@ -2,7 +2,10 @@ using JBDH.Controllers;
 using JBDH.Models;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
+using Microsoft.Extensions.Hosting;
+using System.IO;
 using DbHandler = JBDH.Controllers.DbHandler;
+
 var builder = WebApplication.CreateBuilder(args);
 await Task.Run(async () =>
 {
@@ -80,6 +83,14 @@ lifetime.ApplicationStopping.Register(() =>
     connection.Open();
     DbHandler.FlushDatabase(connection);
     Console.WriteLine("Database flushed successfully.");
+
+    // Delete the timestamp file on application shutdown
+    var timestampFilePath = "timestamp.txt";
+    if (File.Exists(timestampFilePath))
+    {
+        File.Delete(timestampFilePath);
+        Console.WriteLine("Deleted timestamp.txt on application shutdown.");
+    }
 });
 
 app.Run();
