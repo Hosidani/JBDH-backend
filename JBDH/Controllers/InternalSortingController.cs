@@ -161,5 +161,5 @@ class InternalSorting
 
         return jobs;
     }
-}
 
+}

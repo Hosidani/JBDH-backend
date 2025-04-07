@@ -26,16 +26,63 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult SearchJobs(string description, string location)
     {
+        Console.WriteLine("SearchJobs method called");
         try
         {
-            var jobs = InternalSorting.GetJobs(description, location);
-            Console.WriteLine($"jobs length: {jobs.Count()}");
-            foreach (var job in jobs)
-            {
-                Console.WriteLine($"Job Title: {job.GetValueOrDefault("title", "N/A")}, Company: {job.GetValueOrDefault("company", "N/A")}");
-            }
+            var results = InternalSorting.InternalSortingFunction(description, location);
+            Console.WriteLine($"Returning {results.Count} job results");
 
-            return View("SearchResults", jobs);
+            var presentJobs = new List<(int Priority, Dictionary<string, object> Job)>();
+            foreach (var job in results)
+            {
+                var jobTitle = job.GetValueOrDefault("title", "").ToString();
+                var jobLocation = job.GetValueOrDefault("location", "").ToString();
+                int? jobPriority = null;
+                // BUG: java - Alingsås = Alla blir priority 4. Detta är fel.
+                if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
+                {
+                    continue; // Skip this job if title or location is invalid
+                }
+                if (description.ToLower() == jobTitle.ToLower() && location == jobLocation)
+                {
+                    jobPriority = 1;
+                }
+                else if (description.ToLower() == jobTitle.ToLower() && location == "default")
+                {
+                    jobPriority = 2;
+                }
+                else if (location == jobLocation && description == "default")
+                {
+                    jobPriority = 3;
+                }
+                else if (location == jobLocation || description == "default")
+                {
+                    jobPriority = 4;
+                }
+                else if (description.ToLower() == jobTitle.ToLower() || location == "default")
+                {
+                    jobPriority = 5;
+                }
+
+                if (jobPriority.HasValue)
+                {
+                    presentJobs.Add((jobPriority.Value, job));
+                }
+            }
+            // Group jobs by priority and count the number of jobs in each priority group
+            var priorityCounts = presentJobs
+                .GroupBy(job => job.Priority)
+                .Select(group => new { Priority = group.Key, Count = group.Count() })
+                .ToList();
+
+            // Print the counts for each priority
+            foreach (var priorityCount in priorityCounts)
+            {
+                Console.WriteLine($"Priority {priorityCount.Priority}: {priorityCount.Count} jobs");
+            }
+            presentJobs.Sort((x, y) => x.Priority.CompareTo(y.Priority));
+            var sortedJobs = presentJobs.Select(x => x.Job).ToList();
+            return View("SearchResults", sortedJobs);
         }
         catch (Exception ex)
         {

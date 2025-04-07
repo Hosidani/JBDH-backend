@@ -17,6 +17,7 @@ namespace JBDH.Controllers
         [HttpPost("submit_input")]
         public IActionResult SubmitInput([FromBody] Dictionary<string, string> data)
         {
+            Console.WriteLine("SubmitInput method called");
             try
             {
                 if (!data.ContainsKey("description") || !data.ContainsKey("location") || !data.ContainsKey("date"))
@@ -40,6 +41,7 @@ namespace JBDH.Controllers
         [HttpGet("jobs")]
         public IActionResult GetJobs([FromQuery] string description, [FromQuery] string location, [FromQuery] string date)
         {
+            Console.WriteLine("GetJobs method called");
             try
             {
                 var (processedDescription, processedLocation, processedDate) = InternalSorting.GetInputFromUser(description, location, date);

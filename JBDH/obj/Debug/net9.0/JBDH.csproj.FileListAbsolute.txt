@@ -443,3 +443,4 @@ C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Pomelo.EntityFrameworkC
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\MySqlConnector.dll
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\jobs.json
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\jobs.json
