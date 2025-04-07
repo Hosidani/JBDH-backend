@@ -122,7 +122,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 Console.Error.WriteLine($"Error flushing database: {e.Message}");
             }
         }
-
+/*
         public static void ProcessAndInsertJobs()
         {
             try
@@ -158,5 +158,6 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 Console.Error.WriteLine($"Error processing jobs: {e.Message}");
             }
         }
+*/
     }
 }

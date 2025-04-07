@@ -26,9 +26,9 @@
                 @foreach (var job in Model)
                 {
                     <tr>
-                        <td>@job.GetValueOrDefault("headline", "N/A")</td>
-                        <td>@((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>())).GetValueOrDefault("name", "N/A")</td>
-                        <td>@((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>())).GetValueOrDefault("municipality", "N/A")</td>
+                        <td>@job.GetValueOrDefault("title", "N/A")</td>
+                        <td>@job.GetValueOrDefault("company", "N/A")</td>
+                        <td>@job.GetValueOrDefault("location", "N/A")</td>
                         <td>@job.GetValueOrDefault("description", "N/A")</td>
                     </tr>
                 }

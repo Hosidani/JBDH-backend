@@ -35,36 +35,129 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
     {
-        int index = 0;
         var transformed = new List<Dictionary<string, object>>();
+        int warningCount = 0;
+
+        int missingDescriptionCount = 0;
+        int missingTitleCount = 0;
+        int missingEmployerCount = 0;
+        int missingLocationCount = 0;
+
         foreach (var job in rawJobs)
         {
-            
+            if (job.GetValueOrDefault("description") == null) missingDescriptionCount++;
+            if (job.GetValueOrDefault("headline") == null) missingTitleCount++;
+            if (job.GetValueOrDefault("employer") == null) missingEmployerCount++;
+            if (job.GetValueOrDefault("workplace_address") == null) missingLocationCount++;
+        }
+
+        Console.WriteLine($"Summary of missing fields:");
+        Console.WriteLine($"- Missing descriptions: {missingDescriptionCount}");
+        Console.WriteLine($"- Missing titles: {missingTitleCount}");
+        Console.WriteLine($"- Missing employers: {missingEmployerCount}");
+        Console.WriteLine($"- Missing locations: {missingLocationCount}");
+
+        foreach (var job in rawJobs)
+        {
             try
             {
-                //Console.WriteLine("Starting transformation for a job...");
                 var jobId = job.GetValueOrDefault("id") ?? "Unknown ID";
-                //Console.WriteLine($"Job ID: {jobId}");
-                var title = job.GetValueOrDefault("headline", "Unknown Title");
-                //Console.WriteLine($" Title: {title}");
                 
-                var rawDescription = job.GetValueOrDefault("description") as Dictionary<string, object>;
-                Console.WriteLine($"Type of Raw description: {rawDescription.GetType()}");
-                Console.WriteLine($"Raw description: {rawDescription["text"]}");
-                var description = rawDescription?.GetValueOrDefault("text", "No description available") ?? "No description available";
-                //Console.WriteLine($" Description: {description}");
-                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}");
-                index++;
-                var company = ((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>())).GetValueOrDefault("name", "Unknown Company");
-                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}");
-                var location = ((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>())).GetValueOrDefault("municipality", "Unknown Location");
-                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}, Location: {location}");
+                var rawTitle = job.GetValueOrDefault("headline", "Unknown Title").ToString();
+                var title = rawTitle != null ? DecodeUnicodeString(rawTitle) : "Unknown Title";
+
+                // Define the DecodeUnicodeString method
+                static string DecodeUnicodeString(string input)
+                {
+                    return System.Text.RegularExpressions.Regex.Unescape(input);
+                }
+
+                // Handle the "description" field
+                var rawDescription = job.GetValueOrDefault("description");
+                string description = "No Description";
+                /* BUG: company name : VIVIDA ASSISTANS AB
+                   Error processing description: Invalid pattern 'Väx med oss på Ada Service Partner – bli vår nya driftansvariga\kundansvarig! 💼🌟*/
+                if (rawDescription is JsonElement descriptionElement && descriptionElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (descriptionElement.TryGetProperty("text", out JsonElement textElement))
+                    {
+                        try
+                        {
+                            description = textElement.GetString() ?? "No Description";
+                            description = DecodeUnicodeString(description);
+
+                            // Replace line breaks and sanitize the text
+                            description = description.Replace("\n", " ").Replace("\r", " ").Trim();
+
+                            // Truncate the description to 200 characters
+                            int maxLength = 200;
+                            if (description.Length > maxLength)
+                            {
+                                description = description.Substring(0, maxLength) + "...";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error processing description: {ex.Message}");
+                            description = "Invalid Description Format";
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("The 'text' field is missing in the 'description' object.");
+                    }
+                }
+                else if (rawDescription == null)
+                {
+                    Console.WriteLine("Warning: The 'description' field is null or missing.");
+                    warningCount++;
+                }
+                else
+                {
+                    Console.WriteLine("Warning: The 'description' field is not a valid JSON object.");
+                    warningCount++;
+                }
+ 
+                string company = "Unknown Company";
+                var rawCompany = job.GetValueOrDefault("employer");
+                if (rawCompany is JsonElement employerElement && employerElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (employerElement.TryGetProperty("workplace", out JsonElement workplaceElement))
+                    {
+                        try
+                        {
+                            company = workplaceElement.GetString() ?? "No company name";
+                            company = DecodeUnicodeString(company);
+
+                            // Replace line breaks and sanitize the text
+                            company = company.Replace("\n", " ").Replace("\r", " ").Trim();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error processing company: {ex.Message}");
+                            company = "Invalid company name";
+                        }
+                    }
+                }
+                //Console.WriteLine($"company name : {company}");
+
+                // Handle the "workplace_address" field
+                string location = "Unknown Location";
+                if (job.GetValueOrDefault("workplace_address") is JsonElement addressElement && addressElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (addressElement.TryGetProperty("municipality", out JsonElement municipalityElement))
+                    {
+                        location = DecodeUnicodeString(municipalityElement.GetString() ?? "Unknown Location");
+                    }
+                }
+
+                // Handle the "publication_date" field
                 var postedDate = job.GetValueOrDefault("publication_date") ?? DateTime.MinValue;
-                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}, Location: {location}, Posted Date: {postedDate}");
+
+                // Handle the "webpage_url" field
                 var webpageUrl = job.GetValueOrDefault("webpage_url") ?? "Unknown URL";
 
-                //Console.WriteLine($"Job ID: {jobId}, Title: {title}, Description: {description}, Company: {company}, Location: {location}, Posted Date: {postedDate}, Webpage URL: {webpageUrl}");
-
+                // Add the transformed job to the list
                 transformed.Add(new Dictionary<string, object>
                 {
                     { "job_id", jobId },
@@ -75,29 +168,66 @@ public class EtlPipeline
                     { "posted_date", postedDate },
                     { "webpage_url", webpageUrl }
                 });
+
             }
             catch (Exception e)
             {
-                //LoggingConfig.ReturnInfo($"Skipping invalid job entry: {e.Message}");
+                LoggingConfig.ReturnInfo($"Skipping invalid job entry: {e.Message}");
             }
         }
-        Console.WriteLine($"Transformed {index} jobs successfully.");
+
+        Console.WriteLine($"warning count: {warningCount}");
+        Console.WriteLine($"Transformed {transformed.Count} jobs successfully.");
         return transformed;
     }
 
+/*
     public static List<Dictionary<string, object>> TransformJobs(List<Dictionary<string, object>> rawJobs)
     {
         var transformedJobs = new List<Dictionary<string, object>>();
 
         foreach (var job in rawJobs)
         {
+            // Extract the "title" field
+            var title = job.GetValueOrDefault("headline", "N/A");
+
+            // Extract the "location" field
+            string location = "N/A";
+            if (job.GetValueOrDefault("workplace_address") is JsonElement addressElement && addressElement.ValueKind == JsonValueKind.Object)
+            {
+                if (addressElement.TryGetProperty("municipality", out JsonElement municipalityElement))
+                {
+                    location = municipalityElement.GetString() ?? "N/A";
+                }
+            }
+
+            // Extract the "description" field
+            string description = "N/A";
+            if (job.GetValueOrDefault("description") is JsonElement descriptionElement && descriptionElement.ValueKind == JsonValueKind.Object)
+            {
+                if (descriptionElement.TryGetProperty("text", out JsonElement textElement))
+                {
+                    description = textElement.GetString() ?? "N/A";
+                }
+            }
+
+            // Extract the "employer" field
+            string company = "N/A";
+            if (job.GetValueOrDefault("employer") is JsonElement employerElement && employerElement.ValueKind == JsonValueKind.Object)
+            {
+                if (employerElement.TryGetProperty("name", out JsonElement nameElement))
+                {
+                    company = nameElement.GetString() ?? "N/A";
+                }
+            }
+
+            // Add the transformed job to the list
             var transformedJob = new Dictionary<string, object>
             {
-                { "title", job.GetValueOrDefault("headline", "N/A") },
-                { "location", ((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>()))
-                    .GetValueOrDefault("municipality", "N/A") },
-                { "description", ((Dictionary<string, object>)job.GetValueOrDefault("description", new Dictionary<string, object>()))
-                    .GetValueOrDefault("text", "N/A") }
+                { "title", title },
+                { "location", location },
+                { "description", description },
+                { "company", company }
             };
 
             transformedJobs.Add(transformedJob);
@@ -105,7 +235,7 @@ public class EtlPipeline
 
         return transformedJobs;
     }
-
+*/
     public static void LoadData(List<Dictionary<string, object>> rawJobs)
     {
         try
@@ -117,13 +247,13 @@ public class EtlPipeline
             Console.WriteLine($"Number of jobs to insert: {rawJobs.Count}");
             foreach (var job in rawJobs)
             {
-                Console.WriteLine($"Job ID: {job.GetValueOrDefault("job_id", "N/A")}, Title: {job.GetValueOrDefault("title", "N/A")}");
+                //Console.WriteLine($"Job ID: {job.GetValueOrDefault("job_id", "N/A")}, Title: {job.GetValueOrDefault("title", "N/A")}");
             }
 
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
             {
-                LoggingConfig.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
+                //LoggingConfig.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
                 var command = new MySqlCommand(SqlQueries.SqlQuery(3), connection);
                 command.Parameters.AddWithValue("@job_id", job["job_id"]);
                 command.Parameters.AddWithValue("@title", job["title"]);
@@ -149,11 +279,11 @@ public class EtlPipeline
             var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(5), connection);
             deduplicateCommand.ExecuteNonQuery();
             Console.WriteLine("Distinct rows inserted into clean_table.");
-
-            // Step 3: Remove duplicates from raw_table
-            var cleanupCommand = new MySqlCommand(SqlQueries.SqlQuery(6), connection);
-            cleanupCommand.ExecuteNonQuery();
-            Console.WriteLine("Duplicates removed from raw_table.");
+            
+            // Step 3: Remove duplicates from clean_table
+            //var cleanupCommand = new MySqlCommand(SqlQueries.SqlQuery(6), connection);
+            //cleanupCommand.ExecuteNonQuery();
+            //Console.WriteLine("Duplicates removed from raw_table.");
 
             Console.WriteLine("ETL process completed successfully.");
         }
@@ -171,7 +301,7 @@ public class EtlPipeline
         var sqlData = TransformData(rawData);
         LoggingConfig.ReturnInfo("Data transformed...\nProcessing jobs...");
 
-        // Call ProcessJobs to handle loading and deduplication
+        // Call LoadData to handle loading and deduplication
         LoadData(sqlData);
 
         LoggingConfig.ReturnInfo("ETL pipeline completed successfully.");

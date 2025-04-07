@@ -140,12 +140,14 @@ class InternalSorting
             command.Parameters.AddWithValue("@description", string.IsNullOrEmpty(description) ? "default" : $"%{description}%");
             command.Parameters.AddWithValue("@location", string.IsNullOrEmpty(location) ? "default" : $"%{location}%");
 
+
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 var job = new Dictionary<string, object>
                 {
                     { "title", reader["title"] },
+                    { "company", reader["company"] },
                     { "location", reader["location"] },
                     { "description", reader["description"] }
                 };

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace JBDH.Controllers;
 
@@ -28,6 +29,12 @@ public class HomeController : Controller
         try
         {
             var jobs = InternalSorting.GetJobs(description, location);
+            Console.WriteLine($"jobs length: {jobs.Count()}");
+            foreach (var job in jobs)
+            {
+                Console.WriteLine($"Job Title: {job.GetValueOrDefault("title", "N/A")}, Company: {job.GetValueOrDefault("company", "N/A")}");
+            }
+
             return View("SearchResults", jobs);
         }
         catch (Exception ex)
