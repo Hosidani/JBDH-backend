@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj": {}
+    "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj": {}
   },
   "projects": {
-    "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj": {
+    "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj",
+        "projectUniqueName": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj",
         "projectName": "JBDH",
-        "projectPath": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj",
-        "packagesPath": "C:\\Users\\yazda\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\obj\\",
+        "projectPath": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj",
+        "packagesPath": "C:\\Users\\danie\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\yazda\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\danie\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -49,6 +43,28 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[9.2.0, )"
+            },
+            "MySql.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "NLog": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "NLog.Config": {
+              "target": "Package",
+              "version": "[4.7.15, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[8.0.3, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -68,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

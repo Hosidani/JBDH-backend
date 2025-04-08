@@ -1,0 +1,38 @@
+@model List<Dictionary<string, object>>
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Search Results</h1>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <p>No jobs found matching your criteria.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model)
+                {
+                    <tr>
+                        <td>@job.GetValueOrDefault("title", "N/A")</td>
+                        <td>@job.GetValueOrDefault("company", "N/A")</td>
+                        <td>@job.GetValueOrDefault("location", "N/A")</td>
+                        <td>@job.GetValueOrDefault("description", "N/A")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

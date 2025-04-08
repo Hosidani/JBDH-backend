@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Login</h1>
+
+    @if (ViewData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@ViewData["ErrorMessage"]</div>
+    }
+
+    <form method="post" action="/Home/Login">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+
+<!-- 
+    Changes to implement database authentication:
+
+    1. Add a `Login` action in the `HomeController`:
+       - This action should accept the `username` and `password` from the form.
+       - Query the database to validate the credentials.
+       - If valid, set a session or authentication cookie and redirect the user.
+       - If invalid, return an error message to the view.
+
+       Example:
+       [HttpPost]
+       public IActionResult Login(string username, string password)
+       {
+           var user = _context.Users
+               .FirstOrDefault(u => u.Username == username && u.Password == password);
+
+           if (user != null)
+           {
+               HttpContext.Session.SetString("Username", user.Username);
+               return RedirectToAction("Index", "Home");
+           }
+
+           ViewData["ErrorMessage"] = "Invalid username or password.";
+           return View();
+       }
+
+    2. Secure password storage:
+       - Use a hashing algorithm (e.g., SHA256 or bcrypt) to hash passwords before storing them in the database.
+       - Update the login logic to compare hashed passwords.
+
+    3. Ensure the `Users` table exists in the database:
+       - Use Entity Framework migrations to create the table if it doesn't exist.
+       - The table should include fields for `Id`, `Username`, and `Password`.
+
+    4. Enable session middleware:
+       - Ensure `app.UseSession()` is called in `Program.cs` to enable session management.
+
+    5. Update the database connection string:
+       - Ensure the connection string in `appsettings.json` points to the correct database.
+
+    After implementing these changes, the form will validate the username and password against the database.
+-->

@@ -1,8 +1,23 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@* TODO: Add a comment to this file describing its purpose and functionality. *@
+@* This file is part of the Job Database Handler project. *@
+@* The Job Database Handler is a web application that allows users to manage job listings, applications, and related data. *@
+
+@{
+    ViewData["Title"] = "Home";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Job Search</h1>
+    <p>Search for jobs by description and location.</p>
+    <form method="get" action="/Home/SearchJobs">
+        <input type="text" name="description" placeholder="Enter job description">
+        <input type="text" name="location" placeholder="Enter location">
+        <button type="submit">Search</button>
+    </form>
 </div>
+
+@*
+1. We Should Add DbHandlerController and PlatsBankenApiController and SearchApiController here to fix Search function
+2. Then should we do our test with java-Alingsås ...
+3. We are done here, should start with user database
+*@
