@@ -98,7 +98,8 @@ public class EtlPipeline
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error processing description: {ex.Message}");
+                            var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 100) + "..." : ex.Message;
+                            Console.WriteLine($"Error processing description: {truncatedMessage}");
                             description = "Invalid Description Format";
                         }
                     }
@@ -134,7 +135,9 @@ public class EtlPipeline
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error processing company: {ex.Message}");
+                            // Limit the exception message to 100 characters to avoid overly verbose output
+                            var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 100) + "..." : ex.Message;
+                            Console.WriteLine($"Error processing company: {truncatedMessage}");
                             company = "Invalid company name";
                         }
                     }

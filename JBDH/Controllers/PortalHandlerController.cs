@@ -56,31 +56,42 @@ namespace JBDH.Controllers
                     var jobTitle = job.GetValueOrDefault("title", "").ToString();
                     var jobLocation = job.GetValueOrDefault("location", "").ToString();
                     int? jobPriority = null;
-                    // TODO: POSSIBLE CRASH HERE IF JOB TITLE OR LOCATION IS NULL
-                    // Check if jobTitle and jobLocation are not null or empty
-                    if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
+
+                    // Skip this job if title or location is invalid
+                    /*if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
                     {
-                        continue; // Skip this job if title or location is invalid
-                    }
-                    if (processedDescription.ToLower() == jobTitle.ToLower() && processedLocation == jobLocation)
+                        continue;
+                    }*/
+
+                    Console.WriteLine($"Processing Job: Title = {jobTitle}, Location = {jobLocation}");
+                    Console.WriteLine($"Processed Description: {processedDescription}, Processed Location: {processedLocation}");
+
+                    // Adjust priority based on conditions
+                    if (jobTitle.Contains(processedDescription, StringComparison.OrdinalIgnoreCase) &&
+                        jobLocation.Contains(processedLocation, StringComparison.OrdinalIgnoreCase))
                     {
                         jobPriority = 1;
+                        //Console.WriteLine($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
                     }
-                    else if (processedDescription.ToLower() == jobTitle.ToLower() && processedLocation == "default")
+                    else if (jobTitle.Contains(processedDescription, StringComparison.OrdinalIgnoreCase) && processedLocation == "default")
                     {
                         jobPriority = 2;
+                        //Console.WriteLine($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
                     }
-                    else if (processedLocation == jobLocation && processedDescription == "default")
+                    else if (processedLocation == jobLocation)
                     {
                         jobPriority = 3;
+                        Console.WriteLine($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
                     }
-                    else if (processedLocation == jobLocation || processedDescription == "default")
+                    else if (jobTitle.Contains(processedDescription, StringComparison.OrdinalIgnoreCase) && processedLocation == jobLocation)
                     {
                         jobPriority = 4;
+                        Console.WriteLine($"Assigned Priority 4: Title = {jobTitle}, Location = {jobLocation}");
                     }
-                    else if (processedDescription.ToLower() == jobTitle.ToLower() || processedLocation == "default")
+                    else
                     {
                         jobPriority = 5;
+                        Console.WriteLine($"Assigned Priority 5: Title = {jobTitle}, Location = {jobLocation}");
                     }
 
                     if (jobPriority.HasValue)

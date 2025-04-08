@@ -37,37 +37,36 @@ public class HomeController : Controller
             {
                 var jobTitle = job.GetValueOrDefault("title", "").ToString();
                 var jobLocation = job.GetValueOrDefault("location", "").ToString();
-                int? jobPriority = null;
-                // BUG: java - Alingsås = Alla blir priority 4. Detta är fel.
+                int jobPriority = 0;
+                // Skip this job if title or location is invalid
                 if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
                 {
-                    continue; // Skip this job if title or location is invalid
+                    continue;
                 }
-                if (description.ToLower() == jobTitle.ToLower() && location == jobLocation)
-                {
-                    jobPriority = 1;
-                }
-                else if (description.ToLower() == jobTitle.ToLower() && location == "default")
+                if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase) &&
+                        jobLocation.Contains(location, StringComparison.OrdinalIgnoreCase))
+                    {
+                        jobPriority = 1;
+                        Console.WriteLine($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
+                    }
+                else if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase))
                 {
                     jobPriority = 2;
+                    Console.WriteLine($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
                 }
-                else if (location == jobLocation && description == "default")
+                else if (location == jobLocation)
                 {
                     jobPriority = 3;
+                    Console.WriteLine($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
                 }
-                else if (location == jobLocation || description == "default")
-                {
-                    jobPriority = 4;
-                }
-                else if (description.ToLower() == jobTitle.ToLower() || location == "default")
-                {
-                    jobPriority = 5;
-                }
+                
+                presentJobs.Add((jobPriority, job));
 
-                if (jobPriority.HasValue)
-                {
-                    presentJobs.Add((jobPriority.Value, job));
-                }
+                // Log the assigned priority
+                Console.WriteLine($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
+
+                // Add the job to the list with its priority
+                presentJobs.Add((jobPriority, job));
             }
             // Group jobs by priority and count the number of jobs in each priority group
             var priorityCounts = presentJobs
