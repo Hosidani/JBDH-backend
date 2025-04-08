@@ -59,14 +59,15 @@ public class HomeController : Controller
                     jobPriority = 3;
                     Console.WriteLine($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
                 }
-                
-                presentJobs.Add((jobPriority, job));
 
                 // Log the assigned priority
                 Console.WriteLine($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
 
                 // Add the job to the list with its priority
-                presentJobs.Add((jobPriority, job));
+                if ( jobPriority != 0 ){
+                    presentJobs.Add((jobPriority, job));
+                }
+                
             }
             // Group jobs by priority and count the number of jobs in each priority group
             var priorityCounts = presentJobs
