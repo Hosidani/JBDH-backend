@@ -80,6 +80,8 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             {
                 var createRawTable = SqlQueries.SqlQuery(1);
                 var createCleanTable = SqlQueries.SqlQuery(2);
+                var createUserTable = SqlQueries.SqlQuery(14);
+    
 
                 using (var command = new MySqlCommand(createRawTable, connection))
                 {
@@ -90,6 +92,12 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 {
                     command.ExecuteNonQuery();
                 }
+
+                using (var command = new MySqlCommand(createUserTable, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+
 
                 Console.WriteLine("Ensured that 'raw_table' and 'clean_table' exist.");
             }

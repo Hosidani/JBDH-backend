@@ -7,11 +7,13 @@ using System.IO;
 using DbHandler = JBDH.Controllers.DbHandler;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Run PlatsbankenApi.Main asynchronously before starting the web application
 await Task.Run(async () =>
 {
     try
     {
-        await PlatsbankenApi.Main(args);
+        await PlatsbankenApi.Main(args); // Fetch or process job data
     }
     catch (Exception ex)
     {
@@ -24,7 +26,7 @@ await Task.Run(() =>
 {
     try
     {
-        DbHandler.Main(args);
+        DbHandler.Main(args); // Initialize database or populate tables
     }
     catch (Exception ex)
     {
@@ -34,6 +36,7 @@ await Task.Run(() =>
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
+builder.Services.AddSession(); // Add session services
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -65,10 +68,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
+app.UseSession(); // Enable session middleware
 app.UseAuthorization();
 app.UseCors();
-app.UseSession();
 
 app.MapControllerRoute(
     name: "default",

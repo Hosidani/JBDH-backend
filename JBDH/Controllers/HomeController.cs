@@ -11,15 +11,19 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly ApplicationDbContext _context;
+    private readonly IWebHostEnvironment _environment;
 
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, IWebHostEnvironment environment)
     {
         _logger = logger;
         _context = context;
+        _environment = environment;
     }
 
     public IActionResult Index()
     {
+        ViewData["IsLoggedIn"] = HttpContext.Session.GetString("Username") != null;
+        ViewData["Username"] = HttpContext.Session.GetString("Username");
         return View();
     }
 
@@ -129,6 +133,42 @@ public class HomeController : Controller
         }
 
         return View();
+    }
+
+    [HttpPost]
+    public IActionResult UploadCV(IFormFile cvFile)
+    {
+        if (cvFile != null && cvFile.Length > 0)
+        {
+            try
+            {
+                // Save the CV file to the "wwwroot/uploads" directory
+                var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                }
+
+                var filePath = Path.Combine(uploadsPath, cvFile.FileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    cvFile.CopyTo(stream);
+                }
+
+                ViewData["Message"] = "CV uploaded successfully!";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading CV: {ex.Message}");
+                ViewData["ErrorMessage"] = "An error occurred while uploading your CV.";
+            }
+        }
+        else
+        {
+            ViewData["ErrorMessage"] = "Please select a file to upload.";
+        }
+
+        return RedirectToAction("Index");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

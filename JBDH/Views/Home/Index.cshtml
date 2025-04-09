@@ -4,6 +4,8 @@
 
 @{
     ViewData["Title"] = "Home";
+    var isLoggedIn = (bool)(ViewData["IsLoggedIn"] ?? false);
+    var username = ViewData["Username"]?.ToString();
 }
 
 <div class="text-center">
@@ -14,6 +16,21 @@
         <input type="text" name="location" placeholder="Enter location">
         <button type="submit">Search</button>
     </form>
+
+    @if (isLoggedIn)
+    {
+        <div class="mt-4">
+            <h2>Welcome, @username!</h2>
+            <p>You can now upload your CV to find jobs that match your skills.</p>
+            <form asp-action="UploadCV" method="post" enctype="multipart/form-data">
+                <div>
+                    <label for="cvFile">Choose your CV file (PDF, Word, JPG):</label>
+                    <input type="file" id="cvFile" name="cvFile" required />
+                </div>
+                <button type="submit">Upload CV</button>
+            </form>
+        </div>
+    }
 </div>
 
 @*
