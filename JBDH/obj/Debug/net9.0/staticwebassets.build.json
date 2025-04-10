@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "BlHtd0F9epdU56zk8C9H5Clul8gi0mEVM74Wu4OUtWk=",
+  "Hash": "2UowFt5QOnkT5YBO2W5DoE3o5fMuPeGErJfzTE+Tvgo=",
   "Source": "JBDH",
   "BasePath": "_content/JBDH",
   "Mode": "Default",
@@ -2724,6 +2724,48 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Cover_Letter.pdf",
+      "SourceId": "JBDH",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\",
+      "BasePath": "_content/JBDH",
+      "RelativePath": "uploads/Cover_Letter#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "hk1nl53124",
+      "Integrity": "sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\Cover_Letter.pdf"
+    },
+    {
+      "Identity": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
+      "SourceId": "JBDH",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\",
+      "BasePath": "_content/JBDH",
+      "RelativePath": "uploads/Hossein_YazdaniPajouh_CV#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "uxkptkaszo",
+      "Integrity": "QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf"
     }
   ],
   "Endpoints": [
@@ -21878,6 +21920,170 @@
         {
           "Name": "integrity",
           "Value": "sha256-JKWeHUaANNuffeRatdc54UCb84RoxjEw/nTq8Mops8Y="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Cover_Letter.hk1nl53124.pdf",
+      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Cover_Letter.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "15686"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 10 Apr 2025 09:49:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "hk1nl53124"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Cover_Letter.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Cover_Letter.pdf",
+      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Cover_Letter.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "15686"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 10 Apr 2025 09:49:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV.pdf",
+      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "199557"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 10 Apr 2025 10:01:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV.uxkptkaszo.pdf",
+      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "199557"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 10 Apr 2025 10:01:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "uxkptkaszo"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Hossein_YazdaniPajouh_CV.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0="
         }
       ]
     }

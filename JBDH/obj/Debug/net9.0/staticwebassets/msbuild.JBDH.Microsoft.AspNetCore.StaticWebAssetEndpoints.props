@@ -768,5 +768,29 @@
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-hjIBkvmgxQXbNXK3B9YQ3t06RwLuQSQzC/dpvuB/lMk="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1117"},{"Name":"Content-Type","Value":"text/plain"},{"Name":"ETag","Value":"\u0022hjIBkvmgxQXbNXK3B9YQ3t06RwLuQSQzC/dpvuB/lMk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 03 Apr 2025 09:39:09 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Cover_Letter.hk1nl53124.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Cover_Letter.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"hk1nl53124"},{"Name":"integrity","Value":"sha256-sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="},{"Name":"label","Value":"_content/JBDH/uploads/Cover_Letter.pdf"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Thu, 10 Apr 2025 09:49:31 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Cover_Letter.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Cover_Letter.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Thu, 10 Apr 2025 09:49:31 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"199557"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0=\u0022"},{"Name":"Last-Modified","Value":"Thu, 10 Apr 2025 10:01:51 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.uxkptkaszo.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"uxkptkaszo"},{"Name":"integrity","Value":"sha256-QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0="},{"Name":"label","Value":"_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"199557"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0=\u0022"},{"Name":"Last-Modified","Value":"Thu, 10 Apr 2025 10:01:51 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
   </ItemGroup>
 </Project>

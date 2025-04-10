@@ -22,8 +22,24 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        ViewData["IsLoggedIn"] = HttpContext.Session.GetString("Username") != null;
-        ViewData["Username"] = HttpContext.Session.GetString("Username");
+        // Retrieve login status and username from the session
+        var isLoggedIn = HttpContext.Session.GetString("Username") != null;
+        var username = HttpContext.Session.GetString("Username");
+
+        // Pass the values to the view using ViewData
+        ViewData["IsLoggedIn"] = isLoggedIn;
+        ViewData["Username"] = username;
+
+        // Log the login status to the console
+        if (isLoggedIn)
+        {
+            Console.WriteLine($"User is logged in: {username}");
+        }
+        else
+        {
+            Console.WriteLine("No user is logged in.");
+        }
+
         return View();
     }
 
@@ -142,8 +158,7 @@ public class HomeController : Controller
         {
             try
             {
-                // Save the CV file to the "wwwroot/uploads" directory
-                var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(uploadsPath))
                 {
                     Directory.CreateDirectory(uploadsPath);
@@ -155,6 +170,7 @@ public class HomeController : Controller
                     cvFile.CopyTo(stream);
                 }
 
+                Console.WriteLine($"CV uploaded to: {filePath}");
                 ViewData["Message"] = "CV uploaded successfully!";
             }
             catch (Exception ex)

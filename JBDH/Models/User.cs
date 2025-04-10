@@ -19,6 +19,7 @@ namespace JBDH.Models
         [Required]
         public string Email { get; set; }
 
+        [Required]
         public string CVPath { get; set; } // Path to uploaded CV
     }
 }

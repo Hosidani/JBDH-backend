@@ -46,12 +46,19 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string username, string password, string confirmPassword, string email)
+    public IActionResult Register(string username, string password, string confirmPassword, string email, IFormFile cvFile)
     {
         Console.WriteLine($"Username: {username}");
         Console.WriteLine($"Password: {password}");
         Console.WriteLine($"Confirm Password: {confirmPassword}");
         Console.WriteLine($"Email: {email}");
+       
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)|| cvFile.Length == 0)
+        {
+            Console.WriteLine("One or more required fields are empty.");
+            ViewData["ErrorMessage"] = "All fields are required.";
+            return View();
+        }
 
         if (password != confirmPassword)
         {
@@ -67,20 +74,44 @@ public class UserController : Controller
                 // Hash the password before saving
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
+                // Handle CV upload
+                string cvPath = null;
+                if (cvFile != null && cvFile.Length > 0)
+                {
+                    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                    if (!Directory.Exists(uploadsPath))
+                    {
+                        Directory.CreateDirectory(uploadsPath);
+                    }
+
+                    cvPath = Path.Combine(uploadsPath, cvFile.FileName);
+                    using (var stream = new FileStream(cvPath, FileMode.Create))
+                    {
+                        cvFile.CopyTo(stream);
+                    }
+                    Console.WriteLine($"CV uploaded to: {cvPath}");
+                }
                 var user = new User
                 {
                     Username = username,
                     PasswordHash = hashedPassword,
                     Role = "User", // Default role
-                    Email = email
+                    Email = email,
+                    CVPath = cvPath // Save the CV path in the database
                 };
-
+                Console.WriteLine($"CV Path: {cvPath}");
                 Console.WriteLine("User object created successfully.");
 
                 _context.Users.Add(user);
                 _context.SaveChanges();
 
                 Console.WriteLine("User saved to database successfully.");
+
+                // Set session to log the user in
+                HttpContext.Session.SetString("Username", username);
+                ViewData["IsLoggedIn"] = true;
+                ViewData["Username"] = username;
+
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -113,14 +144,38 @@ public class UserController : Controller
     [HttpPost]
     public IActionResult Login(string username, string password)
     {
-        // Example logic for login
-        if (username == "testuser" && password == "password") // Replace with actual authentication logic
+        Console.WriteLine($"Login attempt: Username={username}");
+
+        // Fetch the user from the database
+        var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
+        if (user == null)
         {
-            HttpContext.Session.SetString("Username", username);
+            Console.WriteLine("User not found.");
+            ViewData["ErrorMessage"] = "Invalid username or password.";
+            return View();
+        }
+
+        if (string.IsNullOrEmpty(user.PasswordHash))
+        {
+            Console.WriteLine("PasswordHash is null or empty for the user.");
+            ViewData["ErrorMessage"] = "Invalid username or password.";
+            return View();
+        }
+
+        if (BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        {
+            // If the user exists and the password is correct
+            HttpContext.Session.SetString("Username", username); // Store username in session
+            ViewData["IsLoggedIn"] = true;
+            ViewData["Username"] = username;
+            Console.WriteLine($"Login successful for user: {username}");
             return RedirectToAction("Index", "Home");
         }
 
+        // If login fails
         ViewData["ErrorMessage"] = "Invalid username or password.";
+        Console.WriteLine($"Login failed for user: {username}");
         return View();
     }
 }

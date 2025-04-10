@@ -22,14 +22,22 @@
         <div class="mt-4">
             <h2>Welcome, @username!</h2>
             <p>You can now upload your CV to find jobs that match your skills.</p>
+            @*
             <form asp-action="UploadCV" method="post" enctype="multipart/form-data">
-                <div>
-                    <label for="cvFile">Choose your CV file (PDF, Word, JPG):</label>
-                    <input type="file" id="cvFile" name="cvFile" required />
-                </div>
-                <button type="submit">Upload CV</button>
+            <div>
+                <label for="cvFile">Choose your CV file (PDF, Word, JPG):</label>
+                <input type="file" id="cvFile" name="cvFile" required />
+            </div>
+            <button type="submit">Upload CV</button>
             </form>
+            <p>Debug: User is logged in.</p> <!-- Debug message -->
+            *@
         </div>
+        
+    }
+    else
+    {
+        <p>Debug: No user is logged in.</p> <!-- Debug message -->
     }
 </div>
 
