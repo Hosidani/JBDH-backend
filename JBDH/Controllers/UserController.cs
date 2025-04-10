@@ -97,7 +97,10 @@ public class UserController : Controller
                     PasswordHash = hashedPassword,
                     Role = "User", // Default role
                     Email = email,
-                    CVPath = cvPath // Save the CV path in the database
+                    CVPath = cvPath, // Save the CV path in the database
+                    Organisation = "Free", // Default organisation
+                    OrganisationId = "Free", // Default organisation ID
+                    developerMode = "false" // Default developer mode  
                 };
                 Console.WriteLine($"CV Path: {cvPath}");
                 Console.WriteLine("User object created successfully.");

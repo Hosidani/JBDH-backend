@@ -49,7 +49,6 @@ namespace JBDH.Models
                 LoggingConfig.ReturnError($"Failed to dispose database command: {e.Message}");
             }
         }
- 
         public static void CommitToConnection(MySqlConnection connection)
         {
             try
