@@ -18,9 +18,10 @@ namespace JBDH.Models
             { 11, "DELETE FROM raw_table;" },
             { 12, "DELETE FROM clean_table;" },
             { 13, "SELECT * FROM clean_table;"},
-            { 14, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Role VARCHAR(50), Email VARCHAR(255) NOT NULL UNIQUE, CVPath VARCHAR(2083), Organisation VARCHAR(255), OrganisationID INT, DeveloperMode BOOLEAN DEFAULT FALSE );"}
+            { 14, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Role VARCHAR(50), Email VARCHAR(255) NOT NULL UNIQUE, CVPath VARCHAR(2083), Organisation VARCHAR(255), OrganisationID INT NULL, DeveloperMode BOOLEAN DEFAULT FALSE );"},
+            { 15, "DELETE FROM Users;" }
         };
- 
+
         public static string SqlQuery(int queryId)
         {
             return Queries.ContainsKey(queryId) ? Queries[queryId] : null;

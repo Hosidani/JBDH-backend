@@ -46,25 +46,29 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string username, string password, string confirmPassword, string email, IFormFile cvFile)
-    {
-        Console.WriteLine($"Username: {username}");
-        Console.WriteLine($"Password: {password}");
-        Console.WriteLine($"Confirm Password: {confirmPassword}");
-        Console.WriteLine($"Email: {email}");
-       
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)|| cvFile.Length == 0)
-        {
-            Console.WriteLine("One or more required fields are empty.");
-            ViewData["ErrorMessage"] = "All fields are required.";
-            return View();
-        }
-
+    public IActionResult Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId, bool developerMode)
+    {  
+        
         if (password != confirmPassword)
         {
             Console.WriteLine("Passwords do not match.");
             ViewData["ErrorMessage"] = "Passwords do not match.";
             return View();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine($"Validation Error: {error.ErrorMessage}");
+            }
+            Console.WriteLine("ModelState is invalid.");
+            return View();
+        }
+
+        if (string.IsNullOrEmpty(organisation))
+        {
+            organisation = null; // Treat empty strings as null
         }
 
         if (ModelState.IsValid)
@@ -99,17 +103,11 @@ public class UserController : Controller
                     Email = email,
                     CVPath = cvPath, // Save the CV path in the database
                     Organisation = "Free", // Default organisation
-                    OrganisationId = "Free", // Default organisation ID
-                    developerMode = "false" // Default developer mode  
+                    OrganisationId = 0, // Default organisation ID
+                    developerMode = false // Default developer mode  
                 };
-                Console.WriteLine($"CV Path: {cvPath}");
-                Console.WriteLine("User object created successfully.");
-
                 _context.Users.Add(user);
                 _context.SaveChanges();
-
-                Console.WriteLine("User saved to database successfully.");
-
                 // Set session to log the user in
                 HttpContext.Session.SetString("Username", username);
                 ViewData["IsLoggedIn"] = true;

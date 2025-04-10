@@ -20,8 +20,8 @@ namespace JBDH.Models
         public string Email { get; set; }
 
         public string CVPath { get; set; } // Path to uploaded CV
-        public string Organisation { get; set; } // Paid organisation name
-        public string OrganisationId { get; set; } // Paid organisation name
-        public string developerMode { get; set; } // Developer mode
+        public string? Organisation { get; set; } // Optional organisation name
+        public int? OrganisationId { get; set; } // Paid organisation name
+        public bool? developerMode { get; set; } // Developer mode
     }
 }

@@ -257,20 +257,8 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.slim.min.map"
     },
     {
-      "Id": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Cover_Letter.pdf",
-      "PackagePath": "staticwebassets\\uploads\\Cover_Letter.pdf"
-    },
-    {
-      "Id": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
-      "PackagePath": "staticwebassets\\uploads\\Hossein_YazdaniPajouh_CV.pdf"
-    },
-    {
       "Id": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\kryddning.jpg",
       "PackagePath": "staticwebassets\\uploads\\kryddning.jpg"
-    },
-    {
-      "Id": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\pz44ilctgb381.png",
-      "PackagePath": "staticwebassets\\uploads\\pz44ilctgb381.png"
     },
     {
       "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

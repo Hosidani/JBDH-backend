@@ -121,7 +121,10 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 // Delete all rows from clean_table
                 var deleteCleanTableCommand = new MySqlCommand(SqlQueries.SqlQuery(12), connection);
                 var cleanRowsDeleted = deleteCleanTableCommand.ExecuteNonQuery();
-                Console.WriteLine($"Deleted {cleanRowsDeleted} rows from clean_table.");
+                Console.WriteLine($"Deleted {cleanRowsDeleted} rows from clean_table.");// Delete all rows from clean_table
+                var deleteUserTableCommand = new MySqlCommand(SqlQueries.SqlQuery(15), connection);
+                var userRowsDeleted = deleteUserTableCommand.ExecuteNonQuery();
+                Console.WriteLine($"Deleted {userRowsDeleted} rows from Users.");
 
                 Console.WriteLine("Database flushed successfully.");
             }

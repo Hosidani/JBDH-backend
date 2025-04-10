@@ -145,6 +145,7 @@ public class HomeController : Controller
         var isLoggedIn = HttpContext.Session.GetString("IsLoggedIn");
         if (string.IsNullOrEmpty(isLoggedIn) || isLoggedIn != "true")
         {
+            // Correct page
             return RedirectToAction("Login"); // Redirect to login if not logged in
         }
 

@@ -20,6 +20,8 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> ExtractData(string filePath)
     {
+        Console.WriteLine("Starting data extraction...");
+        Console.WriteLine($"Extracting data from {filePath}...");
         try
         {
             var jsonData = File.ReadAllText(filePath);
@@ -35,6 +37,8 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
     {
+        Console.WriteLine("Starting data transformation...");
+        Console.WriteLine($"Number of jobs to transform: {rawJobs.Count}");
         var transformed = new List<Dictionary<string, object>>();
         int warningCount = 0;
 
@@ -246,7 +250,7 @@ public class EtlPipeline
             using var connection = new MySqlConnection(ConnectionString);
             connection.Open();
 
-            Console.WriteLine("Starting ETL process...");
+            Console.WriteLine("Starting Load Data process...");
             Console.WriteLine($"Number of jobs to insert: {rawJobs.Count}");
             foreach (var job in rawJobs)
             {

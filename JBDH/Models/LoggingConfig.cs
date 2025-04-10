@@ -24,7 +24,7 @@ namespace JBDH.Models
 
             // Define a logging rule for all levels
             var rule = new NLog.Config.LoggingRule("*", NLog.LogLevel.Trace, logConsole);
-config.LoggingRules.Add(rule);
+            config.LoggingRules.Add(rule);
 
             // Apply the configuration
             NLog.LogManager.Configuration = config;
