@@ -11,13 +11,11 @@ namespace JBDH.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly ApplicationDbContext _context;
     private readonly IWebHostEnvironment _environment;
     
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, IWebHostEnvironment environment)
+    public HomeController(ApplicationDbContext context, IWebHostEnvironment environment)
     {
-        _logger = logger;
         _context = context;
         _environment = environment;
     }
@@ -91,7 +89,7 @@ public class HomeController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching or filtering jobs: {ex.Message}");
+            LoggingConfig.ReturnError($"Error in SearchJobs: {ex.Message}");
             return View("Error", new { Message = "An error occurred while searching for jobs." });
         }
     }
