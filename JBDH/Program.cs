@@ -134,7 +134,11 @@ app.Use(async (context, next) =>
     var endpoint = context.GetEndpoint();
     if (endpoint != null)
     {
-        Console.WriteLine($"Endpoint: {endpoint.DisplayName}");
+        Console.WriteLine($"Matched Endpoint: {endpoint.DisplayName}");
+    }
+    else
+    {
+        Console.WriteLine("No endpoint matched.");
     }
     await next();
 });
