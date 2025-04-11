@@ -4,6 +4,7 @@ using JBDH.Models;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Controllers;
 public class LoginController : Controller
@@ -27,4 +28,15 @@ public class LoginController : Controller
         ViewData["ErrorMessage"] = "Invalid username or password.";
         return View();
     }
+    public IActionResult Login()
+    {
+        return View();
+    }
+    public IActionResult Logout()
+        {
+            HttpContext.SignOutAsync("CookieAuth");
+            HttpContext.Session.Clear();
+            ViewData["Username"] = null; // Clear ViewData
+            return RedirectToAction("Index", "Home");
+        }
 }

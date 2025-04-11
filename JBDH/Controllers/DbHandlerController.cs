@@ -14,7 +14,8 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
         public static void Main(string[] args)
         {
             LoggingConfig.ConfigLogging();
-            LoggingConfig.ReturnInfo("Starting up Job database handler...\nSetting up connection...");
+            LoggingConfig.ReturnInfo("Starting up Job database handler...");
+            LoggingConfig.ReturnInfo("Setting up connection...");
             EnsureJsonFileExists(JsonFile);
             using (var connection = OpenConnection())
             {
@@ -22,17 +23,10 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 EnsureTablesExist(connection);
                 EtlPipeline.RunEtlPipeline(JsonFile);
                 LoggingConfig.ReturnInfo("ETL pipeline completed...");
-                
-                // Delete the JSON file after the ETL process
-                //DeleteJsonFile(JsonFile);
-
                 LoggingConfig.ReturnInfo("Starting sorting queries...");
-                // InternalSorting.TestInternalSorting(); // Placeholder for sorting queries
             }
-
             LoggingConfig.ReturnInfo("Closing application...");
         }
-
         private static MySqlConnection OpenConnection()
         {
             try
@@ -81,94 +75,51 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 var createRawTable = SqlQueries.SqlQuery(1);
                 var createCleanTable = SqlQueries.SqlQuery(2);
                 var createUserTable = SqlQueries.SqlQuery(14);
-    
-
                 using (var command = new MySqlCommand(createRawTable, connection))
                 {
                     command.ExecuteNonQuery();
                 }
-
                 using (var command = new MySqlCommand(createCleanTable, connection))
                 {
                     command.ExecuteNonQuery();
                 }
-
                 using (var command = new MySqlCommand(createUserTable, connection))
                 {
                     command.ExecuteNonQuery();
                 }
-
-
-                Console.WriteLine("Ensured that 'raw_table' and 'clean_table' exist.");
+                LoggingConfig.ReturnInfo("Ensured that 'raw_table', 'clean_table', and 'Users' exist.");
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Error ensuring tables exist: {e.Message}");
             }
         }
-
         public static void FlushDatabase(MySqlConnection connection)
         {
             try
             {
-                Console.WriteLine("Flushing database...");
+                LoggingConfig.ReturnInfo("Flushing database...");
 
                 // Delete all rows from raw_table
                 var deleteRawTableCommand = new MySqlCommand(SqlQueries.SqlQuery(11), connection);
                 var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
-                Console.WriteLine($"Deleted {rawRowsDeleted} rows from raw_table.");
+                LoggingConfig.ReturnInfo($"Deleted {rawRowsDeleted} rows from raw_table.");
 
                 // Delete all rows from clean_table
                 var deleteCleanTableCommand = new MySqlCommand(SqlQueries.SqlQuery(12), connection);
                 var cleanRowsDeleted = deleteCleanTableCommand.ExecuteNonQuery();
-                Console.WriteLine($"Deleted {cleanRowsDeleted} rows from clean_table.");// Delete all rows from clean_table
+                LoggingConfig.ReturnInfo($"Deleted {cleanRowsDeleted} rows from clean_table.");
+
+                // Delete all rows from Users table
                 var deleteUserTableCommand = new MySqlCommand(SqlQueries.SqlQuery(15), connection);
                 var userRowsDeleted = deleteUserTableCommand.ExecuteNonQuery();
-                Console.WriteLine($"Deleted {userRowsDeleted} rows from Users.");
-
-                Console.WriteLine("Database flushed successfully.");
+                LoggingConfig.ReturnInfo($"Deleted {userRowsDeleted} rows from Users.");
+                LoggingConfig.ReturnInfo("Flushed database successfully.");
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Error flushing database: {e.Message}");
             }
         }
-/*
-        public static void ProcessAndInsertJobs()
-        {
-            try
-            {
-                if (!File.Exists(JsonFile))
-                {
-                    Console.Error.WriteLine($"File {JsonFile} not found.");
-                    return;
-                }
-
-                var jsonData = File.ReadAllText(JsonFile);
-                var rawJobs = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonData);
-
-                var transformedJobs = EtlPipeline.TransformJobs(rawJobs);
-
-                using var connection = new MySqlConnection(ConnectionString);
-                connection.Open();
-                EnsureTablesExist(connection);
-
-                foreach (var job in transformedJobs)
-                {
-                    var command = new MySqlCommand("INSERT INTO clean_table (title, location, description) VALUES (@title, @location, @description)", connection);
-                    command.Parameters.AddWithValue("@title", job["title"]);
-                    command.Parameters.AddWithValue("@location", job["location"]);
-                    command.Parameters.AddWithValue("@description", job["description"]);
-                    command.ExecuteNonQuery();
-                }
-
-                Console.WriteLine("Jobs successfully inserted into the database.");
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine($"Error processing jobs: {e.Message}");
-            }
-        }
-*/
     }
 }

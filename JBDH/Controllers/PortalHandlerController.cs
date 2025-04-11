@@ -17,7 +17,7 @@ namespace JBDH.Controllers
         [HttpPost("submit_input")]
         public IActionResult SubmitInput([FromBody] Dictionary<string, string> data)
         {
-            Console.WriteLine("SubmitInput method called");
+            LoggingConfig.ReturnInfo("SubmitInput method called");
             try
             {
                 if (!data.ContainsKey("description") || !data.ContainsKey("location") || !data.ContainsKey("date"))
@@ -33,7 +33,7 @@ namespace JBDH.Controllers
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Input submission failed: {e.Message}");
+                LoggingConfig.ReturnError($"Error in SubmitInput: {e.Message}");;
                 return StatusCode(500, new { success = false, error = "Internal server error" });
             }
         }
@@ -41,14 +41,14 @@ namespace JBDH.Controllers
         [HttpGet("jobs")]
         public IActionResult GetJobs([FromQuery] string description, [FromQuery] string location, [FromQuery] string date)
         {
-            Console.WriteLine("GetJobs method called");
+            LoggingConfig.ReturnInfo($"GetJobs called with description: {description}, location: {location}, date: {date}");
             try
             {
                 var (processedDescription, processedLocation, processedDate) = InternalSorting.GetInputFromUser(description, location, date);
-                Console.WriteLine($"Processed inputs - Description: {processedDescription}, Location: {processedLocation}, Date: {processedDate}");
+                LoggingConfig.ReturnInfo($"Processed inputs - Description: {processedDescription}, Location: {processedLocation}, Date: {processedDate}");
 
                 var results = InternalSorting.InternalSortingFunction(processedDescription, processedLocation);
-                Console.WriteLine($"Returning {results.Count} job results");
+                LoggingConfig.ReturnInfo($"Fetched {results.Count} job results from the database");
 
                 var presentJobs = new List<(int Priority, Dictionary<string, object> Job)>();
                 foreach (var job in results)
@@ -62,36 +62,34 @@ namespace JBDH.Controllers
                     {
                         continue;
                     }*/
-
-                    Console.WriteLine($"Processing Job: Title = {jobTitle}, Location = {jobLocation}");
-                    Console.WriteLine($"Processed Description: {processedDescription}, Processed Location: {processedLocation}");
-
+                    LoggingConfig.ReturnInfo($"Job Title: {jobTitle}, Job Location: {jobLocation}");
+                    LoggingConfig.ReturnInfo($"Proccessed Description: {processedDescription}, Processed Location: {processedLocation}");
                     // Adjust priority based on conditions
                     if (jobTitle.Contains(processedDescription, StringComparison.OrdinalIgnoreCase) &&
                         jobLocation.Contains(processedLocation, StringComparison.OrdinalIgnoreCase))
                     {
                         jobPriority = 1;
-                        //Console.WriteLine($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfig.ReturnInfo($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
                     }
                     else if (jobTitle.Contains(processedDescription, StringComparison.OrdinalIgnoreCase) && processedLocation == "default")
                     {
                         jobPriority = 2;
-                        //Console.WriteLine($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfig.ReturnInfo($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
                     }
                     else if (processedLocation == jobLocation)
                     {
                         jobPriority = 3;
-                        Console.WriteLine($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfig.ReturnInfo($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
                     }
                     else if (jobTitle.Contains(processedDescription, StringComparison.OrdinalIgnoreCase) && processedLocation == jobLocation)
                     {
                         jobPriority = 4;
-                        Console.WriteLine($"Assigned Priority 4: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfig.ReturnInfo($"Assigned Priority 4: Title = {jobTitle}, Location = {jobLocation}");
                     }
                     else
                     {
                         jobPriority = 5;
-                        Console.WriteLine($"Assigned Priority 5: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfig.ReturnInfo($"Assigned Priority 5: Title = {jobTitle}, Location = {jobLocation}");
                     }
 
                     if (jobPriority.HasValue)
@@ -112,7 +110,7 @@ namespace JBDH.Controllers
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Job fetch failed: {e.Message}");
+                LoggingConfig.ReturnError($"Error in GetJobs: {e.Message}");
                 return StatusCode(500, new { success = false, error = "Internal server error" });
             }
         }

@@ -4,8 +4,8 @@
 
 @{
     ViewData["Title"] = "Home";
-    var isLoggedIn = (bool)(ViewData["IsLoggedIn"] ?? false);
-    var username = ViewData["Username"]?.ToString();
+    var isLoggedIn = User.Identity.IsAuthenticated; // Check if the user is authenticated
+    var username = User.Identity.IsAuthenticated ? User.Identity.Name : null; // Get the username from the identity
 }
 
 <div class="text-center">
@@ -21,28 +21,11 @@
     {
         <div class="mt-4">
             <h2>Welcome, @username!</h2>
-            <p>You can now upload your CV to find jobs that match your skills.</p>
-            @*
-            <form asp-action="UploadCV" method="post" enctype="multipart/form-data">
-            <div>
-                <label for="cvFile">Choose your CV file (PDF, Word, JPG):</label>
-                <input type="file" id="cvFile" name="cvFile" required />
-            </div>
-            <button type="submit">Upload CV</button>
-            </form>
-            <p>Debug: User is logged in.</p> <!-- Debug message -->
-            *@
+            <p>Feel free to search for jobs.</p>
         </div>
-        
     }
     else
     {
-        <p>Debug: No user is logged in.</p> <!-- Debug message -->
+        <p>Please log in to access more features.</p>
     }
 </div>
-
-@*
-1. We Should Add DbHandlerController and PlatsBankenApiController and SearchApiController here to fix Search function
-2. Then should we do our test with java-Alingsås ...
-3. We are done here, should start with user database
-*@

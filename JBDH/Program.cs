@@ -17,7 +17,7 @@ await Task.Run(async () =>
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error in PlatsbankenApi.Main: {ex.Message}");
+        LoggingConfig.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
     }
 });
 
@@ -30,12 +30,19 @@ await Task.Run(() =>
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error in DbHandler.Main: {ex.Message}");
+        LoggingConfig.ReturnError($"Error in DbHandler.Main: {ex.Message}");
     }
 });
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/User/Login"; // Redirect to login page if not authenticated
+    });
+
+builder.Services.AddAuthorization();
 builder.Services.AddSession(); // Add session services
 builder.Services.AddCors(options =>
 {
@@ -56,6 +63,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")));
 
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -67,8 +76,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRouting();
 app.UseSession(); // Enable session middleware
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors();
 
@@ -76,23 +86,56 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+//app.MapGet("/Settings/Test", () => "Settings route is working!");
 // Add a shutdown hook to flush the database
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
-    Console.WriteLine("Application is shutting down. Flushing the database...");
+    LoggingConfig.ReturnInfo("Application is shutting down. Flushing the database...");
     using var connection = new MySqlConnection(DbHandler.ConnectionString);
     connection.Open();
     DbHandler.FlushDatabase(connection);
-    Console.WriteLine("Database flushed successfully.");
+    LoggingConfig.ReturnInfo("Database flush completed.");
+
+    // Delete all files in the uploads folder
+    LoggingConfig.ReturnInfo("Deleting files in the uploads folder...");
+    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+    if (Directory.Exists(uploadsPath))
+    {
+        var files = Directory.GetFiles(uploadsPath);
+        foreach (var file in files)
+        {
+            try
+            {
+                File.Delete(file);
+                LoggingConfig.ReturnInfo($"Deleted file: {file}");
+            }
+            catch (Exception ex)
+            {
+                LoggingConfig.ReturnError($"Error deleting file {file}: {ex.Message}");
+            }
+        }
+    }
+    else
+    {
+        LoggingConfig.ReturnInfo("Uploads folder does not exist. No files to delete.");
+    }
 
     // Delete the timestamp file on application shutdown
     var timestampFilePath = "timestamp.txt";
     if (File.Exists(timestampFilePath))
     {
         File.Delete(timestampFilePath);
-        Console.WriteLine("Deleted timestamp.txt on application shutdown.");
+        LoggingConfig.ReturnInfo("Deleted timestamp.txt on application shutdown.");
     }
 });
-
+app.Use(async (context, next) =>
+{
+    var endpoint = context.GetEndpoint();
+    if (endpoint != null)
+    {
+        Console.WriteLine($"Endpoint: {endpoint.DisplayName}");
+    }
+    await next();
+});
 app.Run();

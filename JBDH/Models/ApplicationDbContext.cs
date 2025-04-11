@@ -38,12 +38,14 @@ public class ApplicationDbContext : DbContext
                 .HasMaxLength(2083); // Optional field with max length (e.g., URL length limit)
 
             entity.Property(u => u.Organisation)
+                .IsRequired(false) // Optional field
                 .HasMaxLength(255); // Optional field with max length
 
             entity.Property(u => u.OrganisationId)
                 .IsRequired(false); // Nullable field
 
             entity.Property(u => u.developerMode)
+                .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
         });
     }

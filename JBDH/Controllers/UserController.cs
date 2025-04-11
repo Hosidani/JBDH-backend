@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
 using BCrypt.Net;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Controllers;
 
@@ -13,32 +15,6 @@ public class UserController : Controller
         _context = context;
     }
 
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public IActionResult Create(User user)
-    {
-        if (ModelState.IsValid)
-        {
-            // Hash the password before saving
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-
-            // Set default role as "User" if not provided
-            if (string.IsNullOrEmpty(user.Role))
-            {
-                user.Role = "User";
-            }
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-            return RedirectToAction("Index", "Home");
-        }
-        return View(user);
-    }
-
     [HttpGet]
     public IActionResult Register()
     {
@@ -46,12 +22,11 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId, bool developerMode)
-    {  
-        
+    public IActionResult Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId)
+    {
         if (password != confirmPassword)
         {
-            Console.WriteLine("Passwords do not match.");
+            LoggingConfig.ReturnError("Passwords do not match.");
             ViewData["ErrorMessage"] = "Passwords do not match.";
             return View();
         }
@@ -60,106 +35,95 @@ public class UserController : Controller
         {
             foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
             {
-                Console.WriteLine($"Validation Error: {error.ErrorMessage}");
+                LoggingConfig.ReturnError($"ModelState Error: {error.ErrorMessage}");
             }
-            Console.WriteLine("ModelState is invalid.");
+            LoggingConfig.ReturnError("ModelState is invalid.");
             return View();
         }
 
-        if (string.IsNullOrEmpty(organisation))
+        try
         {
-            organisation = null; // Treat empty strings as null
-        }
+            // Hash the password before saving
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
-        if (ModelState.IsValid)
-        {
-            try
+            // Handle CV upload
+            string cvPath = null;
+            if (cvFile != null && cvFile.Length > 0)
             {
-                // Hash the password before saving
-                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-                // Handle CV upload
-                string cvPath = null;
-                if (cvFile != null && cvFile.Length > 0)
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadsPath))
                 {
-                    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                    if (!Directory.Exists(uploadsPath))
-                    {
-                        Directory.CreateDirectory(uploadsPath);
-                    }
-
-                    cvPath = Path.Combine(uploadsPath, cvFile.FileName);
-                    using (var stream = new FileStream(cvPath, FileMode.Create))
-                    {
-                        cvFile.CopyTo(stream);
-                    }
-                    Console.WriteLine($"CV uploaded to: {cvPath}");
+                    Directory.CreateDirectory(uploadsPath);
                 }
-                var user = new User
+                cvPath = Path.Combine(uploadsPath, cvFile.FileName);
+                using (var stream = new FileStream(cvPath, FileMode.Create))
                 {
-                    Username = username,
-                    PasswordHash = hashedPassword,
-                    Role = "User", // Default role
-                    Email = email,
-                    CVPath = cvPath, // Save the CV path in the database
-                    Organisation = "Free", // Default organisation
-                    OrganisationId = 0, // Default organisation ID
-                    developerMode = false // Default developer mode  
-                };
-                _context.Users.Add(user);
-                _context.SaveChanges();
-                // Set session to log the user in
-                HttpContext.Session.SetString("Username", username);
-                ViewData["IsLoggedIn"] = true;
-                ViewData["Username"] = username;
-
-                return RedirectToAction("Index", "Home");
+                    cvFile.CopyTo(stream);
+                }
+                LoggingConfig.ReturnInfo($"CV uploaded to: {cvPath}");
             }
-            catch (Exception ex)
+
+            // Create the user object
+            var user = new User
             {
-                Console.WriteLine($"Error registering user: {ex.Message}");
-                ViewData["ErrorMessage"] = "An error occurred while registering the user.";
-            }
-        }
-        else
-        {
-            Console.WriteLine("ModelState is invalid.");
-        }
+                Username = username,
+                PasswordHash = hashedPassword,
+                Role = "User", // Default role
+                Email = email,
+                CVPath = cvPath, // Save the CV path in the database
+                Organisation = organisation ?? "Free", // Default organisation if null
+                OrganisationId = organisationId,
+                developerMode = false // Always set developerMode to false
+            };
 
-        return View();
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            // Set session to log the user in
+            HttpContext.Session.SetString("Username", username);
+            ViewData["IsLoggedIn"] = true;
+            ViewData["Username"] = username;
+
+            return RedirectToAction("Index", "Home");
+        }
+        catch (Exception ex)
+        {
+            LoggingConfig.ReturnError($"Error registering user: {ex.Message}");
+            ViewData["ErrorMessage"] = "An error occurred while registering the user.";
+            return View();
+        }
     }
 
     [HttpGet]
     public IActionResult Logout()
     {
-        HttpContext.Session.Clear(); // Clear the session
-        return RedirectToAction("Index", "Home"); // Redirect to the homepage
+        HttpContext.SignOutAsync("CookieAuth");
+        return RedirectToAction("Login");
     }
 
     public IActionResult Login()
     {
-        ViewData["IsLoggedIn"] = HttpContext.Session.GetString("Username") != null;
         return View();
     }
 
     [HttpPost]
     public IActionResult Login(string username, string password)
     {
-        Console.WriteLine($"Login attempt: Username={username}");
+        LoggingConfig.ReturnInfo($"Login attempt: Username={username}");
 
         // Fetch the user from the database
         var user = _context.Users.FirstOrDefault(u => u.Username == username);
 
         if (user == null)
         {
-            Console.WriteLine("User not found.");
+            LoggingConfig.ReturnError("User not found.");
             ViewData["ErrorMessage"] = "Invalid username or password.";
             return View();
         }
 
         if (string.IsNullOrEmpty(user.PasswordHash))
         {
-            Console.WriteLine("PasswordHash is null or empty for the user.");
+            LoggingConfig.ReturnError("PasswordHash is null or empty for the user.");
             ViewData["ErrorMessage"] = "Invalid username or password.";
             return View();
         }
@@ -167,16 +131,22 @@ public class UserController : Controller
         if (BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
         {
             // If the user exists and the password is correct
-            HttpContext.Session.SetString("Username", username); // Store username in session
-            ViewData["IsLoggedIn"] = true;
-            ViewData["Username"] = username;
-            Console.WriteLine($"Login successful for user: {username}");
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, username)
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+
+            LoggingConfig.ReturnInfo($"User {username} logged in successfully.");
             return RedirectToAction("Index", "Home");
         }
 
         // If login fails
         ViewData["ErrorMessage"] = "Invalid username or password.";
-        Console.WriteLine($"Login failed for user: {username}");
+        LoggingConfig.ReturnError("Invalid username or password.");
         return View();
     }
 }

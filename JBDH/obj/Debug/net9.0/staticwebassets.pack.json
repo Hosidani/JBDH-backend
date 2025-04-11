@@ -257,10 +257,6 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.slim.min.map"
     },
     {
-      "Id": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\kryddning.jpg",
-      "PackagePath": "staticwebassets\\uploads\\kryddning.jpg"
-    },
-    {
       "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
     },
