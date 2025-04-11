@@ -4,6 +4,8 @@
 
 @{
     ViewData["Title"] = "Home";
+    var isLoggedIn = User.Identity.IsAuthenticated; // Check if the user is authenticated
+    var username = User.Identity.IsAuthenticated ? User.Identity.Name : null; // Get the username from the identity
 }
 
 <div class="text-center">
@@ -14,10 +16,16 @@
         <input type="text" name="location" placeholder="Enter location">
         <button type="submit">Search</button>
     </form>
-</div>
 
-@*
-1. We Should Add DbHandlerController and PlatsBankenApiController and SearchApiController here to fix Search function
-2. Then should we do our test with java-Alingsås ...
-3. We are done here, should start with user database
-*@
+    @if (isLoggedIn)
+    {
+        <div class="mt-4">
+            <h2>Welcome, @username!</h2>
+            <p>Feel free to search for jobs.</p>
+        </div>
+    }
+    else
+    {
+        <p>Please log in to access more features.</p>
+    }
+</div>

@@ -14,12 +14,39 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Example: Configure the User table
+        // Configure the User table
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(u => u.Id); // Primary key
-            entity.Property(u => u.Username).IsRequired().HasMaxLength(100); // Required field with max length
-            entity.Property(u => u.PasswordHash).IsRequired(); // Required field
+
+            entity.Property(u => u.Username)
+                .IsRequired()
+                .HasMaxLength(100); // Required field with max length
+
+            entity.Property(u => u.PasswordHash)
+                .IsRequired(); // Required field
+
+            entity.Property(u => u.Role)
+                .IsRequired()
+                .HasMaxLength(50); // Required field with max length
+
+            entity.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(100); // Required field with max length
+
+            entity.Property(u => u.CVPath)
+                .HasMaxLength(2083); // Optional field with max length (e.g., URL length limit)
+
+            entity.Property(u => u.Organisation)
+                .IsRequired(false) // Optional field
+                .HasMaxLength(255); // Optional field with max length
+
+            entity.Property(u => u.OrganisationId)
+                .IsRequired(false); // Nullable field
+
+            entity.Property(u => u.developerMode)
+                .IsRequired(false) // Optional field
+                .HasDefaultValue(false); // Default value for boolean field
         });
     }
 }

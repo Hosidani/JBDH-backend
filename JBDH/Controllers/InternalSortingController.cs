@@ -24,7 +24,7 @@ class InternalSorting
         string searchPattern = date == "default" ? "%" : $"%{date}%";
         return ExecuteQuery(query, new object[] { searchPattern });
     }
- 
+     
     public static List<Dictionary<string, object>> SearchByDescription(string description)
     {
         string query = SqlQueries.SqlQuery(9);
@@ -38,14 +38,13 @@ class InternalSorting
         string searchPattern = location == "default" ? "%" : $"%{location.ToLower()}%";
         return ExecuteQuery(query, new object[] { searchPattern });
     }
- 
+
     public static List<Dictionary<string, object>> ExecuteQuery(string query, object[] parameters)
     {
         using var conn = new MySqlConnection(Settings.SetupConnection());
         conn.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = query;
- 
         if (parameters != null)
         {
             for (int i = 0; i < parameters.Length; i++)
@@ -53,7 +52,6 @@ class InternalSorting
                 cmd.Parameters.AddWithValue($"@param{i + 1}", parameters[i]);
             }
         }
- 
         var results = new List<Dictionary<string, object>>();
         try
         {
@@ -83,7 +81,6 @@ class InternalSorting
         LoggingConfig.ReturnInfo("Combining results...");
         var seen = new HashSet<object>();
         var combined = new List<Dictionary<string, object>>();
- 
         foreach (var results in resultsSets)
         {
             foreach (var row in results)
@@ -129,18 +126,14 @@ class InternalSorting
     public static List<Dictionary<string, object>> GetJobs(string description, string location)
     {
         var jobs = new List<Dictionary<string, object>>();
-
         try
         {
             using var connection = new MySqlConnection(ConnectionString);
             connection.Open();
-
             var query = "SELECT * FROM clean_table WHERE (@description = 'default' OR title LIKE @description) AND (@location = 'default' OR location LIKE @location)";
             using var command = new MySqlCommand(query, connection);
             command.Parameters.AddWithValue("@description", string.IsNullOrEmpty(description) ? "default" : $"%{description}%");
             command.Parameters.AddWithValue("@location", string.IsNullOrEmpty(location) ? "default" : $"%{location}%");
-
-
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -158,8 +151,6 @@ class InternalSorting
         {
             Console.Error.WriteLine($"Error retrieving jobs: {e.Message}");
         }
-
         return jobs;
     }
-
 }

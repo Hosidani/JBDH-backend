@@ -4,20 +4,23 @@ using JBDH.Models;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly ApplicationDbContext _context;
-
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+    private readonly IWebHostEnvironment _environment;
+    
+    public HomeController(ApplicationDbContext context, IWebHostEnvironment environment)
     {
-        _logger = logger;
         _context = context;
+        _environment = environment;
     }
 
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public IActionResult Index()
     {
         return View();
@@ -26,12 +29,12 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult SearchJobs(string description, string location)
     {
-        Console.WriteLine("SearchJobs method called");
+        LoggingConfig.ReturnInfo("SearchJobs method called");
         try
         {
             var results = InternalSorting.InternalSortingFunction(description, location);
-            Console.WriteLine($"Returning {results.Count} job results");
-
+            LoggingConfig.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
+            LoggingConfig.ReturnInfo($"Results count: {results.Count}");
             var presentJobs = new List<(int Priority, Dictionary<string, object> Job)>();
             foreach (var job in results)
             {
@@ -47,21 +50,21 @@ public class HomeController : Controller
                         jobLocation.Contains(location, StringComparison.OrdinalIgnoreCase))
                     {
                         jobPriority = 1;
-                        Console.WriteLine($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfig.ReturnInfo($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
                     }
                 else if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase))
                 {
                     jobPriority = 2;
-                    Console.WriteLine($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
+                    LoggingConfig.ReturnInfo($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
                 }
                 else if (location == jobLocation)
                 {
                     jobPriority = 3;
-                    Console.WriteLine($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
+                    LoggingConfig.ReturnInfo($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
                 }
 
                 // Log the assigned priority
-                Console.WriteLine($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
+                LoggingConfig.ReturnInfo($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
 
                 // Add the job to the list with its priority
                 if ( jobPriority != 0 ){
@@ -78,7 +81,7 @@ public class HomeController : Controller
             // Print the counts for each priority
             foreach (var priorityCount in priorityCounts)
             {
-                Console.WriteLine($"Priority {priorityCount.Priority}: {priorityCount.Count} jobs");
+                LoggingConfig.ReturnInfo($"Priority {priorityCount.Priority}: {priorityCount.Count} jobs");
             }
             presentJobs.Sort((x, y) => x.Priority.CompareTo(y.Priority));
             var sortedJobs = presentJobs.Select(x => x.Job).ToList();
@@ -86,48 +89,12 @@ public class HomeController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching or filtering jobs: {ex.Message}");
+            LoggingConfig.ReturnError($"Error in SearchJobs: {ex.Message}");
             return View("Error", new { Message = "An error occurred while searching for jobs." });
         }
     }
-
     public IActionResult Privacy()
     {
-        return View();
-    }
-
-    public IActionResult Login()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public IActionResult Login(string username, string password)
-    {
-        // Query the database for the user
-        var user = _context.Users
-            .FirstOrDefault(u => u.Username == username && u.PasswordHash == password);
-
-        if (user != null)
-        {
-            // Set session or authentication cookie
-            HttpContext.Session.SetString("Username", user.Username ?? string.Empty);
-            return RedirectToAction("Index", "Home");
-        }
-
-        // Return an error message if login fails
-        ViewData["ErrorMessage"] = "Invalid username or password.";
-        return View();
-    }
-
-    public IActionResult Settings()
-    {
-        var isLoggedIn = HttpContext.Session.GetString("IsLoggedIn");
-        if (string.IsNullOrEmpty(isLoggedIn) || isLoggedIn != "true")
-        {
-            return RedirectToAction("Login"); // Redirect to login if not logged in
-        }
-
         return View();
     }
 
