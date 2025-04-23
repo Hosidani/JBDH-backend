@@ -7,7 +7,7 @@ using AIConfig = JBDH.Models.AIConfig;
         private readonly HttpClient _httpClient;
         private readonly AIConfig _aiConfig;
 
-        public CreateAIconfig(IConfiguration configuration)
+        public void CreateAIconfig(IConfiguration configuration)
         {
             _aiConfig = new AIConfig
             {
