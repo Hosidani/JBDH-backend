@@ -63,4 +63,43 @@ namespace JBDH.Models
             }
         }
     }
+
+    public static class AISettings
+    {
+        private const string APIKey = "sk-3c7fc5ab902a4832b4799b9f1d10fb0e";
+        private const string APIUrl = "https://api.openai.com/v1/chat/completions";
+        private const string Model = "gpt-3.5-turbo";
+        private const string SystemMessage = "You are a helpful assistant that helps users find jobs. You will be given a job description and location, and you will return the best job matches from the database. You will also provide a summary of the job and its location.";
+        private const string Temperature = "0.7";
+        private const string Max_Tokens = "1000";
+        private const bool IsStreaming = false;
+        public static string GetAPIKey()
+        {
+            return APIKey;
+        }
+        public static string GetAPIUrl()
+        {
+            return APIUrl;
+        }
+        public static string GetModel()
+        {
+            return Model;
+        }
+        public static string GetSystemMessage()
+        {
+            return SystemMessage;
+        }
+        public static string GetTemperature()
+        {
+            return Temperature;
+        }
+        public static string GetMaxTokens()
+        {
+            return Max_Tokens;
+        }
+        public static bool GetIsStreaming()
+        {
+            return IsStreaming;
+        }
+}
 }
