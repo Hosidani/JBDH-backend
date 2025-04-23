@@ -1,14 +1,17 @@
+using System.Text; 
 using System.Text.Json;
+using Newtonsoft.Json; 
 using JBDH.Models;
 using AIConfig = JBDH.Models.AIConfig;
 
     public class AIService
     {
         private readonly HttpClient _httpClient;
-        private readonly AIConfig _aiConfig;
-
+        private AIConfig _aiConfig; // HOSSEIN: Deleted readonly (_aiConfig needs to be reassigned later.)
+        
         public void CreateAIconfig(IConfiguration configuration)
         {
+            
             _aiConfig = new AIConfig
             {
                 OpenAIKey = AISettings.GetAPIKey(),
@@ -17,8 +20,7 @@ using AIConfig = JBDH.Models.AIConfig;
                 OpenAIOrgId = AISettings.GetOrgId(),
                 OpenAIUserId = AISettings.GetUserId(),
                 MaxTokens = int.Parse(AISettings.GetMaxTokens()),
-                Temperature = double.Parse(AISettings.GetTemperature()),
-                TopP = AISettings.GetTopP()
+                Temperature = double.Parse(AISettings.GetTemperature())
             };
         }
         public AIService(HttpClient httpClient, AIConfig aiConfig)
@@ -29,6 +31,7 @@ using AIConfig = JBDH.Models.AIConfig;
 
         public async Task<string> GenerateResponseAsync(string prompt)
         {
+            
             var requestBody = new
             {
                 model = _aiConfig.OpenAIModel,
@@ -47,6 +50,6 @@ using AIConfig = JBDH.Models.AIConfig;
             var responseBody = await response.Content.ReadAsStringAsync();
             dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
 
-            return jsonResponse.choices[0].text.ToString();
+            return jsonResponse?.choices?[0]?.text?.ToString() ?? "No response";
         }
     }

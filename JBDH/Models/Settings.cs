@@ -68,6 +68,8 @@ namespace JBDH.Models
     {
         private const string APIKey = "sk-3c7fc5ab902a4832b4799b9f1d10fb0e";
         private const string APIUrl = "https://api.openai.com/v1/chat/completions";
+        private const string OrgId = "org-4v0x1X2Z3Y4Z5A6B7C8D9E0F";
+        private const string UserId = "user-1A2B3C4D5E6F7G8H9I0J";
         private const string Model = "gpt-3.5-turbo";
         private const string SystemMessage = "You are a helpful assistant that helps users find jobs. You will be given a job description and location, and you will return the best job matches from the database. You will also provide a summary of the job and its location.";
         private const string Temperature = "0.7";
@@ -80,6 +82,14 @@ namespace JBDH.Models
         public static string GetAPIUrl()
         {
             return APIUrl;
+        }
+        public static string GetOrgId()
+        {
+            return OrgId;
+        }
+        public static string GetUserId()
+        {
+            return UserId;
         }
         public static string GetModel()
         {
