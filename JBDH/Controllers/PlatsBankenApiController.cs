@@ -35,7 +35,6 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 using var client = new HttpClient();
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
-
                 var content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content);
             }
@@ -68,8 +67,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             }
         }
 
-        public static List<Dictionary<string, object>> FilterJobs(
-            List<Dictionary<string, object>> jobAds, string description = "", string location = "")
+        public static List<Dictionary<string, object>> FilterJobs(List<Dictionary<string, object>> jobAds, string description = "", string location = "")
         {
             var filteredJobs = new List<Dictionary<string, object>>();
 

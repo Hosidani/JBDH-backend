@@ -11,22 +11,6 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
         public static readonly string ConnectionString = DbConfig.DB_CONFIG; // Ensure this is a valid MySQL connection string
         private const string JsonFile = "jobs.json";
 
-        public static void Main(string[] args)
-        {
-            LoggingConfig.ConfigLogging();
-            LoggingConfig.ReturnInfo("Starting up Job database handler...");
-            LoggingConfig.ReturnInfo("Setting up connection...");
-            EnsureJsonFileExists(JsonFile);
-            using (var connection = OpenConnection())
-            {
-                LoggingConfig.ReturnInfo("Connection established...");
-                EnsureTablesExist(connection);
-                EtlPipeline.RunEtlPipeline(JsonFile);
-                LoggingConfig.ReturnInfo("ETL pipeline completed...");
-                LoggingConfig.ReturnInfo("Starting sorting queries...");
-            }
-            LoggingConfig.ReturnInfo("Closing application...");
-        }
         private static MySqlConnection OpenConnection()
         {
             try
@@ -121,5 +105,22 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
                 Console.Error.WriteLine($"Error flushing database: {e.Message}");
             }
         }
+
+        public static void Main(string[] args)
+            {
+                LoggingConfig.ConfigLogging();
+                LoggingConfig.ReturnInfo("Starting up Job database handler...");
+                LoggingConfig.ReturnInfo("Setting up connection...");
+                EnsureJsonFileExists(JsonFile);
+                using (var connection = OpenConnection())
+                {
+                    LoggingConfig.ReturnInfo("Connection established...");
+                    EnsureTablesExist(connection);
+                    EtlPipeline.RunEtlPipeline(JsonFile);
+                    LoggingConfig.ReturnInfo("ETL pipeline completed...");
+                    LoggingConfig.ReturnInfo("Starting sorting queries...");
+                }
+                LoggingConfig.ReturnInfo("Closing application...");
+            }
     }
 }
