@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "SiJIrT+e7Oo=",
+  "dgSpecHash": "J8cAUkiqEFQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\JBDH.csproj",
   "expectedPackageFiles": [
@@ -28,6 +28,7 @@
     "C:\\Users\\danie\\.nuget\\packages\\mysql.data\\9.2.0\\mysql.data.9.2.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\mysql.entityframeworkcore\\9.0.0\\mysql.entityframeworkcore.9.0.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\mysqlconnector\\2.3.5\\mysqlconnector.2.3.5.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\nlog\\5.0.0\\nlog.5.0.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\nlog.config\\4.7.15\\nlog.config.4.7.15.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\nlog.schema\\4.7.15\\nlog.schema.4.7.15.nupkg.sha512",
