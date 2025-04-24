@@ -1,12 +1,11 @@
 using JBDH.Controllers;
 using JBDH.Models;
+using JBDH.Services;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
 using Microsoft.Extensions.Hosting;
 using System.IO;
-using DbHandler = JBDH.Controllers.DbHandler;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using JBDH.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -95,9 +94,9 @@ var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
     LoggingConfigService.ReturnInfo("Application is shutting down. Flushing the database...");
-    using var connection = new MySqlConnection(DbHandler.ConnectionString);
+    using var connection = new MySqlConnection(DbConfig.DB_CONFIG);
     connection.Open();
-    DbHandler.FlushDatabase(connection);
+    DatabaseHandlerService.FlushDatabase(connection);
     LoggingConfigService.ReturnInfo("Database flush completed.");
 
     // Delete all files in the uploads folder

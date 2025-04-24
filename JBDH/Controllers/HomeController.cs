@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
+using JBDH.Services;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
@@ -29,12 +30,12 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult SearchJobs(string description, string location)
     {
-        LoggingConfig.ReturnInfo("SearchJobs method called");
+        LoggingConfigService.ReturnInfo("SearchJobs method called");
         try
         {
             var results = InternalSorting.InternalSortingFunction(description, location);
-            LoggingConfig.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
-            LoggingConfig.ReturnInfo($"Results count: {results.Count}");
+            LoggingConfigService.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
+            LoggingConfigService.ReturnInfo($"Results count: {results.Count}");
             var presentJobs = new List<(int Priority, Dictionary<string, object> Job)>();
             foreach (var job in results)
             {
@@ -50,21 +51,21 @@ public class HomeController : Controller
                         jobLocation.Contains(location, StringComparison.OrdinalIgnoreCase))
                     {
                         jobPriority = 1;
-                        LoggingConfig.ReturnInfo($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
+                        LoggingConfigService.ReturnInfo($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
                     }
                 else if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase))
                 {
                     jobPriority = 2;
-                    LoggingConfig.ReturnInfo($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
+                    LoggingConfigService.ReturnInfo($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
                 }
                 else if (location == jobLocation)
                 {
                     jobPriority = 3;
-                    LoggingConfig.ReturnInfo($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
+                    LoggingConfigService.ReturnInfo($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
                 }
 
                 // Log the assigned priority
-                LoggingConfig.ReturnInfo($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
+                LoggingConfigService.ReturnInfo($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
 
                 // Add the job to the list with its priority
                 if ( jobPriority != 0 ){
@@ -81,7 +82,7 @@ public class HomeController : Controller
             // Print the counts for each priority
             foreach (var priorityCount in priorityCounts)
             {
-                LoggingConfig.ReturnInfo($"Priority {priorityCount.Priority}: {priorityCount.Count} jobs");
+                LoggingConfigService.ReturnInfo($"Priority {priorityCount.Priority}: {priorityCount.Count} jobs");
             }
             presentJobs.Sort((x, y) => x.Priority.CompareTo(y.Priority));
             var sortedJobs = presentJobs.Select(x => x.Job).ToList();
@@ -89,7 +90,7 @@ public class HomeController : Controller
         }
         catch (Exception ex)
         {
-            LoggingConfig.ReturnError($"Error in SearchJobs: {ex.Message}");
+            LoggingConfigService.ReturnError($"Error in SearchJobs: {ex.Message}");
             return View("Error", new { Message = "An error occurred while searching for jobs." });
         }
     }

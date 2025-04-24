@@ -5,7 +5,7 @@ using JBDH.Controllers;
 
 namespace JBDH.Services
 { 
-    public static class Settings
+    public static class SettingsService
         {
             public static readonly string ConnectionString = DbConfig.DB_CONFIG; // Ensure this is a valid MySQL connection string
             public static string SetupConnection()

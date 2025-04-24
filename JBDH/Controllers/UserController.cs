@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
+using JBDH.Services;
 using BCrypt.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
@@ -26,7 +27,7 @@ public class UserController : Controller
     {
         if (password != confirmPassword)
         {
-            LoggingConfig.ReturnError("Passwords do not match.");
+            LoggingConfigService.ReturnError("Passwords do not match.");
             ViewData["ErrorMessage"] = "Passwords do not match.";
             return View();
         }
@@ -35,9 +36,9 @@ public class UserController : Controller
         {
             foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
             {
-                LoggingConfig.ReturnError($"ModelState Error: {error.ErrorMessage}");
+                LoggingConfigService.ReturnError($"ModelState Error: {error.ErrorMessage}");
             }
-            LoggingConfig.ReturnError("ModelState is invalid.");
+            LoggingConfigService.ReturnError("ModelState is invalid.");
             return View();
         }
 
@@ -60,7 +61,7 @@ public class UserController : Controller
                 {
                     cvFile.CopyTo(stream);
                 }
-                LoggingConfig.ReturnInfo($"CV uploaded to: {cvPath}");
+                LoggingConfigService.ReturnInfo($"CV uploaded to: {cvPath}");
             }
 
             // Create the user object
@@ -88,7 +89,7 @@ public class UserController : Controller
         }
         catch (Exception ex)
         {
-            LoggingConfig.ReturnError($"Error registering user: {ex.Message}");
+            LoggingConfigService.ReturnError($"Error registering user: {ex.Message}");
             ViewData["ErrorMessage"] = "An error occurred while registering the user.";
             return View();
         }
@@ -109,21 +110,21 @@ public class UserController : Controller
     [HttpPost]
     public IActionResult Login(string username, string password)
     {
-        LoggingConfig.ReturnInfo($"Login attempt: Username={username}");
+        LoggingConfigService.ReturnInfo($"Login attempt: Username={username}");
 
         // Fetch the user from the database
         var user = _context.Users.FirstOrDefault(u => u.Username == username);
 
         if (user == null)
         {
-            LoggingConfig.ReturnError("User not found.");
+            LoggingConfigService.ReturnError("User not found.");
             ViewData["ErrorMessage"] = "Invalid username or password.";
             return View();
         }
 
         if (string.IsNullOrEmpty(user.PasswordHash))
         {
-            LoggingConfig.ReturnError("PasswordHash is null or empty for the user.");
+            LoggingConfigService.ReturnError("PasswordHash is null or empty for the user.");
             ViewData["ErrorMessage"] = "Invalid username or password.";
             return View();
         }
@@ -140,13 +141,13 @@ public class UserController : Controller
 
             HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
-            LoggingConfig.ReturnInfo($"User {username} logged in successfully.");
+            LoggingConfigService.ReturnInfo($"User {username} logged in successfully.");
             return RedirectToAction("Index", "Home");
         }
 
         // If login fails
         ViewData["ErrorMessage"] = "Invalid username or password.";
-        LoggingConfig.ReturnError("Invalid username or password.");
+        LoggingConfigService.ReturnError("Invalid username or password.");
         return View();
     }
 }
