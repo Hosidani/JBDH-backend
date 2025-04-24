@@ -1,4 +1,4 @@
-@model List<Dictionary<string, object>>
+@model List<(int Priority, Dictionary<string, object> Job)>
 
 @{
     ViewData["Title"] = "Search Results";
@@ -16,6 +16,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Priority</th>
                     <th>Title</th>
                     <th>Company</th>
                     <th>Location</th>
@@ -23,13 +24,14 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var job in Model)
+                @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@job.GetValueOrDefault("title", "N/A")</td>
-                        <td>@job.GetValueOrDefault("company", "N/A")</td>
-                        <td>@job.GetValueOrDefault("location", "N/A")</td>
-                        <td>@job.GetValueOrDefault("description", "N/A")</td>
+                        <td>@item.Priority</td>
+                        <td>@(item.Job.ContainsKey("title") ? item.Job["title"] : "N/A")</td>
+                        <td>@(item.Job.ContainsKey("company") ? item.Job["company"] : "N/A")</td>
+                        <td>@(item.Job.ContainsKey("location") ? item.Job["location"] : "N/A")</td>
+                        <td>@(item.Job.ContainsKey("description") ? item.Job["description"] : "N/A")</td>
                     </tr>
                 }
             </tbody>

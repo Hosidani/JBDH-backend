@@ -5,7 +5,7 @@ using JBDH.Models; // Assuming this is the namespace for your models
 
 namespace JBDH.Services
 { 
-    class InternalSorting
+    class InternalSortingService
     {
         private static readonly string ConnectionString = DbConfig.DB_CONFIG;
 
@@ -104,24 +104,6 @@ namespace JBDH.Services
                 string.IsNullOrEmpty(date) ? "default" : date
             );
         }
-    
-        public static List<Dictionary<string, object>> InternalSortingFunction(string description, string location)
-        {
-            try
-            {
-                var results = HierarchyResults(
-                    SearchByDescription(description),
-                    SearchByLocation(location)
-                );
-                LoggingConfigService.ReturnInfo($"Returning {results.Count} results");
-                return results;
-            }
-            catch (Exception e)
-            {
-                LoggingConfigService.ReturnError($"Sorting failed: {e.Message}");
-                throw;
-            }
-        }
 
         public static List<Dictionary<string, object>> GetJobs(string description, string location)
         {
@@ -152,6 +134,23 @@ namespace JBDH.Services
                 Console.Error.WriteLine($"Error retrieving jobs: {e.Message}");
             }
             return jobs;
+        }
+        public static List<Dictionary<string, object>> InternalSortingFunction(string description, string location)
+        {
+            try
+            {
+                var results = HierarchyResults(
+                    SearchByDescription(description),
+                    SearchByLocation(location)
+                );
+                LoggingConfigService.ReturnInfo($"Returning {results.Count} results");
+                return results;
+            }
+            catch (Exception e)
+            {
+                LoggingConfigService.ReturnError($"Sorting failed: {e.Message}");
+                throw;
+            }
         }
     }
 }

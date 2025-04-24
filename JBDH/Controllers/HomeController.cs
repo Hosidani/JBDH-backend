@@ -8,7 +8,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 
-namespace JBDH.Controllers;
+
+namespace JBDH.Controllers
+{
 
 public class HomeController : Controller
 {
@@ -31,68 +33,23 @@ public class HomeController : Controller
     public IActionResult SearchJobs(string description, string location)
     {
         LoggingConfigService.ReturnInfo("SearchJobs method called");
-        try
+        var searchJobsService = new SearchJobsService(_context, _environment);
+        if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location))
         {
-            var results = InternalSorting.InternalSortingFunction(description, location);
-            LoggingConfigService.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
-            LoggingConfigService.ReturnInfo($"Results count: {results.Count}");
-            var presentJobs = new List<(int Priority, Dictionary<string, object> Job)>();
-            foreach (var job in results)
-            {
-                var jobTitle = job.GetValueOrDefault("title", "").ToString();
-                var jobLocation = job.GetValueOrDefault("location", "").ToString();
-                int jobPriority = 0;
-                // Skip this job if title or location is invalid
-                if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
-                {
-                    continue;
-                }
-                if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase) &&
-                        jobLocation.Contains(location, StringComparison.OrdinalIgnoreCase))
-                    {
-                        jobPriority = 1;
-                        LoggingConfigService.ReturnInfo($"Assigned Priority 1: Title = {jobTitle}, Location = {jobLocation}");
-                    }
-                else if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase))
-                {
-                    jobPriority = 2;
-                    LoggingConfigService.ReturnInfo($"Assigned Priority 2: Title = {jobTitle}, Location = {jobLocation}");
-                }
-                else if (location == jobLocation)
-                {
-                    jobPriority = 3;
-                    LoggingConfigService.ReturnInfo($"Assigned Priority 3: Title = {jobTitle}, Location = {jobLocation}");
-                }
-
-                // Log the assigned priority
-                LoggingConfigService.ReturnInfo($"Assigned Priority {jobPriority}: Title = {jobTitle}, Location = {jobLocation}");
-
-                // Add the job to the list with its priority
-                if ( jobPriority != 0 ){
-                    presentJobs.Add((jobPriority, job));
-                }
-                
-            }
-            // Group jobs by priority and count the number of jobs in each priority group
-            var priorityCounts = presentJobs
-                .GroupBy(job => job.Priority)
-                .Select(group => new { Priority = group.Key, Count = group.Count() })
-                .ToList();
-
-            // Print the counts for each priority
-            foreach (var priorityCount in priorityCounts)
-            {
-                LoggingConfigService.ReturnInfo($"Priority {priorityCount.Priority}: {priorityCount.Count} jobs");
-            }
-            presentJobs.Sort((x, y) => x.Priority.CompareTo(y.Priority));
-            var sortedJobs = presentJobs.Select(x => x.Job).ToList();
-            return View("SearchResults", sortedJobs);
+            LoggingConfigService.ReturnError("Description or location is empty.");
+            return View("Error", new { Message = "Description and location cannot be empty." });
         }
-        catch (Exception ex)
+        var jobs = searchJobsService.SearchJobs(description, location);
+        LoggingConfigService.ReturnInfo($"Jobs count: {jobs.Count}");
+        foreach (var job in jobs)
         {
-            LoggingConfigService.ReturnError($"Error in SearchJobs: {ex.Message}");
-            return View("Error", new { Message = "An error occurred while searching for jobs." });
+            Console.WriteLine($"Priority: {job.Priority}");
+            foreach (var kvp in job.Job)
+            {
+                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+            }
         }
+        return View("SearchResults",jobs);
     }
     public IActionResult Privacy()
     {
@@ -104,4 +61,5 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+}
 }
