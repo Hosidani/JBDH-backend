@@ -17,7 +17,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             LoggingConfig.ReturnInfo("Starting up Job database handler...");
             LoggingConfig.ReturnInfo("Setting up connection...");
             EnsureJsonFileExists(JsonFile);
-            using (var connection = OpenConnection())
+            using (var connection = Settings.OpenConnection())
             {
                 LoggingConfig.ReturnInfo("Connection established...");
                 EnsureTablesExist(connection);

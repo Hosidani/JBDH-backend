@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 using JBDH.Models;
 using AIConfig = JBDH.Models.AIConfig;
 
+namespace JBDH.Services
+{
+
 
     public class AIService
     {
@@ -82,6 +85,7 @@ using AIConfig = JBDH.Models.AIConfig;
             dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
 
             return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
-}
+        }
 
+    }
 }

@@ -5,6 +5,9 @@ using MySql.Data.MySqlClient;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 using DbHandler = JBDH.Controllers.DbHandler;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using JBDH.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,11 +16,11 @@ await Task.Run(async () =>
 {
     try
     {
-        await PlatsbankenApi.Main(args); // Fetch or process job data
+        await JobStreamService.Main(args); // Fetch or process job data
     }
     catch (Exception ex)
     {
-        LoggingConfig.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
+        LoggingConfigService.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
     }
 });
 
@@ -26,11 +29,11 @@ await Task.Run(() =>
 {
     try
     {
-        DbHandler.Main(args); // Initialize database or populate tables
+        DatabaseHandlerService.Main(args); // Initialize database or populate tables
     }
     catch (Exception ex)
     {
-        LoggingConfig.ReturnError($"Error in DbHandler.Main: {ex.Message}");
+        LoggingConfigService.ReturnError($"Error in DbHandler.Main: {ex.Message}");
     }
 });
 
@@ -91,14 +94,14 @@ app.MapControllerRoute(
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
-    LoggingConfig.ReturnInfo("Application is shutting down. Flushing the database...");
+    LoggingConfigService.ReturnInfo("Application is shutting down. Flushing the database...");
     using var connection = new MySqlConnection(DbHandler.ConnectionString);
     connection.Open();
     DbHandler.FlushDatabase(connection);
-    LoggingConfig.ReturnInfo("Database flush completed.");
+    LoggingConfigService.ReturnInfo("Database flush completed.");
 
     // Delete all files in the uploads folder
-    LoggingConfig.ReturnInfo("Deleting files in the uploads folder...");
+    LoggingConfigService.ReturnInfo("Deleting files in the uploads folder...");
     var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
     if (Directory.Exists(uploadsPath))
     {
@@ -108,17 +111,17 @@ lifetime.ApplicationStopping.Register(() =>
             try
             {
                 File.Delete(file);
-                LoggingConfig.ReturnInfo($"Deleted file: {file}");
+                LoggingConfigService.ReturnInfo($"Deleted file: {file}");
             }
             catch (Exception ex)
             {
-                LoggingConfig.ReturnError($"Error deleting file {file}: {ex.Message}");
+                LoggingConfigService.ReturnError($"Error deleting file {file}: {ex.Message}");
             }
         }
     }
     else
     {
-        LoggingConfig.ReturnInfo("Uploads folder does not exist. No files to delete.");
+        LoggingConfigService.ReturnInfo("Uploads folder does not exist. No files to delete.");
     }
 
     // Delete the timestamp file on application shutdown
@@ -126,7 +129,7 @@ lifetime.ApplicationStopping.Register(() =>
     if (File.Exists(timestampFilePath))
     {
         File.Delete(timestampFilePath);
-        LoggingConfig.ReturnInfo("Deleted timestamp.txt on application shutdown.");
+        LoggingConfigService.ReturnInfo("Deleted timestamp.txt on application shutdown.");
     }
 });
 app.Use(async (context, next) =>
