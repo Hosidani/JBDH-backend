@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>Register</h2>
+
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div style="color: red;">@ViewData["ErrorMessage"]</div>
+}
+
+<form asp-action="Register" method="post" enctype="multipart/form-data">
+    <div>
+        <label>Username:</label>
+        <input type="text" name="username" required />
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" name="password" required />
+    </div>
+    <div>
+        <label>Confirm Password:</label>
+        <input type="password" name="confirmPassword" required />
+    </div>
+    <div>
+        <label>Email:</label>
+        <input type="email" name="email" required />
+    </div>
+    <div>
+        <label>Upload CV (optional):</label>
+        <input type="file" name="cvFile" />
+    </div>
+    <div>
+        <label>Organisation (optional):</label>
+        <input type="text" name="organisation" />
+    </div>
+    <div>
+        <label>Organisation ID (optional):</label>
+        <input type="number" name="organisationId" />
+    </div>
+    <br />
+    <button type="submit">Register</button>
+</form>

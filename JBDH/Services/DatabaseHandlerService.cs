@@ -23,19 +23,6 @@ namespace JBDH.Services
                 }
             }
 
-            private static void DeleteJsonFile(string filePath)
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                    LoggingConfigService.ReturnInfo($"Deleted JSON file: {filePath}");
-                }
-                else
-                {
-                    LoggingConfigService.ReturnInfo($"JSON file not found: {filePath}");
-                }
-            }
-
             private static void EnsureTablesExist(MySqlConnection connection)
             {
                 try
@@ -62,48 +49,19 @@ namespace JBDH.Services
                     Console.Error.WriteLine($"Error ensuring tables exist: {e.Message}");
                 }
             }
-            public static void FlushDatabase(MySqlConnection connection)
-            {
-                try
-                {
-                    LoggingConfigService.ReturnInfo("Flushing database...");
-
-                    // Delete all rows from raw_table
-                    var deleteRawTableCommand = new MySqlCommand(SqlQueries.SqlQuery(11), connection);
-                    var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {rawRowsDeleted} rows from raw_table.");
-
-                    // Delete all rows from clean_table
-                    var deleteCleanTableCommand = new MySqlCommand(SqlQueries.SqlQuery(12), connection);
-                    var cleanRowsDeleted = deleteCleanTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {cleanRowsDeleted} rows from clean_table.");
-
-                    // Delete all rows from Users table
-                    var deleteUserTableCommand = new MySqlCommand(SqlQueries.SqlQuery(15), connection);
-                    var userRowsDeleted = deleteUserTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {userRowsDeleted} rows from Users.");
-                    LoggingConfigService.ReturnInfo("Flushed database successfully.");
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine($"Error flushing database: {e.Message}");
-                }
-            }
-            public static void Main(string[] args)
+            
+            public static void databaseHandler(string[] args)
             {
                 LoggingConfigService.ConfigLogging();
                 LoggingConfigService.ReturnInfo("Starting up Job database handler...");
-                LoggingConfigService.ReturnInfo("Setting up connection...");
                 EnsureJsonFileExists(JsonFile);
                 using (var connection = Settings.OpenConnection())
                 {
                     LoggingConfigService.ReturnInfo("Connection established...");
                     EnsureTablesExist(connection);
                     EtlPipeline.RunEtlPipeline(JsonFile);
-                    LoggingConfigService.ReturnInfo("ETL pipeline completed...");
-                    LoggingConfigService.ReturnInfo("Starting sorting queries...");
+                    LoggingConfigService.ReturnInfo("Database handler setup completed.");
                 }
-                LoggingConfigService.ReturnInfo("Closing application...");
             }
         }
 }

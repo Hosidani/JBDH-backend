@@ -32,7 +32,6 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult SearchJobs(string description, string location)
     {
-        LoggingConfigService.ReturnInfo("SearchJobs method called");
         var searchJobsService = new SearchJobsService(_context, _environment);
         if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location))
         {
@@ -40,15 +39,6 @@ public class HomeController : Controller
             return View("Error", new { Message = "Description and location cannot be empty." });
         }
         var jobs = searchJobsService.SearchJobs(description, location);
-        LoggingConfigService.ReturnInfo($"Jobs count: {jobs.Count}");
-        foreach (var job in jobs)
-        {
-            Console.WriteLine($"Priority: {job.Priority}");
-            foreach (var kvp in job.Job)
-            {
-                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-            }
-        }
         return View("SearchResults",jobs);
     }
     public IActionResult Privacy()

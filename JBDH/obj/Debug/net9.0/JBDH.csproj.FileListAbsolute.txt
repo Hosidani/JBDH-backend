@@ -322,7 +322,6 @@ C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\BCrypt.N
 C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\client\package.json
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\appsettings.json
-C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\jobs.json
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.runtime.json
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\JBDH.staticwebassets.endpoints.json
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\NLog.config
@@ -340,6 +339,15 @@ C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\K4os.Hash.xxHash.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Caching.Abstractions.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Logging.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Options.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\MySql.Data.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\MySql.EntityFrameworkCore.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\Newtonsoft.Json.dll

@@ -7,7 +7,7 @@ using ApplicationDbContext = JBDH.Models.ApplicationDbContext;
 
 namespace JBDH.Controllers
 {
-    //[Authorize] // Ensure only logged-in users can access this controller
+    [Authorize]
     public class SettingsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -97,14 +97,21 @@ namespace JBDH.Controllers
         [HttpGet]
         public IActionResult Settings()
         {
-            LoggingConfigService.ReturnInfo("Settings action called");
-            return View();
-        }
+            // Check if the user is authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                // Retrieve the username from the claims
+                var username = User.Identity.Name;
 
-        [HttpGet]
-        public IActionResult Test()
-        {
-            return Content("Settings route is working!");
+                // Print the username to the console
+                LoggingConfigService.ReturnInfo($"Current user: {username}");
+            }
+            else
+            {
+                // If not authenticated, print a message
+                LoggingConfigService.ReturnError("User is not authenticated.");
+            }
+            return View();
         }
     }
 }

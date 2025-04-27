@@ -1,11 +1,13 @@
-@section Title { Settings }
+@{
+    ViewData["Title"] = "Settings";
+}
 
 <div class="text-center">
     <h1 class="display-4">Settings</h1>
     <p>Welcome to the settings page!</p>
     <p>Update your CV below:</p>
 
-    <form method="post" enctype="multipart/form-data" action="/Settings/ChangeCV">
+    <form method="post" enctype="multipart/form-data" asp-action="ChangeCV" asp-controller="Settings">
         <div class="mb-3">
             <label for="cvFile" class="form-label">Upload your CV</label>
             <input type="file" class="form-control" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" required>
@@ -15,11 +17,11 @@
 
     @if (ViewData["ErrorMessage"] != null)
     {
-        <p class="text-danger">@ViewData["ErrorMessage"]</p>
+        <p class="text-danger mt-3">@ViewData["ErrorMessage"]</p>
     }
 
     @if (ViewData["SuccessMessage"] != null)
     {
-        <p class="text-success">@ViewData["SuccessMessage"]</p>
+        <p class="text-success mt-3">@ViewData["SuccessMessage"]</p>
     }
 </div>

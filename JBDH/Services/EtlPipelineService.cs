@@ -21,7 +21,7 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> ExtractData(string filePath)
     {
-        LoggingConfigService.ReturnInfo("Starting data extraction...");
+        LoggingConfigService.ReturnInfo("Extracting raw data from JSON file...");
         LoggingConfigService.ReturnInfo($"Extracting data from {filePath}...");
         try
         {
@@ -38,7 +38,7 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
     {
-        LoggingConfigService.ReturnInfo("Starting data transformation...");
+        LoggingConfigService.ReturnInfo("Transforming data...");
         LoggingConfigService.ReturnInfo($"Number of jobs to transform: {rawJobs.Count}");
         var transformed = new List<Dictionary<string, object>>();
         int warningCount = 0;
@@ -180,6 +180,7 @@ public class EtlPipeline
     }
     public static void LoadData(List<Dictionary<string, object>> rawJobs)
     {
+        LoggingConfigService.ReturnInfo("Processing jobs...");
         try
         {
             using var connection = new MySqlConnection(ConnectionString);
@@ -187,10 +188,6 @@ public class EtlPipeline
             LoggingConfigService.ReturnInfo("Database connection established.");
             LoggingConfigService.ReturnInfo("Starting Load data process...");
             LoggingConfigService.ReturnInfo($"Number of jobs to insert: {rawJobs.Count}");
-            /*foreach (var job in rawJobs)
-            {
-                Console.WriteLine($"Job ID: {job.GetValueOrDefault("job_id", "N/A")}, Title: {job.GetValueOrDefault("title", "N/A")}");
-            }*/
 
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
@@ -220,7 +217,6 @@ public class EtlPipeline
             var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(5), connection);
             deduplicateCommand.ExecuteNonQuery();
             LoggingConfigService.ReturnInfo("Distinct rows inserted into clean_table.");
-            LoggingConfigService.ReturnInfo("ETL process completed successfully.");
         }
         catch (Exception e)
         {
@@ -230,14 +226,11 @@ public class EtlPipeline
 
     public static void RunEtlPipeline(string jsonFile)
     {
-        LoggingConfigService.ReturnInfo("Starting ETL pipeline...");
-        LoggingConfigService.ReturnInfo("Extracting raw data from JSON file...");
+        LoggingConfigService.ReturnInfo("Starting ETL pipeline Service...");
         var rawData = ExtractData(jsonFile);
         LoggingConfigService.ReturnInfo("Data extracted...");
-        LoggingConfigService.ReturnInfo("Transforming data...");
         var sqlData = TransformData(rawData);
         LoggingConfigService.ReturnInfo("Data transformed...");
-        LoggingConfigService.ReturnInfo("Processing jobs...");
         // Call LoadData to handle loading and deduplication
         LoadData(sqlData);
         LoggingConfigService.ReturnInfo("ETL pipeline completed successfully.");

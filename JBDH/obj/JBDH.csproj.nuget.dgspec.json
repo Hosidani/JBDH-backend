@@ -48,13 +48,17 @@
               "target": "Package",
               "version": "[4.0.3, )"
             },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            },
             "MySql.Data": {
               "target": "Package",
-              "version": "[9.2.0, )"
+              "version": "[9.3.0, )"
             },
             "MySql.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.3, )"
             },
             "NLog": {
               "target": "Package",

@@ -88,7 +88,7 @@ namespace JBDH.Services
             {
                 foreach (var counter in counters)
                 {
-                    Console.WriteLine(string.Join(", ", counter));
+                    ReturnInfo(string.Join(", ", counter));
                 }
             }
         }

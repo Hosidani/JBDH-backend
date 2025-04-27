@@ -1,11 +1,14 @@
 using JBDH.Controllers;
 using JBDH.Models;
 using JBDH.Services;
-using Microsoft.EntityFrameworkCore;
-using MySql.Data.MySqlClient;
-using Microsoft.Extensions.Hosting;
-using System.IO;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
+using Microsoft.AspNetCore.Builder; // For WebApplication
+using Microsoft.Extensions.DependencyInjection; // For DI container setup
+using Microsoft.Extensions.Hosting; // For environment setup
+using Microsoft.AspNetCore.Http; // For IHttpContextAccessor
+using Microsoft.EntityFrameworkCore; // For DbContext and DbContextOptionsBuilder
+using MySql.Data.MySqlClient; // For MySQL connection
+using MySql.EntityFrameworkCore.Extensions; // For UseMySQL
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +31,7 @@ await Task.Run(() =>
 {
     try
     {
-        DatabaseHandlerService.Main(args); // Initialize database or populate tables
+        DatabaseHandlerService.databaseHandler(args); // Initialize database or populate tables
     }
     catch (Exception ex)
     {
@@ -36,16 +39,32 @@ await Task.Run(() =>
     }
 });
 
-// Add services to the container
+// Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
+
+// Add session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set the session timeout
+    options.Cookie.HttpOnly = true;  // Ensures cookies are sent only through HTTP requests
+    options.Cookie.IsEssential = true;  // Makes the session cookie essential for the app
+});
+
+// Configure services
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
-        options.LoginPath = "/User/Login"; // Redirect to login page if not authenticated
+        options.Cookie.Name = "MyCookieName";
+        options.LoginPath = "/Login/Login";
+        options.LogoutPath = "/Logout/Logout";
     });
 
+// Add authorization
 builder.Services.AddAuthorization();
-builder.Services.AddSession(); // Add session services
+
+// Add CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -53,98 +72,67 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
+
+// Add memory cache for session
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-builder.Services.AddHttpContextAccessor();
+
+// Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")));
+    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-
+// Build the application
 var app = builder.Build();
 
+// Access IHostApplicationLifetime to hook into shutdown events
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+// Register a function to run when the application is stopping
+
+// SHUTDOWN HOOK:
+lifetime.ApplicationStopping.Register(() =>
+{
+    try
+    {
+        // Create a new scope to resolve scoped services
+        using (var scope = app.Services.CreateScope())
+        {
+            // Resolve ApplicationDbContext from the scope
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            // Call your database flushing service
+            FlushDatabaseService.FlushDatabase();
+            DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
+        }
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Error during application shutdown: {ex.Message}");
+    }
+});
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseSession(); // Enable session middleware
-app.UseRouting();
-app.UseEndpoints(endpoints =>
+else
 {
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
-});
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors();
+app.UseSession();
+app.UseStaticFiles();
 
+app.UseHttpsRedirection();
+app.UseCors(); // This should come after UseRouting() and before endpoints
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route pattern
 
-//app.MapGet("/Settings/Test", () => "Settings route is working!");
-// Add a shutdown hook to flush the database
-var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-lifetime.ApplicationStopping.Register(() =>
-{
-    LoggingConfigService.ReturnInfo("Application is shutting down. Flushing the database...");
-    using var connection = new MySqlConnection(DbConfig.DB_CONFIG);
-    connection.Open();
-    DatabaseHandlerService.FlushDatabase(connection);
-    LoggingConfigService.ReturnInfo("Database flush completed.");
-
-    // Delete all files in the uploads folder
-    LoggingConfigService.ReturnInfo("Deleting files in the uploads folder...");
-    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-    if (Directory.Exists(uploadsPath))
-    {
-        var files = Directory.GetFiles(uploadsPath);
-        foreach (var file in files)
-        {
-            try
-            {
-                File.Delete(file);
-                LoggingConfigService.ReturnInfo($"Deleted file: {file}");
-            }
-            catch (Exception ex)
-            {
-                LoggingConfigService.ReturnError($"Error deleting file {file}: {ex.Message}");
-            }
-        }
-    }
-    else
-    {
-        LoggingConfigService.ReturnInfo("Uploads folder does not exist. No files to delete.");
-    }
-
-    // Delete the timestamp file on application shutdown
-    var timestampFilePath = "timestamp.txt";
-    if (File.Exists(timestampFilePath))
-    {
-        File.Delete(timestampFilePath);
-        LoggingConfigService.ReturnInfo("Deleted timestamp.txt on application shutdown.");
-    }
-});
-app.Use(async (context, next) =>
-{
-    var endpoint = context.GetEndpoint();
-    if (endpoint != null)
-    {
-        Console.WriteLine($"Endpoint: {endpoint.DisplayName}");
-    }
-    await next();
-});
+// Start the application
 app.Run();
