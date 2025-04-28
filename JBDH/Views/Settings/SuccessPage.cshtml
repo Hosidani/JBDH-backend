@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Success";
+    var successMessage = ViewData["SuccessMessage"] as string ?? "Changes made successfully!";
+}
+
+<div class="text-center">
+    <h1 class="display-4 text-success">Success!</h1>
+    <p>@successMessage</p>
+    
+    <a class="btn btn-primary" href="@Url.Action("Index", "Home")">Go to Homepage</a>
+</div>

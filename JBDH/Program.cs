@@ -43,6 +43,7 @@ await Task.Run(() =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 
 // Add session support
