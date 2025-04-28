@@ -34,9 +34,11 @@ namespace JBDH.Services
         // Sign in the user
         public async Task SignInUserAsync(string username)
         {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, username)
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

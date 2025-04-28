@@ -23,5 +23,6 @@ namespace JBDH.Models
         public string? Organisation { get; set; } // Optional organisation name
         public int? OrganisationId { get; set; } // Paid organisation name
         public bool? developerMode { get; set; } // Developer mode
+        public bool? openForHiring { get; set; } // Active mode
     }
 }

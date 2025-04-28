@@ -1,0 +1,61 @@
+@model JBDH.Models.User
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h2 class="mt-4">Profile Information</h2>
+
+<div class="card p-4 mt-3 shadow-sm">
+    <dl class="row">
+        <dt class="col-sm-3">Username:</dt>
+        <dd class="col-sm-9">@Model.Username</dd>
+
+        <dt class="col-sm-3">Email:</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+
+        <dt class="col-sm-3">Organisation:</dt>
+        <dd class="col-sm-9">@Model.Organisation ?? "N/A"</dd>
+
+        <dt class="col-sm-3">Organisation ID:</dt>
+        <dd class="col-sm-9">@Model.OrganisationId?.ToString() ?? "N/A"</dd>
+
+        <dt class="col-sm-3">Open for Hiring:</dt>
+        <dd class="col-sm-9">
+            @if (Model.openForHiring == true)
+            {
+                <span class="badge bg-success">Open</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Closed</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Developer Mode:</dt>
+        <dd class="col-sm-9">
+            @if (Model.developerMode == true)
+            {
+                <span class="badge bg-info">Developer</span>
+            }
+            else
+            {
+                <span class="badge bg-light text-dark">User</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">CV:</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.CVPath))
+            {
+                <a href="@Url.Content("~/uploads/" + System.IO.Path.GetFileName(Model.CVPath))" target="_blank" class="btn btn-primary btn-sm">
+                    View CV
+                </a>
+            }
+            else
+            {
+                <span>No CV uploaded</span>
+            }
+        </dd>
+    </dl>
+</div>

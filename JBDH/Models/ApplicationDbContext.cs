@@ -47,6 +47,10 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.developerMode)
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
+
+            entity.Property(u => u.openForHiring)
+                .IsRequired(false) // Optional field
+                .HasDefaultValue(false); // Default value for boolean field
         });
     }
 }

@@ -42,6 +42,7 @@ await Task.Run(() =>
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 
 // Add session support

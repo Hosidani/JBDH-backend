@@ -3,7 +3,6 @@ using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
-using ApplicationDbContext = JBDH.Models.ApplicationDbContext;
 
 namespace JBDH.Controllers
 {
@@ -94,6 +93,29 @@ namespace JBDH.Controllers
             return RedirectToAction("Settings", "Home");
         }
         
+        [HttpPost]
+        public IActionResult ToggleOpenForHire(bool openForHiring)
+        {
+            // Get the logged-in user's username
+            LoggingConfigService.ReturnInfo($"Current user in ToggleOpenForHire: {User.Identity.Name}");
+            LoggingConfigService.ReturnInfo($"openForHiring received from form: {openForHiring}");
+            var username = User.Identity.Name;
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                //LoggingConfigService.ReturnError("User not found.");
+                ViewData["ErrorMessage"] = "User not found.";
+                return View("Settings");
+            }
+            LoggingConfigService.ReturnInfo($"Before update, openForHiring = {user.openForHiring}");
+            // Update the user's openForHiring status in the database
+            user.openForHiring = openForHiring;
+            _context.SaveChanges();
+            LoggingConfigService.ReturnInfo($"After update, openForHiring = {user.openForHiring}");
+            LoggingConfigService.ReturnInfo($"Open for hiring status updated for user: {username}");
+            ViewData["SuccessMessage"] = "Open for hiring status updated successfully!";
+            return RedirectToAction("Index", "Home");
+        }
         [HttpGet]
         public IActionResult Settings()
         {
@@ -102,16 +124,20 @@ namespace JBDH.Controllers
             {
                 // Retrieve the username from the claims
                 var username = User.Identity.Name;
-
-                // Print the username to the console
-                LoggingConfigService.ReturnInfo($"Current user: {username}");
+                LoggingConfigService.ReturnInfo($"Current user in Settings: {username}");
+                var user = _context.Users.FirstOrDefault(u => u.Username == username);
+                if (user != null)
+                {
+                    ViewData["OpenForHiring"] = user.openForHiring ?? false;
+                }
             }
             else
             {
                 // If not authenticated, print a message
                 LoggingConfigService.ReturnError("User is not authenticated.");
+                ViewData["OpenForHiring"] = false;
             }
-            return View();
+            return View();  // Render the settings view
         }
     }
 }

@@ -21,7 +21,7 @@ public class RegisterController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId)
+    public async Task<IActionResult> Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId, bool openForHiring)
     {
         if (password != confirmPassword)
         {
@@ -70,7 +70,8 @@ public class RegisterController : Controller
                 CVPath = cvPath,
                 Organisation = organisation ?? "Free",
                 OrganisationId = organisationId,
-                developerMode = false
+                developerMode = false,
+                openForHiring = openForHiring
             };
 
             _context.Users.Add(user);
