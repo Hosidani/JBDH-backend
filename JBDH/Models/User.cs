@@ -24,5 +24,9 @@ namespace JBDH.Models
         public int? OrganisationId { get; set; } // Paid organisation name
         public bool? developerMode { get; set; } // Developer mode
         public bool? openForHiring { get; set; } // Active mode
+
+        public ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
+        public ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
+
     }
 }

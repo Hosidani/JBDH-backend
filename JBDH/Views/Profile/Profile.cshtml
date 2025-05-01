@@ -1,4 +1,4 @@
-@model JBDH.Models.User
+@model JBDH.Models.ProfileViewModel
 
 @{
     ViewData["Title"] = "Profile";
@@ -9,20 +9,20 @@
 <div class="card p-4 mt-3 shadow-sm">
     <dl class="row">
         <dt class="col-sm-3">Username:</dt>
-        <dd class="col-sm-9">@Model.Username</dd>
+        <dd class="col-sm-9">@Model.User.Username</dd>
 
         <dt class="col-sm-3">Email:</dt>
-        <dd class="col-sm-9">@Model.Email</dd>
+        <dd class="col-sm-9">@Model.User.Email</dd>
 
         <dt class="col-sm-3">Organisation:</dt>
-        <dd class="col-sm-9">@Model.Organisation ?? "N/A"</dd>
+        <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.User.Organisation) ? Model.User.Organisation : "N/A")</dd>
 
         <dt class="col-sm-3">Organisation ID:</dt>
-        <dd class="col-sm-9">@Model.OrganisationId?.ToString() ?? "N/A"</dd>
+        <dd class="col-sm-9">@Model.User.OrganisationId?.ToString() ?? "N/A"</dd>
 
         <dt class="col-sm-3">Open for Hiring:</dt>
         <dd class="col-sm-9">
-            @if (Model.openForHiring == true)
+            @if (Model.User.openForHiring == true)
             {
                 <span class="badge bg-success">Open</span>
             }
@@ -34,7 +34,7 @@
 
         <dt class="col-sm-3">Developer Mode:</dt>
         <dd class="col-sm-9">
-            @if (Model.developerMode == true)
+            @if (Model.User.developerMode == true)
             {
                 <span class="badge bg-info">Developer</span>
             }
@@ -46,9 +46,9 @@
 
         <dt class="col-sm-3">CV:</dt>
         <dd class="col-sm-9">
-            @if (!string.IsNullOrEmpty(Model.CVPath))
+            @if (!string.IsNullOrEmpty(Model.User.CVPath))
             {
-                <a href="@Url.Content("~/uploads/" + System.IO.Path.GetFileName(Model.CVPath))" target="_blank" class="btn btn-primary btn-sm">
+                <a href="@Url.Content("~/uploads/" + System.IO.Path.GetFileName(Model.User.CVPath))" target="_blank" class="btn btn-primary btn-sm">
                     View CV
                 </a>
             }
@@ -58,4 +58,15 @@
             }
         </dd>
     </dl>
+
+    @if (!Model.IsFriend) 
+    {
+        <form method="post" asp-action="SendFriendRequest" asp-route-addresseeId="@Model.User.Id">
+            <button type="submit" class="btn btn-success">Send Friend Request</button>
+        </form>
+    }
+    else
+    {
+        <button class="btn btn-secondary" disabled>Already Friends</button>
+    }
 </div>

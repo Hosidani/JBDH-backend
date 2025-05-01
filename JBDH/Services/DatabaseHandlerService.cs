@@ -30,6 +30,7 @@ namespace JBDH.Services
                     var createRawTable = SqlQueries.SqlQuery(1);
                     var createCleanTable = SqlQueries.SqlQuery(2);
                     var createUserTable = SqlQueries.SqlQuery(14);
+                    var createFriendshipTable = SqlQueries.SqlQuery(16);
                     using (var command = new MySqlCommand(createRawTable, connection))
                     {
                         command.ExecuteNonQuery();
@@ -42,25 +43,65 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
-                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', and 'Users' exist.");
+                    using (var command = new MySqlCommand(createFriendshipTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users' and 'Friendships' tables exists.");
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine($"Error ensuring tables exist: {e.Message}");
+                    LoggingConfigService.ReturnError($"Error ensuring tables exist: {e.Message}");
                 }
             }
             
             public static void databaseHandler(string[] args)
             {
                 LoggingConfigService.ConfigLogging();
-                LoggingConfigService.ReturnInfo("Starting up Job database handler...");
-                EnsureJsonFileExists(JsonFile);
-                using (var connection = Settings.OpenConnection())
+                // Check if the database already exists
+                var databaseExists = false;
+                var connectionString = Settings.ConnectionString;
+                using (var connection = new MySqlConnection(connectionString))
                 {
-                    LoggingConfigService.ReturnInfo("Connection established...");
-                    EnsureTablesExist(connection);
-                    EtlPipeline.RunEtlPipeline(JsonFile);
-                    LoggingConfigService.ReturnInfo("Database handler setup completed.");
+                    connection.Open();
+                    var command = new MySqlCommand("SHOW DATABASES LIKE 'testing_purposes'", connection);
+                    var reader = command.ExecuteReader();
+                    databaseExists = reader.HasRows;
+                }
+                if (databaseExists)
+                {
+                    LoggingConfigService.ReturnInfo("Database already exists. No need to create it again.");
+                    LoggingConfigService.ReturnInfo("Starting up Job database handler...");
+                    EnsureJsonFileExists(JsonFile);
+                    using (var connection = Settings.OpenConnection())
+                    {
+                        LoggingConfigService.ReturnInfo("Connection established...");
+                        EnsureTablesExist(connection);
+                        EtlPipeline.RunEtlPipeline(JsonFile);
+                        LoggingConfigService.ReturnInfo("Database handler setup completed.");
+                    }
+                }
+                else
+                    {
+                        // Create the database and tables
+                    LoggingConfigService.ReturnInfo("Creating database...");
+                    var createDatabase = SqlQueries.SqlQuery(0);
+                    using (var connection = Settings.OpenConnection())
+                    {
+                        using (var command = new MySqlCommand(createDatabase, connection))
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                    LoggingConfigService.ReturnInfo("Starting up Job database handler...");
+                    EnsureJsonFileExists(JsonFile);
+                    using (var connection = Settings.OpenConnection())
+                    {
+                        LoggingConfigService.ReturnInfo("Connection established...");
+                        EnsureTablesExist(connection);
+                        EtlPipeline.RunEtlPipeline(JsonFile);
+                        LoggingConfigService.ReturnInfo("Database handler setup completed.");
+                    }
                 }
             }
         }

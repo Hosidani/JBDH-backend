@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MySqlX.XDevAPI.CRUD;
 
 namespace JBDH.Services
 { 
@@ -7,6 +8,7 @@ namespace JBDH.Services
             // BUG :  Number 6 doenst work.
             private static readonly Dictionary<int, string> Queries = new Dictionary<int, string>
             {
+                { 0, "CREATE DATABASE IF NOT EXISTS testing_purposes"},
                 { 1, "CREATE TABLE IF NOT EXISTS raw_table (job_id VARCHAR(255) PRIMARY KEY,title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" }, 
                 { 2, "CREATE TABLE IF NOT EXISTS clean_table (job_id VARCHAR(255) PRIMARY KEY, title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" }, 
                 { 3, "INSERT INTO raw_table (job_id, title, description, company, location, posted_date, webpage_url) VALUES (@job_id, @title, @description, @company, @location, @posted_date, @webpage_url);" },
@@ -19,7 +21,8 @@ namespace JBDH.Services
                 { 12, "DELETE FROM clean_table;" },
                 { 13, "SELECT * FROM clean_table;"},
                 { 14, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Role VARCHAR(50), Email VARCHAR(255) NOT NULL UNIQUE, CVPath VARCHAR(2083), Organisation VARCHAR(255), OrganisationID INT NULL, DeveloperMode BOOLEAN DEFAULT FALSE, OpenForHiring BOOLEAN DEFAULT FALSE);"},
-                { 15, "DELETE FROM Users;" }
+                { 15, "DELETE FROM Users;" },
+                { 16, "CREATE TABLE IF NOT EXISTS Friendships ( Id INT PRIMARY KEY AUTO_INCREMENT, RequesterId INT NOT NULL, AddresseeId INT NOT NULL, Status ENUM('Pending', 'Friends') NOT NULL, RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (RequesterId) REFERENCES Users(Id), FOREIGN KEY (AddresseeId) REFERENCES Users(Id) );"}            
             };
 
             public static string SqlQuery(int queryId)

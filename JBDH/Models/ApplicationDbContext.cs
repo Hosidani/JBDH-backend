@@ -8,6 +8,8 @@ public class ApplicationDbContext : DbContext
 
     // Define DbSets for your tables
     public DbSet<User> Users { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
+
 
     // Optional: Override OnModelCreating to configure relationships, constraints, etc.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,5 +54,17 @@ public class ApplicationDbContext : DbContext
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
         });
+        // Configure the Friendship relationships
+    modelBuilder.Entity<Friendship>()
+        .HasOne(f => f.Requester)
+        .WithMany()
+        .HasForeignKey(f => f.RequesterId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Friendship>()
+        .HasOne(f => f.Addressee)
+        .WithMany()
+        .HasForeignKey(f => f.AddresseeId)
+        .OnDelete(DeleteBehavior.Restrict);
     }
 }

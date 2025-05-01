@@ -13,19 +13,6 @@ using MySql.EntityFrameworkCore.Extensions; // For UseMySQL
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Run PlatsbankenApi.Main asynchronously before starting the web application
-await Task.Run(async () =>
-{
-    try
-    {
-        await JobStreamService.Main(args); // Fetch or process job data
-    }
-    catch (Exception ex)
-    {
-        LoggingConfigService.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
-    }
-});
-
 // Run DbHandler.Main synchronously before starting the web application
 await Task.Run(() =>
 {
@@ -39,11 +26,27 @@ await Task.Run(() =>
     }
 });
 
+// Run PlatsbankenApi.Main asynchronously before starting the web application
+await Task.Run(async () =>
+{
+    try
+    {
+        await JobStreamService.Main(args); // Fetch or process job data
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
+    }
+});
+
+
+
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
+ builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 
 // Add session support
