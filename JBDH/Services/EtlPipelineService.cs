@@ -5,7 +5,8 @@ using System.Text.Json;
 using MySql.Data.MySqlClient;
 using JBDH.Models; // Assuming this is the namespace for your models
 
-namespace JBDH.Controllers; // Assuming this is the namespace for your controller
+namespace JBDH.Services
+{    
 
 public class EtlPipeline
 {
@@ -20,6 +21,8 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> ExtractData(string filePath)
     {
+        LoggingConfigService.ReturnInfo("Extracting raw data from JSON file...");
+        LoggingConfigService.ReturnInfo($"Extracting data from {filePath}...");
         try
         {
             var jsonData = File.ReadAllText(filePath);
@@ -28,13 +31,15 @@ public class EtlPipeline
         }
         catch (Exception e)
         {
-            LoggingConfig.ReturnInfo($"Error reading JSON file: {e.Message}");
+            LoggingConfigService.ReturnInfo($"Error reading JSON file: {e.Message}");
             return new List<Dictionary<string, object>>();
         }
     }
 
     public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
     {
+        LoggingConfigService.ReturnInfo("Transforming data...");
+        LoggingConfigService.ReturnInfo($"Number of jobs to transform: {rawJobs.Count}");
         var transformed = new List<Dictionary<string, object>>();
         int warningCount = 0;
 
@@ -50,19 +55,13 @@ public class EtlPipeline
             if (job.GetValueOrDefault("employer") == null) missingEmployerCount++;
             if (job.GetValueOrDefault("workplace_address") == null) missingLocationCount++;
         }
-
-        Console.WriteLine($"Summary of missing fields:");
-        Console.WriteLine($"- Missing descriptions: {missingDescriptionCount}");
-        Console.WriteLine($"- Missing titles: {missingTitleCount}");
-        Console.WriteLine($"- Missing employers: {missingEmployerCount}");
-        Console.WriteLine($"- Missing locations: {missingLocationCount}");
+        LoggingConfigService.ReturnInfo($"Number of jobs with missing fields: {missingDescriptionCount + missingTitleCount + missingEmployerCount + missingLocationCount}");
 
         foreach (var job in rawJobs)
         {
             try
             {
                 var jobId = job.GetValueOrDefault("id") ?? "Unknown ID";
-                
                 var rawTitle = job.GetValueOrDefault("headline", "Unknown Title").ToString();
                 var title = rawTitle != null ? DecodeUnicodeString(rawTitle) : "Unknown Title";
 
@@ -75,8 +74,6 @@ public class EtlPipeline
                 // Handle the "description" field
                 var rawDescription = job.GetValueOrDefault("description");
                 string description = "No Description";
-                /* BUG: company name : VIVIDA ASSISTANS AB
-                   Error processing description: Invalid pattern 'Väx med oss på Ada Service Partner – bli vår nya driftansvariga\kundansvarig! 💼🌟*/
                 if (rawDescription is JsonElement descriptionElement && descriptionElement.ValueKind == JsonValueKind.Object)
                 {
                     if (descriptionElement.TryGetProperty("text", out JsonElement textElement))
@@ -98,24 +95,24 @@ public class EtlPipeline
                         }
                         catch (Exception ex)
                         {
-                            var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 100) + "..." : ex.Message;
-                            Console.WriteLine($"Error processing description: {truncatedMessage}");
+                            var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 50) + "..." : ex.Message;
+                            LoggingConfigService.ReturnError($"Processing description: {truncatedMessage}");
                             description = "Invalid Description Format";
                         }
                     }
                     else
                     {
-                        Console.WriteLine("The 'text' field is missing in the 'description' object.");
+                        LoggingConfigService.ReturnError("The 'text' field is missing in the 'description' object.");
                     }
                 }
                 else if (rawDescription == null)
                 {
-                    Console.WriteLine("Warning: The 'description' field is null or missing.");
+                    LoggingConfigService.ReturnError("Warning: The 'description' field is null or missing.");
                     warningCount++;
                 }
                 else
                 {
-                    Console.WriteLine("Warning: The 'description' field is not a valid JSON object.");
+                    LoggingConfigService.ReturnError("Warning: The 'description' field is not a valid JSON object.");
                     warningCount++;
                 }
  
@@ -137,12 +134,11 @@ public class EtlPipeline
                         {
                             // Limit the exception message to 100 characters to avoid overly verbose output
                             var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 100) + "..." : ex.Message;
-                            Console.WriteLine($"Error processing company: {truncatedMessage}");
+                            LoggingConfigService.ReturnError($"Error processing company: {truncatedMessage}");
                             company = "Invalid company name";
                         }
                     }
                 }
-                //Console.WriteLine($"company name : {company}");
 
                 // Handle the "workplace_address" field
                 string location = "Unknown Location";
@@ -175,88 +171,28 @@ public class EtlPipeline
             }
             catch (Exception e)
             {
-                LoggingConfig.ReturnInfo($"Skipping invalid job entry: {e.Message}");
+                LoggingConfigService.ReturnInfo($"Skipping invalid job entry: {e.Message}");
             }
         }
-
-        Console.WriteLine($"warning count: {warningCount}");
-        Console.WriteLine($"Transformed {transformed.Count} jobs successfully.");
+        LoggingConfigService.ReturnInfo($"Transformed {transformed.Count} jobs successfully.");
+        LoggingConfigService.ReturnInfo($"Number of warnings: {warningCount}");
         return transformed;
     }
-
-/*
-    public static List<Dictionary<string, object>> TransformJobs(List<Dictionary<string, object>> rawJobs)
-    {
-        var transformedJobs = new List<Dictionary<string, object>>();
-
-        foreach (var job in rawJobs)
-        {
-            // Extract the "title" field
-            var title = job.GetValueOrDefault("headline", "N/A");
-
-            // Extract the "location" field
-            string location = "N/A";
-            if (job.GetValueOrDefault("workplace_address") is JsonElement addressElement && addressElement.ValueKind == JsonValueKind.Object)
-            {
-                if (addressElement.TryGetProperty("municipality", out JsonElement municipalityElement))
-                {
-                    location = municipalityElement.GetString() ?? "N/A";
-                }
-            }
-
-            // Extract the "description" field
-            string description = "N/A";
-            if (job.GetValueOrDefault("description") is JsonElement descriptionElement && descriptionElement.ValueKind == JsonValueKind.Object)
-            {
-                if (descriptionElement.TryGetProperty("text", out JsonElement textElement))
-                {
-                    description = textElement.GetString() ?? "N/A";
-                }
-            }
-
-            // Extract the "employer" field
-            string company = "N/A";
-            if (job.GetValueOrDefault("employer") is JsonElement employerElement && employerElement.ValueKind == JsonValueKind.Object)
-            {
-                if (employerElement.TryGetProperty("name", out JsonElement nameElement))
-                {
-                    company = nameElement.GetString() ?? "N/A";
-                }
-            }
-
-            // Add the transformed job to the list
-            var transformedJob = new Dictionary<string, object>
-            {
-                { "title", title },
-                { "location", location },
-                { "description", description },
-                { "company", company }
-            };
-
-            transformedJobs.Add(transformedJob);
-        }
-
-        return transformedJobs;
-    }
-*/
     public static void LoadData(List<Dictionary<string, object>> rawJobs)
     {
+        LoggingConfigService.ReturnInfo("Processing jobs...");
         try
         {
             using var connection = new MySqlConnection(ConnectionString);
             connection.Open();
-
-            Console.WriteLine("Starting ETL process...");
-            Console.WriteLine($"Number of jobs to insert: {rawJobs.Count}");
-            foreach (var job in rawJobs)
-            {
-                //Console.WriteLine($"Job ID: {job.GetValueOrDefault("job_id", "N/A")}, Title: {job.GetValueOrDefault("title", "N/A")}");
-            }
+            LoggingConfigService.ReturnInfo("Database connection established.");
+            LoggingConfigService.ReturnInfo("Starting Load data process...");
+            LoggingConfigService.ReturnInfo($"Number of jobs to insert: {rawJobs.Count}");
 
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
             {
-                //LoggingConfig.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
+                //LoggingConfigService.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
                 var command = new MySqlCommand(SqlQueries.SqlQuery(3), connection);
                 command.Parameters.AddWithValue("@job_id", job["job_id"]);
                 command.Parameters.AddWithValue("@title", job["title"]);
@@ -272,41 +208,33 @@ public class EtlPipeline
                 }
                 catch (MySqlException ex)
                 {
-                    Console.Error.WriteLine($"Error inserting job_id {job["job_id"]}: {ex.Message}");
+                    LoggingConfigService.ReturnError($"MySQL error inserting job_id {job["job_id"]}: {ex.Message}");
                 }
             }
-
-            Console.WriteLine("Raw jobs inserted into raw_table.");
+            LoggingConfigService.ReturnInfo("All jobs inserted into raw_table.");
 
             // Step 2: Deduplicate data by inserting distinct rows into clean_table
             var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(5), connection);
             deduplicateCommand.ExecuteNonQuery();
-            Console.WriteLine("Distinct rows inserted into clean_table.");
-            
-            // Step 3: Remove duplicates from clean_table
-            //var cleanupCommand = new MySqlCommand(SqlQueries.SqlQuery(6), connection);
-            //cleanupCommand.ExecuteNonQuery();
-            //Console.WriteLine("Duplicates removed from raw_table.");
-
-            Console.WriteLine("ETL process completed successfully.");
+            LoggingConfigService.ReturnInfo("Distinct rows inserted into clean_table.");
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Error in ETL process: {e.Message}");
+            LoggingConfigService.ReturnError($"Error in ETL process: {e.Message}");
         }
     }
 
     public static void RunEtlPipeline(string jsonFile)
     {
-        LoggingConfig.ReturnInfo("Starting ETL pipeline...\nExtracting raw data from JSON file...");
+        LoggingConfigService.ReturnInfo("Starting ETL pipeline Service...");
         var rawData = ExtractData(jsonFile);
-        LoggingConfig.ReturnInfo("Data extracted...\nTransforming data...");
+        LoggingConfigService.ReturnInfo("Data extracted...");
         var sqlData = TransformData(rawData);
-        LoggingConfig.ReturnInfo("Data transformed...\nProcessing jobs...");
-
+        LoggingConfigService.ReturnInfo("Data transformed...");
         // Call LoadData to handle loading and deduplication
         LoadData(sqlData);
-
-        LoggingConfig.ReturnInfo("ETL pipeline completed successfully.");
+        LoggingConfigService.ReturnInfo("ETL pipeline completed successfully.");
     }
+}
+
 }

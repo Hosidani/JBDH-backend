@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Settings</h1>
+    <p>Welcome to the settings page!</p>
+
+    <p>Update your email below:</p>
+    <form method="post" asp-action="UpdateEmail" asp-controller="Settings">
+        <div class="mb-3">
+            <label for="email" class="form-label">Update Email</label>
+            <input type="email" class="form-control" id="email" name="newEmail" value="@ViewData["Email"]" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Update Email</button>
+    </form>
+
+    <hr />
+
+    <p>Update your organisation name below:</p>
+    <form method="post" asp-action="UpdateOrganisation" asp-controller="Settings">
+        <div class="mb-3">
+            <label for="organisation" class="form-label">Organisation Name</label>
+            <input type="text" class="form-control" id="organisation" name="newOrganisation" value="@ViewData["Organisation"]" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Update Organisation</button>
+    </form>
+
+    <hr />
+
+    <p>Update your organisation ID below:</p>
+    <form method="post" asp-action="UpdateOrganisationId" asp-controller="Settings">
+        <div class="mb-3">
+            <label for="organisationId" class="form-label">Organisation ID</label>
+            <input type="number" class="form-control" id="organisationId" name="newOrganisationId" value="@ViewData["OrganisationId"]" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Update Organisation ID</button>
+    </form>
+
+    <hr />
+
+    <p>Update your CV below:</p>
+    <form method="post" enctype="multipart/form-data" asp-action="ChangeCV" asp-controller="Settings">
+        <div class="mb-3">
+            <label for="cvFile" class="form-label">Upload your CV</label>
+            <input type="file" class="form-control" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Update CV</button>
+    </form>
+
+    <hr />
+
+    <form method="post" asp-action="ToggleOpenForHire" asp-controller="Settings">
+        <div class="mb-3">
+            <label for="openForHiring" class="form-label">Open for Hiring</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="openForHiring" value="true" id="openForHiring"
+                    @(ViewData["OpenForHiring"] != null && (bool)ViewData["OpenForHiring"] ? "checked" : "") />
+                <label class="form-check-label" for="openForHiring">Yes, I am open for hiring</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Status</button>
+    </form>
+
+    <hr />
+
+    @if (ViewData["ErrorMessage"] != null)
+    {
+        <p class="text-danger mt-3">@ViewData["ErrorMessage"]</p>
+    }
+
+    @if (ViewData["SuccessMessage"] != null)
+    {
+        <p class="text-success mt-3">@ViewData["SuccessMessage"]</p>
+    }
+</div>

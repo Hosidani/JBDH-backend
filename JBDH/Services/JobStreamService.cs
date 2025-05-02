@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using JBDH.Models; // Assuming this is the namespace for your models
 using JBDH.Controllers; // Assuming this is the namespace for your controllers
 
-namespace JBDH.Controllers // Assuming this is the namespace for your controller
-{
-    class PlatsbankenApi
+namespace JBDH.Services
+{ 
+class JobStreamService
     {
         private const string DbTableName = "testing_purposes";
         private const string DbFileName = "testing_purposes.db";
@@ -41,7 +41,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Error fetching job ads: {e.Message}");
+                LoggingConfigService.ReturnError($"Error fetching job ads: {e.Message}");
                 return null;
             }
         }
@@ -54,9 +54,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
 
                 // Add the date parameter to the query string
                 var fullUrl = $"{url}?date={Uri.EscapeDataString(date)}";
-
-                Console.WriteLine($"Fetching job ads from URL: {fullUrl}");
-
+                LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {fullUrl}");
                 var response = await client.GetAsync(fullUrl);
                 response.EnsureSuccessStatusCode();
 
@@ -65,7 +63,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Error fetching job ads: {e.Message}");
+                LoggingConfigService.ReturnError($"Error fetching job ads: {e.Message}");
                 return null;
             }
         }
@@ -98,60 +96,37 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             return filteredJobs;
         }
 
-        public static void PrintJobDetails(Dictionary<string, object> job)
-        {
-            Console.WriteLine($"Title: {job.GetValueOrDefault("headline", "N/A")}");
-            Console.WriteLine($"Company: {((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>()))
-                .GetValueOrDefault("name", "N/A")}");
-            Console.WriteLine($"Location: {((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>()))
-                .GetValueOrDefault("municipality", "N/A")}");
-            Console.WriteLine($"Application deadline: {job.GetValueOrDefault("application_deadline", "N/A")}");
-            var descriptionDict = job.GetValueOrDefault("description", null) as Dictionary<string, object>;
-            var description = descriptionDict?.GetValueOrDefault("text", "")?.ToString();
-            Console.WriteLine($"Description: {description?.Substring(0, Math.Min(200, description.Length))}...");
-            Console.WriteLine(new string('-', 50));
-        }
-
-        /// <summary>
-        /// Saves the fetched job ads to a JSON file.
-        /// </summary>
-        /// <param name="data">The job ads to save.</param>
-        /// <param name="filename">The name of the file to save the data to.</param>
+        
         public static void SaveToJson(List<Dictionary<string, object>> data)
         {
             try
             {
                 var jsonData = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(JsonFile, jsonData);
-                Console.WriteLine($"Successfully saved data to {JsonFile}");
+                LoggingConfigService.ReturnInfo($"Saving data to {JsonFile}...");
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Error saving JSON file: {e.Message}");
+                LoggingConfigService.ReturnError($"Error saving JSON file: {e.Message}");
             }
         }
-
-        /// <summary>
-        /// Main method to fetch job ads from the API and save them to a JSON file.
-        /// </summary>
         public static async Task Main(string[] args)
         {
-            Console.WriteLine("Starting job ad retrieval process...");
-
+            LoggingConfigService.ReturnInfo("Starting job ad retrieval process...");
             // Check if this is the first run or an update
             var isFirstRun = !File.Exists("timestamp.txt"); // Use a file to track the last fetch timestamp
             var date = isFirstRun ? null : File.ReadAllText("timestamp.txt");
-
             List<Dictionary<string, object>> jobAds;
 
             if (isFirstRun)
             {
-                Console.WriteLine("First run detected. Fetching full dataset using Snapshot...");
+                LoggingConfigService.ReturnInfo("First run detected. Fetching full dataset using Snapshot...");
                 jobAds = await FetchJobAdsAsync(SnapshotUrl);
             }
             else
             {
-                Console.WriteLine($"Fetching incremental updates since {date} using Stream...");
+                LoggingConfigService.ReturnInfo($"Last fetch date: {date}");
+                LoggingConfigService.ReturnInfo("Fetching incremental updates using Stream...");
                 jobAds = await FetchJobAdsAsync(StreamUrl, date);
             }
 
@@ -162,15 +137,14 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
 
                 // Update the timestamp file with the current date
                 File.WriteAllText("timestamp.txt", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-
-                Console.WriteLine($"Saved {jobAds.Count} jobs to {JsonFile}");
+                LoggingConfigService.ReturnInfo($"Updated timestamp to {DateTime.UtcNow}");
+                LoggingConfigService.ReturnInfo($"Fetched {jobAds.Count} job ads from the API.");
             }
             else
             {
-                Console.Error.WriteLine("Failed to retrieve job ads from both sources.");
+                LoggingConfigService.ReturnError("Failed to fetch job ads from the API.");
             }
-
-            Console.WriteLine("Job ad retrieval process completed.");
+            LoggingConfigService.ReturnInfo("Job ads retrieval process completed.");
         }
     }
 }
