@@ -20,6 +20,7 @@ public class ProfileController : Controller
         _friendService = friendService; // Initialize FriendService
     }
 
+    // GET: Profile
     [HttpGet]
     public async Task<IActionResult> Profile(int userId)
     {
