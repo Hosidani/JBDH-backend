@@ -1,11 +1,9 @@
-namespace JBDH.Models;
-
-
-// TODO : Add a comment describing the purpose of this file
-
-public class ErrorViewModel
+namespace JBDH.Models
 {
-    public string? RequestId { get; set; }
-
-    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+    public class ErrorViewModel
+    {
+        public string Message { get; set; }
+        public string? Title { get; set; } // Optional: to provide a custom title
+        public string? ReturnUrl { get; set; } // Optional: link back to another page
+    }
 }

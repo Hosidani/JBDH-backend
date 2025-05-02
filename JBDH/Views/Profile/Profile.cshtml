@@ -58,15 +58,21 @@
             }
         </dd>
     </dl>
-
-    @if (!Model.IsFriend) 
+    @if (Model.User != null)
     {
-        <form method="post" asp-action="SendFriendRequest" asp-route-addresseeId="@Model.User.Id">
-            <button type="submit" class="btn btn-success">Send Friend Request</button>
-        </form>
+        @if (!Model.IsFriend) 
+        {
+            <form method="post" asp-action="SendFriendRequest" asp-route-addresseeId="@Model.User.Id">
+                <button type="submit" class="btn btn-success">Send Friend Request</button>
+            </form>
+        }
+        else
+        {
+            <button class="btn btn-secondary" disabled>Already Friends</button>
+        }
     }
     else
     {
-        <button class="btn btn-secondary" disabled>Already Friends</button>
+        <p>User not found.</p>
     }
 </div>

@@ -36,7 +36,13 @@ public class HomeController : Controller
         if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location))
         {
             LoggingConfigService.ReturnError("Description or location is empty.");
-            return View("Error", new { Message = "Description and location cannot be empty." });
+            return View("Error", new ErrorViewModel
+                {
+                    Title = "Missing Input",
+                    Message = "Description and location cannot be empty.",
+                    ReturnUrl = Url.Action("Index", "Home")
+                });
+
         }
         var jobs = searchJobsService.SearchJobs(description, location);
         return View("SearchResults",jobs);
@@ -49,7 +55,12 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new ErrorViewModel
+            {
+                Title = "Unexpected Error",
+                Message = "An unexpected error occurred. Please try again later."
+            });
+
     }
-}
+    }
 }

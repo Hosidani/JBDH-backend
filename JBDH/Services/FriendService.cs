@@ -17,16 +17,16 @@ public class FriendService : IFriendService
 
     public async Task<bool> SendFriendRequestAsync(int requesterId, int addresseeId)
     {
-/*        if (requesterId == addresseeId)
+        if (requesterId == addresseeId)
             return false;
 
         bool exists = await _context.Friendships.AnyAsync(f =>
             (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
-            (f.RequesterId == addresseeId && f.AddresseeId == requesterId));
+            (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && f.Status == FriendshipStatus.Pending);
 
         if (exists)
             return false;
-*/
+
         var friendship = new Friendship
         {
             RequesterId = requesterId,
@@ -40,18 +40,22 @@ public class FriendService : IFriendService
         return true;
     }
 
+
+
     public async Task<bool> AreFriendsAsync(int requesterId, int addresseeId)
     {
         if (requesterId == addresseeId)
             return false;
+            
         var friendship = await _context.Friendships
             .FirstOrDefaultAsync(f =>
-                ((f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
-                 (f.RequesterId == requesterId && f.AddresseeId == addresseeId)) &&
-                 f.Status == FriendshipStatus.Friends);
+                (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
+                (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && 
+                f.Status == FriendshipStatus.Friends);
 
         return friendship != null;
     }
+
 
     public async Task<bool> AcceptFriendRequestAsync(int requestId)
     {

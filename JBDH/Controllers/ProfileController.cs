@@ -23,20 +23,26 @@ public class ProfileController : Controller
     [HttpGet]
     public async Task<IActionResult> Profile(int userId)
     {
-        
-        var currentUserName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (currentUserName == userId.ToString())
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(currentUserIdClaim, out var currentUserId))
         {
-            return RedirectToAction("MyProfile", "Profile");
+            return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
         }
-        
-        // Parse the current user's ID from the claims
-        var currentUserId = int.Parse(currentUserName);
 
-        // Fetch user details by userId
+        if (currentUserId == userId)
+        {
+            LoggingConfigService.ReturnInfo($"User {currentUserId} tried to access their own profile.");
+            return RedirectToAction("MyProfile");
+        }
+
         var user = await _profileService.GetUserByIdAsync(userId);
+        LoggingConfigService.ReturnInfo($"User {userId} profile accessed by {currentUserId}.");
+        if (user == null)
+        {
+            return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+        }
 
-        // Check if current user and viewed user are friends
         var isFriend = await _friendService.AreFriendsAsync(currentUserId, userId);
 
         var viewModel = new ProfileViewModel
@@ -48,10 +54,34 @@ public class ProfileController : Controller
         return View(viewModel);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> MyProfile()
+    {
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+        }
+
+        var user = await _profileService.GetUserByIdAsync(currentUserId);
+        if (user == null)
+        {
+            return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+        }
+
+        var viewModel = new ProfileViewModel
+        {
+            User = user,
+            IsFriend = false // Doesn't matter here, since it's the user's own profile
+        };
+
+        return View("MyProfile", viewModel); // Make sure you're explicitly referring to MyProfile.cshtml
+    }
+
     // Method to send a friend request
     [HttpPost]
-    public async Task<IActionResult> SendFriendRequest(string addresseeId)
-
+    public async Task<IActionResult> SendFriendRequest(int addresseeId)
     {
         var currentUserName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -59,13 +89,13 @@ public class ProfileController : Controller
         {
             return RedirectToAction("Login", "Login");
         }
-        // Parse the current user's ID from the claims
+
+        // Parse the addresseeId
         var currentUserId = int.Parse(currentUserName);
-        
-        // Parse the addresseeId to an integer
-        if (!int.TryParse(addresseeId, out int addresseeIdInt))
+
+        if (!int.TryParse(addresseeId.ToString(), out int addresseeIdInt))
         {
-            return View("ErrorPage", new { message = "Invalid addressee ID." });
+            return View("ErrorPage", "Invalid addressee ID.");
         }
 
         var success = await _friendService.SendFriendRequestAsync(currentUserId, addresseeIdInt);
@@ -76,8 +106,9 @@ public class ProfileController : Controller
         }
         else
         {
-            return View("ErrorPage", new { message = "Could not send friend request." });
+            return View("ErrorPage", "Could not send friend request.");
         }
     }
+
 
 }

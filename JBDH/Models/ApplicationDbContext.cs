@@ -55,16 +55,17 @@ public class ApplicationDbContext : DbContext
                 .HasDefaultValue(false); // Default value for boolean field
         });
         // Configure the Friendship relationships
-    modelBuilder.Entity<Friendship>()
-        .HasOne(f => f.Requester)
-        .WithMany()
-        .HasForeignKey(f => f.RequesterId)
-        .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Friendship>()
+            .HasOne(f => f.Requester)
+            .WithMany(u => u.SentFriendRequests)
+            .HasForeignKey(f => f.RequesterId)
+            .OnDelete(DeleteBehavior.NoAction);
 
-    modelBuilder.Entity<Friendship>()
-        .HasOne(f => f.Addressee)
-        .WithMany()
-        .HasForeignKey(f => f.AddresseeId)
-        .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Friendship>()
+            .HasOne(f => f.Addressee)
+            .WithMany(u => u.ReceivedFriendRequests)
+            .HasForeignKey(f => f.AddresseeId)
+            .OnDelete(DeleteBehavior.NoAction);
+
     }
 }
