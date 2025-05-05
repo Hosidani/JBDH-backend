@@ -30,6 +30,7 @@ namespace JBDH.Services
                     var createRawTable = SqlQueries.SqlQuery(1);
                     var createCleanTable = SqlQueries.SqlQuery(2);
                     var createUserTable = SqlQueries.SqlQuery(14);
+                    var createEmailVerificationTable = SqlQueries.SqlQuery(17);
                     var createFriendshipTable = SqlQueries.SqlQuery(16);
                     using (var command = new MySqlCommand(createRawTable, connection))
                     {
@@ -43,11 +44,15 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
+                    using (var command = new MySqlCommand(createEmailVerificationTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
                     using (var command = new MySqlCommand(createFriendshipTable, connection))
                     {
                         command.ExecuteNonQuery();
                     }
-                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users' and 'Friendships' tables exists.");
+                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users' , 'EmailVerification' , 'and 'Friendships' tables exists.");
                 }
                 catch (Exception e)
                 {
