@@ -6,6 +6,8 @@ public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
+
     // Define DbSets for your tables
     public DbSet<User> Users { get; set; }
     public DbSet<Friendship> Friendships { get; set; }
@@ -54,6 +56,17 @@ public class ApplicationDbContext : DbContext
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
         });
+
+        // Configure EmailVerificationToken
+        modelBuilder.Entity<EmailVerificationToken>(entity =>
+        {
+            entity.HasKey(e => e.Id); // Define primary key
+            entity.HasOne<User>()
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade); // Foreign key to Users table
+        });
+
         // Configure the Friendship relationships
         modelBuilder.Entity<Friendship>()
             .HasOne(f => f.Requester)

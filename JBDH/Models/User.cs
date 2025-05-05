@@ -25,6 +25,8 @@ namespace JBDH.Models
         public bool? developerMode { get; set; } // Developer mode
         public bool? openForHiring { get; set; } // Active mode
 
+        public bool IsEmailConfirmed { get; set; } = false; // Indicates if the email is confirmed
+
         public ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
         public ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
 

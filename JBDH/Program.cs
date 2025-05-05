@@ -46,7 +46,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
- builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 
 // Add session support
@@ -84,6 +84,22 @@ builder.Services.AddDistributedMemoryCache();
 // Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register SMTP config
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+// Register email service
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Validate SMTP settings
+var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+if (string.IsNullOrWhiteSpace(smtpSettings.Username) || string.IsNullOrWhiteSpace(smtpSettings.Password))
+{
+    throw new Exception("SMTP configuration is invalid. Please check your appsettings.json.");
+}
+
+// Usual stuff
+builder.Services.AddControllersWithViews();
 
 // Build the application
 var app = builder.Build();
