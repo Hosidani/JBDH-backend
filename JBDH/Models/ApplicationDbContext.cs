@@ -9,9 +9,9 @@ public class ApplicationDbContext : DbContext
     // Define DbSets for your tables
     public DbSet<User> Users { get; set; }
     public DbSet<Friendship> Friendships { get; set; }
+    public DbSet<Organization> Organizations { get; set; }
+    public DbSet<Manager> Managers { get; set; }
 
-
-    // Optional: Override OnModelCreating to configure relationships, constraints, etc.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -39,21 +39,47 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.CVPath)
                 .HasMaxLength(2083); // Optional field with max length (e.g., URL length limit)
 
-            entity.Property(u => u.Organisation)
-                .IsRequired(false) // Optional field
-                .HasMaxLength(255); // Optional field with max length
-
-            entity.Property(u => u.OrganisationId)
-                .IsRequired(false); // Nullable field
-
-            entity.Property(u => u.developerMode)
+            entity.Property(u => u.DeveloperMode)
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
 
-            entity.Property(u => u.openForHiring)
+            entity.Property(u => u.OpenForHiring)
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
         });
+
+        // Configure the Organization table
+        modelBuilder.Entity<Organization>(entity =>
+        {
+            entity.HasKey(o => o.Id); // Primary key
+
+            entity.Property(o => o.Name)
+                .IsRequired()
+                .HasMaxLength(255); // Required field with max length
+
+            entity.Property(o => o.Description)
+                .HasMaxLength(1000); // Optional field with max length
+
+            // Configure many-to-many relationship for Managers
+            entity.HasMany(o => o.Managers)
+                .WithMany(m => m.ManagedOrganizations) // Reference Manager, not User
+                .UsingEntity<Dictionary<string, object>>(
+                    "OrganizationManagers",
+                    j => j.HasOne<Manager>() // Reference Manager
+                          .WithMany()
+                          .HasForeignKey("ManagerId")
+                          .OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne<Organization>()
+                          .WithMany()
+                          .HasForeignKey("OrganizationId")
+                          .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("ManagerId", "OrganizationId"); // Composite key
+                        j.ToTable("OrganizationManagers");
+                    });
+        });
+
         // Configure the Friendship relationships
         modelBuilder.Entity<Friendship>()
             .HasOne(f => f.Requester)
@@ -66,6 +92,5 @@ public class ApplicationDbContext : DbContext
             .WithMany(u => u.ReceivedFriendRequests)
             .HasForeignKey(f => f.AddresseeId)
             .OnDelete(DeleteBehavior.NoAction);
-
     }
 }

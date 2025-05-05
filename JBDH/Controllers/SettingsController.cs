@@ -41,6 +41,7 @@ namespace JBDH.Controllers
 
             return RedirectToAction("Settings", "Home");
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateEmail(string newEmail)
         {
@@ -68,66 +69,19 @@ namespace JBDH.Controllers
                 return View("ErrorPage");
             }
         }
-        // Update Organisation
-        [HttpPost]
-        public async Task<IActionResult> UpdateOrganisation(string newOrganisation)
-        {
-            try
-            {
-                var success = await _userPropertiesService.UpdateOrganisationAsync(newOrganisation);
-                if (success)
-                {
-                    ViewData["SuccessMessage"] = "Your organisation has been successfully updated.";
-                    return RedirectToAction("SuccessPage");
-                }
-                else
-                {
-                    ViewData["ErrorMessage"] = "Failed to update organisation.";
-                    return View("ErrorPage");
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewData["ErrorMessage"] = "An error occurred: " + ex.Message;
-                return View("ErrorPage");
-            }
-        }
 
-        // Update OrganisationId
-        [HttpPost]
-        public async Task<IActionResult> UpdateOrganisationId(int newOrganisationId)
-        {
-            try
-            {
-                var success = await _userPropertiesService.UpdateOrganisationIdAsync(newOrganisationId);
-                if (success)
-                {
-                    ViewData["SuccessMessage"] = "Your organisation ID has been successfully updated.";
-                    return RedirectToAction("SuccessPage");
-                }
-                else
-                {
-                    ViewData["ErrorMessage"] = "Failed to update organisation ID.";
-                    return View("ErrorPage");
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewData["ErrorMessage"] = "An error occurred: " + ex.Message;
-                return View("ErrorPage");
-            }
-        }
         public IActionResult SuccessPage()
         {
             return View();  // Return the SuccessPage view
         }
+
         [HttpGet]
         public async Task<IActionResult> Settings()
         {
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user != null)
             {
-                ViewData["OpenForHiring"] = user.openForHiring ?? false;
+                ViewData["OpenForHiring"] = user.OpenForHiring ?? false; // Updated property casing
             }
             else
             {

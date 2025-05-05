@@ -1,0 +1,197 @@
+Date : 2025-05-05 23:30:20
+Directory : c:\Users\danie\Documents\JBDH_V0.1
+Total : 121 files,  72882 codes, 6301 comments, 9250 blanks, all 88433 lines
+
+Languages
++---------------+------------+------------+------------+------------+------------+
+| language      | files      | code       | comment    | blank      | total      |
++---------------+------------+------------+------------+------------+------------+
+| CSS           |         21 |     41,053 |        124 |      3,342 |     44,519 |
+| JavaScript    |         18 |     26,839 |      6,010 |      5,462 |     38,311 |
+| C#            |         54 |      2,267 |        164 |        342 |      2,773 |
+| XML           |          9 |      2,152 |          0 |          5 |      2,157 |
+| ASP.NET Razor |         18 |        553 |          3 |         94 |        650 |
+| Markdown      |          1 |         18 |          0 |          5 |         23 |
++---------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                                     | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                        |        121 |     72,882 |      6,301 |      9,250 |     88,433 |
+| JBDH                                                                                                                                     |        121 |     72,882 |      6,301 |      9,250 |     88,433 |
+| JBDH (Files)                                                                                                                             |          2 |        124 |         18 |         26 |        168 |
+| JBDH\Controllers                                                                                                                         |          8 |        454 |         13 |         68 |        535 |
+| JBDH\Data                                                                                                                                |          1 |         10 |          0 |          1 |         11 |
+| JBDH\Migrations                                                                                                                          |          3 |        105 |          6 |         21 |        132 |
+| JBDH\Models                                                                                                                              |         12 |        259 |          5 |         43 |        307 |
+| JBDH\Services                                                                                                                            |         21 |      1,271 |         80 |        163 |      1,514 |
+| JBDH\Views                                                                                                                               |         19 |        591 |          5 |        103 |        699 |
+| JBDH\Views (Files)                                                                                                                       |          2 |          6 |          0 |          2 |          8 |
+| JBDH\Views\Friends                                                                                                                       |          1 |         36 |          0 |          5 |         41 |
+| JBDH\Views\Home                                                                                                                          |          3 |         69 |          3 |         10 |         82 |
+| JBDH\Views\Login                                                                                                                         |          1 |         54 |          0 |         13 |         67 |
+| JBDH\Views\Profile                                                                                                                       |          2 |        121 |          0 |         19 |        140 |
+| JBDH\Views\Register                                                                                                                      |          1 |         46 |          0 |          3 |         49 |
+| JBDH\Views\Settings                                                                                                                      |          2 |         72 |          0 |         17 |         89 |
+| JBDH\Views\Shared                                                                                                                        |          5 |        125 |          2 |         19 |        146 |
+| JBDH\Views\User                                                                                                                          |          2 |         62 |          0 |         15 |         77 |
+| JBDH\client                                                                                                                              |          1 |         23 |          0 |          3 |         26 |
+| JBDH\client\src                                                                                                                          |          1 |         23 |          0 |          3 |         26 |
+| JBDH\obj                                                                                                                                 |         19 |      2,310 |         50 |         52 |      2,412 |
+| JBDH\obj (Files)                                                                                                                         |          3 |         74 |          0 |          1 |         75 |
+| JBDH\obj\Debug                                                                                                                           |         12 |      2,204 |         28 |         39 |      2,271 |
+| JBDH\obj\Debug\net9.0                                                                                                                    |         12 |      2,204 |         28 |         39 |      2,271 |
+| JBDH\obj\Debug\net9.0 (Files)                                                                                                            |          4 |         32 |         20 |         12 |         64 |
+| JBDH\obj\Debug\net9.0\scopedcss                                                                                                          |          3 |        114 |          8 |         27 |        149 |
+| JBDH\obj\Debug\net9.0\scopedcss\Views                                                                                                    |          1 |         38 |          2 |          9 |         49 |
+| JBDH\obj\Debug\net9.0\scopedcss\Views\Shared                                                                                             |          1 |         38 |          2 |          9 |         49 |
+| JBDH\obj\Debug\net9.0\scopedcss\bundle                                                                                                   |          1 |         38 |          3 |          9 |         50 |
+| JBDH\obj\Debug\net9.0\scopedcss\projectbundle                                                                                            |          1 |         38 |          3 |          9 |         50 |
+| JBDH\obj\Debug\net9.0\staticwebassets                                                                                                    |          5 |      2,058 |          0 |          0 |      2,058 |
+| JBDH\obj\Release                                                                                                                         |          4 |         32 |         22 |         12 |         66 |
+| JBDH\obj\Release\net9.0                                                                                                                  |          4 |         32 |         22 |         12 |         66 |
+| JBDH\wwwroot                                                                                                                             |         35 |     67,735 |      6,124 |      8,770 |     82,629 |
+| JBDH\wwwroot\css                                                                                                                         |          1 |         25 |          0 |          6 |         31 |
+| JBDH\wwwroot\js                                                                                                                          |          1 |          0 |          3 |          2 |          5 |
+| JBDH\wwwroot\lib                                                                                                                         |         33 |     67,710 |      6,121 |      8,762 |     82,593 |
+| JBDH\wwwroot\lib\bootstrap                                                                                                               |         22 |     53,115 |      1,949 |      4,505 |     59,569 |
+| JBDH\wwwroot\lib\bootstrap\dist                                                                                                          |         22 |     53,115 |      1,949 |      4,505 |     59,569 |
+| JBDH\wwwroot\lib\bootstrap\dist\css                                                                                                      |         16 |     40,876 |        114 |      3,300 |     44,290 |
+| JBDH\wwwroot\lib\bootstrap\dist\js                                                                                                       |          6 |     12,239 |      1,835 |      1,205 |     15,279 |
+| JBDH\wwwroot\lib\jquery                                                                                                                  |          4 |     12,150 |      3,447 |      3,744 |     19,341 |
+| JBDH\wwwroot\lib\jquery-validation                                                                                                       |          5 |      2,138 |        642 |        459 |      3,239 |
+| JBDH\wwwroot\lib\jquery-validation (Files)                                                                                               |          1 |         18 |          0 |          5 |         23 |
+| JBDH\wwwroot\lib\jquery-validation-unobtrusive                                                                                           |          2 |        307 |         83 |         54 |        444 |
+| JBDH\wwwroot\lib\jquery-validation-unobtrusive\dist                                                                                      |          2 |        307 |         83 |         54 |        444 |
+| JBDH\wwwroot\lib\jquery-validation\dist                                                                                                  |          4 |      2,120 |        642 |        454 |      3,216 |
+| JBDH\wwwroot\lib\jquery\dist                                                                                                             |          4 |     12,150 |      3,447 |      3,744 |     19,341 |
++------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------------------------------+---------------+------------+------------+------------+------------+
+| filename                                                                                                                                 | language      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------------------------+---------------+------------+------------+------------+------------+
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\FriendsController.cs                                                                 | C#            |         27 |          0 |          5 |         32 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\HomeController.cs                                                                    | C#            |         57 |          0 |          9 |         66 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\LoginController.cs                                                                   | C#            |         42 |          4 |          4 |         50 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\LogoutController.cs                                                                  | C#            |         16 |          0 |          2 |         18 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\ProfileController.cs                                                                 | C#            |         89 |          3 |         23 |        115 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\RegisterController.cs                                                                | C#            |         78 |          4 |         13 |         95 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\SettingsController.cs                                                                | C#            |        130 |          2 |          7 |        139 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Controllers\UserController.cs                                                                    | C#            |         15 |          0 |          5 |         20 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Data\ApplicationDbContext.cs                                                                     | C#            |         10 |          0 |          1 |         11 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\JBDH.csproj                                                                                      | XML           |         20 |          0 |          4 |         24 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Migrations\20250403172124_InitialCreate.Designer.cs                                              | C#            |         37 |          2 |          8 |         47 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Migrations\20250403172124_InitialCreate.cs                                                       | C#            |         33 |          3 |          5 |         41 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Migrations\ApplicationDbContextModelSnapshot.cs                                                  | C#            |         35 |          1 |          8 |         44 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\AIConfig.cs                                                                               | C#            |         12 |          0 |          1 |         13 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\ApplicationDbContext.cs                                                                   | C#            |         50 |          4 |         17 |         71 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\DbConfig.cs                                                                               | C#            |          5 |          0 |          1 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\ErrorViewModel.cs                                                                         | C#            |          9 |          0 |          0 |          9 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\Friendship.cs                                                                             | C#            |         15 |          0 |          7 |         22 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\FriendshipStatus.cs                                                                       | C#            |          8 |          0 |          1 |          9 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\Job.cs                                                                                    | C#            |         13 |          0 |          0 |         13 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\MyEntity.cs                                                                               | C#            |          8 |          0 |          0 |          8 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\ProfileViewModel.cs                                                                       | C#            |          8 |          0 |          1 |          9 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\Settings.cs                                                                               | C#            |         79 |          0 |          4 |         83 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\SqlQueries.cs                                                                             | C#            |         28 |          1 |          2 |         31 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Models\User.cs                                                                                   | C#            |         24 |          0 |          9 |         33 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Program.cs                                                                                       | C#            |        104 |         18 |         22 |        144 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\AIService.cs                                                                            | C#            |         42 |         40 |          9 |         91 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\DatabaseHandlerService.cs                                                               | C#            |        107 |          2 |          4 |        113 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\DeleteJsonFileService.cs                                                                | C#            |         26 |          0 |          0 |         26 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\EtlPipelineService.cs                                                                   | C#            |        202 |         14 |         24 |        240 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\FlushDatabaseService.cs                                                                 | C#            |         30 |          3 |          4 |         37 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\FriendService.cs                                                                        | C#            |         76 |          0 |         22 |         98 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\GiveJobPriorityService.cs                                                               | C#            |         39 |          1 |          4 |         44 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\IFriendService.cs                                                                       | C#            |         12 |          1 |          1 |         14 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\ILoginService.cs                                                                        | C#            |          9 |          0 |          1 |         10 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\IProfileService.cs                                                                      | C#            |          5 |          0 |          2 |          7 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\IUserPropertiesService.cs                                                               | C#            |         16 |          0 |          3 |         19 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\InternalSortingService.cs                                                               | C#            |        147 |          0 |          9 |        156 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\JobStreamService.cs                                                                     | C#            |        123 |          9 |         18 |        150 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\LoggingConfigService.cs                                                                 | C#            |         75 |          3 |         17 |         95 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\LoginService.cs                                                                         | C#            |         40 |          3 |          7 |         50 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\PrintJobDetailsService.cs                                                               | C#            |         18 |          0 |          1 |         19 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\ProfileService.cs                                                                       | C#            |         14 |          0 |          4 |         18 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\SearchJobsService.cs                                                                    | C#            |         39 |          0 |          3 |         42 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\SettingsService.cs                                                                      | C#            |         78 |          0 |          4 |         82 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\SqlQueriesService.cs                                                                    | C#            |         31 |          1 |          2 |         34 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\UserPropertiesService.cs                                                                | C#            |        142 |          3 |         24 |        169 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Friends\Friends.cshtml                                                                     | ASP.NET Razor |         36 |          0 |          5 |         41 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Home\Index.cshtml                                                                          | ASP.NET Razor |         25 |          3 |          3 |         31 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Home\Privacy.cshtml                                                                        | ASP.NET Razor |          7 |          0 |          3 |         10 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Home\SearchResults.cshtml                                                                  | ASP.NET Razor |         37 |          0 |          4 |         41 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Login\Login.cshtml                                                                         | ASP.NET Razor |         54 |          0 |         13 |         67 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Profile\MyProfile.cshtml                                                                   | ASP.NET Razor |         52 |          0 |         10 |         62 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Profile\Profile.cshtml                                                                     | ASP.NET Razor |         69 |          0 |          9 |         78 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Register\Register.cshtml                                                                   | ASP.NET Razor |         46 |          0 |          3 |         49 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Settings\Settings.cshtml                                                                   | ASP.NET Razor |         63 |          0 |         14 |         77 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Settings\SuccessPage.cshtml                                                                | ASP.NET Razor |          9 |          0 |          3 |         12 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Shared\Error.cshtml                                                                        | ASP.NET Razor |         20 |          0 |          4 |         24 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Shared\ErrorPage.cshtml                                                                    | ASP.NET Razor |         13 |          0 |          4 |         17 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Shared\_Layout.cshtml                                                                      | ASP.NET Razor |         52 |          0 |          1 |         53 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Shared\_Layout.cshtml.css                                                                  | CSS           |         38 |          2 |          9 |         49 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\Shared\_ValidationScriptsPartial.cshtml                                                    | ASP.NET Razor |          2 |          0 |          1 |          3 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\User\Register.cshtml                                                                       | ASP.NET Razor |         43 |          0 |         12 |         55 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\User\login.cshtml                                                                          | ASP.NET Razor |         19 |          0 |          3 |         22 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\_ViewImports.cshtml                                                                        | ASP.NET Razor |          3 |          0 |          1 |          4 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\Views\_ViewStart.cshtml                                                                          | ASP.NET Razor |          3 |          0 |          1 |          4 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\client\src\App.js                                                                                | JavaScript    |         23 |          0 |          3 |         26 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\.NETCoreApp,Version=v9.0.AssemblyAttributes.cs                                  | C#            |          3 |          1 |          1 |          5 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.AssemblyInfo.cs                                                            | C#            |          9 |          9 |          5 |         23 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.GlobalUsings.g.cs                                                          | C#            |         16 |          1 |          1 |         18 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.RazorAssemblyInfo.cs                                                       | C#            |          4 |          9 |          5 |         18 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css                                | CSS           |         38 |          2 |          9 |         49 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\scopedcss\bundle\JBDH.styles.css                                                | CSS           |         38 |          3 |          9 |         50 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\scopedcss\projectbundle\JBDH.bundle.scp.css                                     | CSS           |         38 |          3 |          9 |         50 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssetEndpoints.props | XML           |        820 |          0 |          0 |        820 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.JBDH.Microsoft.AspNetCore.StaticWebAssets.props         | XML           |      1,228 |          0 |          0 |      1,228 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.build.JBDH.props                                        | XML           |          4 |          0 |          0 |          4 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.JBDH.props                          | XML           |          3 |          0 |          0 |          3 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.JBDH.props                              | XML           |          3 |          0 |          0 |          3 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\JBDH.csproj.EntityFrameworkCore.targets                                                      | XML           |         28 |          0 |          1 |         29 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\JBDH.csproj.nuget.g.props                                                                    | XML           |         36 |          0 |          0 |         36 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\JBDH.csproj.nuget.g.targets                                                                  | XML           |         10 |          0 |          0 |         10 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Release\net9.0\.NETCoreApp,Version=v9.0.AssemblyAttributes.cs                                | C#            |          3 |          1 |          1 |          5 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Release\net9.0\JBDH.AssemblyInfo.cs                                                          | C#            |          9 |         10 |          5 |         24 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Release\net9.0\JBDH.GlobalUsings.g.cs                                                        | C#            |         16 |          1 |          1 |         18 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Release\net9.0\JBDH.RazorAssemblyInfo.cs                                                     | C#            |          4 |         10 |          5 |         19 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\css\site.css                                                                             | CSS           |         25 |          0 |          6 |         31 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\js\site.js                                                                               | JavaScript    |          0 |          3 |          2 |          5 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css                                                | CSS           |      3,886 |          6 |        193 |      4,085 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css                                            | CSS           |          1 |          5 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css                                            | CSS           |      3,886 |          6 |        192 |      4,084 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css                                        | CSS           |          1 |          5 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css                                              | CSS           |        518 |         14 |         65 |        597 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css                                          | CSS           |          1 |          5 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css                                          | CSS           |        524 |          6 |         64 |        594 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css                                      | CSS           |          1 |          5 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css                                           | CSS           |      4,891 |          8 |        503 |      5,402 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css                                       | CSS           |          1 |          5 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css                                       | CSS           |      4,887 |          6 |        500 |      5,393 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css                                   | CSS           |          1 |          5 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap.css                                                     | CSS           |     11,136 |         24 |        897 |     12,057 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css                                                 | CSS           |          2 |          4 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css                                                 | CSS           |     11,138 |          6 |        886 |     12,030 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css                                             | CSS           |          2 |          4 |          0 |          6 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js                                                | JavaScript    |      5,064 |        655 |        596 |      6,315 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js                                            | JavaScript    |          1 |          6 |          0 |          7 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js                                                   | JavaScript    |      3,568 |        578 |        302 |      4,448 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js                                               | JavaScript    |          1 |          6 |          0 |          7 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\js\bootstrap.js                                                       | JavaScript    |      3,604 |        584 |        307 |      4,495 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js                                                   | JavaScript    |          1 |          6 |          0 |          7 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.js                    | JavaScript    |        306 |         76 |         54 |        436 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation-unobtrusive\dist\jquery.validate.unobtrusive.min.js                | JavaScript    |          1 |          7 |          0 |          8 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation\LICENSE.md                                                         | Markdown      |         18 |          0 |          5 |         23 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation\dist\additional-methods.js                                         | JavaScript    |        860 |        443 |        202 |      1,505 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation\dist\additional-methods.min.js                                     | JavaScript    |          1 |          3 |          0 |          4 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation\dist\jquery.validate.js                                            | JavaScript    |      1,258 |        193 |        252 |      1,703 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js                                        | JavaScript    |          1 |          3 |          0 |          4 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery\dist\jquery.js                                                                | JavaScript    |      6,767 |      1,887 |      2,063 |     10,717 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery\dist\jquery.min.js                                                            | JavaScript    |          1 |          1 |          1 |          3 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery\dist\jquery.slim.js                                                           | JavaScript    |      5,381 |      1,558 |      1,679 |      8,618 |
+| c:\Users\danie\Documents\JBDH_V0.1\JBDH\wwwroot\lib\jquery\dist\jquery.slim.min.js                                                       | JavaScript    |          1 |          1 |          1 |          3 |
+| Total                                                                                                                                    |               |     72,882 |      6,301 |      9,250 |     88,433 |
++------------------------------------------------------------------------------------------------------------------------------------------+---------------+------------+------------+------------+------------+

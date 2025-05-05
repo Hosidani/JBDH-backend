@@ -60,59 +60,15 @@ namespace JBDH.Services
                 return false;
             }
         }
-        // Update Organisation
-        public async Task<bool> UpdateOrganisationAsync(string newOrganisation)
-        {
-            var user = await GetCurrentUserAsync();
-            if (user == null)
-            {
-                LoggingConfigService.ReturnInfo("User not found.");
-                return false;
-            }
 
-            user.Organisation = newOrganisation;
-            try
-            {
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LoggingConfigService.ReturnInfo($"Error updating organisation: {ex.Message}");
-                return false;
-            }
-        }
+        // Removed UpdateOrganisationAsync and UpdateOrganisationIdAsync as they are no longer relevant
 
-        // Update OrganisationId
-        public async Task<bool> UpdateOrganisationIdAsync(int newOrganisationId)
-        {
-            var user = await GetCurrentUserAsync();
-            if (user == null)
-            {
-                LoggingConfigService.ReturnInfo("User not found.");
-                return false;
-            }
-
-            user.OrganisationId = newOrganisationId;
-            try
-            {
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LoggingConfigService.ReturnInfo($"Error updating organisation ID: {ex.Message}");
-                return false;
-            }
-        }
         public async Task<bool> UpdateOpenForHiringAsync(bool openForHiring)
         {
             var user = await GetCurrentUserAsync();
             if (user == null) return false;
 
-            user.openForHiring = openForHiring;
+            user.OpenForHiring = openForHiring; // Updated property casing
             await _context.SaveChangesAsync();
             return true;
         }
@@ -122,7 +78,7 @@ namespace JBDH.Services
             var user = await GetCurrentUserAsync();
             if (user == null) return false;
 
-            user.developerMode = developerMode;
+            user.DeveloperMode = developerMode; // Updated property casing
             await _context.SaveChangesAsync();
             return true;
         }

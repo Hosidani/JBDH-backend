@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using JBDH.Models;
 using JBDH.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JBDH.Controllers;
 
@@ -17,32 +18,34 @@ public class RegisterController : Controller
     [HttpGet]
     public IActionResult Register()
     {
-        return View();
+        return View(); // Prompt to select registration type
+    }
+
+    [HttpGet]
+    public IActionResult RegisterUser()
+    {
+        return View(); // View for user registration
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId, bool openForHiring)
+    public async Task<IActionResult> RegisterUser(string username, string password, string confirmPassword, string email, IFormFile cvFile, bool openForHiring)
     {
         if (password != confirmPassword)
         {
-            LoggingConfigService.ReturnError("Passwords do not match.");
             ViewData["ErrorMessage"] = "Passwords do not match.";
             return View();
         }
 
         if (_context.Users.Any(u => u.Username == username))
         {
-            LoggingConfigService.ReturnError("Username already exists.");
             ViewData["ErrorMessage"] = "Username already exists.";
             return View();
         }
 
         try
         {
-            // Hash the password
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
-            // Handle CV upload
             string cvPath = null;
             if (cvFile != null && cvFile.Length > 0)
             {
@@ -57,10 +60,8 @@ public class RegisterController : Controller
                 {
                     await cvFile.CopyToAsync(stream);
                 }
-                LoggingConfigService.ReturnInfo($"CV uploaded to: {cvPath}");
             }
 
-            // Create user
             var user = new User
             {
                 Username = username,
@@ -68,26 +69,67 @@ public class RegisterController : Controller
                 Role = "User",
                 Email = email,
                 CVPath = cvPath,
-                Organisation = organisation ?? "Free",
-                OrganisationId = organisationId,
-                developerMode = false,
-                openForHiring = openForHiring
+                DeveloperMode = false,
+                OpenForHiring = openForHiring
             };
 
             _context.Users.Add(user);
-            await _context.SaveChangesAsync(); // Always await SaveChangesAsync for better performance!
+            await _context.SaveChangesAsync();
 
-            // Set session to log in
             HttpContext.Session.SetString("Username", username);
-            ViewData["IsLoggedIn"] = true;
-            ViewData["Username"] = username;
-
             return RedirectToAction("Index", "Home");
         }
-        catch (Exception ex)
+        catch
         {
-            LoggingConfigService.ReturnError($"Error registering user: {ex.Message}");
             ViewData["ErrorMessage"] = "An error occurred while registering the user.";
+            return View();
+        }
+    }
+
+    [Authorize(Roles = "Manager")]
+    [HttpGet]
+    public IActionResult RegisterOrganization()
+    {
+        return View(); // View for organization registration
+    }
+
+    [Authorize(Roles = "Manager")]
+    [HttpPost]
+    public async Task<IActionResult> RegisterOrganization(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            ViewData["ErrorMessage"] = "Organization name is required.";
+            return View();
+        }
+
+        try
+        {
+            var managerUsername = User.Identity?.Name;
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Username == managerUsername);
+
+            if (manager == null)
+            {
+                ViewData["ErrorMessage"] = "You must be a manager to register an organization.";
+                return View();
+            }
+
+            // Access ManagedOrganizations from the manager object
+            var organization = new Organization
+            {
+                Name = name,
+                Managers = new List<Manager> { manager }
+            };
+
+            _context.Organizations.Add(organization);
+            await _context.SaveChangesAsync();
+
+            ViewData["SuccessMessage"] = "Organization registered successfully!";
+            return RedirectToAction("Index", "Home");
+        }
+        catch
+        {
+            ViewData["ErrorMessage"] = "An error occurred while registering the organization.";
             return View();
         }
     }
