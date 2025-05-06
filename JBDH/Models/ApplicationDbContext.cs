@@ -16,6 +16,11 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<User>()
+            .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
+            .HasValue<User>("User")
+            .HasValue<Manager>("Manager");
+
         // Configure the User table
         modelBuilder.Entity<User>(entity =>
         {
@@ -62,7 +67,7 @@ public class ApplicationDbContext : DbContext
 
             // Configure many-to-many relationship for Managers
             entity.HasMany(o => o.Managers)
-                .WithMany(m => m.ManagedOrganizations) // Reference Manager, not User
+                .WithMany(m => m.ManagedOrganizations) // Directly reference ManagedOrganizations
                 .UsingEntity<Dictionary<string, object>>(
                     "OrganizationManagers",
                     j => j.HasOne<Manager>() // Reference Manager

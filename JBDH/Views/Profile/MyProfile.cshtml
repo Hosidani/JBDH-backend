@@ -15,7 +15,17 @@
         <dd class="col-sm-9">@Model.User.Email</dd>
 
         <dt class="col-sm-3">Organisation:</dt>
-        <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.User.Organization) ? Model.User.Organization : "N/A")</dd>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.Organization))
+            {
+                <span>@Model.Organization</span>
+                @Html.ActionLink("View Organization", "Details", "Organization", new { id = Model.User.Id }, null)
+            }
+            else
+            {
+                <span>N/A</span>
+            }
+        </dd>
 
         <dt class="col-sm-3">Open for Hiring:</dt>
         <dd class="col-sm-9">

@@ -672,3 +672,4 @@ C:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\refint\JBDH.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.pdb
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\JBDH.genruntimeconfig.cache
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\obj\Debug\net9.0\ref\JBDH.dll
+C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\jobs.json

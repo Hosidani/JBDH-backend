@@ -3,6 +3,7 @@ using JBDH.Models;
 using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Controllers;
 
@@ -45,12 +46,16 @@ public class ProfileController : Controller
         }
 
         var isFriend = await _friendService.AreFriendsAsync(currentUserId, userId);
-
+        var organizationName = user.IsOrganizationVerified ? await _context.Organizations
+            .Where(o => o.Users.Any(u => u.Id == user.Id))
+            .Select(o => o.Name)
+            .FirstOrDefaultAsync() 
+        : null;
         var viewModel = new ProfileViewModel
         {
             User = user,
             IsFriend = isFriend,
-            Organization = user.IsOrganizationVerified && user.Organization != null ? user.Organization.Name : null // Display organization name only if verified and not null
+            Organization = user.IsOrganizationVerified != null ? organizationName : null // Display organization name only if verified and not null
         };
 
         return View(viewModel);

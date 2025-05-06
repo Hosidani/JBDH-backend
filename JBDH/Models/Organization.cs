@@ -16,7 +16,7 @@ namespace JBDH.Models
 
         public string Description { get; set; }
 
-        public ICollection<User> Managers { get; set; } // Changed to a collection
+        public ICollection<Manager> Managers { get; set; } = new List<Manager>();
 
         public ICollection<User> Users { get; set; }
     }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using JBDH.Models;
 using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Controllers;
 
@@ -28,61 +29,68 @@ public class RegisterController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> RegisterUser(string username, string password, string confirmPassword, string email, IFormFile cvFile, bool openForHiring)
+    public async Task<IActionResult> RegisterUser(RegisterUserViewModel model)
     {
-        if (password != confirmPassword)
+        LoggingConfigService.ReturnInfo("RegisterUser method called.");
+        if (model.Password != model.ConfirmPassword)
         {
+            LoggingConfigService.ReturnInfo("Passwords do not match.");
             ViewData["ErrorMessage"] = "Passwords do not match.";
-            return View();
+            return View(model);
         }
 
-        if (_context.Users.Any(u => u.Username == username))
+        if (_context.Users.Any(u => u.Username == model.Username))
         {
+            LoggingConfigService.ReturnInfo("Username already exists.");
             ViewData["ErrorMessage"] = "Username already exists.";
-            return View();
+            return View(model);
         }
-
+        LoggingConfigService.ReturnInfo("Starting insertion of user.");
         try
         {
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-            string cvPath = null;
-            if (cvFile != null && cvFile.Length > 0)
+            LoggingConfigService.ReturnInfo("Creating new user object.");
+            var user = new User
+            {
+                Username = model.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Email = model.Email,
+                OpenForHiring = model.OpenForHiring
+            };
+            LoggingConfigService.ReturnInfo("User object created.");
+            LoggingConfigService.ReturnInfo("Checking if CV file is provided.");
+            if (model.CVFile != null && model.CVFile.Length > 0)
             {
                 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(uploadsPath))
                 {
                     Directory.CreateDirectory(uploadsPath);
                 }
-                var safeFileName = Path.GetFileName(cvFile.FileName);
-                cvPath = Path.Combine(uploadsPath, safeFileName);
-                using (var stream = new FileStream(cvPath, FileMode.Create))
+                var safeFileName = Path.GetFileName(model.CVFile.FileName);
+                user.CVPath = Path.Combine(uploadsPath, safeFileName);
+                using (var stream = new FileStream(user.CVPath, FileMode.Create))
                 {
-                    await cvFile.CopyToAsync(stream);
+                    await model.CVFile.CopyToAsync(stream);
                 }
             }
-
-            var user = new User
-            {
-                Username = username,
-                PasswordHash = hashedPassword,
-                Role = "User",
-                Email = email,
-                CVPath = cvPath,
-                DeveloperMode = false,
-                OpenForHiring = openForHiring
-            };
+            LoggingConfigService.ReturnInfo("CV file processed.");
+            user.DeveloperMode = false; // Default value
+            user.IsOrganizationVerified = false; // Default value
+            user.Role = "User"; // Default role
+            LoggingConfigService.ReturnInfo("User role set to User.");
 
             _context.Users.Add(user);
+            LoggingConfigService.ReturnInfo("User object added to context.");
             await _context.SaveChangesAsync();
+            LoggingConfigService.ReturnInfo("Changes saved to database.");
 
-            HttpContext.Session.SetString("Username", username);
+            HttpContext.Session.SetString("Username", user.Username);
+            LoggingConfigService.ReturnInfo($"User {user.Username} registered successfully.");
             return RedirectToAction("Index", "Home");
         }
         catch
         {
             ViewData["ErrorMessage"] = "An error occurred while registering the user.";
-            return View();
+            return View(model);
         }
     }
 
