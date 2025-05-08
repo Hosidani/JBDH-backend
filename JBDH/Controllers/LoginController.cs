@@ -33,7 +33,7 @@ public class LoginController : Controller
         // If login fails
         ViewData["ErrorMessage"] = "Invalid username or password.";
         LoggingConfigService.ReturnError("Invalid username or password.");
-        return View();
+        return RedirectToAction("Login", "Login");
     }
 
     [HttpGet]

@@ -30,6 +30,7 @@ namespace JBDH.Services
                     var createRawTable = SqlQueries.SqlQuery(1);
                     var createCleanTable = SqlQueries.SqlQuery(2);
                     var createUserTable = SqlQueries.SqlQuery(14);
+                    var createEmailVerificationTable = SqlQueries.SqlQuery(17);
                     var createFriendshipTable = SqlQueries.SqlQuery(16);
                     var createOrganisationTable = SqlQueries.SqlQuery(17);
                     using (var command = new MySqlCommand(createRawTable, connection))
@@ -41,6 +42,10 @@ namespace JBDH.Services
                         command.ExecuteNonQuery();
                     }
                     using (var command = new MySqlCommand(createUserTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createEmailVerificationTable, connection))
                     {
                         command.ExecuteNonQuery();
                     }
