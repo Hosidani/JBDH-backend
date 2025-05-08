@@ -20,15 +20,12 @@ namespace JBDH.Models
         public string Email { get; set; }
 
         public string CVPath { get; set; } // Path to uploaded CV
-        public string? Organisation { get; set; } // Optional organisation name
-        public int? OrganisationId { get; set; } // Paid organisation name
-        public bool? developerMode { get; set; } // Developer mode
-        public bool? openForHiring { get; set; } // Active mode
-
+        public bool? DeveloperMode { get; set; } // Developer mode
+        public bool? OpenForHiring { get; set; } // Active mode
+        public bool IsOrganizationVerified { get; set; } // Track if the organization is verified
         public bool IsEmailConfirmed { get; set; } = false; // Indicates if the email is confirmed
 
         public ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
         public ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
-
     }
 }

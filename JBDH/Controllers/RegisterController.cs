@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using JBDH.Models;
 using JBDH.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Controllers;
@@ -23,24 +24,31 @@ public class RegisterController : Controller
     [HttpGet]
     public IActionResult Register()
     {
-        return View();
+        return View(); // Prompt to select registration type
+    }
+
+    [HttpGet]
+    public IActionResult RegisterUser()
+    {
+        return View(); // View for user registration
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string username, string password, string confirmPassword, string email, IFormFile cvFile, string organisation, int organisationId, bool openForHiring)
+    public async Task<IActionResult> RegisterUser(RegisterUserViewModel model)
     {
-        if (password != confirmPassword)
+        LoggingConfigService.ReturnInfo("RegisterUser method called.");
+        if (model.Password != model.ConfirmPassword)
         {
-            LoggingConfigService.ReturnError("Passwords do not match.");
+            LoggingConfigService.ReturnInfo("Passwords do not match.");
             ViewData["ErrorMessage"] = "Passwords do not match.";
-            return View();
+            return View(model);
         }
 
-        if (_context.Users.Any(u => u.Username == username))
+        if (_context.Users.Any(u => u.Username == model.Username))
         {
-            LoggingConfigService.ReturnError("Username already exists.");
+            LoggingConfigService.ReturnInfo("Username already exists.");
             ViewData["ErrorMessage"] = "Username already exists.";
-            return View();
+            return View(model);
         }
         // Check if the email is already registered
         if (_context.Users.Any(u => u.Email == email))
@@ -51,40 +59,35 @@ public class RegisterController : Controller
 
         try
         {
-            // Hash the password
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-            // Handle CV upload
-            string cvPath = null;
-            if (cvFile != null && cvFile.Length > 0)
+            LoggingConfigService.ReturnInfo("Creating new user object.");
+            var user = new User
+            {
+                Username = model.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Email = model.Email,
+                OpenForHiring = model.OpenForHiring
+            };
+            LoggingConfigService.ReturnInfo("User object created.");
+            LoggingConfigService.ReturnInfo("Checking if CV file is provided.");
+            if (model.CVFile != null && model.CVFile.Length > 0)
             {
                 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(uploadsPath))
                 {
                     Directory.CreateDirectory(uploadsPath);
                 }
-                var safeFileName = Path.GetFileName(cvFile.FileName);
-                cvPath = Path.Combine(uploadsPath, safeFileName);
-                using (var stream = new FileStream(cvPath, FileMode.Create))
+                var safeFileName = Path.GetFileName(model.CVFile.FileName);
+                user.CVPath = Path.Combine(uploadsPath, safeFileName);
+                using (var stream = new FileStream(user.CVPath, FileMode.Create))
                 {
-                    await cvFile.CopyToAsync(stream);
+                    await model.CVFile.CopyToAsync(stream);
                 }
-                LoggingConfigService.ReturnInfo($"CV uploaded to: {cvPath}");
             }
-
-            // Create user
-            var user = new User
-            {
-                Username = username,
-                PasswordHash = hashedPassword,
-                Role = "User",
-                Email = email,
-                CVPath = cvPath,
-                Organisation = organisation ?? "Free",
-                OrganisationId = organisationId,
-                developerMode = false,
-                openForHiring = openForHiring
-            };
+            LoggingConfigService.ReturnInfo("CV file processed.");
+            user.DeveloperMode = false; // Default value
+            user.IsOrganizationVerified = false; // Default value
+            user.Role = "User"; // Default role
+            LoggingConfigService.ReturnInfo("User role set to User.");
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync(); // Always await SaveChangesAsync for better performance!
@@ -125,10 +128,57 @@ public class RegisterController : Controller
             ViewBag.Email = email;
             return View("CheckYourEmail");
         }
-        catch (Exception ex)
+        catch
         {
-            LoggingConfigService.ReturnError($"Error registering user: {ex.Message}");
             ViewData["ErrorMessage"] = "An error occurred while registering the user.";
+            return View(model);
+        }
+    }
+
+    [Authorize(Roles = "Manager")]
+    [HttpGet]
+    public IActionResult RegisterOrganization()
+    {
+        return View(); // View for organization registration
+    }
+
+    [Authorize(Roles = "Manager")]
+    [HttpPost]
+    public async Task<IActionResult> RegisterOrganization(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            ViewData["ErrorMessage"] = "Organization name is required.";
+            return View();
+        }
+
+        try
+        {
+            var managerUsername = User.Identity?.Name;
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Username == managerUsername);
+
+            if (manager == null)
+            {
+                ViewData["ErrorMessage"] = "You must be a manager to register an organization.";
+                return View();
+            }
+
+            // Access ManagedOrganizations from the manager object
+            var organization = new Organization
+            {
+                Name = name,
+                Managers = new List<Manager> { manager }
+            };
+
+            _context.Organizations.Add(organization);
+            await _context.SaveChangesAsync();
+
+            ViewData["SuccessMessage"] = "Organization registered successfully!";
+            return RedirectToAction("Index", "Home");
+        }
+        catch
+        {
+            ViewData["ErrorMessage"] = "An error occurred while registering the organization.";
             return View();
         }
     }

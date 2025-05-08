@@ -15,14 +15,11 @@
         <dd class="col-sm-9">@Model.User.Email</dd>
 
         <dt class="col-sm-3">Organisation:</dt>
-        <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.User.Organisation) ? Model.User.Organisation : "N/A")</dd>
-
-        <dt class="col-sm-3">Organisation ID:</dt>
-        <dd class="col-sm-9">@Model.User.OrganisationId?.ToString() ?? "N/A"</dd>
+        <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.Organization) ? Model.Organization : "N/A")</dd>
 
         <dt class="col-sm-3">Open for Hiring:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.openForHiring == true)
+            @if (Model.User.OpenForHiring == true)
             {
                 <span class="badge bg-success">Open</span>
             }
@@ -34,7 +31,7 @@
 
         <dt class="col-sm-3">Developer Mode:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.developerMode == true)
+            @if (Model.User.DeveloperMode == true)
             {
                 <span class="badge bg-info">Developer</span>
             }
