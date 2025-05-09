@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using JBDH.Models; // Assuming this is the namespace for your models
 using JBDH.Controllers; // Assuming this is the namespace for your controllers
 
-namespace JBDH.Controllers // Assuming this is the namespace for your controller
-{
-    class PlatsbankenApi
+namespace JBDH.Services
+{ 
+class JobStreamService
     {
         private const string DbTableName = "testing_purposes";
         private const string DbFileName = "testing_purposes.db";
@@ -40,7 +40,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             }
             catch (Exception e)
             {
-                LoggingConfig.ReturnError($"Error fetching job ads: {e.Message}");
+                LoggingConfigService.ReturnError($"Error fetching job ads: {e.Message}");
                 return null;
             }
         }
@@ -53,7 +53,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
 
                 // Add the date parameter to the query string
                 var fullUrl = $"{url}?date={Uri.EscapeDataString(date)}";
-                LoggingConfig.ReturnInfo($"Fetching job ads from URL: {fullUrl}");
+                LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {fullUrl}");
                 var response = await client.GetAsync(fullUrl);
                 response.EnsureSuccessStatusCode();
 
@@ -62,7 +62,7 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             }
             catch (Exception e)
             {
-                LoggingConfig.ReturnError($"Error fetching job ads: {e.Message}");
+                LoggingConfigService.ReturnError($"Error fetching job ads: {e.Message}");
                 return null;
             }
         }
@@ -94,34 +94,23 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
             return filteredJobs;
         }
 
-        public static void PrintJobDetails(Dictionary<string, object> job)
-        {
-            LoggingConfig.ReturnInfo($"Title: {job.GetValueOrDefault("headline", "N/A")}");
-            LoggingConfig.ReturnInfo($"Company: {((Dictionary<string, object>)job.GetValueOrDefault("employer", new Dictionary<string, object>()))
-                .GetValueOrDefault("name", "N/A")}");
-            LoggingConfig.ReturnInfo($"Location: {((Dictionary<string, object>)job.GetValueOrDefault("workplace_address", new Dictionary<string, object>()))
-                .GetValueOrDefault("municipality", "N/A")}");
-            LoggingConfig.ReturnInfo($"Job ID: {job.GetValueOrDefault("id", "N/A")}");
-            var descriptionDict = job.GetValueOrDefault("description", null) as Dictionary<string, object>;
-            var description = descriptionDict?.GetValueOrDefault("text", "")?.ToString();
-            LoggingConfig.ReturnInfo($"Description preview: {description?.Substring(0, Math.Min(200, description.Length))}...");
-        }
+        
         public static void SaveToJson(List<Dictionary<string, object>> data)
         {
             try
             {
                 var jsonData = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(JsonFile, jsonData);
-                LoggingConfig.ReturnInfo($"Saving data to {JsonFile}...");
+                LoggingConfigService.ReturnInfo($"Saving data to {JsonFile}...");
             }
             catch (Exception e)
             {
-                LoggingConfig.ReturnError($"Error saving JSON file: {e.Message}");
+                LoggingConfigService.ReturnError($"Error saving JSON file: {e.Message}");
             }
         }
         public static async Task Main(string[] args)
         {
-            LoggingConfig.ReturnInfo("Starting job ad retrieval process...");
+            LoggingConfigService.ReturnInfo("Starting job ad retrieval process...");
             // Check if this is the first run or an update
             var isFirstRun = !File.Exists("timestamp.txt"); // Use a file to track the last fetch timestamp
             var date = isFirstRun ? null : File.ReadAllText("timestamp.txt");
@@ -129,13 +118,13 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
 
             if (isFirstRun)
             {
-                LoggingConfig.ReturnInfo("First run detected. Fetching full dataset using Snapshot...");
+                LoggingConfigService.ReturnInfo("First run detected. Fetching full dataset using Snapshot...");
                 jobAds = await FetchJobAdsAsync(SnapshotUrl);
             }
             else
             {
-                LoggingConfig.ReturnInfo($"Last fetch date: {date}");
-                LoggingConfig.ReturnInfo("Fetching incremental updates using Stream...");
+                LoggingConfigService.ReturnInfo($"Last fetch date: {date}");
+                LoggingConfigService.ReturnInfo("Fetching incremental updates using Stream...");
                 jobAds = await FetchJobAdsAsync(StreamUrl, date);
             }
 
@@ -146,14 +135,14 @@ namespace JBDH.Controllers // Assuming this is the namespace for your controller
 
                 // Update the timestamp file with the current date
                 File.WriteAllText("timestamp.txt", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                LoggingConfig.ReturnInfo($"Updated timestamp to {DateTime.UtcNow}");
-                LoggingConfig.ReturnInfo($"Fetched {jobAds.Count} job ads from the API.");
+                LoggingConfigService.ReturnInfo($"Updated timestamp to {DateTime.UtcNow}");
+                LoggingConfigService.ReturnInfo($"Fetched {jobAds.Count} job ads from the API.");
             }
             else
             {
-                LoggingConfig.ReturnError("Failed to fetch job ads from the API.");
+                LoggingConfigService.ReturnError("Failed to fetch job ads from the API.");
             }
-            LoggingConfig.ReturnInfo("Job ads retrieval process completed.");
+            LoggingConfigService.ReturnInfo("Job ads retrieval process completed.");
         }
     }
 }

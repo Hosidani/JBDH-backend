@@ -1,105 +1,93 @@
 using JBDH.Models;
+using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
-using ApplicationDbContext = JBDH.Models.ApplicationDbContext;
 
 namespace JBDH.Controllers
 {
-    //[Authorize] // Ensure only logged-in users can access this controller
+    [Authorize]
     public class SettingsController : Controller
     {
+        private readonly IUserPropertiesService _userPropertiesService; 
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
 
-        public SettingsController(ApplicationDbContext context, IWebHostEnvironment environment)
+        public SettingsController(IUserPropertiesService userService)
         {
-            _context = context;
-            _environment = environment;
+            _userPropertiesService = userService;
         }
 
         [HttpPost]
-        public IActionResult ChangeCV(IFormFile cvFile)
+        public async Task<IActionResult> ChangeCV(IFormFile cvFile)
         {
-            LoggingConfig.ReturnInfo("ChangeCV method called");
-            if (cvFile == null || cvFile.Length == 0)
-            {
-                LoggingConfig.ReturnError("No file selected for upload.");
-                ViewData["ErrorMessage"] = "Please select a file to upload.";
-                return RedirectToAction("Settings", "Settings"); // Fixed
-            }
+            var success = await _userPropertiesService.UploadCVAsync(cvFile);
+            if (success)
+                ViewData["SuccessMessage"] = "CV updated successfully!";
+            else
+                ViewData["ErrorMessage"] = "Failed to upload CV.";
 
-            if (cvFile.Length > 5 * 1024 * 1024) // 5 MB limit
-            {
-                LoggingConfig.ReturnError("File size exceeds the 5 MB limit.");
-                ViewData["ErrorMessage"] = "File size exceeds the 5 MB limit.";
-                return RedirectToAction("Settings", "Settings"); // Fixed
-            }
+            return RedirectToAction("Settings", "Home");
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> ToggleOpenForHire(bool openForHiring)
+        {
+            var success = await _userPropertiesService.UpdateOpenForHiringAsync(openForHiring);
+            if (success)
+                ViewData["SuccessMessage"] = "Open for hiring status updated successfully!";
+            else
+                ViewData["ErrorMessage"] = "Failed to update status.";
 
-            var extension = Path.GetExtension(cvFile.FileName).ToLowerInvariant();
-            if (new[] { ".exe", ".js", ".bat" }.Contains(extension))
-            {
-                LoggingConfig.ReturnWarning($"Potentially unsafe file uploaded: {cvFile.FileName}");
-                ViewData["ErrorMessage"] = "The selected file type is not allowed.";
-                return RedirectToAction("Settings", "Settings"); // Fixed
-            }
+            return RedirectToAction("Settings", "Home");
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateEmail(string newEmail)
+        {
             try
             {
-                var username = User.Identity.Name;
-                var user = _context.Users.FirstOrDefault(u => u.Username == username);
-                if (user == null)
+                var success = await _userPropertiesService.UpdateEmailAsync(newEmail);
+                if (success)
                 {
-                    LoggingConfig.ReturnError("User not found.");
-                    ViewData["ErrorMessage"] = "User not found.";
-                    return RedirectToAction("Settings", "Settings"); // Fixed
+                    return RedirectToAction("SuccessPage");
                 }
-
-                if (!string.IsNullOrEmpty(user.CVPath))
+                else
                 {
-                    var oldCvPath = Path.Combine(_environment.WebRootPath, user.CVPath);
-                    if (System.IO.File.Exists(oldCvPath))
-                    {
-                        System.IO.File.Delete(oldCvPath);
-                    }
+                    ViewData["ErrorMessage"] = "Email update failed.";
+                    return View("ErrorPage");
                 }
-
-                var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
-                if (!Directory.Exists(uploadsPath))
-                {
-                    Directory.CreateDirectory(uploadsPath);
-                }
-
-                var newCvPath = Path.Combine(uploadsPath, cvFile.FileName);
-                using (var stream = new FileStream(newCvPath, FileMode.Create))
-                {
-                    cvFile.CopyTo(stream);
-                }
-
-                user.CVPath = Path.Combine("uploads", cvFile.FileName);
-                _context.SaveChanges();
-                ViewData["SuccessMessage"] = "CV updated successfully!";
+            }
+            catch (ArgumentException ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("ErrorPage");
             }
             catch (Exception ex)
             {
-                LoggingConfig.ReturnError($"Error updating CV: {ex.Message}");
-                ViewData["ErrorMessage"] = $"An error occurred while updating your CV: {ex.Message}";
+                ViewData["ErrorMessage"] = "An error occurred: " + ex.Message;
+                return View("ErrorPage");
             }
-
-            return RedirectToAction("Settings", "Settings"); // Fixed
         }
-        
-        [HttpGet]
-        public IActionResult Settings()
+
+        public IActionResult SuccessPage()
         {
-            LoggingConfig.ReturnInfo("Settings action called");
+            return View();  // Return the SuccessPage view
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Settings()
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user != null)
+            {
+                ViewData["OpenForHiring"] = user.OpenForHiring ?? false; // Updated property casing
+            }
+            else
+            {
+                ViewData["OpenForHiring"] = false;
+            }
             return View();
-        }
-
-        [HttpGet]
-        public IActionResult Index()
-        {
-            return RedirectToAction("Settings", "Settings"); // Redirect to the Settings action
         }
     }
 }

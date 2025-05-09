@@ -1,0 +1,16 @@
+@model JBDH.Models.ErrorViewModel
+@{
+    ViewData["Title"] = Model.Title ?? "Error";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p>@Model.Message</p>
+}
+
+@if (!string.IsNullOrEmpty(Model.ReturnUrl))
+{
+    <p><a href="@Model.ReturnUrl">Return</a></p>
+}

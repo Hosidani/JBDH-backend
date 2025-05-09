@@ -5,7 +5,8 @@ using System.Text.Json;
 using MySql.Data.MySqlClient;
 using JBDH.Models; // Assuming this is the namespace for your models
 
-namespace JBDH.Controllers; // Assuming this is the namespace for your controller
+namespace JBDH.Services
+{    
 
 public class EtlPipeline
 {
@@ -20,8 +21,8 @@ public class EtlPipeline
 
     public static List<Dictionary<string, object>> ExtractData(string filePath)
     {
-        LoggingConfig.ReturnInfo("Starting data extraction...");
-        LoggingConfig.ReturnInfo($"Extracting data from {filePath}...");
+        LoggingConfigService.ReturnInfo("Extracting raw data from JSON file...");
+        LoggingConfigService.ReturnInfo($"Extracting data from {filePath}...");
         try
         {
             var jsonData = File.ReadAllText(filePath);
@@ -30,15 +31,15 @@ public class EtlPipeline
         }
         catch (Exception e)
         {
-            LoggingConfig.ReturnInfo($"Error reading JSON file: {e.Message}");
+            LoggingConfigService.ReturnInfo($"Error reading JSON file: {e.Message}");
             return new List<Dictionary<string, object>>();
         }
     }
 
     public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
     {
-        LoggingConfig.ReturnInfo("Starting data transformation...");
-        LoggingConfig.ReturnInfo($"Number of jobs to transform: {rawJobs.Count}");
+        LoggingConfigService.ReturnInfo("Transforming data...");
+        LoggingConfigService.ReturnInfo($"Number of jobs to transform: {rawJobs.Count}");
         var transformed = new List<Dictionary<string, object>>();
         int warningCount = 0;
 
@@ -54,7 +55,7 @@ public class EtlPipeline
             if (job.GetValueOrDefault("employer") == null) missingEmployerCount++;
             if (job.GetValueOrDefault("workplace_address") == null) missingLocationCount++;
         }
-        LoggingConfig.ReturnInfo($"Number of jobs with missing fields: {missingDescriptionCount + missingTitleCount + missingEmployerCount + missingLocationCount}");
+        LoggingConfigService.ReturnInfo($"Number of jobs with missing fields: {missingDescriptionCount + missingTitleCount + missingEmployerCount + missingLocationCount}");
 
         foreach (var job in rawJobs)
         {
@@ -95,23 +96,23 @@ public class EtlPipeline
                         catch (Exception ex)
                         {
                             var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 50) + "..." : ex.Message;
-                            LoggingConfig.ReturnError($"Processing description: {truncatedMessage}");
+                            LoggingConfigService.ReturnError($"Processing description: {truncatedMessage}");
                             description = "Invalid Description Format";
                         }
                     }
                     else
                     {
-                        LoggingConfig.ReturnError("The 'text' field is missing in the 'description' object.");
+                        LoggingConfigService.ReturnError("The 'text' field is missing in the 'description' object.");
                     }
                 }
                 else if (rawDescription == null)
                 {
-                    LoggingConfig.ReturnError("Warning: The 'description' field is null or missing.");
+                    LoggingConfigService.ReturnError("Warning: The 'description' field is null or missing.");
                     warningCount++;
                 }
                 else
                 {
-                    LoggingConfig.ReturnError("Warning: The 'description' field is not a valid JSON object.");
+                    LoggingConfigService.ReturnError("Warning: The 'description' field is not a valid JSON object.");
                     warningCount++;
                 }
  
@@ -133,7 +134,7 @@ public class EtlPipeline
                         {
                             // Limit the exception message to 100 characters to avoid overly verbose output
                             var truncatedMessage = ex.Message.Length > 100 ? ex.Message.Substring(0, 100) + "..." : ex.Message;
-                            LoggingConfig.ReturnError($"Error processing company: {truncatedMessage}");
+                            LoggingConfigService.ReturnError($"Error processing company: {truncatedMessage}");
                             company = "Invalid company name";
                         }
                     }
@@ -170,87 +171,28 @@ public class EtlPipeline
             }
             catch (Exception e)
             {
-                LoggingConfig.ReturnInfo($"Skipping invalid job entry: {e.Message}");
+                LoggingConfigService.ReturnInfo($"Skipping invalid job entry: {e.Message}");
             }
         }
-        LoggingConfig.ReturnInfo($"Transformed {transformed.Count} jobs successfully.");
-        LoggingConfig.ReturnInfo($"Number of warnings: {warningCount}");
+        LoggingConfigService.ReturnInfo($"Transformed {transformed.Count} jobs successfully.");
+        LoggingConfigService.ReturnInfo($"Number of warnings: {warningCount}");
         return transformed;
     }
-
-/*
-    public static List<Dictionary<string, object>> TransformJobs(List<Dictionary<string, object>> rawJobs)
-    {
-        var transformedJobs = new List<Dictionary<string, object>>();
-
-        foreach (var job in rawJobs)
-        {
-            // Extract the "title" field
-            var title = job.GetValueOrDefault("headline", "N/A");
-
-            // Extract the "location" field
-            string location = "N/A";
-            if (job.GetValueOrDefault("workplace_address") is JsonElement addressElement && addressElement.ValueKind == JsonValueKind.Object)
-            {
-                if (addressElement.TryGetProperty("municipality", out JsonElement municipalityElement))
-                {
-                    location = municipalityElement.GetString() ?? "N/A";
-                }
-            }
-
-            // Extract the "description" field
-            string description = "N/A";
-            if (job.GetValueOrDefault("description") is JsonElement descriptionElement && descriptionElement.ValueKind == JsonValueKind.Object)
-            {
-                if (descriptionElement.TryGetProperty("text", out JsonElement textElement))
-                {
-                    description = textElement.GetString() ?? "N/A";
-                }
-            }
-
-            // Extract the "employer" field
-            string company = "N/A";
-            if (job.GetValueOrDefault("employer") is JsonElement employerElement && employerElement.ValueKind == JsonValueKind.Object)
-            {
-                if (employerElement.TryGetProperty("name", out JsonElement nameElement))
-                {
-                    company = nameElement.GetString() ?? "N/A";
-                }
-            }
-
-            // Add the transformed job to the list
-            var transformedJob = new Dictionary<string, object>
-            {
-                { "title", title },
-                { "location", location },
-                { "description", description },
-                { "company", company }
-            };
-
-            transformedJobs.Add(transformedJob);
-        }
-
-        return transformedJobs;
-    }
-*/
     public static void LoadData(List<Dictionary<string, object>> rawJobs)
     {
+        LoggingConfigService.ReturnInfo("Processing jobs...");
         try
         {
             using var connection = new MySqlConnection(ConnectionString);
             connection.Open();
-            LoggingConfig.ReturnInfo("Database connection established.");
-            LoggingConfig.ReturnInfo("Starting Load data process...");
-            LoggingConfig.ReturnInfo($"Number of jobs to insert: {rawJobs.Count}");
-            /*foreach (var job in rawJobs)
-            {
-                Console.WriteLine($"Job ID: {job.GetValueOrDefault("job_id", "N/A")}, Title: {job.GetValueOrDefault("title", "N/A")}");
-            }*/
+            LoggingConfigService.ReturnInfo("Database connection established.");
+            LoggingConfigService.ReturnInfo("Starting Load data process...");
+            LoggingConfigService.ReturnInfo($"Number of jobs to insert: {rawJobs.Count}");
 
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
             {
-                //LoggingConfig.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
+                //LoggingConfigService.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
                 var command = new MySqlCommand(SqlQueries.SqlQuery(3), connection);
                 command.Parameters.AddWithValue("@job_id", job["job_id"]);
                 command.Parameters.AddWithValue("@title", job["title"]);
@@ -266,35 +208,33 @@ public class EtlPipeline
                 }
                 catch (MySqlException ex)
                 {
-                    LoggingConfig.ReturnError($"MySQL error inserting job_id {job["job_id"]}: {ex.Message}");
+                    LoggingConfigService.ReturnError($"MySQL error inserting job_id {job["job_id"]}: {ex.Message}");
                 }
             }
-            LoggingConfig.ReturnInfo("All jobs inserted into raw_table.");
+            LoggingConfigService.ReturnInfo("All jobs inserted into raw_table.");
 
             // Step 2: Deduplicate data by inserting distinct rows into clean_table
             var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(5), connection);
             deduplicateCommand.ExecuteNonQuery();
-            LoggingConfig.ReturnInfo("Distinct rows inserted into clean_table.");
-            LoggingConfig.ReturnInfo("ETL process completed successfully.");
+            LoggingConfigService.ReturnInfo("Distinct rows inserted into clean_table.");
         }
         catch (Exception e)
         {
-            LoggingConfig.ReturnError($"Error in ETL process: {e.Message}");
+            LoggingConfigService.ReturnError($"Error in ETL process: {e.Message}");
         }
     }
 
     public static void RunEtlPipeline(string jsonFile)
     {
-        LoggingConfig.ReturnInfo("Starting ETL pipeline...");
-        LoggingConfig.ReturnInfo("Extracting raw data from JSON file...");
+        LoggingConfigService.ReturnInfo("Starting ETL pipeline Service...");
         var rawData = ExtractData(jsonFile);
-        LoggingConfig.ReturnInfo("Data extracted...");
-        LoggingConfig.ReturnInfo("Transforming data...");
+        LoggingConfigService.ReturnInfo("Data extracted...");
         var sqlData = TransformData(rawData);
-        LoggingConfig.ReturnInfo("Data transformed...");
-        LoggingConfig.ReturnInfo("Processing jobs...");
+        LoggingConfigService.ReturnInfo("Data transformed...");
         // Call LoadData to handle loading and deduplication
         LoadData(sqlData);
-        LoggingConfig.ReturnInfo("ETL pipeline completed successfully.");
+        LoggingConfigService.ReturnInfo("ETL pipeline completed successfully.");
     }
+}
+
 }

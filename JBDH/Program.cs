@@ -1,49 +1,75 @@
 using JBDH.Controllers;
 using JBDH.Models;
-using Microsoft.EntityFrameworkCore;
-using MySql.Data.MySqlClient;
-using Microsoft.Extensions.Hosting;
-using System.IO;
-using DbHandler = JBDH.Controllers.DbHandler;
+using JBDH.Services;
+using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
+using Microsoft.AspNetCore.Builder; // For WebApplication
+using Microsoft.Extensions.DependencyInjection; // For DI container setup
+using Microsoft.Extensions.Hosting; // For environment setup
+using Microsoft.AspNetCore.Http; // For IHttpContextAccessor
+using Microsoft.EntityFrameworkCore; // For DbContext and DbContextOptionsBuilder
+using MySql.Data.MySqlClient; // For MySQL connection
+using MySql.EntityFrameworkCore.Extensions; // For UseMySQL
+
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Run PlatsbankenApi.Main asynchronously before starting the web application
-await Task.Run(async () =>
-{
-    try
-    {
-        await PlatsbankenApi.Main(args); // Fetch or process job data
-    }
-    catch (Exception ex)
-    {
-        LoggingConfig.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
-    }
-});
 
 // Run DbHandler.Main synchronously before starting the web application
 await Task.Run(() =>
 {
     try
     {
-        DbHandler.Main(args); // Initialize database or populate tables
+        DatabaseHandlerService.databaseHandler(args); // Initialize database or populate tables
     }
     catch (Exception ex)
     {
-        LoggingConfig.ReturnError($"Error in DbHandler.Main: {ex.Message}");
+        LoggingConfigService.ReturnError($"Error in DbHandler.Main: {ex.Message}");
     }
 });
 
-// Add services to the container
+// Run PlatsbankenApi.Main asynchronously before starting the web application
+await Task.Run(async () =>
+{
+    try
+    {
+        await JobStreamService.Main(args); // Fetch or process job data
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
+    }
+});
+
+
+
+// Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
+builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
+
+// Add session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set the session timeout
+    options.Cookie.HttpOnly = true;  // Ensures cookies are sent only through HTTP requests
+    options.Cookie.IsEssential = true;  // Makes the session cookie essential for the app
+});
+
+// Configure services
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
-        options.LoginPath = "/User/Login"; // Redirect to login page if not authenticated
+        options.Cookie.Name = "MyCookieName";
+        options.LoginPath = "/Login/Login";
+        options.LogoutPath = "/Logout/Logout";
     });
 
+// Add authorization
 builder.Services.AddAuthorization();
-builder.Services.AddSession(); // Add session services
+
+// Add CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -51,95 +77,83 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
+
+// Add memory cache for session
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-builder.Services.AddHttpContextAccessor();
+
+// Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")));
+    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register SMTP config
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
+// Register email service
+builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Validate SMTP settings
+var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+if (string.IsNullOrWhiteSpace(smtpSettings.Username) || string.IsNullOrWhiteSpace(smtpSettings.Password))
+{
+    throw new Exception("SMTP configuration is invalid. Please check your appsettings.json.");
+}
+
+// Usual stuff
+builder.Services.AddControllersWithViews();
+
+// Build the application
 var app = builder.Build();
 
+// Access IHostApplicationLifetime to hook into shutdown events
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+// Register a function to run when the application is stopping
+
+// SHUTDOWN HOOK:
+lifetime.ApplicationStopping.Register(() =>
+{
+    try
+    {
+        // Create a new scope to resolve scoped services
+        using (var scope = app.Services.CreateScope())
+        {
+            // Resolve ApplicationDbContext from the scope
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            // Call your database flushing service
+            FlushDatabaseService.FlushDatabase();
+            DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
+        }
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Error during application shutdown: {ex.Message}");
+    }
+});
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseSession(); // Enable session middleware
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors();
+app.UseSession();
+app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+app.UseCors(); // This should come after UseRouting() and before endpoints
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route pattern
 
-//app.MapGet("/Settings/Test", () => "Settings route is working!");
-// Add a shutdown hook to flush the database
-var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-lifetime.ApplicationStopping.Register(() =>
-{
-    LoggingConfig.ReturnInfo("Application is shutting down. Flushing the database...");
-    using var connection = new MySqlConnection(DbHandler.ConnectionString);
-    connection.Open();
-    DbHandler.FlushDatabase(connection);
-    LoggingConfig.ReturnInfo("Database flush completed.");
-
-    // Delete all files in the uploads folder
-    LoggingConfig.ReturnInfo("Deleting files in the uploads folder...");
-    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-    if (Directory.Exists(uploadsPath))
-    {
-        var files = Directory.GetFiles(uploadsPath);
-        foreach (var file in files)
-        {
-            try
-            {
-                File.Delete(file);
-                LoggingConfig.ReturnInfo($"Deleted file: {file}");
-            }
-            catch (Exception ex)
-            {
-                LoggingConfig.ReturnError($"Error deleting file {file}: {ex.Message}");
-            }
-        }
-    }
-    else
-    {
-        LoggingConfig.ReturnInfo("Uploads folder does not exist. No files to delete.");
-    }
-
-    // Delete the timestamp file on application shutdown
-    var timestampFilePath = "timestamp.txt";
-    if (File.Exists(timestampFilePath))
-    {
-        File.Delete(timestampFilePath);
-        LoggingConfig.ReturnInfo("Deleted timestamp.txt on application shutdown.");
-    }
-});
-app.Use(async (context, next) =>
-{
-    var endpoint = context.GetEndpoint();
-    if (endpoint != null)
-    {
-        Console.WriteLine($"Matched Endpoint: {endpoint.DisplayName}");
-    }
-    else
-    {
-        Console.WriteLine("No endpoint matched.");
-    }
-    await next();
-});
+// Start the application
 app.Run();

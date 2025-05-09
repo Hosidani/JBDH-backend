@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Register Organization";
+}
+
+<h2>Register Organization</h2>
+
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@ViewData["ErrorMessage"]</div>
+}
+
+@if (ViewData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@ViewData["SuccessMessage"]</div>
+}
+
+<form method="post" asp-action="RegisterOrganization">
+    <div class="form-group">
+        <label for="name">Organization Name</label>
+        <input type="text" class="form-control" id="name" name="name" required />
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea class="form-control" id="description" name="description"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Register</button>
+</form>

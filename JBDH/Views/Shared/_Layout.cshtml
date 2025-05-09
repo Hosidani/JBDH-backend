@@ -20,21 +20,24 @@
                             <a class="nav-link" href="/">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/User/Register">Register</a>
+                            <a class="nav-link" href="/Register/Register">Register</a>
                         </li>
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Settings">Settings</a>
+                             <li class="nav-item">
+                                <a class="nav-link" href="/Profile/MyProfile">Profile</a> 
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/User/Logout">Logout</a>
+                                <a class="nav-link" href="/Settings/Settings">Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Logout/Logout">Logout</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link" href="/User/Login">Login</a>
+                                <a class="nav-link" href="/Login/Login">Login</a>
                             </li>
                         }
                     </ul>
