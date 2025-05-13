@@ -257,14 +257,6 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.slim.min.map"
     },
     {
-      "Id": "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\CV - kopia.pdf",
-      "PackagePath": "staticwebassets\\uploads\\CV - kopia.pdf"
-    },
-    {
-      "Id": "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\CV.pdf",
-      "PackagePath": "staticwebassets\\uploads\\CV.pdf"
-    },
-    {
       "Id": "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Cover_Letter.pdf",
       "PackagePath": "staticwebassets\\uploads\\Cover_Letter.pdf"
     },

@@ -47,8 +47,7 @@ namespace JBDH.Controllers
                 var organization = new Organization
                 {
                     Name = name,
-                    Description = description,
-                    Managers = new List<Manager> { manager } // Assign the current manager
+                    Managers = new List<User> { manager } // Assign the current manager
                 };
 
                 _context.Organizations.Add(organization);

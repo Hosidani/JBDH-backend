@@ -30,6 +30,7 @@ class JobStreamService
         /// <returns>A list of job ads as raw JSON objects.</returns>
         public static async Task<List<Dictionary<string, object>>> FetchJobAdsAsync(string url)
         {
+            LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {url}");
             try
             {
                 using var client = new HttpClient();
@@ -47,6 +48,7 @@ class JobStreamService
 
         public static async Task<List<Dictionary<string, object>>> FetchJobAdsAsync(string url, string date)
         {
+            LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {url} with date: {date}");
             try
             {
                 using var client = new HttpClient();

@@ -14,10 +14,8 @@ namespace JBDH.Models
         [StringLength(100)]
         public string Name { get; set; }
 
-        public string Description { get; set; }
+        public ICollection<User> Managers { get; set; } = new List<User>();
 
-        public ICollection<Manager> Managers { get; set; } = new List<Manager>();
-
-        public ICollection<User> Users { get; set; }
+        public ICollection<int> Users { get; set; }
     }
 }

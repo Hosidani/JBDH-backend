@@ -75,15 +75,12 @@ public class ApplicationDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(255); // Required field with max length
 
-            entity.Property(o => o.Description)
-                .HasMaxLength(1000); // Optional field with max length
-
             // Configure many-to-many relationship for Managers
             entity.HasMany(o => o.Managers)
-                .WithMany(m => m.ManagedOrganizations) // Directly reference ManagedOrganizations
+                .WithMany("ManagedOrganizations") // Directly reference ManagedOrganizations
                 .UsingEntity<Dictionary<string, object>>(
                     "OrganizationManagers",
-                    j => j.HasOne<Manager>() // Reference Manager
+                    j => j.HasOne<User>() // Reference Manager
                           .WithMany()
                           .HasForeignKey("ManagerId")
                           .OnDelete(DeleteBehavior.Cascade),
@@ -96,6 +93,7 @@ public class ApplicationDbContext : DbContext
                         j.HasKey("ManagerId", "OrganizationId"); // Composite key
                         j.ToTable("OrganizationManagers");
                     });
+            
         });
 
         // Configure the Friendship relationships

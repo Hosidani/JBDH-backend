@@ -13,19 +13,6 @@ using MySql.EntityFrameworkCore.Extensions; // For UseMySQL
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Run DbHandler.Main synchronously before starting the web application
-await Task.Run(() =>
-{
-    try
-    {
-        DatabaseHandlerService.databaseHandler(args); // Initialize database or populate tables
-    }
-    catch (Exception ex)
-    {
-        LoggingConfigService.ReturnError($"Error in DbHandler.Main: {ex.Message}");
-    }
-});
-
 // Run PlatsbankenApi.Main asynchronously before starting the web application
 await Task.Run(async () =>
 {
@@ -39,6 +26,19 @@ await Task.Run(async () =>
     }
 });
 
+
+// Run DbHandler.Main synchronously before starting the web application
+await Task.Run(() =>
+{
+    try
+    {
+        DatabaseHandlerService.databaseHandler(args); // Initialize database or populate tables
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Error in DbHandler.Main: {ex.Message}");
+    }
+});
 
 
 // Add services to the container **before** calling builder.Build
@@ -111,6 +111,20 @@ var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 // SHUTDOWN HOOK:
 lifetime.ApplicationStopping.Register(() =>
 {
+    var filePath = Path.Combine(AppContext.BaseDirectory, "timestamp.txt");
+
+    if (File.Exists(filePath))
+    {
+        try
+        {
+            File.Delete(filePath);
+            Console.WriteLine("timestamp.txt deleted on shutdown.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to delete timestamp.txt: {ex.Message}");
+        }
+    }
     try
     {
         // Create a new scope to resolve scoped services
@@ -122,6 +136,7 @@ lifetime.ApplicationStopping.Register(() =>
             // Call your database flushing service
             FlushDatabaseService.FlushDatabase();
             DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            
             LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
         }
     }

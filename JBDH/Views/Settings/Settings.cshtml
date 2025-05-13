@@ -27,18 +27,7 @@
     </form>
 
     <hr />
-
-    <p>Update your organisation ID below:</p>
-    <form method="post" asp-action="UpdateOrganisationId" asp-controller="Settings">
-        <div class="mb-3">
-            <label for="organisationId" class="form-label">Organisation ID</label>
-            <input type="number" class="form-control" id="organisationId" name="newOrganisationId" value="@ViewData["OrganisationId"]" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Update Organisation ID</button>
-    </form>
-
-    <hr />
-
+    
     <p>Update your CV below:</p>
     <form method="post" enctype="multipart/form-data" asp-action="ChangeCV" asp-controller="Settings">
         <div class="mb-3">

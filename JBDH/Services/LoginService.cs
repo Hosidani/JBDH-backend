@@ -55,7 +55,6 @@ namespace JBDH.Services
             {
                 Username = username,
                 PasswordHash = passwordHash,
-                IsOrganizationVerified = false // Always default to false
             };
 
             _context.Users.Add(user);

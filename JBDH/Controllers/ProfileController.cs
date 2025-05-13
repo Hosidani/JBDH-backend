@@ -46,16 +46,11 @@ public class ProfileController : Controller
         }
 
         var isFriend = await _friendService.AreFriendsAsync(currentUserId, userId);
-        var organizationName = user.IsOrganizationVerified ? await _context.Organizations
-            .Where(o => o.Users.Any(u => u.Id == user.Id))
-            .Select(o => o.Name)
-            .FirstOrDefaultAsync() 
-        : null;
         var viewModel = new ProfileViewModel
         {
             User = user,
             IsFriend = isFriend,
-            Organization = user.IsOrganizationVerified != null ? organizationName : null // Display organization name only if verified and not null
+            Organization = null, // Display organization name only if verified and not null
         };
 
         return View(viewModel);
