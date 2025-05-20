@@ -24,17 +24,58 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @for (int i = 0; i < Model.Count; i++)
                 {
-                    <tr>
-                        <td>@item.Priority</td>
-                        <td>@(item.Job.ContainsKey("title") ? item.Job["title"] : "N/A")</td>
-                        <td>@(item.Job.ContainsKey("company") ? item.Job["company"] : "N/A")</td>
-                        <td>@(item.Job.ContainsKey("location") ? item.Job["location"] : "N/A")</td>
-                        <td>@(item.Job.ContainsKey("description") ? item.Job["description"] : "N/A")</td>
-                    </tr>
+                    var item = Model[i];
+                    var jobId = item.Job.ContainsKey("job_id") ? item.Job["job_id"] : null;
+                    var title = item.Job.ContainsKey("title") ? item.Job["title"] : "N/A";
+                    var company = item.Job.ContainsKey("company") ? item.Job["company"] : "N/A";
+                    var location = item.Job.ContainsKey("location") ? item.Job["location"] : "N/A";
+                    var description = item.Job.ContainsKey("description") ? item.Job["description"] : "N/A";
+                    var url = item.Job.ContainsKey("webpage_url") ? item.Job["webpage_url"] : "#";
+                <tr>
+                    <td>@item.Priority</td>
+                    <td>
+                        <a href="@url" target="_blank" class="text-primary" onclick="toggleApplyFormAndOpen(event, @i, '@url')">@title</a>
+                    </td>
+                    <td>@company</td>
+                    <td>@location</td>
+                    <td>@description</td>
+                </tr>
+                <tr id="applyRow-@i" style="display:none;">
+                    <td colspan="5">
+                        <form asp-controller="JobApplication" asp-action="Apply" method="post">
+                            <input type="hidden" name="jobId" value="@jobId" />
+                            <textarea name="notes" placeholder="Add note (optional)" class="form-control"></textarea>
+                            <button type="submit" id="applyBtn-@i" class="btn btn-primary mt-2">✅ Mark as Applied</button>
+                        </form>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
     }
 </div>
+
+@section Scripts {
+    <script>
+        function toggleApplyFormAndOpen(event, index, url) {
+            // Open the URL in a new tab
+            window.open(url, '_blank');
+            // Show the apply form for this job
+            document.querySelectorAll('[id^="applyRow-"]').forEach(row => row.style.display = "none");
+            document.getElementById("applyRow-" + index).style.display = "";
+            // Prevent default link navigation (so it doesn't also open in the current tab)
+            event.preventDefault();
+        }
+
+        function markApplied(form, index) {
+            var btn = document.getElementById("applyBtn-" + index);
+            btn.classList.remove("btn-primary");
+            btn.classList.add("btn-success");
+            btn.innerText = "✅ Applied";
+            btn.disabled = true;
+            return false; // Prevent actual form submission for demo
+        }
+    </script>
+}
