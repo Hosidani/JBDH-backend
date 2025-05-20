@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\JBDH.csproj": {}
+    "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\JBDH.csproj": {
+    "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\JBDH.csproj",
+        "projectUniqueName": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj",
         "projectName": "JBDH",
-        "projectPath": "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\JBDH.csproj",
-        "packagesPath": "C:\\Users\\hosse\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hosse\\OneDrive\\Documents\\GitHub\\JBDH_V0.1\\JBDH\\obj\\",
+        "projectPath": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\JBDH.csproj",
+        "packagesPath": "C:\\Users\\yazda\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\hosse\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\yazda\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -98,7 +104,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.204/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

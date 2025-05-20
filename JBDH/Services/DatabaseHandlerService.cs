@@ -22,7 +22,6 @@ namespace JBDH.Services
                     LoggingConfigService.ReturnInfo($"JSON file already exists: {filePath}");
                 }
             }
-
             private static void EnsureTablesExist(MySqlConnection connection)
             {
                 try
@@ -33,6 +32,7 @@ namespace JBDH.Services
                     var createEmailVerificationTable = SqlQueries.SqlQuery(17);
                     var createFriendshipTable = SqlQueries.SqlQuery(16);
                     var createOrganisationTable = SqlQueries.SqlQuery(17);
+                    var createJobApplicationTable = SqlQueries.SqlQuery(19);
                     using (var command = new MySqlCommand(createRawTable, connection))
                     {
                         command.ExecuteNonQuery();
@@ -57,7 +57,11 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
-                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users', 'Friendships' and 'Organisations' tables exists.");
+                    using (var command = new MySqlCommand(createJobApplicationTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users' , 'EmailVerification' , 'Friendships' and 'JobApplication' tables exists.");
                 }
                 catch (Exception e)
                 {

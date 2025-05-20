@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using MySql.Data.MySqlClient;
 using JBDH.Models; // Assuming this is the namespace for your models
+using NLog.Fluent; // Assuming this is the namespace for your models
 
 namespace JBDH.Services
 {    

@@ -18,28 +18,18 @@ await Task.Run(async () =>
 {
     try
     {
-        await JobStreamService.Main(args); // Fetch or process job data
+        await JobStreamService.Main(args); // Async job service
+        DatabaseHandlerService.databaseHandler(args); // Synchronous DB handler
     }
     catch (Exception ex)
     {
-        LoggingConfigService.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
+        LoggingConfigService.ReturnError($"Startup error: {ex.Message}");
+        throw; // Optional: rethrow if you want the app to fail on critical startup errors
     }
+
+// Run PlatsbankenApi.Main asynchronously before starting the web application
+
 });
-
-
-// Run DbHandler.Main synchronously before starting the web application
-await Task.Run(() =>
-{
-    try
-    {
-        DatabaseHandlerService.databaseHandler(args); // Initialize database or populate tables
-    }
-    catch (Exception ex)
-    {
-        LoggingConfigService.ReturnError($"Error in DbHandler.Main: {ex.Message}");
-    }
-});
-
 
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
@@ -47,6 +37,7 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 
 // Add session support
@@ -136,6 +127,7 @@ lifetime.ApplicationStopping.Register(() =>
             // Call your database flushing service
             FlushDatabaseService.FlushDatabase();
             DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            JobStreamService.DeleteTimestampFile(); // Delete the timestamp file
             
             LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
         }
