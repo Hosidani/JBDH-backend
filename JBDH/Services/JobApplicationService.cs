@@ -25,9 +25,8 @@ namespace JBDH.Services
         public async Task<bool> ApplyJobAsync( int userId, int jobId, string notes)
         {
             LoggingConfigService.ReturnInfo($"User {userId} is applying for job {jobId} with notes: {notes}.");
-            // Check if the user has already applied for the job
-            if (await HasUserAppliedAsync(userId, jobId)) return false;
-            LoggingConfigService.ReturnInfo($"User {userId} has not applied for job {jobId} yet.");
+            if (await HasUserAppliedAsync(userId, jobId))
+                return false;
             var application = new JobApplication
             {
                 UserId = userId,
@@ -35,8 +34,6 @@ namespace JBDH.Services
                 AppliedAt = DateTime.UtcNow,
                 Notes = notes
             };
-            LoggingConfigService.ReturnInfo($"Creating new job application for user {userId} and job {jobId}.");
-            // Add the new application to the database
             _context.JobApplications.Add(application);
             await _context.SaveChangesAsync();
             return true;
@@ -45,13 +42,10 @@ namespace JBDH.Services
         public async Task<bool> UnapplyJobAsync( int userId, int jobId)
         {
             LoggingConfigService.ReturnInfo($"User {userId} is unapplying from job {jobId}.");
-            // Check if the user has applied for the job
             var app = await _context.JobApplications
                 .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
-
-            if (app == null) return false;
-            LoggingConfigService.ReturnInfo($"User {userId} has applied for job {jobId} and is now unapplying.");
-            // Remove the application from the database
+            if (app == null)
+                return false;
             _context.JobApplications.Remove(app);
             await _context.SaveChangesAsync();
             return true;
