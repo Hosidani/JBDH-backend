@@ -37,6 +37,11 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddSingleton<AIConfig>();
+builder.Services.AddHttpClient<IAIService, AIService>();
+builder.Services.AddScoped<IManageInputService, ManageInputService>();
+builder.Services.AddScoped<IAIHelperSwitchService, AIHelperSwitchService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 
@@ -78,9 +83,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register SMTP config
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-
-// Register email service
-builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Validate SMTP settings
 var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();

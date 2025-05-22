@@ -13,12 +13,14 @@ public class ProfileController : Controller
     private readonly ApplicationDbContext _context;
     private readonly IProfileService _profileService;
     private readonly IFriendService _friendService; // Add reference to FriendService
+    private readonly IAIService _aiService;
 
-    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService)
+    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIService aiService)
     {
         _context = context;
         _profileService = profileService;
         _friendService = friendService; // Initialize FriendService
+        _aiService = aiService; 
     }
 
     // GET: Profile
@@ -71,11 +73,12 @@ public class ProfileController : Controller
         {
             return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
         }
-
+        var aiResponse = await _aiService.GetAIResponse(user, 0);
         var viewModel = new ProfileViewModel
         {
             User = user,
-            IsFriend = false // Doesn't matter here, since it's the user's own profile
+            IsFriend = false, // Doesn't matter here, since it's the user's own profile
+            AIResponse = aiResponse
         };
 
         return View("MyProfile", viewModel); // Make sure you're explicitly referring to MyProfile.cshtml
@@ -111,6 +114,4 @@ public class ProfileController : Controller
             return View("ErrorPage", "Could not send friend request.");
         }
     }
-
-
 }

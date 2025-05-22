@@ -3,15 +3,21 @@ using System.Text.Json;
 using Newtonsoft.Json; 
 using JBDH.Models;
 using AIConfig = JBDH.Models.AIConfig;
+using Microsoft.AspNetCore.Authorization;
+using System.Text.Json.Nodes;
 
 namespace JBDH.Services
 {
 
 
-    public class AIService
+    public class AIService : IAIService
     {
         private readonly HttpClient _httpClient;
-        private AIConfig _aiConfig; // HOSSEIN: Deleted readonly (_aiConfig needs to be reassigned later.)
+        private AIConfig _aiConfig;
+        private readonly IManageInputService _manageInputService;
+        private IAIHelperSwitchService _aiHelperSwitchService;
+
+        // HOSSEIN: Deleted readonly (_aiConfig needs to be reassigned later.)
         /*
         curl.exe
         Calls the curl program. On Windows, you often see it as curl.exe.
@@ -49,42 +55,27 @@ namespace JBDH.Services
         -d '{"model": "deepseek-chat", "messages": [{"role": "system", "content": "You."}, {"role": "user", "content": "Hello!"}], "stream": false}'
         */
         // Constructor to initialize HttpClient and AIConfig
-        public AIService(HttpClient httpClient, AIConfig aiConfig)
+        public AIService(HttpClient httpClient, AIConfig aiConfig, IManageInputService manageInputService, IAIHelperSwitchService aiHelperSwitchService)
         {
             _httpClient = httpClient;
             _aiConfig = aiConfig;
+            _manageInputService = manageInputService;
+            _aiHelperSwitchService = aiHelperSwitchService;
+
         }
-        // Method to generate a response from OpenAI API
-        public async Task<string> GenerateChatResponseAsync()
-{
-    string userMessage = "Hello! What is 5+2?"; // This should be replaced with the actual user input
-    // Create the request body
-    var requestBody = new
-    {
-        model = _aiConfig.OpenAIModel, // e.g., "deepseek-chat"
-        messages = new[]
-        {
-            new { role = "system", content = "You are to answer my questions." },
-            new { role = "user", content = userMessage }
-        },
-        stream = false
-    };
+        // this should move to a separate method
+        public async Task<string> GetAIResponse(User user, int commandId) {
 
-            var requestJson = JsonConvert.SerializeObject(requestBody);
-            var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
+        _httpClient.DefaultRequestHeaders.Clear();
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
 
-            // Add headers
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
-
-            var response = await _httpClient.PostAsync(_aiConfig.OpenAIUrl, requestContent);
-            response.EnsureSuccessStatusCode();
-
-            var responseBody = await response.Content.ReadAsStringAsync();
-            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
-
-            return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
+        var content = await _aiHelperSwitchService.HelperSwitch(user,commandId);
+        var response = await _httpClient.PostAsync(_aiConfig.OpenAIUrl, content);
+        response.EnsureSuccessStatusCode();
+        var responseBody = await response.Content.ReadAsStringAsync();
+        dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
+        return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
         }
 
     }

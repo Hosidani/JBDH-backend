@@ -64,5 +64,16 @@
                 <span>No CV uploaded</span>
             }
         </dd>
+        <dd class="col-sm-9"></dd>
+            @if (!string.IsNullOrEmpty(Model.AIResponse))
+            {
+                <span class="badge bg-info">AI Response</span>
+                <p>@Model.AIResponse</p>
+            }
+            else
+            {
+                <span>No AI response available</span>
+            }
+        </dd>
     </dl>
 </div>
