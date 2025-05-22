@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace JBDH.Services
 {
     public interface ILoginService
