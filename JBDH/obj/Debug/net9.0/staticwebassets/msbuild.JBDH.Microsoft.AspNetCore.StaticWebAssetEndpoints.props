@@ -772,25 +772,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Cover_Letter.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"hk1nl53124"},{"Name":"integrity","Value":"sha256-sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="},{"Name":"label","Value":"_content/JBDH/uploads/Cover_Letter.pdf"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Tue, 20 May 2025 09:04:34 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Tue, 20 May 2025 08:09:53 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Cover_Letter.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Cover_Letter.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Tue, 20 May 2025 09:04:34 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"6fzcy72bf2"},{"Name":"integrity","Value":"sha256-rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA="},{"Name":"label","Value":"_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"200718"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 18:04:11 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"200718"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 18:04:11 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Tue, 20 May 2025 08:09:53 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/kryddning.020jj3qt1v.jpg">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\kryddning.jpg'))</AssetFile>

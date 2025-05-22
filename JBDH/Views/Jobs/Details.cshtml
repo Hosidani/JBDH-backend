@@ -1,0 +1,20 @@
+@using JBDH.Models.ViewModels
+@model JobDetailsViewModel
+
+<h2>Job Details</h2>
+
+@if (Model.HasApplied)
+{
+    <form asp-action="Unapply" method="post">
+        <input type="hidden" name="jobId" value="@Model.JobId" />
+        <button type="submit" class="btn btn-secondary">❌ Withdraw Application</button>
+    </form>
+}
+else
+{
+    <form asp-action="Apply" method="post">
+        <input type="hidden" name="jobId" value="@Model.JobId" />
+        <textarea name="notes" placeholder="Add note (optional)" class="form-control"></textarea>
+        <button type="submit" class="btn btn-primary mt-2">✅ Mark as Applied</button>
+    </form>
+}

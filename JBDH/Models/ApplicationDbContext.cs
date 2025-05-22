@@ -14,10 +14,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<Manager> Managers { get; set; }
 
+    public DbSet<Job> Jobs { get; set; }
+    public DbSet<JobApplication> JobApplications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        modelBuilder.Entity<Job>().ToTable("clean_table");
         modelBuilder.Entity<User>()
             .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
             .HasValue<User>("User")
@@ -108,5 +111,20 @@ public class ApplicationDbContext : DbContext
             .WithMany(u => u.ReceivedFriendRequests)
             .HasForeignKey(f => f.AddresseeId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<JobApplication>(entity =>
+        {
+            // Composite Primary Key
+            entity.HasKey(ja => new { ja.UserId, ja.JobId });
+
+            // Ensure JobId matches VARCHAR(255)
+            entity.Property(ja => ja.JobId)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            // Optional: explicitly set the table name
+            entity.ToTable("JobApplications");
+        });
+
     }
 }

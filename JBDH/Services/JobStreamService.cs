@@ -13,7 +13,7 @@ class JobStreamService
     {
         private const string DbTableName = "testing_purposes";
         private const string DbFileName = "testing_purposes.db";
-        private const string TimestampFile = "timestamp2.txt";
+        private const string TimestampFile = "timestamp.txt";
         private const string JsonFile = "jobs.json";
 
         private const string BaseUrl = "https://jobstream.api.jobtechdev.se";
@@ -108,6 +108,21 @@ class JobStreamService
             catch (Exception e)
             {
                 LoggingConfigService.ReturnError($"Error saving JSON file: {e.Message}");
+            }
+        }
+        public static void DeleteTimestampFile()
+        {
+            try
+            {
+                if (File.Exists(TimestampFile))
+                {
+                    File.Delete(TimestampFile);
+                    LoggingConfigService.ReturnInfo($"Deleted timestamp file: {TimestampFile}");
+                }
+            }
+            catch (Exception e)
+            {
+                LoggingConfigService.ReturnError($"Error deleting timestamp file: {e.Message}");
             }
         }
         public static async Task Main(string[] args)

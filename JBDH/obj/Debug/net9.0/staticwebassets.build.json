@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "rO5WI7eV6nRDY+DhHnFevnAijK9BsKnYPqIpoHH5IDE=",
+  "Hash": "Q2KcKiEQhcbeSNoWa5pMt8DgELR8Pb+LBnzxkkudcGM=",
   "Source": "JBDH",
   "BasePath": "_content/JBDH",
   "Mode": "Default",
@@ -2745,27 +2745,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploads\\Cover_Letter.pdf"
-    },
-    {
-      "Identity": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
-      "SourceId": "JBDH",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\",
-      "BasePath": "_content/JBDH",
-      "RelativePath": "uploads/Hossein_YazdaniPajouh_CV#[.{fingerprint}]?.pdf",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "6fzcy72bf2",
-      "Integrity": "rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf"
     },
     {
       "Identity": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\kryddning.jpg",
@@ -22009,7 +21988,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 20 May 2025 09:04:34 GMT"
+          "Value": "Tue, 20 May 2025 08:09:53 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22054,7 +22033,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 20 May 2025 09:04:34 GMT"
+          "Value": "Tue, 20 May 2025 08:09:53 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22065,88 +22044,6 @@
         {
           "Name": "integrity",
           "Value": "sha256-sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="
-        }
-      ]
-    },
-    {
-      "Route": "uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf",
-      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "200718"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/pdf"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Thu, 22 May 2025 18:04:11 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "6fzcy72bf2"
-        },
-        {
-          "Name": "label",
-          "Value": "uploads/Hossein_YazdaniPajouh_CV.pdf"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
-        }
-      ]
-    },
-    {
-      "Route": "uploads/Hossein_YazdaniPajouh_CV.pdf",
-      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "200718"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/pdf"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Thu, 22 May 2025 18:04:11 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
         }
       ]
     },
