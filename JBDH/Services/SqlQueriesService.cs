@@ -9,8 +9,8 @@ namespace JBDH.Services
             private static readonly Dictionary<int, string> Queries = new Dictionary<int, string>
             {
                 { 0, "CREATE DATABASE IF NOT EXISTS testing_purposes"},
-                { 1, "CREATE TABLE IF NOT EXISTS raw_table (job_id VARCHAR(255) PRIMARY KEY,title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" }, 
-                { 2, "CREATE TABLE IF NOT EXISTS clean_table (job_id VARCHAR(255) PRIMARY KEY, title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" }, 
+                { 1, "CREATE TABLE IF NOT EXISTS raw_table (job_id VARCHAR(255) PRIMARY KEY,title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" },
+                { 2, "CREATE TABLE IF NOT EXISTS clean_table (job_id VARCHAR(255) PRIMARY KEY, title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" },
                 { 3, "INSERT INTO raw_table (job_id, title, description, company, location, posted_date, webpage_url) VALUES (@job_id, @title, @description, @company, @location, @posted_date, @webpage_url);" },
                 { 4, "DELETE FROM EmailVerificationTokens;" },
                 { 5, "INSERT INTO clean_table SELECT DISTINCT * FROM raw_table;" },
@@ -26,7 +26,8 @@ namespace JBDH.Services
                 { 16, "CREATE TABLE IF NOT EXISTS Friendships (Id INT PRIMARY KEY AUTO_INCREMENT, RequesterId INT NOT NULL,AddresseeId INT NOT NULL, Status ENUM('Pending', 'Friends') NOT NULL, RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (RequesterId) REFERENCES Users(Id), FOREIGN KEY (AddresseeId) REFERENCES Users(Id))"},
                 { 17, "CREATE TABLE IF NOT EXISTS EmailVerificationTokens ( Id INT PRIMARY KEY AUTO_INCREMENT, Token VARCHAR(255) NOT NULL, UserId INT NOT NULL, ExpirationDate DATETIME NOT NULL, IsUsed BOOLEAN DEFAULT FALSE, FOREIGN KEY (UserId) REFERENCES Users(Id) );" },
                 { 18, "CREATE TABLE IF NOT EXISTS Organisations (Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(255) NOT NULL UNIQUE, CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP);" },
-                { 19, "CREATE TABLE IF NOT EXISTS JobApplications (ApplicationId INT PRIMARY KEY AUTO_INCREMENT, UserId INT NOT NULL, JobId VARCHAR(255) NOT NULL, AppliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, Notes TEXT);"}
+                { 19, "CREATE TABLE IF NOT EXISTS JobApplications (ApplicationId INT PRIMARY KEY AUTO_INCREMENT, UserId INT NOT NULL, JobId VARCHAR(255) NOT NULL, AppliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, Notes TEXT);"},
+                { 20, "CREATE TABLE IF NOT EXISTS DataFlows (Id INT PRIMARY KEY AUTO_INCREMENT, ContentType VARCHAR(50), Content TEXT, CreatedAt DATETIME, UserId INT);" }
             };
 
         public static string SqlQuery(int queryId)

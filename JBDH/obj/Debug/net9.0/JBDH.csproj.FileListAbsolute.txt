@@ -850,3 +850,8 @@ C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Core.dl
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Fonts.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Tokenization.dll
 C:\Users\danie\Documents\JBDH_V0.1\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Tokens.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Core.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Fonts.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Tokenization.dll
+C:\Users\yazda\OneDrive\Documents\DH_MVC_APP\JBDH\JBDH\bin\Debug\net9.0\UglyToad.PdfPig.Tokens.dll

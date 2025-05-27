@@ -25,5 +25,6 @@ namespace JBDH.Models
         public ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
         public ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
         public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
+        public ICollection<DataFlow> DataFlows { get; set; } = new List<DataFlow>();
     }
 }

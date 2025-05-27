@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
+    public DbSet<DataFlow> DataFlows { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,7 +97,7 @@ public class ApplicationDbContext : DbContext
                         j.HasKey("ManagerId", "OrganizationId"); // Composite key
                         j.ToTable("OrganizationManagers");
                     });
-            
+
         });
 
         // Configure the Friendship relationships
@@ -124,6 +125,21 @@ public class ApplicationDbContext : DbContext
 
             // Optional: explicitly set the table name
             entity.ToTable("JobApplications");
+        });
+        
+        modelBuilder.Entity<DataFlow>(entity =>
+        {
+            entity.HasKey(df => df.Id); // Primary key
+
+            entity.Property(df => df.ContentType)
+                .IsRequired()
+                .HasMaxLength(50); // Required field with max length
+
+            entity.Property(df => df.Content)
+                .IsRequired(); // Required field
+
+            entity.Property(df => df.CreatedAt)
+                .IsRequired(); // Required field
         });
 
     }
