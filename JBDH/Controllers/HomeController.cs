@@ -59,8 +59,14 @@ public class HomeController : Controller
         }
         if (Int32.Parse(userId) > 0)
         {
+            if (string.IsNullOrEmpty(model.Content))
+            {
+                LoggingConfigService.ReturnError("Content cannot be empty.");
+                ModelState.AddModelError("Content", "Content cannot be empty.");
+                return View();
+            }
+            LoggingConfigService.ReturnInfo($"Creating new data flow with title: {model.Content} IN CONTROLLER");
             await _dataFlowService.CreateAsync(model, Int32.Parse(userId));
-            LoggingConfigService.ReturnInfo("Data flow created successfully.");
         }
         return RedirectToAction("Index");
     }

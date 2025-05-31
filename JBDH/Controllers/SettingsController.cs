@@ -12,9 +12,14 @@ namespace JBDH.Controllers
         private readonly IUserPropertiesService _userPropertiesService; 
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        
+        private readonly IAIService _aiService;
 
-        public SettingsController(IUserPropertiesService userService)
+        public SettingsController(IUserPropertiesService userService, ApplicationDbContext context, IWebHostEnvironment environment, IAIService aiService)
         {
+            _context = context;
+            _environment = environment;
+            _aiService = aiService;
             _userPropertiesService = userService;
         }
 
@@ -26,7 +31,19 @@ namespace JBDH.Controllers
                 ViewData["SuccessMessage"] = "CV updated successfully!";
             else
                 ViewData["ErrorMessage"] = "Failed to upload CV.";
-
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                ViewData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Settings", "Home");
+            }
+            var aiResponse = await _aiService.GetAIResponse(user, 0);
+            var viewModel = new ProfileViewModel
+            {
+                User = user,
+                IsFriend = false, // Doesn't matter here, since it's the user's own profile
+                AIResponse = aiResponse
+            };
             return RedirectToAction("Settings", "Home");
         }
         

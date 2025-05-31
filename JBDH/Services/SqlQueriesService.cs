@@ -15,6 +15,7 @@ namespace JBDH.Services
                 { 4, "DELETE FROM EmailVerificationTokens;" },
                 { 5, "INSERT INTO clean_table SELECT DISTINCT * FROM raw_table;" },
                 { 6, "DELETE FROM clean_table WHERE job_id NOT IN (SELECT MIN(job_id) FROM clean_table GROUP BY description);" },
+                { 7, "CREATE TABLE IF NOT EXISTS ai_responses (ID INT PRIMARY KEY AUTO_INCREMENT, content TEXT);" },
                 { 8, "SELECT * FROM clean_table WHERE posted_date LIKE @param1 ORDER BY posted_date DESC;" },
                 { 9, "SELECT * FROM clean_table WHERE LOWER(title) LIKE @param1 OR LOWER(description) LIKE @param1;" },
                 { 10, "SELECT * FROM clean_table WHERE LOWER(location) LIKE @param1;" },

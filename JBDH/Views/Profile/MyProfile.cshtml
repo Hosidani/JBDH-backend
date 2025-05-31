@@ -67,12 +67,12 @@
         <dd class="col-sm-9"></dd>
             @if (!string.IsNullOrEmpty(Model.AIResponse))
             {
-                <span class="badge bg-info">AI Response</span>
+                <button type="button" class="btn btn-info btn-sm" disabled>Analyze CV</button>
                 <p>@Model.AIResponse</p>
             }
             else
             {
-                <span>No AI response available</span>
+                <span>No CV available</span>
             }
         </dd>
     </dl>

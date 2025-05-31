@@ -13,12 +13,15 @@ public class RegisterController : Controller
     private readonly ApplicationDbContext _context;
     private readonly ILogger<RegisterController> _logger;
     private readonly IEmailService _emailService;
+    
+    private readonly IAIService _aiService;
 
-    public RegisterController(IEmailService emailService, ApplicationDbContext context, ILogger<RegisterController> logger)
+    public RegisterController(IEmailService emailService, ApplicationDbContext context, ILogger<RegisterController> logger, IAIService aiService)
     {
         _emailService = emailService;
         _context = context;
         _logger = logger;
+        _aiService = aiService;
     }
 
     [HttpGet]
@@ -126,6 +129,13 @@ public class RegisterController : Controller
             ViewData["Username"] = model.Username;
 
             ViewBag.Email = model.Email;
+            var aiResponse = await _aiService.GetAIResponse(user, 0);
+            var viewModel = new ProfileViewModel
+            {
+                User = user,
+                IsFriend = false, // Doesn't matter here, since it's the user's own profile
+                AIResponse = aiResponse
+            };
             return View("CheckYourEmail");
         }
         catch
