@@ -1,4 +1,6 @@
+@using Markdig
 @model JBDH.Models.ProfileViewModel
+
 
 @{
     ViewData["Title"] = "My Profile";
@@ -65,10 +67,22 @@
             }
         </dd>
         <dd class="col-sm-9"></dd>
-            @if (!string.IsNullOrEmpty(Model.AIResponse))
+            @{
+                var markdown = Model.UserAIResponse?.responseText ?? "";
+                var html = Markdig.Markdown.ToHtml(markdown);
+            }
+            @if (!string.IsNullOrEmpty(markdown))
             {
-                <button type="button" class="btn btn-info btn-sm" disabled>Analyze CV</button>
-                <p>@Model.AIResponse</p>
+                <button type="button" class="btn btn-info btn-sm" id="analyzeCvBtn">Analyze CV</button>
+                <div id="aiResponseContent" class="markdown-body" style="display:none;">
+                    @Html.Raw(html)
+                </div>
+                <script>
+                    document.getElementById('analyzeCvBtn').addEventListener('click', function() {
+                        var content = document.getElementById('aiResponseContent');
+                        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                    });
+                </script>
             }
             else
             {

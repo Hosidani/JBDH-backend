@@ -64,18 +64,36 @@ namespace JBDH.Services
 
         }
         // this should move to a separate method
-        public async Task<string> GetAIResponse(User user, int commandId) {
+        public async Task<string> GetAIResponse(User user, int commandId)
+        {
+            if (user == null)
+            {
+                LoggingConfigService.ReturnError("User is null");
+                return "User is null";
+            }
+            if (commandId < 0)
+            {
+                LoggingConfigService.ReturnError("CommandId is invalid");
+                return "CommandId is invalid";
+            }
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
 
-        _httpClient.DefaultRequestHeaders.Clear();
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
-
-        var content = await _aiHelperSwitchService.HelperSwitch(user,commandId);
-        var response = await _httpClient.PostAsync(_aiConfig.OpenAIUrl, content);
-        response.EnsureSuccessStatusCode();
-        var responseBody = await response.Content.ReadAsStringAsync();
-        dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
-        return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
+            LoggingConfigService.ReturnInfo($"Getting AI response for user {user.Username}.");
+            var content = await _aiHelperSwitchService.HelperSwitch(user, commandId);
+            if (content == null)
+            {
+                LoggingConfigService.ReturnError("Content is null or empty");
+                return "Content is null or empty";
+            }
+            var response = await _httpClient.PostAsync(_aiConfig.OpenAIUrl, content);
+            LoggingConfigService.ReturnInfo($"Response status code: {response.StatusCode}");
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            LoggingConfigService.ReturnInfo($"Response body: {responseBody}");
+            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
+            return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
         }
 
     }

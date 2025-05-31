@@ -3,7 +3,8 @@ namespace JBDH.Services
 {
     public interface IAIResponseService
     {
-        AIResponse GetAIResponse();
-        void SaveAIResponse(AIResponse aiResponse);
+        AIResponse GetAIResponseFromUser(User user);
+        void SaveAIResponse(AIResponse aiResponse, User user);
+        UserAIResponse GetUserAIResponseByUserId(int userId);
     }
 }

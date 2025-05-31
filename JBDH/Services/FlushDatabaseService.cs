@@ -27,6 +27,10 @@ namespace JBDH.Services
                     var emailVerificationRowsDeleted = deleteEmailVerificationTableCommand.ExecuteNonQuery();
                     LoggingConfigService.ReturnInfo($"Deleted {emailVerificationRowsDeleted} rows from email_verification table.");
                     
+                    // Delete all rows from AIResponses table
+                    var deleteAIResponsesTableCommand = new MySqlCommand(SqlQueries.SqlQuery(20), connection);
+                    var aiResponsesRowsDeleted = deleteAIResponsesTableCommand.ExecuteNonQuery();
+                    LoggingConfigService.ReturnInfo($"Deleted {aiResponsesRowsDeleted} rows from AIResponses table.");
                     // Delete all rows from Users table
                     var deleteUserTableCommand = new MySqlCommand(SqlQueries.SqlQuery(15), connection);
                     var userRowsDeleted = deleteUserTableCommand.ExecuteNonQuery();

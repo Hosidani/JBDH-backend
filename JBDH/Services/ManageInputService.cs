@@ -7,6 +7,11 @@ namespace JBDH.Services
     {
         public async Task<string> ExtractTextFromPdf(string pdfFilePath)
         {
+            if (!File.Exists(pdfFilePath))
+            {
+                LoggingConfigService.ReturnError($"PDF file not found: {pdfFilePath}");
+                return "CV file not found.";
+            }
             var sb = new StringBuilder();
             using (var document = PdfDocument.Open(pdfFilePath))
             {

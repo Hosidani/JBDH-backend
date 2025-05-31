@@ -12,12 +12,14 @@ namespace JBDH.Services
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWebHostEnvironment _environment;
+        private readonly IServiceProvider _serviceProvider;
 
-        public UserPropertiesService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
+        public UserPropertiesService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment, IServiceProvider serviceProvider)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _environment = environment;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<User> GetCurrentUserAsync()
@@ -119,6 +121,46 @@ namespace JBDH.Services
             user.CVPath = Path.Combine("uploads", cvFile.FileName);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<(bool Success, string ErrorMessage)> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return (false, "User not found.");
+
+            var uploadSuccess = await UploadCVAsync(cvFile);
+            if (!uploadSuccess)
+                return (false, "Failed to upload CV.");
+
+            // Run AI analysis in the background
+            Task.Run(async () =>
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
+                    var aiResponseService = scope.ServiceProvider.GetRequiredService<IAIResponseService>();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    try
+                    {
+                        string aiResponseText = await aiService.GetAIResponse(user, 0);
+                        var aiResponse = new AIResponse
+                        {
+                            responseText = aiResponseText,
+                            createdAt = DateTime.UtcNow
+                        };
+                        dbContext.AIResponses.Add(aiResponse);
+                        await dbContext.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingConfigService.ReturnError($"Background AI generation failed: {ex.Message}");
+                    }
+                }
+            });
+
+            return (true, null);
         }
     }
 }

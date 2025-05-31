@@ -14,36 +14,33 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
         
         private readonly IAIService _aiService;
+        private readonly IAIResponseService _aiResponseService;
 
-        public SettingsController(IUserPropertiesService userService, ApplicationDbContext context, IWebHostEnvironment environment, IAIService aiService)
+        public SettingsController(IUserPropertiesService userService, ApplicationDbContext context, IWebHostEnvironment environment, IAIService aiService, IAIResponseService aiResponseService)
         {
             _context = context;
             _environment = environment;
             _aiService = aiService;
             _userPropertiesService = userService;
+            _aiResponseService = aiResponseService;
         }
 
         [HttpPost]
         public async Task<IActionResult> ChangeCV(IFormFile cvFile)
         {
-            var success = await _userPropertiesService.UploadCVAsync(cvFile);
-            if (success)
-                ViewData["SuccessMessage"] = "CV updated successfully!";
-            else
-                ViewData["ErrorMessage"] = "Failed to upload CV.";
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user == null)
             {
                 ViewData["ErrorMessage"] = "User not found.";
                 return RedirectToAction("Settings", "Home");
             }
-            var aiResponse = await _aiService.GetAIResponse(user, 0);
-            var viewModel = new ProfileViewModel
-            {
-                User = user,
-                IsFriend = false, // Doesn't matter here, since it's the user's own profile
-                AIResponse = aiResponse
-            };
+
+            var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(cvFile, user.Id);
+            if (result.Success)
+                ViewData["SuccessMessage"] = "CV updated successfully!";
+            else
+                ViewData["ErrorMessage"] = result.ErrorMessage;
+
             return RedirectToAction("Settings", "Home");
         }
         

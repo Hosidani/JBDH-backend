@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
+using Microsoft.AspNetCore.Mvc;
 using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -15,7 +15,7 @@ public class ProfileController : Controller
     private readonly IFriendService _friendService; // Add reference to FriendService
     private readonly IAIService _aiService;
 
-    private readonly IAIResponseService AIResponseService;
+    private readonly IAIResponseService _airesponseService;
 
 
     public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIService aiService, IAIResponseService aiResponseService)
@@ -24,7 +24,7 @@ public class ProfileController : Controller
         _profileService = profileService;
         _friendService = friendService; // Initialize FriendService
         _aiService = aiService;
-        AIResponseService = aiResponseService;
+        _airesponseService = aiResponseService;
     }
 
     // GET: Profile
@@ -82,7 +82,7 @@ public class ProfileController : Controller
             User = user,
             IsFriend = false, // This is the user's own profile, so they are not a friend of themselves
             Organization = null, // Display organization name only if verified and not null
-            AIResponse = AIResponseService.GetAIResponse().responseText  // Get AI response for the user
+            UserAIResponse = _airesponseService.GetUserAIResponseByUserId(user.Id)  // Get AI response for the user
         };
 
         return View("MyProfile", viewModel); // Make sure you're explicitly referring to MyProfile.cshtml

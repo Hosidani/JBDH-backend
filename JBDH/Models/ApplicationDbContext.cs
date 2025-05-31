@@ -17,6 +17,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
     public DbSet<DataFlow> DataFlows { get; set; }
+    public DbSet<AIResponse> AIResponses { get; set; }
+    public DbSet<UserAIResponse> UserAIResponses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,6 +59,9 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.OpenForHiring)
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
+
+            entity.Property(u => u.Id)
+                .ValueGeneratedOnAdd();
         });
 
         // Configure EmailVerificationToken
@@ -107,6 +112,7 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(f => f.RequesterId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        // Configure the Friendship relationships
         modelBuilder.Entity<Friendship>()
             .HasOne(f => f.Addressee)
             .WithMany(u => u.ReceivedFriendRequests)
@@ -126,7 +132,7 @@ public class ApplicationDbContext : DbContext
             // Optional: explicitly set the table name
             entity.ToTable("JobApplications");
         });
-        
+
         modelBuilder.Entity<DataFlow>(entity =>
         {
             entity.HasKey(df => df.Id); // Primary key
@@ -141,6 +147,22 @@ public class ApplicationDbContext : DbContext
             entity.Property(df => df.CreatedAt)
                 .IsRequired(); // Required field
         });
+
+        modelBuilder.Entity<AIResponse>(entity =>
+        {
+            entity.HasKey(ar => ar.id); // Primary key
+
+            entity.Property(ar => ar.responseText)
+                .IsRequired(); // Required field
+
+            entity.Property(ar => ar.createdAt)
+                .IsRequired(); // Required field
+        });
+        modelBuilder.Entity<UserAIResponse>()
+            .HasOne(uai => uai.User)
+            .WithMany(u => u.AIResponses)
+            .HasForeignKey(uai => uai.UserId);
+
 
     }
 }

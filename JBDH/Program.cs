@@ -45,6 +45,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
+builder.Services.AddScoped<IAIResponseService, AIResponseService>();
+builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 
 // Add session support
 builder.Services.AddSession(options =>
