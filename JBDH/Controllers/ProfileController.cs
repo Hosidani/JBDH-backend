@@ -82,7 +82,7 @@ public class ProfileController : Controller
             User = user,
             IsFriend = false, // This is the user's own profile, so they are not a friend of themselves
             Organization = null, // Display organization name only if verified and not null
-            UserAIResponse = _airesponseService.GetUserAIResponseByUserId(user.Id)  // Get AI response for the user
+            UserAIResponse = await _airesponseService.GetLatestAIResponseAsync(user.Id)  // Get AI response for the user
         };
 
         return View("MyProfile", viewModel); // Make sure you're explicitly referring to MyProfile.cshtml

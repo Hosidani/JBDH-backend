@@ -5,6 +5,6 @@ namespace JBDH.Services
     {
         AIResponse GetAIResponseFromUser(User user);
         void SaveAIResponse(AIResponse aiResponse, User user);
-        UserAIResponse GetUserAIResponseByUserId(int userId);
+        Task<UserAIResponse> GetLatestAIResponseAsync(int userId);
     }
 }

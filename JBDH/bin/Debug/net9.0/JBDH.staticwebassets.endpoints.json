@@ -18941,8 +18941,8 @@
       ]
     },
     {
-      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.98xbwlm174.pdf",
-      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf",
+      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.7fe6zs8ve5.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -18955,7 +18955,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "768375"
+          "Value": "768418"
         },
         {
           "Name": "Content-Type",
@@ -18963,31 +18963,31 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"+bDssyHNQw4pdaZQx4Zl4kCCML1N1R3tqLjqJwhptio=\""
+          "Value": "\"fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 31 May 2025 23:01:11 GMT"
+          "Value": "Sun, 01 Jun 2025 20:49:13 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "98xbwlm174"
+          "Value": "7fe6zs8ve5"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-+bDssyHNQw4pdaZQx4Zl4kCCML1N1R3tqLjqJwhptio="
+          "Value": "sha256-fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y="
         },
         {
           "Name": "label",
-          "Value": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf"
+          "Value": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf"
         }
       ]
     },
     {
-      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf",
-      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf",
+      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -19000,7 +19000,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "768375"
+          "Value": "768418"
         },
         {
           "Name": "Content-Type",
@@ -19008,17 +19008,99 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"+bDssyHNQw4pdaZQx4Zl4kCCML1N1R3tqLjqJwhptio=\""
+          "Value": "\"fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 31 May 2025 23:01:11 GMT"
+          "Value": "Sun, 01 Jun 2025 20:49:13 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-+bDssyHNQw4pdaZQx4Zl4kCCML1N1R3tqLjqJwhptio="
+          "Value": "sha256-fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.7jf1cxe40t.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "769752"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"HWtM95fTGuvEXMejZdlXH+FkHzsWO+bcEPEGG4dxo40=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 31 May 2025 23:18:37 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "7jf1cxe40t"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-HWtM95fTGuvEXMejZdlXH+FkHzsWO+bcEPEGG4dxo40="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "769752"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"HWtM95fTGuvEXMejZdlXH+FkHzsWO+bcEPEGG4dxo40=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 31 May 2025 23:18:37 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-HWtM95fTGuvEXMejZdlXH+FkHzsWO+bcEPEGG4dxo40="
         }
       ]
     },

@@ -1,4 +1,5 @@
 using JBDH.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services
 {
@@ -41,24 +42,19 @@ namespace JBDH.Services
             LoggingConfigService.ReturnInfo($"AIResponse saved for user {user.Username}");
         }
 
-        // Method to get UserAIResponse by user ID
-        public UserAIResponse GetUserAIResponseByUserId(int userId)
+        public async Task<UserAIResponse> GetLatestAIResponseAsync(int userId)
         {
+            LoggingConfigService.ReturnInfo($"Fetching latest AI response for user ID: {userId}");
             if (userId <= 0)
             {
-                LoggingConfigService.ReturnError("Invalid user ID");
+                LoggingConfigService.ReturnError("Invalid user ID provided.");
                 return null;
             }
-
-            var userAIResponse = _context.UserAIResponses
-                .FirstOrDefault(uar => uar.UserId == userId);
-
-            if (userAIResponse == null)
-            {
-                LoggingConfigService.ReturnError($"No AI response found for user ID {userId}");
-            }
-
-            return userAIResponse;
+            return await _context.UserAIResponses
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.createdAt)
+                .FirstOrDefaultAsync();
         }
+
     }
 }

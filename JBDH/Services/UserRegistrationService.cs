@@ -117,7 +117,13 @@ public class UserRegistrationService : IUserRegistrationService
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 try
                 {
-                    string aiResponseText = await aiService.GetAIResponse(user, 0);
+                    AIHelperRequest request = new AIHelperRequest
+                    {
+                        User = user,
+                        CommandId = 0, // Assuming 0 is for CV analysis
+                        CVPath = user.CVPath
+                    };
+                    string aiResponseText = await aiService.GetAIResponse(request);
                     UserAIResponse useraiResponse = new UserAIResponse
                     {
                         responseText = aiResponseText,

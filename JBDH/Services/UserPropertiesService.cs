@@ -85,7 +85,13 @@ namespace JBDH.Services
             return true;
         }
 
-        public async Task<bool> UploadCVAsync(IFormFile cvFile)
+        private string GetAbsoluteCVPath(string cvFileName) // Helper method to get the absolute path of the CV file
+        {
+            if (string.IsNullOrEmpty(cvFileName)) return null;
+            return Path.Combine(_environment.WebRootPath, "uploads", cvFileName);
+        }
+
+        public async Task<bool> UploadCVAsync(IFormFile cvFile) // Method to upload CV file
         {
             var user = await GetCurrentUserAsync();
             if (user == null) return false;
@@ -113,26 +119,39 @@ namespace JBDH.Services
             // Delete old CV if exists
             if (!string.IsNullOrEmpty(user.CVPath))
             {
-                var oldCvFullPath = Path.Combine(_environment.WebRootPath, user.CVPath);
-                if (File.Exists(oldCvFullPath))
+                var oldCvFullPath = GetAbsoluteCVPath(user.CVPath);
+                if (!string.IsNullOrEmpty(oldCvFullPath) && File.Exists(oldCvFullPath))
                     File.Delete(oldCvFullPath);
             }
 
-            user.CVPath = Path.Combine("uploads", cvFile.FileName);
+            user.CVPath = cvFile.FileName; // Store only filename
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<(bool Success, string ErrorMessage)> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId)
+        public async Task<(bool Success, string ErrorMessage)> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId) // Method to change CV and analyze it
         {
+            LoggingConfigService.ReturnInfo("ChangeCVAndAnalyzeAsync method called.");
             var user = await _context.Users.FindAsync(userId);
+            LoggingConfigService.ReturnInfo($"User found: {user?.Username ?? "null"}");
             if (user == null)
+            {
+                LoggingConfigService.ReturnInfo("User not found.");
                 return (false, "User not found.");
-
+            }
+            if (cvFile == null || cvFile.Length == 0)
+            {
+                LoggingConfigService.ReturnInfo("No CV file provided.");
+                return (false, "No CV file provided.");
+            }
+            LoggingConfigService.ReturnInfo($"Received CV file: {cvFile.FileName}");
             var uploadSuccess = await UploadCVAsync(cvFile);
             if (!uploadSuccess)
+            {
+                LoggingConfigService.ReturnInfo("Failed to upload CV.");
                 return (false, "Failed to upload CV.");
-
+            }
+            LoggingConfigService.ReturnInfo($"CV upload success: {uploadSuccess}");
             // Run AI analysis in the background
             Task.Run(async () =>
             {
@@ -144,14 +163,25 @@ namespace JBDH.Services
 
                     try
                     {
-                        string aiResponseText = await aiService.GetAIResponse(user, 0);
-                        var aiResponse = new AIResponse
+                        LoggingConfigService.ReturnInfo("Starting AI analysis for user CV.");
+                        // Always construct the full path for AI analysis
+                        var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", user.CVPath);
+                        AIHelperRequest request = new AIHelperRequest
                         {
+                            CommandId = 0, // Assuming 0 is for CV analysis
+                            CVPath = fullCvPath,
+                            User = user
+                        };
+                        string aiResponseText = await aiService.GetAIResponse(request);
+                        var aiResponse = new UserAIResponse
+                        {
+                            UserId = user.Id,
                             responseText = aiResponseText,
                             createdAt = DateTime.UtcNow
                         };
                         dbContext.AIResponses.Add(aiResponse);
                         await dbContext.SaveChangesAsync();
+                        LoggingConfigService.ReturnInfo("AI analysis completed and response saved.");
                     }
                     catch (Exception ex)
                     {
@@ -160,7 +190,7 @@ namespace JBDH.Services
                 }
             });
 
-            return (true, null);
+            return (true, string.Empty);
         }
     }
 }

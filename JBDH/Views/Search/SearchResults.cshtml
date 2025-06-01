@@ -57,6 +57,17 @@
     }
 </div>
 
+@foreach (var job in Model)
+{
+    <div>
+        <span>@job.Job["title"]</span>
+        <form asp-action="AnalyzeJob" asp-controller="Jobs" method="post">
+            <input type="hidden" name="jobAdUrl" value="@job.Job["pdf_url"]" />
+            <button type="submit">Analyze with AI</button>
+        </form>
+    </div>
+}
+
 @section Scripts {
     <script>
         function toggleApplyFormAndOpen(event, index, url) {

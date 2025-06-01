@@ -1170,23 +1170,41 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Cover_Letter.pdf'))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf'))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf'))">
       <SourceType>Package</SourceType>
       <SourceId>JBDH</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/JBDH</BasePath>
-      <RelativePath>uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf</RelativePath>
+      <RelativePath>uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>All</AssetMode>
       <AssetRole>Primary</AssetRole>
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>98xbwlm174</Fingerprint>
-      <Integrity>+bDssyHNQw4pdaZQx4Zl4kCCML1N1R3tqLjqJwhptio=</Integrity>
+      <Fingerprint>7jf1cxe40t</Fingerprint>
+      <Integrity>HWtM95fTGuvEXMejZdlXH+FkHzsWO+bcEPEGG4dxo40=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-1.pdf'))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf'))">
+      <SourceType>Package</SourceType>
+      <SourceId>JBDH</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/JBDH</BasePath>
+      <RelativePath>uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>7fe6zs8ve5</Fingerprint>
+      <Integrity>fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))">
       <SourceType>Package</SourceType>
