@@ -49,6 +49,10 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.Email)
                 .IsRequired()
                 .HasMaxLength(100); // Required field with max length
+            
+            entity.Property(u => u.Location)
+                .IsRequired(false) // Optional field
+                .HasMaxLength(255); // Optional field with max length
 
             entity.Property(u => u.CVPath)
                 .HasMaxLength(2083); // Optional field with max length (e.g., URL length limit)

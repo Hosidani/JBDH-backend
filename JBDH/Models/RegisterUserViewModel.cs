@@ -6,6 +6,7 @@ namespace JBDH.Models
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
         public string Email { get; set; }
+        public string Location { get; set; }
         public IFormFile CVFile { get; set; }
         public bool OpenForHiring { get; set; }
     }

@@ -48,6 +48,7 @@ builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
 builder.Services.AddScoped<IAIResponseService, AIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
+builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 
 // Add session support
 builder.Services.AddSession(options =>

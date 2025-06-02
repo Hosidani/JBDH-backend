@@ -1,0 +1,49 @@
+@model List<SearchCandidateViewModel>
+
+@{
+    ViewData["Title"] = "Candidate Results";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Candidate Results</h1>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <p>No candidates found matching your criteria.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Priority</th>
+                    <th>Username</th>
+                    <th>Location</th>
+                    <th>AI Response</th>
+                    <th>AI Response Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var candidate in Model)
+                {
+                    <tr>
+                        <td>@candidate.Priority</td>
+                        <td>@candidate.Username</td>
+                        <td>@candidate.Location</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(candidate.AIResponse))
+                            {
+                                <div style="max-width: 400px; word-break: break-word;">
+                                    @candidate.AIResponse
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @candidate.AIResponseCreatedAt.ToString("yyyy-MM-dd HH:mm")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
