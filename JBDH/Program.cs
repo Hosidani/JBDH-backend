@@ -47,6 +47,7 @@ builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
 builder.Services.AddScoped<IAIResponseService, AIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 
 // Add session support
 builder.Services.AddSession(options =>

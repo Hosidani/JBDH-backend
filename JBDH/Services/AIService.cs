@@ -24,7 +24,6 @@ namespace JBDH.Services
             _aiHelperSwitchService = aiHelperSwitchService;
 
         }
-        // this should move to a separate method
         public async Task<string> GetAIResponse(AIHelperRequest request)
         {
             if (request == null)

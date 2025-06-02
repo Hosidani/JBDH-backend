@@ -17,10 +17,10 @@ namespace JBDH.Services
                     var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
                     LoggingConfigService.ReturnInfo($"Deleted {rawRowsDeleted} rows from raw_table.");
 
-                    // Delete all rows from clean_table
+                    // Delete all rows from Jobs
                     var deleteCleanTableCommand = new MySqlCommand(SqlQueries.SqlQuery(12), connection);
                     var cleanRowsDeleted = deleteCleanTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {cleanRowsDeleted} rows from clean_table.");
+                    LoggingConfigService.ReturnInfo($"Deleted {cleanRowsDeleted} rows from Jobs.");
 
                     // Delete all rows from email_verification table
                     var deleteEmailVerificationTableCommand = new MySqlCommand(SqlQueries.SqlQuery(4), connection);

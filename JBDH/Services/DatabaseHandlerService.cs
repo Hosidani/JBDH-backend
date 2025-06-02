@@ -35,10 +35,11 @@ namespace JBDH.Services
                     var createOrganisationTable = SqlQueries.SqlQuery(17);
                     var createJobApplicationTable = SqlQueries.SqlQuery(19);
                     var createDataFlowTable = SqlQueries.SqlQuery(20);
+                    var createJobAIResponseTable = SqlQueries.SqlQuery(22);
                     using (var command = new MySqlCommand(createRawTable, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
+                    {
+                        command.ExecuteNonQuery();
+                    }
                     using (var command = new MySqlCommand(createCleanTable, connection))
                     {
                         command.ExecuteNonQuery();
@@ -71,7 +72,11 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
-                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users' , 'EmailVerification' , 'Friendships' , 'JobApplication' , 'DataFlow' and 'ai_response' tables exists.");
+                    using (var command = new MySqlCommand(createJobAIResponseTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'Jobs', 'Users' , 'EmailVerification' , 'Friendships' , 'JobApplication' , 'DataFlow', 'ai_response' and 'job_ai_responses' tables exists.");
                 }
                 catch (Exception e)
                 {

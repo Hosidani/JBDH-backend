@@ -1,44 +1,54 @@
+using JBDH.Models;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace JBDH.Services
 {
     public class GiveJobPriorityService
     {
-        public static List<(int Priority, Dictionary<string, object> Job)> AssignJobPriority(
-    List<Dictionary<string, object>> results,
-    string description,
-    string location)
+        public static List<JobSearchResultViewModel> AssignJobPriority(
+            List<Job> jobs,
+            string description,
+            string location)
         {
             LoggingConfigService.ReturnInfo("GiveJobPriority service called");
-            var presentJobs = new List<(int Priority, Dictionary<string, object> Job)>();
-            foreach (var job in results)
+            var presentJobs = new List<JobSearchResultViewModel>();
+
+            foreach (var job in jobs)
             {
-                var jobTitle = job.GetValueOrDefault("title", "").ToString();
-                var jobLocation = job.GetValueOrDefault("location", "").ToString();
                 int jobPriority = 0;
 
                 // Skip this job if title or location is invalid
-                if (string.IsNullOrEmpty(jobTitle) || string.IsNullOrEmpty(jobLocation))
-                {
+                if (string.IsNullOrEmpty(job.Title) || string.IsNullOrEmpty(job.Location))
                     continue;
-                }
 
-                if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase) &&
-                    jobLocation.Contains(location, StringComparison.OrdinalIgnoreCase))
+                if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase) &&
+                    job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
                 {
                     jobPriority = 1;
                 }
-                else if (jobTitle.Contains(description, StringComparison.OrdinalIgnoreCase))
+                else if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase))
                 {
                     jobPriority = 2;
                 }
-
-                if (jobPriority > 0)
+                else if (job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    presentJobs.Add((jobPriority, job));
+                    jobPriority = 3;
                 }
+                else
+                {
+                    jobPriority = 4; // Least relevant
+                }
+
+                presentJobs.Add(new JobSearchResultViewModel
+                {
+                    Job = job,
+                    Priority = jobPriority
+                });
             }
+
             LoggingConfigService.ReturnInfo($"Presenting {presentJobs.Count} jobs.");
             return presentJobs.OrderBy(j => j.Priority).ToList();
         }
-
     }
 }

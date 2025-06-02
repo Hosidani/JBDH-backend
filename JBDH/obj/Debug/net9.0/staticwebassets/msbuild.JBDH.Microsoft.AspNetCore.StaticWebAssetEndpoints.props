@@ -784,13 +784,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"7fe6zs8ve5"},{"Name":"integrity","Value":"sha256-fT6MymO/vi\u002BZqskXmRgFRK1oF5\u002BzDLH7YmeqaR3Mh3Y="},{"Name":"label","Value":"_content/JBDH/uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"768418"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022fT6MymO/vi\u002BZqskXmRgFRK1oF5\u002BzDLH7YmeqaR3Mh3Y=\u0022"},{"Name":"Last-Modified","Value":"Sun, 01 Jun 2025 20:49:13 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"768418"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022fT6MymO/vi\u002BZqskXmRgFRK1oF5\u002BzDLH7YmeqaR3Mh3Y=\u0022"},{"Name":"Last-Modified","Value":"Sun, 01 Jun 2025 21:02:38 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-fT6MymO/vi\u002BZqskXmRgFRK1oF5\u002BzDLH7YmeqaR3Mh3Y="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"768418"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022fT6MymO/vi\u002BZqskXmRgFRK1oF5\u002BzDLH7YmeqaR3Mh3Y=\u0022"},{"Name":"Last-Modified","Value":"Sun, 01 Jun 2025 20:49:13 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"768418"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022fT6MymO/vi\u002BZqskXmRgFRK1oF5\u002BzDLH7YmeqaR3Mh3Y=\u0022"},{"Name":"Last-Modified","Value":"Sun, 01 Jun 2025 21:02:38 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2.7jf1cxe40t.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2.pdf'))</AssetFile>
@@ -803,6 +803,18 @@
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-HWtM95fTGuvEXMejZdlXH\u002BFkHzsWO\u002BbcEPEGG4dxo40="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"769752"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022HWtM95fTGuvEXMejZdlXH\u002BFkHzsWO\u002BbcEPEGG4dxo40=\u0022"},{"Name":"Last-Modified","Value":"Sat, 31 May 2025 23:18:37 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV Project lead ver. 6.1.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Sun, 01 Jun 2025 22:14:04 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Daniel Nordgren CV Project lead ver. 6.1.zel47wk24q.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV Project lead ver. 6.1.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"zel47wk24q"},{"Name":"integrity","Value":"sha256-a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk="},{"Name":"label","Value":"_content/JBDH/uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Sun, 01 Jun 2025 22:14:04 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>

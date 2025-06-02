@@ -19,11 +19,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<DataFlow> DataFlows { get; set; }
     public DbSet<AIResponse> AIResponses { get; set; }
     public DbSet<UserAIResponse> UserAIResponses { get; set; }
+    public DbSet<JobAIResponse> JobAIResponses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Job>().ToTable("clean_table");
+        modelBuilder.Entity<Job>().ToTable("Jobs");
         modelBuilder.Entity<User>()
             .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
             .HasValue<User>("User")
@@ -163,6 +164,24 @@ public class ApplicationDbContext : DbContext
             .WithMany(u => u.AIResponses)
             .HasForeignKey(uai => uai.UserId);
 
+        modelBuilder.Entity<JobAIResponse>(entity =>
+        {
+            entity.HasKey(jr => jr.Id); // Primary key
 
+            entity.Property(jr => jr.ResponseText)
+                .IsRequired();
+
+            entity.Property(jr => jr.CreatedAt)
+                .IsRequired();
+
+            entity.Property(jr => jr.JobId)
+                .IsRequired();
+
+            // Optional: Add a foreign key constraint if you want referential integrity
+            entity.HasOne<Job>()
+                .WithMany()
+                .HasForeignKey(jr => jr.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

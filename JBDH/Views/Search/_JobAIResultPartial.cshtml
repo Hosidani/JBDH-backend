@@ -1,0 +1,11 @@
+@using Markdig
+@model string
+
+@if (!string.IsNullOrEmpty(Model))
+{
+    var html = Markdig.Markdown.ToHtml(Model);
+    <div class="ai-response">
+        <strong>AI Analysis:</strong>
+        @Html.Raw(html)
+    </div>
+}
