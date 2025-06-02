@@ -135,18 +135,13 @@ namespace JBDH.Controllers
         [HttpGet]
         public IActionResult SearchCandidate(string keyword, string location)
         {
-            var results = _searchCandidateService.SearchCandidates(keyword, location);
-            return View("SearchResultsCandidates", results);
-        }
-
-        public IActionResult SearchResultsJobs()
-        {
-            var jobs = ... // Hämta dina jobb
-            foreach (var job in jobs)
+            if (string.IsNullOrWhiteSpace(keyword) && string.IsNullOrWhiteSpace(location))
             {
-                job.DescriptionHtml = Markdown.ToHtml(job.Description ?? "");
+                return View();
             }
-            return View(jobs);
+            var results = _searchCandidateService.SearchCandidates(keyword, location);
+            ViewData["keyword"] = keyword; 
+            return View("SearchResultsCandidates", results);
         }
     }
 }
