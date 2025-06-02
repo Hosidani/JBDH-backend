@@ -18,10 +18,10 @@
 
         <dt class="col-sm-3">Organisation:</dt>
         <dd class="col-sm-9">
-            @if (!string.IsNullOrEmpty(Model.Organization))
+            @if (!string.IsNullOrEmpty(Model.Organisation))
             {
-                <span>@Model.Organization</span>
-                @Html.ActionLink("View Organization", "Details", "Organization", new { id = Model.User.Id }, null)
+                <span>@Model.Organisation</span>
+                @Html.ActionLink("View Organization", "Details", "Organisation", new { id = Model.User.Id }, null)
             }
             else
             {
@@ -66,7 +66,6 @@
                 <span>No CV uploaded</span>
             }
         </dd>
-        <dd class="col-sm-9"></dd>
             @{
                 var markdown = Model.UserAIResponse?.responseText ?? "";
                 var html = Markdig.Markdown.ToHtml(markdown);

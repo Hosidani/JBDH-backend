@@ -37,7 +37,12 @@ public class RegisterController : Controller
     [HttpGet]
     public IActionResult RegisterUser()
     {
-        return View(); // View for user registration
+        var model = new RegisterUserViewModel
+        {
+            AvailableRoles = new List<string> { "Manager", "Recruiter" }, // or whatever roles you support
+            SelectedRoles = new List<string>() // initialize as empty list
+        };
+        return View(model); // View for user registration
     }
 
     [HttpPost]
@@ -52,6 +57,7 @@ public class RegisterController : Controller
         }
         return View("CheckYourEmail");
     }
+
 
     [Authorize(Roles = "Manager")]
     [HttpGet]
@@ -77,26 +83,26 @@ public class RegisterController : Controller
 
             if (manager == null)
             {
-                ViewData["ErrorMessage"] = "You must be a manager to register an organization.";
+                ViewData["ErrorMessage"] = "You must be a manager to register an organisation.";
                 return View();
             }
 
             // Access ManagedOrganizations from the manager object
-            var organization = new Organization
+            var organisation = new Organisation
             {
                 Name = name,
-                Managers = new List<User> { manager }
+                Managers = new List<Manager> { manager }
             };
 
-            _context.Organizations.Add(organization);
+            _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            ViewData["SuccessMessage"] = "Organization registered successfully!";
+            ViewData["SuccessMessage"] = "Organisation registered successfully!";
             return RedirectToAction("Index", "Home");
         }
         catch
         {
-            ViewData["ErrorMessage"] = "An error occurred while registering the organization.";
+            ViewData["ErrorMessage"] = "An error occurred while registering the organisation.";
             return View();
         }
     }

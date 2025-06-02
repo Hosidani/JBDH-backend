@@ -18967,7 +18967,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 09:44:48 GMT"
+          "Value": "Mon, 02 Jun 2025 23:17:31 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19012,13 +19012,95 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 09:44:48 GMT"
+          "Value": "Mon, 02 Jun 2025 23:17:31 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
           "Value": "sha256-fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "761869"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 23:22:46 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV Project lead ver. 6.1.zel47wk24q.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "761869"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 23:22:46 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zel47wk24q"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf"
         }
       ]
     },

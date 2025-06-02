@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JBDH.Models
 {
-    public class Organization
+    public class Organisation
     {
         [Key]
         public int Id { get; set; }
@@ -14,7 +14,7 @@ namespace JBDH.Models
         [StringLength(100)]
         public string Name { get; set; }
 
-        public ICollection<User> Managers { get; set; } = new List<User>();
+        public ICollection<Manager> Managers { get; set; } = new List<Manager>();
 
         public ICollection<int> Users { get; set; }
     }

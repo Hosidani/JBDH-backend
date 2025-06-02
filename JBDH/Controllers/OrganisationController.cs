@@ -7,27 +7,27 @@ using System.Threading.Tasks;
 namespace JBDH.Controllers
 {
     [Authorize(Roles = "Manager")] // Restrict access to users with the "Manager" role
-    public class OrganizationController : Controller
+    public class OrganisationController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public OrganizationController(ApplicationDbContext context)
+        public OrganisationController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public IActionResult RegisterOrganization()
+        public IActionResult RegisterOrganisation()
         {
-            return View(); // Return a view for registering an organization
+            return View(); // Return a view for registering an organisation
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterOrganization(string name, string description)
+        public async Task<IActionResult> RegisterOrganisation(string name, string description)
         {
             if (string.IsNullOrEmpty(name))
             {
-                ViewData["ErrorMessage"] = "Organization name is required.";
+                ViewData["ErrorMessage"] = "Organisation name is required.";
                 return View();
             }
 
@@ -39,21 +39,21 @@ namespace JBDH.Controllers
 
                 if (manager == null)
                 {
-                    ViewData["ErrorMessage"] = "You must be a manager to register an organization.";
+                    ViewData["ErrorMessage"] = "You must be a manager to register an organisation.";
                     return View();
                 }
 
-                // Create the organization
-                var organization = new Organization
+                // Create the organisation
+                var organisation = new Organisation
                 {
                     Name = name,
-                    Managers = new List<User> { manager } // Assign the current manager
+                    Managers = new List<Manager> { manager } // Assign the current manager
                 };
 
-                _context.Organizations.Add(organization);
+                _context.Organisations.Add(organisation);
                 await _context.SaveChangesAsync();
 
-                ViewData["SuccessMessage"] = "Organization registered successfully!";
+                ViewData["SuccessMessage"] = "Organisation registered successfully!";
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -64,23 +64,23 @@ namespace JBDH.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddManager(int organizationId, string managerUsername)
+        public async Task<IActionResult> AddManager(int organisationId, string managerUsername)
         {
             if (string.IsNullOrEmpty(managerUsername))
             {
                 ViewData["ErrorMessage"] = "Manager username is required.";
-                return RedirectToAction("Details", new { id = organizationId });
+                return RedirectToAction("Details", new { id = organisationId });
             }
 
             try
             {
-                var organization = await _context.Organizations
+                var organisation = await _context.Organisations
                     .Include(o => o.Managers)
-                    .FirstOrDefaultAsync(o => o.Id == organizationId);
+                    .FirstOrDefaultAsync(o => o.Id == organisationId);
 
-                if (organization == null)
+                if (organisation == null)
                 {
-                    ViewData["ErrorMessage"] = "Organization not found.";
+                    ViewData["ErrorMessage"] = "Organisation not found.";
                     return RedirectToAction("Index");
                 }
 
@@ -88,25 +88,25 @@ namespace JBDH.Controllers
                 if (managerToAdd == null)
                 {
                     ViewData["ErrorMessage"] = "Manager not found.";
-                    return RedirectToAction("Details", new { id = organizationId });
+                    return RedirectToAction("Details", new { id = organisationId });
                 }
 
-                if (organization.Managers.Contains(managerToAdd))
+                if (organisation.Managers.Contains(managerToAdd))
                 {
-                    ViewData["ErrorMessage"] = "This manager is already part of the organization.";
-                    return RedirectToAction("Details", new { id = organizationId });
+                    ViewData["ErrorMessage"] = "This manager is already part of the organisation.";
+                    return RedirectToAction("Details", new { id = organisationId });
                 }
 
-                organization.Managers.Add(managerToAdd);
+                organisation.Managers.Add(managerToAdd);
                 await _context.SaveChangesAsync();
 
-                ViewData["SuccessMessage"] = "Manager added to the organization successfully!";
-                return RedirectToAction("Details", new { id = organizationId });
+                ViewData["SuccessMessage"] = "Manager added to the organisation successfully!";
+                return RedirectToAction("Details", new { id = organisationId });
             }
             catch
             {
-                ViewData["ErrorMessage"] = "An error occurred while adding the manager to the organization.";
-                return RedirectToAction("Details", new { id = organizationId });
+                ViewData["ErrorMessage"] = "An error occurred while adding the manager to the organisation.";
+                return RedirectToAction("Details", new { id = organisationId });
             }
         }
     }
