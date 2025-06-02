@@ -67,6 +67,18 @@ namespace JBDH.Controllers
         public async Task<IActionResult> AnalyzeJob(string jobAdUrl, string jobId)
         {
             LoggingConfigService.ReturnInfo($"AnalyzeJob called with URL: {jobAdUrl} and Job ID: {jobId}");
+
+            var existingResponse = await _context.JobAIResponses
+                .Where(r => r.JobId == jobId)
+                .OrderByDescending(r => r.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (existingResponse != null && !string.IsNullOrEmpty(existingResponse.ResponseText))
+            {
+                LoggingConfigService.ReturnInfo("Returning cached AI analysis result.");
+                return PartialView("_JobAIResultPartial", existingResponse.ResponseText);
+            }
+
             var aiResult = await _jobAIAnalysisService.AnalyzeJobAsync(jobAdUrl);
             string aiResultString;
 
@@ -79,7 +91,6 @@ namespace JBDH.Controllers
                 aiResultString = aiResult?.ToString() ?? string.Empty;
             }
 
-            // Extract only the AI's answer if the result is JSON
             if (!string.IsNullOrEmpty(aiResultString) && aiResultString.TrimStart().StartsWith("{"))
             {
                 try
@@ -87,8 +98,9 @@ namespace JBDH.Controllers
                     dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResultString);
                     aiResultString = json?.choices?[0]?.message?.content?.ToString() ?? aiResultString;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    LoggingConfigService.ReturnError("Failed to parse AI response JSON: " + ex.Message);
                     // Ignore parsing errors and use the original string
                 }
             }
@@ -103,6 +115,16 @@ namespace JBDH.Controllers
                     ReturnUrl = Url.Action("SearchJob")
                 });
             }
+
+            var newResponse = new JobAIResponse
+            {
+                JobId = jobId,
+                ResponseText = aiResultString,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.JobAIResponses.Add(newResponse);
+            await _context.SaveChangesAsync();
+
             LoggingConfigService.ReturnInfo($"AI analysis result: {aiResultString}");
             return PartialView("_JobAIResultPartial", aiResultString);
         }

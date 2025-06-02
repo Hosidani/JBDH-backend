@@ -186,6 +186,7 @@ namespace JBDH.Services
                     catch (Exception ex)
                     {
                         LoggingConfigService.ReturnError($"Background AI generation failed: {ex.Message}");
+                        return;
                     }
                 }
             });

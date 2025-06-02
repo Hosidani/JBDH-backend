@@ -28,7 +28,7 @@ namespace JBDH.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangeCV(IFormFile cvFile)
         {
-            LoggingConfigService.ReturnInfo("ChangeCV method called.");
+            LoggingConfigService.ReturnInfo("ChangeCV method called with file: " + (cvFile?.FileName ?? "No file uploaded"));
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user == null)
             {

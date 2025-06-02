@@ -45,6 +45,7 @@
                     <td>
                         <form asp-action="AnalyzeJob" asp-controller="Search" method="post" style="display:inline;" class="analyze-form" data-jobid="@jobId" onsubmit="event.stopPropagation();">
                             <input type="hidden" name="jobAdUrl" value="@item.Job.WebpageUrl" />
+                            <input type="hidden" name="jobId" value="@item.Job.JobId" />
                             <button type="submit" class="btn btn-secondary btn-sm">Analyze with AI</button>
                         </form>
                     </td>
