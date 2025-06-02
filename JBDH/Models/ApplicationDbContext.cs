@@ -16,11 +16,15 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
+    public DbSet<DataFlow> DataFlows { get; set; }
+    public DbSet<AIResponse> AIResponses { get; set; }
+    public DbSet<UserAIResponse> UserAIResponses { get; set; }
+    public DbSet<JobAIResponse> JobAIResponses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Job>().ToTable("clean_table");
+        modelBuilder.Entity<Job>().ToTable("Jobs");
         modelBuilder.Entity<User>()
             .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
             .HasValue<User>("User")
@@ -56,6 +60,9 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.OpenForHiring)
                 .IsRequired(false) // Optional field
                 .HasDefaultValue(false); // Default value for boolean field
+
+            entity.Property(u => u.Id)
+                .ValueGeneratedOnAdd();
         });
 
         // Configure EmailVerificationToken
@@ -96,7 +103,7 @@ public class ApplicationDbContext : DbContext
                         j.HasKey("ManagerId", "OrganizationId"); // Composite key
                         j.ToTable("OrganizationManagers");
                     });
-            
+
         });
 
         // Configure the Friendship relationships
@@ -106,6 +113,7 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(f => f.RequesterId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        // Configure the Friendship relationships
         modelBuilder.Entity<Friendship>()
             .HasOne(f => f.Addressee)
             .WithMany(u => u.ReceivedFriendRequests)
@@ -126,5 +134,54 @@ public class ApplicationDbContext : DbContext
             entity.ToTable("JobApplications");
         });
 
+        modelBuilder.Entity<DataFlow>(entity =>
+        {
+            entity.HasKey(df => df.Id); // Primary key
+
+            entity.Property(df => df.ContentType)
+                .IsRequired()
+                .HasMaxLength(50); // Required field with max length
+
+            entity.Property(df => df.Content)
+                .IsRequired(); // Required field
+
+            entity.Property(df => df.CreatedAt)
+                .IsRequired(); // Required field
+        });
+
+        modelBuilder.Entity<AIResponse>(entity =>
+        {
+            entity.HasKey(ar => ar.id); // Primary key
+
+            entity.Property(ar => ar.responseText)
+                .IsRequired(); // Required field
+
+            entity.Property(ar => ar.createdAt)
+                .IsRequired(); // Required field
+        });
+        modelBuilder.Entity<UserAIResponse>()
+            .HasOne(uai => uai.User)
+            .WithMany(u => u.AIResponses)
+            .HasForeignKey(uai => uai.UserId);
+
+        modelBuilder.Entity<JobAIResponse>(entity =>
+        {
+            entity.HasKey(jr => jr.Id); // Primary key
+
+            entity.Property(jr => jr.ResponseText)
+                .IsRequired();
+
+            entity.Property(jr => jr.CreatedAt)
+                .IsRequired();
+
+            entity.Property(jr => jr.JobId)
+                .IsRequired();
+
+            // Optional: Add a foreign key constraint if you want referential integrity
+            entity.HasOne<Job>()
+                .WithMany()
+                .HasForeignKey(jr => jr.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

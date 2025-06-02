@@ -48,6 +48,14 @@
               "target": "Package",
               "version": "[4.0.3, )"
             },
+            "HtmlAgilityPack": {
+              "target": "Package",
+              "version": "[1.12.1, )"
+            },
+            "Markdig": {
+              "target": "Package",
+              "version": "[0.41.1, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.4, )"
@@ -57,6 +65,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.4, )"
+            },
+            "Microsoft.Playwright": {
+              "target": "Package",
+              "version": "[1.52.0, )"
             },
             "MySql.Data": {
               "target": "Package",

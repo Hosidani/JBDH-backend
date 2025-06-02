@@ -12,20 +12,35 @@ namespace JBDH.Controllers
         private readonly IUserPropertiesService _userPropertiesService; 
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        
+        private readonly IAIService _aiService;
+        private readonly IAIResponseService _aiResponseService;
 
-        public SettingsController(IUserPropertiesService userService)
+        public SettingsController(IUserPropertiesService userService, ApplicationDbContext context, IWebHostEnvironment environment, IAIService aiService, IAIResponseService aiResponseService)
         {
+            _context = context;
+            _environment = environment;
+            _aiService = aiService;
             _userPropertiesService = userService;
+            _aiResponseService = aiResponseService;
         }
 
         [HttpPost]
         public async Task<IActionResult> ChangeCV(IFormFile cvFile)
         {
-            var success = await _userPropertiesService.UploadCVAsync(cvFile);
-            if (success)
+            LoggingConfigService.ReturnInfo("ChangeCV method called with file: " + (cvFile?.FileName ?? "No file uploaded"));
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                ViewData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Settings", "Home");
+            }
+
+            var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(cvFile, user.Id);
+            if (result.Success)
                 ViewData["SuccessMessage"] = "CV updated successfully!";
             else
-                ViewData["ErrorMessage"] = "Failed to upload CV.";
+                ViewData["ErrorMessage"] = result.ErrorMessage;
 
             return RedirectToAction("Settings", "Home");
         }

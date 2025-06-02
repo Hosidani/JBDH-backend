@@ -12,6 +12,8 @@ public class ProfileService : IProfileService
 
     public async Task<User> GetUserByIdAsync(int userId)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        return await _context.Set<JBDH.Models.User>()
+                .Include(u => u.AIResponses)
+                .FirstOrDefaultAsync(u => u.Id == userId);
     }
 }

@@ -2,30 +2,22 @@
 @* This file is part of the Job Database Handler project. *@
 @* The Job Database Handler is a web application that allows users to manage job listings, applications, and related data. *@
 
+@model IEnumerable<JBDH.Models.DataFlow>
+
 @{
     ViewData["Title"] = "Home";
     var isLoggedIn = User.Identity.IsAuthenticated; // Check if the user is authenticated
     var username = User.Identity.IsAuthenticated ? User.Identity.Name : null; // Get the username from the identity
 }
 
-<div class="text-center">
-    <h1 class="display-4">Job Search</h1>
-    <p>Search for jobs by description and location.</p>
-    <form method="get" action="/Home/SearchJobs">
-        <input type="text" name="description" placeholder="Enter job description">
-        <input type="text" name="location" placeholder="Enter location">
-        <button type="submit">Search</button>
-    </form>
 
-    @if (isLoggedIn)
-    {
-        <div class="mt-4">
-            <h2>Welcome, @username!</h2>
-            <p>Feel free to search for jobs.</p>
-        </div>
-    }
-    else
-    {
-        <p>Please log in to access more features.</p>
-    }
-</div>
+
+<h2>User posts</h2>
+<a href="@Url.Action("CreateFlow")">Create new post</a>
+@foreach(var flow in Model)
+{
+    <div>
+        <b>@flow.ContentType</b>: @flow.Content <br />
+        <small>@flow.CreatedAt</small>
+    </div>
+}

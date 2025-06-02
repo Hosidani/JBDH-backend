@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Search";
+    bool isLoggedIn = User.Identity.IsAuthenticated;
+    string username = isLoggedIn ? User.Identity.Name : "Guest";
+}
+<div class="text-center">
+    <h1 class="display-4">Job Search</h1>
+    <p>Search for jobs by description and location.</p>
+    <form asp-controller="Search" asp-action="SearchForJobs" method="get">
+        <input type="text" name="description" placeholder="Enter job description">
+        <input type="text" name="location" placeholder="Enter location">
+        <button type="submit">Search</button>
+    </form>
+
+    @if (isLoggedIn)
+    {
+        <div class="mt-4">
+            <h2>Welcome, @username!</h2>
+            <p>Feel free to search for jobs.</p>
+        </div>
+    }
+    else
+    {
+        <p>Please log in to access more features.</p>
+    }
+</div>

@@ -214,10 +214,10 @@ public class EtlPipeline
             }
             LoggingConfigService.ReturnInfo("All jobs inserted into raw_table.");
 
-            // Step 2: Deduplicate data by inserting distinct rows into clean_table
+            // Step 2: Deduplicate data by inserting distinct rows into Jobs
             var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(5), connection);
             deduplicateCommand.ExecuteNonQuery();
-            LoggingConfigService.ReturnInfo("Distinct rows inserted into clean_table.");
+            LoggingConfigService.ReturnInfo("Distinct rows inserted into Jobs.");
         }
         catch (Exception e)
         {

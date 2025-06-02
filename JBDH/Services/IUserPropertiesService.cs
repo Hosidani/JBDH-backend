@@ -11,5 +11,6 @@ namespace JBDH.Services
         Task<bool> UpdateOpenForHiringAsync(bool openForHiring);
         Task<bool> UploadCVAsync(IFormFile cvFile);
         Task<bool> UpdateDeveloperModeAsync(bool developerMode);
+        Task<(bool Success, string ErrorMessage)> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId);
     }
 }
