@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Models;
 using JBDH.Services;
 using NLog.Config;
+using Markdig;
 
 namespace JBDH.Controllers
 {
@@ -13,14 +14,16 @@ namespace JBDH.Controllers
         private readonly IUserPropertiesService _userPropertiesService;
         private readonly IAIHelperSwitchService _aiHelperSwitchService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        private readonly ISearchCandidateService _searchCandidateService; // Added service for candidate search
 
-        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIHelperSwitchService aiHelperSwitchService, IJobAIAnalysisService jobAIAnalysisService)
+        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIHelperSwitchService aiHelperSwitchService, IJobAIAnalysisService jobAIAnalysisService, ISearchCandidateService searchCandidateService)
         {
             _context = context;
             _environment = environment;
             _userPropertiesService = userPropertiesService;
             _aiHelperSwitchService = aiHelperSwitchService;
             _jobAIAnalysisService = jobAIAnalysisService;
+            _searchCandidateService = searchCandidateService; // Initialize the candidate search service
         }
 
         [HttpGet]
@@ -50,7 +53,7 @@ namespace JBDH.Controllers
                     .FirstOrDefaultAsync();
             }
 
-            return View("SearchResults", results);
+            return View("SearchResultsJobs", results);
         }
 
         public IActionResult SearchJob()
@@ -127,6 +130,18 @@ namespace JBDH.Controllers
 
             LoggingConfigService.ReturnInfo($"AI analysis result: {aiResultString}");
             return PartialView("_JobAIResultPartial", aiResultString);
+        }
+
+        [HttpGet]
+        public IActionResult SearchCandidate(string keyword, string location)
+        {
+            if (string.IsNullOrWhiteSpace(keyword) && string.IsNullOrWhiteSpace(location))
+            {
+                return View();
+            }
+            var results = _searchCandidateService.SearchCandidates(keyword, location);
+            ViewData["keyword"] = keyword; 
+            return View("SearchResultsCandidates", results);
         }
     }
 }

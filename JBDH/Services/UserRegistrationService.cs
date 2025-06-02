@@ -51,6 +51,7 @@ public class UserRegistrationService : IUserRegistrationService
             Username = model.Username,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
             Email = model.Email,
+            Location = model.Location,
             OpenForHiring = model.OpenForHiring,
             DeveloperMode = false,
             Role = "User"

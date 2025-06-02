@@ -18967,7 +18967,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 09:17:53 GMT"
+          "Value": "Mon, 02 Jun 2025 09:44:48 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19012,7 +19012,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 09:17:53 GMT"
+          "Value": "Mon, 02 Jun 2025 09:44:48 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19101,6 +19101,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "AssetFile": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "241406"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 18:41:26 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.vskk32xd41.pdf",
+      "AssetFile": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "241406"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 18:41:26 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vskk32xd41"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf"
         }
       ]
     },

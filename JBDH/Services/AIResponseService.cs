@@ -25,7 +25,7 @@ namespace JBDH.Services
                 LoggingConfigService.ReturnError("User AIResponses is empty");
                 return null;
             }
-            return user.AIResponses.ElementAtOrDefault(length - 1) ?? new AIResponse();
+            return user.AIResponses.ElementAtOrDefault(length - 1);
         }
 
         public void SaveAIResponse(AIResponse aiResponse, JBDH.Models.User user)

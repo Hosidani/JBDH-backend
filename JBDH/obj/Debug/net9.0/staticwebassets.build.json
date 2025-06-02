@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "VCAgL3dULiuUEuxQBrztzCP5uptaLTWvK4uK4UPzD5g=",
+  "Hash": "sy6plLRx0zTtI0C6fSKsPb7xfW3n3QgSdKpbVNF9VkU=",
   "Source": "JBDH",
   "BasePath": "_content/JBDH",
   "Mode": "Default",
@@ -2766,6 +2766,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploads\\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf"
+    },
+    {
+      "Identity": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "SourceId": "JBDH",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\",
+      "BasePath": "_content/JBDH",
+      "RelativePath": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "vskk32xd41",
+      "Integrity": "sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf"
     },
     {
       "Identity": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
@@ -22112,7 +22133,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 09:17:53 GMT"
+          "Value": "Mon, 02 Jun 2025 09:44:48 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22157,7 +22178,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 09:17:53 GMT"
+          "Value": "Mon, 02 Jun 2025 09:44:48 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22168,6 +22189,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "AssetFile": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "241406"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 18:41:26 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.vskk32xd41.pdf",
+      "AssetFile": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "241406"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 18:41:26 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vskk32xd41"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw="
         }
       ]
     },
