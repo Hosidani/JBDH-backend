@@ -9,5 +9,7 @@ namespace JBDH.Models
         public string Location { get; set; } // Job location
         public DateTime? PostedDate { get; set; } // Date the job was posted
         public string WebpageUrl { get; set; } // URL to the job posting
+        public int? RecruiterId { get; set; }
+        public User Recruiter { get; set; }
     }
 }

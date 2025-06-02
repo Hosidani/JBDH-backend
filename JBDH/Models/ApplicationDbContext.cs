@@ -13,13 +13,14 @@ public class ApplicationDbContext : DbContext
     public DbSet<Friendship> Friendships { get; set; }
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<Manager> Managers { get; set; }
-
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
     public DbSet<DataFlow> DataFlows { get; set; }
     public DbSet<AIResponse> AIResponses { get; set; }
     public DbSet<UserAIResponse> UserAIResponses { get; set; }
     public DbSet<JobAIResponse> JobAIResponses { get; set; }
+    public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,7 +50,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.Email)
                 .IsRequired()
                 .HasMaxLength(100); // Required field with max length
-            
+
             entity.Property(u => u.Location)
                 .IsRequired(false) // Optional field
                 .HasMaxLength(255); // Optional field with max length
@@ -187,5 +188,22 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(jr => jr.JobId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasKey(ura => new { ura.UserId, ura.Role });
+
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasOne(ura => ura.User)
+            .WithMany(u => u.Roles)
+            .HasForeignKey(ura => ura.UserId);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.OwnedUsers)
+            .WithOne(u => u.OwnedByRecruiter)
+            .HasForeignKey(u => u.OwnedByRecruiterId);
+
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.Recruiter)
+            .WithMany()
+            .HasForeignKey(j => j.RecruiterId);
     }
 }
