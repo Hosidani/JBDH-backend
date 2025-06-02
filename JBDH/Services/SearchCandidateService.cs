@@ -54,7 +54,13 @@ public class SearchCandidateService : ISearchCandidateService
             })
             .OrderBy(x => x.Priority)
             .ToList();
-
+        if (filtered.Count == 0)
+        {
+            // If no candidates found, return an empty list
+            LoggingConfigService.ReturnError("No candidates found for the given criteria.");
+            return new List<SearchCandidateViewModel>();
+        }
+        LoggingConfigService.ReturnInfo($"Found {filtered.Count} candidates matching the criteria: keyword='{keyword}', location='{location}'");
         return filtered;
     }
 }
