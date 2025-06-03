@@ -53,9 +53,23 @@ public class UserRegistrationService : IUserRegistrationService
             Email = model.Email,
             Location = model.Location,
             OpenForHiring = model.OpenForHiring,
-            DeveloperMode = false,
-            Role = "User"
+            DeveloperMode = false
         };
+
+        // Always assign "User" role
+        user.Roles.Add(new UserRoleAssignment { User = user, Role = "User" });
+
+        // Assign additional roles if selected
+        if (model.SelectedRoles != null)
+        {
+            foreach (var role in model.SelectedRoles.Distinct())
+            {
+                if (!string.Equals(role, "User", StringComparison.OrdinalIgnoreCase)) // Avoid duplicate
+                {
+                    user.Roles.Add(new UserRoleAssignment { User = user, Role = role });
+                }
+            }
+        }
 
         // Handle CV upload
         if (model.CVFile != null && model.CVFile.Length > 0)

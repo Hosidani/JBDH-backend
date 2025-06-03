@@ -12,10 +12,7 @@ namespace JBDH.Models
 
         [Required]
         public string PasswordHash { get; set; }
-
-        [Required]
-        public string Role { get; set; } // e.g., "User", "Manager", "Developer", "Recuriture", "Sales"
-
+        
         [Required]
         public string Email { get; set; }
         public string Location { get; set; }
@@ -28,5 +25,9 @@ namespace JBDH.Models
         public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
         public ICollection<DataFlow> DataFlows { get; set; } = new List<DataFlow>();
         public ICollection<UserAIResponse> AIResponses { get; set; } = new List<UserAIResponse>();
+        public ICollection<UserRoleAssignment> Roles { get; set; } = new List<UserRoleAssignment>();
+        public int? OwnedByRecruiterId { get; set; }
+        public User OwnedByRecruiter { get; set; }
+        public ICollection<User> OwnedUsers { get; set; } = new List<User>();
     }
 }

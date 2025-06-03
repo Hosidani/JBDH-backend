@@ -56,7 +56,7 @@ public class ProfileController : Controller
         {
             User = user,
             IsFriend = isFriend,
-            Organization = null, // Display organization name only if verified and not null
+            Organisation = null, // Display organisation name only if verified and not null
         };
 
         return View(viewModel);
@@ -81,7 +81,7 @@ public class ProfileController : Controller
         {
             User = user,
             IsFriend = false, // This is the user's own profile, so they are not a friend of themselves
-            Organization = null, // Display organization name only if verified and not null
+            Organisation = null, // Display organisation name only if verified and not null
             UserAIResponse = await _airesponseService.GetLatestAIResponseAsync(user.Id)  // Get AI response for the user
         };
 

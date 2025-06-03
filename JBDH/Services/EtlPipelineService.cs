@@ -152,7 +152,14 @@ public class EtlPipeline
                 }
 
                 // Handle the "publication_date" field
-                var postedDate = job.GetValueOrDefault("publication_date") ?? DateTime.MinValue;
+                string postedDate = "1970-01-01";
+                if (job.GetValueOrDefault("publication_date") is JsonElement dateElement && dateElement.ValueKind == JsonValueKind.String)
+                {
+                    postedDate = dateElement.GetString();
+                    // Optionally, parse and reformat if needed
+                    if (DateTime.TryParse(postedDate, out var dt))
+                        postedDate = dt.ToString("yyyy-MM-dd");
+                }
 
                 // Handle the "webpage_url" field
                 var webpageUrl = job.GetValueOrDefault("webpage_url") ?? "Unknown URL";

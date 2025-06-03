@@ -6,7 +6,7 @@ namespace JBDH.Models
     {
         public User User { get; set; }
         public bool IsFriend { get; set; }
-        public string Organization { get; set; } // Display organization only if verified
+        public string Organisation { get; set; } 
         public UserAIResponse UserAIResponse { get; set; } 
 
     }

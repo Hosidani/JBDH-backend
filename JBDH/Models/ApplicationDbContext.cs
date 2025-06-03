@@ -10,16 +10,18 @@ public class ApplicationDbContext : DbContext
 
     // Define DbSets for your tables
     public DbSet<User> Users { get; set; }
-    public DbSet<Friendship> Friendships { get; set; }
-    public DbSet<Organization> Organizations { get; set; }
     public DbSet<Manager> Managers { get; set; }
-
+    public DbSet<Recruiter> Recruiters { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
+    public DbSet<Organisation> Organisations { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
     public DbSet<DataFlow> DataFlows { get; set; }
     public DbSet<AIResponse> AIResponses { get; set; }
     public DbSet<UserAIResponse> UserAIResponses { get; set; }
     public DbSet<JobAIResponse> JobAIResponses { get; set; }
+    public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,7 +30,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
             .HasValue<User>("User")
-            .HasValue<Manager>("Manager");
+            .HasValue<Manager>("Manager")
+            .HasValue<Recruiter>("Recruiter");
 
         // Configure the User table
         modelBuilder.Entity<User>(entity =>
@@ -42,14 +45,10 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.PasswordHash)
                 .IsRequired(); // Required field
 
-            entity.Property(u => u.Role)
-                .IsRequired()
-                .HasMaxLength(50); // Required field with max length
-
             entity.Property(u => u.Email)
                 .IsRequired()
                 .HasMaxLength(100); // Required field with max length
-            
+
             entity.Property(u => u.Location)
                 .IsRequired(false) // Optional field
                 .HasMaxLength(255); // Optional field with max length
@@ -81,7 +80,7 @@ public class ApplicationDbContext : DbContext
 
 
         // Configure the Organization table
-        modelBuilder.Entity<Organization>(entity =>
+        modelBuilder.Entity<Organisation>(entity =>
         {
             entity.HasKey(o => o.Id); // Primary key
 
@@ -91,21 +90,15 @@ public class ApplicationDbContext : DbContext
 
             // Configure many-to-many relationship for Managers
             entity.HasMany(o => o.Managers)
-                .WithMany("ManagedOrganizations") // Directly reference ManagedOrganizations
+                .WithMany(m => m.ManagedOrganisations)
                 .UsingEntity<Dictionary<string, object>>(
-                    "OrganizationManagers",
-                    j => j.HasOne<User>() // Reference Manager
-                          .WithMany()
-                          .HasForeignKey("ManagerId")
-                          .OnDelete(DeleteBehavior.Cascade),
-                    j => j.HasOne<Organization>()
-                          .WithMany()
-                          .HasForeignKey("OrganizationId")
-                          .OnDelete(DeleteBehavior.Cascade),
+                    "OrganisationManagers",
+                    j => j.HasOne<Manager>().WithMany().HasForeignKey("ManagerId").OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne<Organisation>().WithMany().HasForeignKey("OrganisationId").OnDelete(DeleteBehavior.Cascade),
                     j =>
                     {
-                        j.HasKey("ManagerId", "OrganizationId"); // Composite key
-                        j.ToTable("OrganizationManagers");
+                        j.HasKey("ManagerId", "OrganisationId");
+                        j.ToTable("OrganisationManagers");
                     });
 
         });
@@ -187,5 +180,22 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(jr => jr.JobId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasKey(ura => new { ura.UserId, ura.Role });
+
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasOne(ura => ura.User)
+            .WithMany(u => u.Roles)
+            .HasForeignKey(ura => ura.UserId);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.OwnedUsers)
+            .WithOne(u => u.OwnedByRecruiter)
+            .HasForeignKey(u => u.OwnedByRecruiterId);
+
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.Recruiter)
+            .WithMany()
+            .HasForeignKey(j => j.RecruiterId);
     }
 }

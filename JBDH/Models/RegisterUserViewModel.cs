@@ -9,5 +9,7 @@ namespace JBDH.Models
         public string Location { get; set; }
         public IFormFile CVFile { get; set; }
         public bool OpenForHiring { get; set; }
+        public List<string> AvailableRoles { get; set; } = new List<string> { "Manager", "Recruiter" };
+        public List<string> SelectedRoles { get; set; } = new List<string>();
     }
 }

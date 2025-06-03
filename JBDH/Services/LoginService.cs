@@ -62,7 +62,7 @@ namespace JBDH.Services
 
             if (organizationId.HasValue)
             {
-                var organization = await _context.Organizations.Include(o => o.Managers)
+                var organization = await _context.Organisations.Include(o => o.Managers)
                     .FirstOrDefaultAsync(o => o.Id == organizationId.Value);
 
                 if (organization?.Managers != null && organization.Managers.Any())
