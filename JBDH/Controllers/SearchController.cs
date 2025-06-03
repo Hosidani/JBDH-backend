@@ -4,6 +4,7 @@ using JBDH.Models;
 using JBDH.Services;
 using NLog.Config;
 using Markdig;
+using System.Threading.Tasks;
 
 namespace JBDH.Controllers
 {
@@ -133,13 +134,13 @@ namespace JBDH.Controllers
         }
 
         [HttpGet]
-        public IActionResult SearchCandidate(string keyword, string location)
+        public async Task<IActionResult> SearchCandidate(string keyword, string location)
         {
             if (string.IsNullOrWhiteSpace(keyword) && string.IsNullOrWhiteSpace(location))
             {
                 return View();
             }
-            var results = _searchCandidateService.SearchCandidates(keyword, location);
+            var results = await _searchCandidateService.SearchCandidates(keyword, location);
             ViewData["keyword"] = keyword; 
             return View("SearchResultsCandidates", results);
         }

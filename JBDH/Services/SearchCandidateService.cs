@@ -1,29 +1,21 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
 using JBDH.Services;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication;
-
-using JBDH.Services;
+using Microsoft.EntityFrameworkCore;
 
 public class SearchCandidateService : ISearchCandidateService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IAIResponseService _airesponseService;
 
-
-    public SearchCandidateService(ApplicationDbContext context)
+    public SearchCandidateService(ApplicationDbContext context, IAIResponseService airesponseService)
     {
         _context = context;
-
+        _airesponseService = airesponseService;
     }
-
-    public List<SearchCandidateViewModel> SearchCandidates(string keyword, string location)
+    public async Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location)
     {
         var users = _context.Users.Where(u => u.OpenForHiring == true);
+        LoggingConfigService.ReturnInfo($"Total users open for hiring: {await users.CountAsync()}");
 
         var userWithAI = users.Select(u => new
         {
@@ -33,34 +25,41 @@ public class SearchCandidateService : ISearchCandidateService
                 .OrderByDescending(ai => ai.createdAt)
                 .FirstOrDefault()
         });
-
-        var filtered = userWithAI
+        var filtered = await userWithAI
             .Where(x =>
                 x.LatestAI != null &&
-                (string.IsNullOrEmpty(keyword) || 
-                    x.LatestAI.responseText.ToLower().Contains(keyword.ToLower())) &&
-                (string.IsNullOrEmpty(location) || 
+                (string.IsNullOrEmpty(keyword) ||
+                    !string.IsNullOrEmpty(x.LatestAI.responseText) && x.LatestAI.responseText.ToLower().Contains(keyword.ToLower())) &&
+                (string.IsNullOrEmpty(location) ||
                     (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()))
             )
-            .ToList() // Materialize the query to avoid expression tree issues
-            .Select(x => new SearchCandidateViewModel
+            .ToListAsync();
+
+        LoggingConfigService.ReturnInfo($"Filtered users count: {filtered.Count}");
+
+        // Bygg ViewModels och prioritera
+        var candidates = await Task.WhenAll(filtered.Select(async x =>
+        {
+            var aiResponse = await _airesponseService.GetLatestAIResponseAsync(x.User.Id);
+            LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Username: {x.User.Username}, LatestAIResponse: {(aiResponse != null ? aiResponse.responseText : "NULL")}");
+            return new SearchCandidateViewModel
             {
                 UserId = x.User.Id,
                 Username = x.User.Username,
                 Location = x.User.Location,
-                AIResponse = x.LatestAI != null ? x.LatestAI.responseText : null,
-                AIResponseCreatedAt = x.LatestAI != null ? x.LatestAI.createdAt : DateTime.MinValue,
+                UserAIResponse = aiResponse ?? new UserAIResponse(), // Ensure non-null assignment
                 Priority = (!string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()) ? 1 : 2
-            })
-            .OrderBy(x => x.Priority)
-            .ToList();
-        if (filtered.Count == 0)
+            };
+        }));
+
+        var prioritized = candidates.OrderBy(x => x.Priority).ToList();
+
+        if (prioritized.Count == 0)
         {
-            // If no candidates found, return an empty list
             LoggingConfigService.ReturnError("No candidates found for the given criteria.");
             return new List<SearchCandidateViewModel>();
         }
-        LoggingConfigService.ReturnInfo($"Found {filtered.Count} candidates matching the criteria: keyword='{keyword}', location='{location}'");
-        return filtered;
+        LoggingConfigService.ReturnInfo($"Found {prioritized.Count} candidates matching the criteria: keyword='{keyword}', location='{location}'");
+        return prioritized;
     }
 }
