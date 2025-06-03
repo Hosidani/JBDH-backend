@@ -14,10 +14,40 @@
 
 <h2>User posts</h2>
 <a href="@Url.Action("CreateFlow")">Create new post</a>
-@foreach(var flow in Model)
+@foreach (var post in Model)
 {
-    <div>
-        <b>@flow.ContentType</b>: @flow.Content <br />
-        <small>@flow.CreatedAt</small>
+    <div class="dataflow-post mb-3">
+        <p>@post.Content</p>
+        <button type="button" class="btn btn-danger btn-sm" onclick="showReportForm(@post.Id)">Report</button>
+        <form asp-action="ReportDataFlow" asp-controller="Home" method="post" style="display:none;" id="reportForm_@post.Id" class="mt-2">
+            <input type="hidden" name="reportedUserId" value="@post.UserId" />
+            <input type="hidden" name="dataFlowId" value="@post.Id" />
+            <input type="hidden" name="dataFlowText" value="@post.Content" />
+            <textarea name="reason" maxlength="100" placeholder="Ange anledning (max 100 tecken)" 
+                      class="form-control mb-2" style="width:200px;display:inline-block;" 
+                      oninput="updateCharCount(this, 'charCount_@post.Id')"></textarea>
+            <div style="font-size: 0.9em; color: #666;">
+                <span id="charCount_@post.Id">100</span> tecken kvar
+            </div>
+            <button type="submit" class="btn btn-danger btn-sm mt-1">Skicka rapport</button>
+        </form>
     </div>
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@section Scripts {
+    <script>
+        function showReportForm(postId) {
+            document.getElementById('reportForm_' + postId).style.display = 'block';
+        }
+        function updateCharCount(textarea, counterId) {
+            var max = 100;
+            var left = max - textarea.value.length;
+            document.getElementById(counterId).innerText = left;
+        }
+    </script>
 }

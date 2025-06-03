@@ -21,6 +21,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserAIResponse> UserAIResponses { get; set; }
     public DbSet<JobAIResponse> JobAIResponses { get; set; }
     public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
+    public DbSet<UserReport> UserReports { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -197,5 +198,16 @@ public class ApplicationDbContext : DbContext
             .HasOne(j => j.Recruiter)
             .WithMany()
             .HasForeignKey(j => j.RecruiterId);
+            
+        modelBuilder.Entity<UserReport>(entity =>
+        {
+            entity.HasKey(r => r.Id); // Primary key
+
+            entity.Property(r => r.Reason)
+                .IsRequired(); // Required field
+
+            entity.Property(r => r.CreatedAt)
+                .IsRequired(); // Required field
+        });
     }
 }

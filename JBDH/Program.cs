@@ -49,6 +49,7 @@ builder.Services.AddScoped<IAIResponseService, AIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
+builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 
 // Add session support
 builder.Services.AddSession(options =>

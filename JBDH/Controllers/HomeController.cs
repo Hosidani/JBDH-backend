@@ -20,11 +20,13 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
 
         private readonly DataFlowService _dataFlowService;
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, DataFlowService dataFlowService)
+        private readonly IRapportUserService _rapportUserService;
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, DataFlowService dataFlowService, IRapportUserService rapportUserService)
         {
             _context = context;
             _environment = environment;
             _dataFlowService = dataFlowService;
+            _rapportUserService = rapportUserService;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -106,6 +108,22 @@ namespace JBDH.Controllers
         public IActionResult Settings()
         {
             return View("~/Views/Settings/Settings.cshtml");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReportDataFlow(int reportedUserId, int dataFlowId, string dataFlowText, string reason)
+        {
+            // Hämta reporterUserId från inloggad användare
+            var reporterClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (reporterClaim == null)
+            {
+                TempData["Error"] = "User is not authenticated.";
+                return RedirectToAction("Login", "Account");
+            }
+            var reporterUserId = int.Parse(reporterClaim.Value);
+            await _rapportUserService.ReportUserAsync(reporterUserId, reportedUserId, reason, dataFlowId, dataFlowText);
+            TempData["Message"] = "The post has been reported.";
+            return RedirectToAction("Index");
         }
     }
 }
