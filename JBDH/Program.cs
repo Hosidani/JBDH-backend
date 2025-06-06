@@ -50,6 +50,8 @@ builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
 
 // Add session support
 builder.Services.AddSession(options =>
@@ -99,6 +101,7 @@ if (string.IsNullOrWhiteSpace(smtpSettings.Username) || string.IsNullOrWhiteSpac
 
 // Usual stuff
 builder.Services.AddControllersWithViews();
+builder.Services.AddHostedService<UserBanBackgroundService>(); // Register the background service
 
 // Build the application
 var app = builder.Build();

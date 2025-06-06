@@ -39,6 +39,7 @@ namespace JBDH.Services
                     var createJobAIResponseTable = SqlQueries.SqlQuery(22);
                     var createUserRoleAssignmentsTable = SqlQueries.SqlQuery(23);
                     var createUserReportsTable = SqlQueries.SqlQuery(24);
+                    var createPasswordResetTable = SqlQueries.SqlQuery(25);
                     
                     using (var command = new MySqlCommand(createUserTable, connection))
                 {
@@ -89,7 +90,11 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
-                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'Jobs', 'Users' , 'EmailVerification' , 'Friendships' , 'JobApplication' , 'DataFlow', 'ai_response', 'job_ai_responses' and 'UserReports' tables exists.");
+                    using (var command = new MySqlCommand(createPasswordResetTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'Jobs', 'Users' , 'EmailVerification' , 'Friendships' , 'JobApplication' , 'DataFlow', 'ai_response', 'job_ai_responses' , 'UserReports' and 'PasswordReset' tables exists.");
                 }
                 catch (Exception e)
                 {
