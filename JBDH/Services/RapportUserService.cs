@@ -1,4 +1,5 @@
 using JBDH.Models; 
+using Microsoft.EntityFrameworkCore;
 
 public class RapportUserService : IRapportUserService
 {
@@ -10,6 +11,12 @@ public class RapportUserService : IRapportUserService
 
     public async Task ReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId, string dataFlowText)
     {
+        var reporterExists = await _context.Users.AnyAsync(u => u.Id == reporterUserId);
+        var reportedExists = await _context.Users.AnyAsync(u => u.Id == reportedUserId);
+
+        if (!reporterExists || !reportedExists)
+            throw new ArgumentException("Reporter or reported user does not exist.");
+
         var report = new UserReport
         {
             ReporterUserId = reporterUserId,

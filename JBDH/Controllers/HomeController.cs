@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using JBDH.Models.ViewModels;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace JBDH.Controllers
@@ -18,7 +19,6 @@ namespace JBDH.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
-
         private readonly DataFlowService _dataFlowService;
         private readonly IRapportUserService _rapportUserService;
         public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, DataFlowService dataFlowService, IRapportUserService rapportUserService)
@@ -46,7 +46,6 @@ namespace JBDH.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateFlow(DataFlowViewModel model)
         {
-            // Kontrollera om användaren är inloggad och få user-ID
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
@@ -82,10 +81,7 @@ namespace JBDH.Controllers
         [HttpGet]
         public IActionResult GeneralUswerFlow()
         {
-            // Get all posts from the database
             var allPosts = _dataFlowService.GetAll();
-
-            // Return the view with the posts
             return View(allPosts);
         }
         public IActionResult Privacy()
@@ -101,7 +97,6 @@ namespace JBDH.Controllers
                 Title = "Unexpected Error",
                 Message = "An unexpected error occurred. Please try again later."
             });
-
         }
 
         [HttpGet]
@@ -121,6 +116,17 @@ namespace JBDH.Controllers
                 return RedirectToAction("Login", "Account");
             }
             var reporterUserId = int.Parse(reporterClaim.Value);
+
+            var reporterExists = await _context.Users.AnyAsync(u => u.Id == reporterUserId);
+            var reportedExists = await _context.Users.AnyAsync(u => u.Id == reportedUserId);
+            if (!reporterExists || !reportedExists)
+            {
+                // Log or handle error here
+                LoggingConfigService.ReturnError($"Reporter or reported user does not exist. Reporter ID: {reporterUserId}, Reported User ID: {reportedUserId}");
+                TempData["Error"] = "Reporter or reported user does not exist.";
+                return RedirectToAction("Index");
+            }
+
             await _rapportUserService.ReportUserAsync(reporterUserId, reportedUserId, reason, dataFlowId, dataFlowText);
             TempData["Message"] = "The post has been reported.";
             return RedirectToAction("Index");
