@@ -85,9 +85,9 @@ namespace JBDH.Services
             {
                 foreach (var row in results)
                 {
-                    if (!seen.Contains(row["job_id"]))
+                    if (!seen.Contains(row["JobId"]))
                     {
-                        seen.Add(row["job_id"]);
+                        seen.Add(row["JobId"]);
                         combined.Add(row);
                     }
                 }

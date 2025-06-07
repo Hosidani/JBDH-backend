@@ -37,13 +37,13 @@ namespace JBDH.Services
                     LoggingConfigService.ReturnInfo("Job dictionary keys: " + string.Join(", ", dict.Keys));
                     jobs.Add(new Job
                     {
-                        JobId = dict.ContainsKey("job_id") ? dict["job_id"].ToString() : "0", // <-- assign as string
-                        Title = dict["title"].ToString(),
-                        Description = dict["description"].ToString(),
-                        Company = dict["company"].ToString(),
-                        Location = dict["location"].ToString(),
-                        PostedDate = dict.ContainsKey("posted_date") ? (DateTime?)Convert.ToDateTime(dict["posted_date"]) : null,
-                        WebpageUrl = dict["webpage_url"].ToString()
+                        JobId = dict.ContainsKey("JobId") ? dict["JobId"].ToString() : "0",
+                        Title = dict.ContainsKey("Title") ? dict["Title"].ToString() : "",
+                        Description = dict.ContainsKey("Description") ? dict["Description"].ToString() : "",
+                        Company = dict.ContainsKey("Company") ? dict["Company"].ToString() : "",
+                        Location = dict.ContainsKey("Location") ? dict["Location"].ToString() : "",
+                        PostedDate = dict.ContainsKey("PostedDate") ? (DateTime?)Convert.ToDateTime(dict["PostedDate"]) : null,
+                        WebpageUrl = dict.ContainsKey("WebpageUrl") ? dict["WebpageUrl"].ToString() : ""
                     });
                 }
 

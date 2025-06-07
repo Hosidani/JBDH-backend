@@ -4,6 +4,17 @@
     ViewData["Title"] = "Search Results";
 }
 
+@if (ViewData["AIAnalysisResult"] != null)
+{
+    @using Markdig
+    var html = Markdig.Markdown.ToHtml(ViewData["AIAnalysisResult"].ToString());
+    <div class="alert alert-info mb-4">
+        <strong>AI Analysis of Your CV Against the Top Job Result:</strong>
+        <br />
+        @Html.Raw(html) <!-- Use the Markdig HTML here -->
+    </div>
+}
+
 <div class="text-center">
     <h1 class="display-4">Search Results</h1>
 
@@ -77,6 +88,8 @@
         </table>
     }
 </div>
+
+
 
 @section Scripts {
     <script>
