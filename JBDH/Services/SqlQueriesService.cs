@@ -23,7 +23,7 @@ namespace JBDH.Services
                 { 11, "DELETE FROM raw_table;" },
                 { 12, "DELETE FROM Jobs;" },
                 { 13, "SELECT * FROM Jobs;"},
-                { 14, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Email VARCHAR(255) NOT NULL UNIQUE, Location VARCHAR(255), CVPath VARCHAR(2083), Organisation VARCHAR(255), DeveloperMode BOOLEAN DEFAULT FALSE, OpenForHiring BOOLEAN DEFAULT FALSE, OwnedByRecruiterId INT NULL, Role VARCHAR(100) NOT NULL, FOREIGN KEY (OwnedByRecruiterId) REFERENCES Users(Id));" },
+                { 14, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Email VARCHAR(255) NOT NULL UNIQUE, Location VARCHAR(255), CVPath VARCHAR(2083), Organisation VARCHAR(255), DeveloperMode BOOLEAN DEFAULT FALSE, OpenForHiring BOOLEAN DEFAULT FALSE, OwnedByRecruiterId INT NULL, Role VARCHAR(100) NOT NULL, IsBanned BOOLEAN DEFAULT FALSE, FOREIGN KEY (OwnedByRecruiterId) REFERENCES Users(Id));" },
                 { 15, "DELETE FROM Users;" },
                 { 16, "CREATE TABLE IF NOT EXISTS Friendships (Id INT PRIMARY KEY AUTO_INCREMENT, RequesterId INT NOT NULL,AddresseeId INT NOT NULL, Status ENUM('Pending', 'Friends') NOT NULL, RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (RequesterId) REFERENCES Users(Id), FOREIGN KEY (AddresseeId) REFERENCES Users(Id))"},
                 { 17, "CREATE TABLE IF NOT EXISTS EmailVerificationTokens ( Id INT PRIMARY KEY AUTO_INCREMENT, Token VARCHAR(255) NOT NULL, UserId INT NOT NULL, ExpirationDate DATETIME NOT NULL, IsUsed BOOLEAN DEFAULT FALSE, FOREIGN KEY (UserId) REFERENCES Users(Id) );" },
@@ -32,7 +32,10 @@ namespace JBDH.Services
                 { 20, "CREATE TABLE IF NOT EXISTS DataFlows (Id INT PRIMARY KEY AUTO_INCREMENT, ContentType VARCHAR(50), Content TEXT, CreatedAt DATETIME, UserId INT);" },
                 { 21, "DELETE FROM AIResponses;" },
                 { 22, "CREATE TABLE IF NOT EXISTS JobAIResponses (Id INT AUTO_INCREMENT PRIMARY KEY, JobId VARCHAR(255) NOT NULL, ResponseText TEXT NOT NULL, CreatedAt DATETIME NOT NULL, FOREIGN KEY (JobId) REFERENCES Jobs(JobId));" },
-                { 23, "CREATE TABLE IF NOT EXISTS UserRoleAssignments (UserId INT NOT NULL,Role VARCHAR(50) NOT NULL,PRIMARY KEY (UserId, Role),FOREIGN KEY (UserId) REFERENCES Users(Id))" }
+                { 23, "CREATE TABLE IF NOT EXISTS UserRoleAssignments (UserId INT NOT NULL,Role VARCHAR(50) NOT NULL,PRIMARY KEY (UserId, Role),FOREIGN KEY (UserId) REFERENCES Users(Id))" },
+                { 24, "CREATE TABLE IF NOT EXISTS UserReports (Id INT PRIMARY KEY AUTO_INCREMENT, ReporterUserId INT NOT NULL, ReportedUserId INT NOT NULL, DataFlowId INT NULL, DataFlowText TEXT NULL, Reason TEXT NOT NULL, CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (ReportedUserId) REFERENCES Users(Id), FOREIGN KEY (ReporterUserId) REFERENCES Users(Id));" },
+                { 25, "CREATE TABLE IF NOT EXISTS PasswordResets (Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT NOT NULL, Token VARCHAR(255) NOT NULL, ExpirationDate DATETIME NOT NULL, IsUsed BOOLEAN DEFAULT FALSE, FOREIGN KEY (UserId) REFERENCES Users(Id));" }
+
             };
 
         public static string SqlQuery(int queryId)

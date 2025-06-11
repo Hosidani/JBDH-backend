@@ -32,6 +32,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -206,5 +207,33 @@ public class ApplicationDbContext : DbContext
             .HasOne(j => j.Recruiter)
             .WithMany()
             .HasForeignKey(j => j.RecruiterId);
+
+        modelBuilder.Entity<UserReport>(entity =>
+        {
+            entity.HasKey(r => r.Id); // Primary key
+
+            entity.Property(r => r.Reason)
+                .IsRequired(); // Required field
+
+            entity.Property(r => r.CreatedAt)
+                .IsRequired(); // Required field
+        });
+
+        modelBuilder.Entity<PasswordReset>(entity =>
+        {
+            entity.HasKey(pr => pr.Id); // Primary key
+
+            entity.Property(pr => pr.Token)
+                .IsRequired()
+                .HasMaxLength(255); // Required field with max length
+
+            entity.Property(pr => pr.ExpirationDate)
+                .IsRequired(); // Required field
+
+            entity.HasOne(pr => pr.User)
+                .WithMany()
+                .HasForeignKey(pr => pr.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Foreign key to Users table
+        });
     }
 }

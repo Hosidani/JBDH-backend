@@ -22,19 +22,43 @@ namespace JBDH.Services
         }
 
         // Validate user credentials
-        public async Task<bool> ValidateUserAsync(string username, string password)
+        public async Task<LoginResult> ValidateUserAsync(string username, string password)
         {
+            var result = new LoginResult();
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null || string.IsNullOrEmpty(user.PasswordHash))
-                return false;
 
-            return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            if (user == null)
+            {
+                result.UserExists = false;
+                result.ErrorMessage = "Invalid username or password.";
+                return result;
+            }
+            result.UserExists = true;
+
+            if (user.IsBanned)
+            {
+                result.IsBanned = true;
+                result.ErrorMessage = "This account has been banned.";
+                return result; // Stop here if banned!
+            }
+
+            result.PasswordCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            result.IsSuccess = result.PasswordCorrect;
+
+            if (!result.IsSuccess)
+            {
+                result.ErrorMessage = "Invalid username or password.";
+            }
+            return result;
         }
+
 
         // Sign in the user
         public async Task SignInUserAsync(string username)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null || user.IsBanned)
+                return;
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),

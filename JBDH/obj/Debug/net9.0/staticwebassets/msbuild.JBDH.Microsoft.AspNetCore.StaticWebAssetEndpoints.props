@@ -778,19 +778,7 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Cover_Letter.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Fri, 02 May 2025 16:53:13 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/CV Ale HR-specialist.aync27z9xx.pdf">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\CV Ale HR-specialist.pdf'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"aync27z9xx"},{"Name":"integrity","Value":"sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="},{"Name":"label","Value":"_content/JBDH/uploads/CV Ale HR-specialist.pdf"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"293957"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\u0022"},{"Name":"Last-Modified","Value":"Sat, 07 Jun 2025 15:24:28 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/CV Ale HR-specialist.pdf">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\CV Ale HR-specialist.pdf'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"293957"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\u0022"},{"Name":"Last-Modified","Value":"Sat, 07 Jun 2025 15:24:28 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"15686"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022sUAd\u002BUEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg=\u0022"},{"Name":"Last-Modified","Value":"Tue, 03 Jun 2025 08:06:05 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.7fe6zs8ve5.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf'))</AssetFile>
@@ -808,13 +796,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV Project lead ver. 6.1.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 04 Jun 2025 10:19:59 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Tue, 03 Jun 2025 07:50:46 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Daniel Nordgren CV Project lead ver. 6.1.zel47wk24q.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Daniel Nordgren CV Project lead ver. 6.1.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"zel47wk24q"},{"Name":"integrity","Value":"sha256-a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk="},{"Name":"label","Value":"_content/JBDH/uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 04 Jun 2025 10:19:59 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Tue, 03 Jun 2025 07:50:46 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>

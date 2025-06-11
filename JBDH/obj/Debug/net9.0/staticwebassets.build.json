@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "sj3nukSKaIBCgeVmKbJ9nl45SQoRNNKz45qs7Xbfvvs=",
+  "Hash": "SKXj+7fOjZEytfWkyMpt6vTnxMCWlczx7QpznoAb3/Q=",
   "Source": "JBDH",
   "BasePath": "_content/JBDH",
   "Mode": "Default",
@@ -2747,31 +2747,10 @@
       "OriginalItemSpec": "wwwroot\\uploads\\Cover_Letter.pdf"
     },
     {
-      "Identity": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\CV Ale HR-specialist.pdf",
+      "Identity": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
       "SourceId": "JBDH",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\",
-      "BasePath": "_content/JBDH",
-      "RelativePath": "uploads/CV Ale HR-specialist#[.{fingerprint}]?.pdf",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "aync27z9xx",
-      "Integrity": "QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\uploads\\CV Ale HR-specialist.pdf"
-    },
-    {
-      "Identity": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
-      "SourceId": "JBDH",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\",
       "BasePath": "_content/JBDH",
       "RelativePath": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2#[.{fingerprint}]?.pdf",
       "AssetKind": "All",
@@ -22339,7 +22318,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+          "Value": "Tue, 03 Jun 2025 07:50:46 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22376,7 +22355,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+          "Value": "Tue, 03 Jun 2025 07:50:46 GMT"
         },
         {
           "Name": "Cache-Control",

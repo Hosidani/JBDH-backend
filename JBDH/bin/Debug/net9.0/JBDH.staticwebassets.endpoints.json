@@ -18891,52 +18891,15 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "aync27z9xx"
+          "Value": "muycvpuwrr"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+          "Value": "sha256-h68a4ojlMeHZ2MJNcpHGvBgERdoUw7Qpxk6a/oPD5kQ="
         },
         {
           "Name": "label",
-          "Value": "uploads/CV Ale HR-specialist.pdf"
-        }
-      ]
-    },
-    {
-      "Route": "uploads/CV Ale HR-specialist.pdf",
-      "AssetFile": "uploads/CV Ale HR-specialist.pdf",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "293957"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/pdf"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+          "Value": "lib/jquery/dist/jquery.slim.min.js.gz"
         }
       ]
     },
@@ -19131,7 +19094,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+          "Value": "Tue, 03 Jun 2025 07:50:46 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19168,7 +19131,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+          "Value": "Tue, 03 Jun 2025 07:50:46 GMT"
         }
       ],
       "EndpointProperties": [
