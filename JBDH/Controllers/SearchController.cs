@@ -16,8 +16,9 @@ namespace JBDH.Controllers
         private readonly IAIHelperSwitchService _aiHelperSwitchService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly ISearchCandidateService _searchCandidateService; // Added service for candidate search
+        private readonly IAIService _aIService;
 
-        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIHelperSwitchService aiHelperSwitchService, IJobAIAnalysisService jobAIAnalysisService, ISearchCandidateService searchCandidateService)
+        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIHelperSwitchService aiHelperSwitchService, IJobAIAnalysisService jobAIAnalysisService, ISearchCandidateService searchCandidateService, IAIService aIService)
         {
             _context = context;
             _environment = environment;
@@ -25,6 +26,7 @@ namespace JBDH.Controllers
             _aiHelperSwitchService = aiHelperSwitchService;
             _jobAIAnalysisService = jobAIAnalysisService;
             _searchCandidateService = searchCandidateService; // Initialize the candidate search service
+            _aIService = aIService;
         }
 
         [HttpGet]
@@ -102,7 +104,7 @@ namespace JBDH.Controllers
                     dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResultString);
                     aiResultString = json?.choices?[0]?.message?.content?.ToString() ?? aiResultString;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     LoggingConfigService.ReturnError("Failed to parse AI response JSON: " + ex.Message);
                     // Ignore parsing errors and use the original string
@@ -141,8 +143,49 @@ namespace JBDH.Controllers
                 return View();
             }
             var results = await _searchCandidateService.SearchCandidates(keyword, location);
-            ViewData["keyword"] = keyword; 
+            ViewData["keyword"] = keyword;
             return View("SearchResultsCandidates", results);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchForJobsAndAnalyzeCVAgainstJob(string description, string location)
+        {
+            LoggingConfigService.ReturnInfo("SearchForJobsAndAnalyzeCVAgainstJob called.");
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(user.CVPath))
+            {
+                LoggingConfigService.ReturnError("Description, location, or CV path is empty.");
+                return View("Error", new ErrorViewModel
+                {
+                    Title = "Missing Input",
+                    Message = "Description, location, and CV path cannot be empty.",
+                    ReturnUrl = Url.Action("Index", "Home")
+                });
+            }
+
+            // Get prioritized jobs as view models
+            var results = new SearchJobsService(_context, _environment)
+                .SearchJobs(description, location);
+
+            // Analyze the first job against the CV using AIHelperSwitchService
+            if (results.Any())
+            {
+                var aiRequest = new AIHelperRequest
+                {
+                    CommandId = 2,
+                    JobAdUrl = results.First().Job.WebpageUrl,
+                    CVPath = user.CVPath,
+                    User = user // Make sure to set this if required by your AIService
+                };
+                string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
+                ViewData["AIAnalysisResult"] = aiAnalysisResult;
+            }
+            else
+            {
+                ViewData["AIAnalysisResult"] = "No jobs found for the given criteria.";
+            }
+
+            return View("SearchResultsJobs", results);
         }
     }
 }

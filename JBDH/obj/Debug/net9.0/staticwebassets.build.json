@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "yoD05R901qIuU1ntEEWoGyPaQvVfb+iVJAQvbKWNCNY=",
+  "Hash": "SKXj+7fOjZEytfWkyMpt6vTnxMCWlczx7QpznoAb3/Q=",
   "Source": "JBDH",
   "BasePath": "_content/JBDH",
   "Mode": "Default",
@@ -2747,10 +2747,10 @@
       "OriginalItemSpec": "wwwroot\\uploads\\Cover_Letter.pdf"
     },
     {
-      "Identity": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
+      "Identity": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
       "SourceId": "JBDH",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\",
       "BasePath": "_content/JBDH",
       "RelativePath": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2#[.{fingerprint}]?.pdf",
       "AssetKind": "All",
@@ -22132,6 +22132,88 @@
       ]
     },
     {
+      "Route": "uploads/CV Ale HR-specialist.aync27z9xx.pdf",
+      "AssetFile": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\CV Ale HR-specialist.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "293957"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "aync27z9xx"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/CV Ale HR-specialist.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/CV Ale HR-specialist.pdf",
+      "AssetFile": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\CV Ale HR-specialist.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "293957"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+        }
+      ]
+    },
+    {
       "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.7fe6zs8ve5.pdf",
       "AssetFile": "C:\\Users\\danie\\Documents\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
       "Selectors": [],
@@ -22236,7 +22318,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
+          "Value": "Tue, 03 Jun 2025 07:50:46 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22273,7 +22355,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
+          "Value": "Tue, 03 Jun 2025 07:50:46 GMT"
         },
         {
           "Name": "Cache-Control",

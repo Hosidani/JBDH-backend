@@ -18859,6 +18859,91 @@
       ]
     },
     {
+<<<<<<< HEAD
+      "Route": "uploads/CV Ale HR-specialist.aync27z9xx.pdf",
+      "AssetFile": "uploads/CV Ale HR-specialist.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "293957"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "aync27z9xx"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/CV Ale HR-specialist.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/CV Ale HR-specialist.pdf",
+      "AssetFile": "uploads/CV Ale HR-specialist.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "293957"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+        }
+      ]
+    },
+    {
+=======
+>>>>>>> origin/dev
       "Route": "uploads/Cover_Letter.hk1nl53124.pdf",
       "AssetFile": "uploads/Cover_Letter.pdf",
       "Selectors": [],
@@ -19049,7 +19134,11 @@
         },
         {
           "Name": "Last-Modified",
+<<<<<<< HEAD
+          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+=======
           "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
+>>>>>>> origin/dev
         }
       ],
       "EndpointProperties": [
@@ -19086,7 +19175,11 @@
         },
         {
           "Name": "Last-Modified",
+<<<<<<< HEAD
+          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+=======
           "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
+>>>>>>> origin/dev
         }
       ],
       "EndpointProperties": [

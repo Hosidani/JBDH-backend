@@ -8,21 +8,29 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
-    // Define DbSets for your tables
     public DbSet<User> Users { get; set; }
+
     public DbSet<Manager> Managers { get; set; }
+
     public DbSet<Recruiter> Recruiters { get; set; }
+
     public DbSet<Friendship> Friendships { get; set; }
+
     public DbSet<Organisation> Organisations { get; set; }
+
     public DbSet<Job> Jobs { get; set; }
+
     public DbSet<JobApplication> JobApplications { get; set; }
+
     public DbSet<DataFlow> DataFlows { get; set; }
+
     public DbSet<AIResponse> AIResponses { get; set; }
+
     public DbSet<UserAIResponse> UserAIResponses { get; set; }
+
     public DbSet<JobAIResponse> JobAIResponses { get; set; }
+
     public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
-    public DbSet<UserReport> UserReports { get; set; }
-    public DbSet<PasswordReset> PasswordResets { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
