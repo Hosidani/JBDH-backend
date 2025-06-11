@@ -44,8 +44,14 @@
                 <textarea name="comment"></textarea>
                 <button type="submit">Add Comment</button>
             </form>
-            <!-- Render replies recursively -->
-            @Html.Partial("_DataFlowThread", post)
+            <!-- Render ONLY the comments/replies, NOT the post itself -->
+            @if (post.RelatedDataFlows != null && post.RelatedDataFlows.Any())
+            {
+                @foreach (var comment in post.RelatedDataFlows)
+                {
+                    @Html.Partial("_DataFlowThread", comment)
+                }
+            }
         </div>
     </div>
 }

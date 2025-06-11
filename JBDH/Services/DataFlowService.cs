@@ -16,22 +16,6 @@ namespace JBDH.Services
             _context = context;
         }
 
-        // Get all posts with comments
-        public List<DataFlow> GetAllWithComments()
-        {
-            return _context.DataFlows
-                .Where(df => df.ParentDataFlowId == null)
-                .Include(df => df.RelatedDataFlows)
-                .OrderByDescending(df => df.CreatedAt)
-                .ToList();
-        }
-
-        // Get all posts
-        public List<DataFlow> GetAll()
-        {
-            return _context.DataFlows.OrderByDescending(df => df.CreatedAt).ToList();
-        }
-
         // Get posts for a specific user
         public List<DataFlow> GetByUserId(int userId)
         {
@@ -83,14 +67,6 @@ namespace JBDH.Services
 
             _context.DataFlows.Add(commentFlow);
             await _context.SaveChangesAsync();
-        }
-
-        // Get a post with comments
-        public async Task<DataFlow?> GetPostWithCommentsAsync(int postId)
-        {
-            return await _context.DataFlows
-                .Include(df => df.RelatedDataFlows)
-                .FirstOrDefaultAsync(df => df.Id == postId);
         }
 
         public List<DataFlow> GetAllRecursive()

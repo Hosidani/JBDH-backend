@@ -79,17 +79,6 @@ namespace JBDH.Controllers
             return View(posts);
         }
 
-        [HttpGet]
-        public IActionResult GeneralUswerFlow()
-        {
-            var allPosts = _dataFlowService.GetAll();
-            return View(allPosts);
-        }
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -144,18 +133,11 @@ namespace JBDH.Controllers
             if (string.IsNullOrWhiteSpace(comment))
             {
                 TempData["Error"] = "Comment cannot be empty.";
-                return RedirectToAction("PostDetails", new { id = dataFlowId });
+                return RedirectToAction("Index");
             }
 
             await _dataFlowService.AddCommentAsync(dataFlowId, int.Parse(userId), comment);
-            return RedirectToAction("PostDetails", new { id = dataFlowId });
-        }
-
-        public async Task<IActionResult> PostDetails(int id)
-        {
-            var post = await _dataFlowService.GetPostWithCommentsAsync(id);
-            if (post == null) return NotFound();
-            return View(post); // This should render PostDetails.cshtml
+            return RedirectToAction("Index");
         }
     }
 }
