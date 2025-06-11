@@ -1,4 +1,6 @@
+@using Markdig
 @model JBDH.Models.ProfileViewModel
+
 
 @{
     ViewData["Title"] = "My Profile";
@@ -15,14 +17,21 @@
         <dd class="col-sm-9">@Model.User.Email</dd>
 
         <dt class="col-sm-3">Organisation:</dt>
-        <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.User.Organisation) ? Model.User.Organisation : "N/A")</dd>
-
-        <dt class="col-sm-3">Organisation ID:</dt>
-        <dd class="col-sm-9">@Model.User.OrganisationId?.ToString() ?? "N/A"</dd>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.Organisation))
+            {
+                <span>@Model.Organisation</span>
+                @Html.ActionLink("View Organization", "Details", "Organisation", new { id = Model.User.Id }, null)
+            }
+            else
+            {
+                <span>N/A</span>
+            }
+        </dd>
 
         <dt class="col-sm-3">Open for Hiring:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.openForHiring == true)
+            @if (Model.User.OpenForHiring == true)
             {
                 <span class="badge bg-success">Open</span>
             }
@@ -34,7 +43,7 @@
 
         <dt class="col-sm-3">Developer Mode:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.developerMode == true)
+            @if (Model.User.DeveloperMode == true)
             {
                 <span class="badge bg-info">Developer</span>
             }
@@ -55,6 +64,28 @@
             else
             {
                 <span>No CV uploaded</span>
+            }
+        </dd>
+            @{
+                var markdown = Model.UserAIResponse?.responseText ?? "";
+                var html = Markdig.Markdown.ToHtml(markdown);
+            }
+            @if (!string.IsNullOrEmpty(markdown))
+            {
+                <button type="button" class="btn btn-info btn-sm" id="analyzeCvBtn">Analyze CV</button>
+                <div id="aiResponseContent" class="markdown-body" style="display:none;">
+                    @Html.Raw(html)
+                </div>
+                <script>
+                    document.getElementById('analyzeCvBtn').addEventListener('click', function() {
+                        var content = document.getElementById('aiResponseContent');
+                        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                    });
+                </script>
+            }
+            else
+            {
+                <span>No CV available</span>
             }
         </dd>
     </dl>

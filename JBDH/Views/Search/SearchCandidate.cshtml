@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Search Candidate";
+}
+
+<h2>Search for Candidates</h2>
+
+<form asp-action="SearchCandidate" method="get" class="mb-4">
+    <div class="mb-3">
+        <label for="keyword" class="form-label">Keyword</label>
+        <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Enter keyword" />
+    </div>
+    <div class="mb-3">
+        <label for="location" class="form-label">Location</label>
+        <input type="text" name="location" id="location" class="form-control" placeholder="Enter location" />
+    </div>
+    <button type="submit" class="btn btn-info">Search</button>
+</form>

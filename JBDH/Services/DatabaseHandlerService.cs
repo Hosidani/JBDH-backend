@@ -22,15 +22,30 @@ namespace JBDH.Services
                     LoggingConfigService.ReturnInfo($"JSON file already exists: {filePath}");
                 }
             }
-
+            
             private static void EnsureTablesExist(MySqlConnection connection)
             {
                 try
                 {
                     var createRawTable = SqlQueries.SqlQuery(1);
                     var createCleanTable = SqlQueries.SqlQuery(2);
+                    var createAiResponseTable = SqlQueries.SqlQuery(7);
                     var createUserTable = SqlQueries.SqlQuery(14);
+                    var createEmailVerificationTable = SqlQueries.SqlQuery(17);
                     var createFriendshipTable = SqlQueries.SqlQuery(16);
+                    var createOrganisationTable = SqlQueries.SqlQuery(18);
+                    var createJobApplicationTable = SqlQueries.SqlQuery(19);
+                    var createDataFlowTable = SqlQueries.SqlQuery(20);
+                    var createJobAIResponseTable = SqlQueries.SqlQuery(22);
+                    var createUserRoleAssignmentsTable = SqlQueries.SqlQuery(23);
+                    var createUserReportsTable = SqlQueries.SqlQuery(24);
+                    var createPasswordResetTable = SqlQueries.SqlQuery(25);
+                    
+                    using (var command = new MySqlCommand(createUserTable, connection))
+                {
+                    command.ExecuteNonQuery();
+                    LoggingConfigService.ReturnInfo("Users table created.");
+                }
                     using (var command = new MySqlCommand(createRawTable, connection))
                     {
                         command.ExecuteNonQuery();
@@ -39,7 +54,7 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
-                    using (var command = new MySqlCommand(createUserTable, connection))
+                    using (var command = new MySqlCommand(createEmailVerificationTable, connection))
                     {
                         command.ExecuteNonQuery();
                     }
@@ -47,7 +62,39 @@ namespace JBDH.Services
                     {
                         command.ExecuteNonQuery();
                     }
-                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'clean_table', 'Users' and 'Friendships' tables exists.");
+                    using (var command = new MySqlCommand(createOrganisationTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createJobApplicationTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createDataFlowTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createAiResponseTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createJobAIResponseTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createUserRoleAssignmentsTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createUserReportsTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    using (var command = new MySqlCommand(createPasswordResetTable, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    LoggingConfigService.ReturnInfo("Ensured that 'raw_table', 'Jobs', 'Users' , 'EmailVerification' , 'Friendships' , 'JobApplication' , 'DataFlow', 'ai_response', 'job_ai_responses' , 'UserReports' and 'PasswordReset' tables exists.");
                 }
                 catch (Exception e)
                 {
@@ -67,41 +114,27 @@ namespace JBDH.Services
                     var command = new MySqlCommand("SHOW DATABASES LIKE 'testing_purposes'", connection);
                     var reader = command.ExecuteReader();
                     databaseExists = reader.HasRows;
-                }
-                if (databaseExists)
-                {
-                    LoggingConfigService.ReturnInfo("Database already exists. No need to create it again.");
-                    LoggingConfigService.ReturnInfo("Starting up Job database handler...");
-                    EnsureJsonFileExists(JsonFile);
-                    using (var connection = Settings.OpenConnection())
+                    if (databaseExists)
                     {
-                        LoggingConfigService.ReturnInfo("Connection established...");
-                        EnsureTablesExist(connection);
-                        EtlPipeline.RunEtlPipeline(JsonFile);
-                        LoggingConfigService.ReturnInfo("Database handler setup completed.");
+                        LoggingConfigService.ReturnInfo("Database 'testing_purposes' already exists.");
                     }
-                }
-                else
+                    else
                     {
-                        // Create the database and tables
-                    LoggingConfigService.ReturnInfo("Creating database...");
-                    var createDatabase = SqlQueries.SqlQuery(0);
-                    using (var connection = Settings.OpenConnection())
-                    {
-                        using (var command = new MySqlCommand(createDatabase, connection))
+                        var createDatabase = SqlQueries.SqlQuery(0);
+                        using (var dbCommand = new MySqlCommand(createDatabase, connection))
                         {
-                            command.ExecuteNonQuery();
+                            dbCommand.ExecuteNonQuery();
                         }
+                        LoggingConfigService.ReturnInfo("Database 'testing_purposes' created.");
                     }
-                    LoggingConfigService.ReturnInfo("Starting up Job database handler...");
-                    EnsureJsonFileExists(JsonFile);
-                    using (var connection = Settings.OpenConnection())
-                    {
-                        LoggingConfigService.ReturnInfo("Connection established...");
-                        EnsureTablesExist(connection);
-                        EtlPipeline.RunEtlPipeline(JsonFile);
-                        LoggingConfigService.ReturnInfo("Database handler setup completed.");
-                    }
+                }
+                // Always open a new connection to the correct database before creating tables
+                using (var connection = Settings.OpenConnection()) // This should connect to 'testing_purposes'
+                {
+                    LoggingConfigService.ReturnInfo("Connection established...");
+                    EnsureTablesExist(connection);
+                    EtlPipeline.RunEtlPipeline(JsonFile);
+                    LoggingConfigService.ReturnInfo("Database handler setup completed.");
                 }
             }
         }

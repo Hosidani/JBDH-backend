@@ -91,5 +91,10 @@ namespace JBDH.Services
                     ReturnInfo(string.Join(", ", counter));
                 }
             }
+            public static void main(string[] args)
+            {
+                ConfigLogging();
+                ReturnInfo("Logging configured successfully.");
+            } 
         }
 }

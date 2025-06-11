@@ -18859,6 +18859,91 @@
       ]
     },
     {
+<<<<<<< HEAD
+      "Route": "uploads/CV Ale HR-specialist.aync27z9xx.pdf",
+      "AssetFile": "uploads/CV Ale HR-specialist.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "293957"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "aync27z9xx"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/CV Ale HR-specialist.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/CV Ale HR-specialist.pdf",
+      "AssetFile": "uploads/CV Ale HR-specialist.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "293957"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-QjLbcVeeYmN0WT8sfuHkw1O74pZDrPkTbwBK0wSiobU="
+        }
+      ]
+    },
+    {
+=======
+>>>>>>> origin/dev
       "Route": "uploads/Cover_Letter.hk1nl53124.pdf",
       "AssetFile": "uploads/Cover_Letter.pdf",
       "Selectors": [],
@@ -18885,7 +18970,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 28 Apr 2025 19:58:47 GMT"
+          "Value": "Fri, 02 May 2025 16:53:13 GMT"
         }
       ],
       "EndpointProperties": [
@@ -18930,13 +19015,349 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 28 Apr 2025 19:58:47 GMT"
+          "Value": "Fri, 02 May 2025 16:53:13 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
           "Value": "sha256-sUAd+UEfxtpOJ0W5PqiyfAp3Bl90C/RAvL05NopfDyg="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.7fe6zs8ve5.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "768418"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 23:17:31 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "7fe6zs8ve5"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV BackendUtvecklare ver. 6.2-2.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "768418"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 23:17:31 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-fT6MymO/vi+ZqskXmRgFRK1oF5+zDLH7YmeqaR3Mh3Y="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "761869"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk=\""
+        },
+        {
+          "Name": "Last-Modified",
+<<<<<<< HEAD
+          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+=======
+          "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
+>>>>>>> origin/dev
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Daniel Nordgren CV Project lead ver. 6.1.zel47wk24q.pdf",
+      "AssetFile": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "761869"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk=\""
+        },
+        {
+          "Name": "Last-Modified",
+<<<<<<< HEAD
+          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
+=======
+          "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
+>>>>>>> origin/dev
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zel47wk24q"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-a+wgvqv3mZ859oxIzeI85PhQe+Js/tecQiDzGIj4qWk="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf",
+      "AssetFile": "uploads/Hossein_YazdaniPajouh_CV.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "200718"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 25 May 2025 15:53:39 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6fzcy72bf2"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Hossein_YazdaniPajouh_CV.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV.pdf",
+      "AssetFile": "uploads/Hossein_YazdaniPajouh_CV.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "200718"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 25 May 2025 15:53:39 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "AssetFile": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "241406"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 18:41:26 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.vskk32xd41.pdf",
+      "AssetFile": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "241406"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 18:41:26 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vskk32xd41"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-sd6c+nVLSWzZB5ejne+HqIXEWhLFgwHp+EtTHsoAjTw="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf"
         }
       ]
     },
@@ -18967,7 +19388,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 02 May 2025 16:37:32 GMT"
+          "Value": "Sun, 25 May 2025 16:07:54 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19012,7 +19433,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 02 May 2025 16:37:32 GMT"
+          "Value": "Sun, 25 May 2025 16:07:54 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19049,7 +19470,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 28 Apr 2025 19:57:35 GMT"
+          "Value": "Tue, 06 May 2025 10:34:10 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19094,7 +19515,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 28 Apr 2025 19:57:35 GMT"
+          "Value": "Tue, 06 May 2025 10:34:10 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19131,7 +19552,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 28 Apr 2025 19:57:35 GMT"
+          "Value": "Fri, 02 May 2025 16:53:13 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19176,7 +19597,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 28 Apr 2025 19:57:35 GMT"
+          "Value": "Fri, 02 May 2025 16:53:13 GMT"
         }
       ],
       "EndpointProperties": [

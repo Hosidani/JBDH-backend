@@ -12,21 +12,24 @@ namespace JBDH.Models
 
         [Required]
         public string PasswordHash { get; set; }
-
-        [Required]
-        public string Role { get; set; } // e.g., "User", "Manager", "Developer"
-
+        
         [Required]
         public string Email { get; set; }
+        public string Location { get; set; }
 
-        public string CVPath { get; set; } // Path to uploaded CV
-        public string? Organisation { get; set; } // Optional organisation name
-        public int? OrganisationId { get; set; } // Paid organisation name
-        public bool? developerMode { get; set; } // Developer mode
-        public bool? openForHiring { get; set; } // Active mode
+        public string? CVPath { get; set; } // Path to uploaded CV
+        public bool? DeveloperMode { get; set; } // Developer mode
+        public bool? OpenForHiring { get; set; } // Active mode
+        public bool IsBanned { get; set; } = false;
 
         public ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
         public ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
-
+        public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
+        public ICollection<DataFlow> DataFlows { get; set; } = new List<DataFlow>();
+        public ICollection<UserAIResponse> AIResponses { get; set; } = new List<UserAIResponse>();
+        public ICollection<UserRoleAssignment> Roles { get; set; } = new List<UserRoleAssignment>();
+        public int? OwnedByRecruiterId { get; set; }
+        public User OwnedByRecruiter { get; set; }
+        public ICollection<User> OwnedUsers { get; set; } = new List<User>();
     }
 }

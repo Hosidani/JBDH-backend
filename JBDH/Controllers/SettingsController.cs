@@ -2,6 +2,7 @@ using JBDH.Models;
 using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 
 namespace JBDH.Controllers
@@ -12,20 +13,35 @@ namespace JBDH.Controllers
         private readonly IUserPropertiesService _userPropertiesService; 
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        
+        private readonly IAIService _aiService;
+        private readonly IAIResponseService _aiResponseService;
 
-        public SettingsController(IUserPropertiesService userService)
+        public SettingsController(IUserPropertiesService userService, ApplicationDbContext context, IWebHostEnvironment environment, IAIService aiService, IAIResponseService aiResponseService)
         {
+            _context = context;
+            _environment = environment;
+            _aiService = aiService;
             _userPropertiesService = userService;
+            _aiResponseService = aiResponseService;
         }
 
         [HttpPost]
         public async Task<IActionResult> ChangeCV(IFormFile cvFile)
         {
-            var success = await _userPropertiesService.UploadCVAsync(cvFile);
-            if (success)
+            LoggingConfigService.ReturnInfo("ChangeCV method called with file: " + (cvFile?.FileName ?? "No file uploaded"));
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                ViewData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Settings", "Home");
+            }
+
+            var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(cvFile, user.Id);
+            if (result.Success)
                 ViewData["SuccessMessage"] = "CV updated successfully!";
             else
-                ViewData["ErrorMessage"] = "Failed to upload CV.";
+                ViewData["ErrorMessage"] = result.ErrorMessage;
 
             return RedirectToAction("Settings", "Home");
         }
@@ -41,6 +57,7 @@ namespace JBDH.Controllers
 
             return RedirectToAction("Settings", "Home");
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateEmail(string newEmail)
         {
@@ -68,72 +85,69 @@ namespace JBDH.Controllers
                 return View("ErrorPage");
             }
         }
-        // Update Organisation
-        [HttpPost]
-        public async Task<IActionResult> UpdateOrganisation(string newOrganisation)
-        {
-            try
-            {
-                var success = await _userPropertiesService.UpdateOrganisationAsync(newOrganisation);
-                if (success)
-                {
-                    ViewData["SuccessMessage"] = "Your organisation has been successfully updated.";
-                    return RedirectToAction("SuccessPage");
-                }
-                else
-                {
-                    ViewData["ErrorMessage"] = "Failed to update organisation.";
-                    return View("ErrorPage");
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewData["ErrorMessage"] = "An error occurred: " + ex.Message;
-                return View("ErrorPage");
-            }
-        }
 
-        // Update OrganisationId
-        [HttpPost]
-        public async Task<IActionResult> UpdateOrganisationId(int newOrganisationId)
-        {
-            try
-            {
-                var success = await _userPropertiesService.UpdateOrganisationIdAsync(newOrganisationId);
-                if (success)
-                {
-                    ViewData["SuccessMessage"] = "Your organisation ID has been successfully updated.";
-                    return RedirectToAction("SuccessPage");
-                }
-                else
-                {
-                    ViewData["ErrorMessage"] = "Failed to update organisation ID.";
-                    return View("ErrorPage");
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewData["ErrorMessage"] = "An error occurred: " + ex.Message;
-                return View("ErrorPage");
-            }
-        }
         public IActionResult SuccessPage()
         {
             return View();  // Return the SuccessPage view
         }
+
         [HttpGet]
         public async Task<IActionResult> Settings()
         {
+            var model = new ManageRolesViewModel
+            {
+                AvailableRoles = new List<string> { "Manager", "Recruiter" }, // or your roles
+                SelectedRoles = new List<string>() // or the user's roles
+            };
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageRoles()
+        {
             var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user != null)
+            if (user == null)
+                return RedirectToAction("Settings");
+
+            var model = new ManageRolesViewModel
             {
-                ViewData["OpenForHiring"] = user.openForHiring ?? false;
-            }
-            else
+                UserId = user.Id,
+                // Only show roles that can be changed (not "User")
+                SelectedRoles = user.Roles
+                    .Where(r => r.Role != "User")
+                    .Select(r => r.Role)
+                    .ToList()
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageRoles(ManageRolesViewModel model)
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdString, out var userId))
             {
-                ViewData["OpenForHiring"] = false;
+                // Handle error, e.g. return Unauthorized or similar
+                return Unauthorized();
             }
-            return View();
+
+            // Remove all current roles except "User"
+            var currentRoles = _context.UserRoleAssignments.Where(ura => ura.UserId == userId && ura.Role != "User");
+            _context.UserRoleAssignments.RemoveRange(currentRoles);
+
+            // Add selected roles (except "User", which is always assigned)
+            foreach (var role in model.SelectedRoles)
+            {
+                if (role != "User" && !_context.UserRoleAssignments.Any(ura => ura.UserId == userId && ura.Role == role))
+                {
+                    _context.UserRoleAssignments.Add(new UserRoleAssignment { UserId = userId, Role = role });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            ViewData["SuccessMessage"] = "Roles updated successfully!";
+            return RedirectToAction("Settings");
         }
     }
 }

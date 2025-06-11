@@ -1,3 +1,4 @@
+@model JBDH.Models.ManageRolesViewModel
 @{
     ViewData["Title"] = "Settings";
 }
@@ -27,18 +28,7 @@
     </form>
 
     <hr />
-
-    <p>Update your organisation ID below:</p>
-    <form method="post" asp-action="UpdateOrganisationId" asp-controller="Settings">
-        <div class="mb-3">
-            <label for="organisationId" class="form-label">Organisation ID</label>
-            <input type="number" class="form-control" id="organisationId" name="newOrganisationId" value="@ViewData["OrganisationId"]" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Update Organisation ID</button>
-    </form>
-
-    <hr />
-
+    
     <p>Update your CV below:</p>
     <form method="post" enctype="multipart/form-data" asp-action="ChangeCV" asp-controller="Settings">
         <div class="mb-3">
@@ -60,6 +50,33 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Update Status</button>
+    </form>
+
+    <hr />
+
+    <p>Manage your roles:</p>
+    <form method="post" asp-action="ManageRoles" asp-controller="Settings">
+        <div class="mb-3">
+            @if (Model?.AvailableRoles != null && Model?.SelectedRoles != null)
+            {
+                foreach (var role in Model.AvailableRoles)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="SelectedRoles"
+                               value="@role"
+                               id="role_@role"
+                               @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                        <label class="form-check-label" for="role_@role">@role</label>
+                    </div>
+                }
+            }
+            <div class="form-text">
+                <strong>Note:</strong> All users always have the "User" role.
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Roles</button>
     </form>
 
     <hr />

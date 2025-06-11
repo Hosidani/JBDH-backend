@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
+using Microsoft.AspNetCore.Mvc;
 using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Controllers;
 
@@ -12,14 +13,21 @@ public class ProfileController : Controller
     private readonly ApplicationDbContext _context;
     private readonly IProfileService _profileService;
     private readonly IFriendService _friendService; // Add reference to FriendService
+    private readonly IAIService _aiService;
 
-    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService)
+    private readonly IAIResponseService _airesponseService;
+
+
+    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIService aiService, IAIResponseService aiResponseService)
     {
         _context = context;
         _profileService = profileService;
         _friendService = friendService; // Initialize FriendService
+        _aiService = aiService;
+        _airesponseService = aiResponseService;
     }
 
+    // GET: Profile
     [HttpGet]
     public async Task<IActionResult> Profile(int userId)
     {
@@ -44,11 +52,11 @@ public class ProfileController : Controller
         }
 
         var isFriend = await _friendService.AreFriendsAsync(currentUserId, userId);
-
         var viewModel = new ProfileViewModel
         {
             User = user,
-            IsFriend = isFriend
+            IsFriend = isFriend,
+            Organisation = null, // Display organisation name only if verified and not null
         };
 
         return View(viewModel);
@@ -69,11 +77,12 @@ public class ProfileController : Controller
         {
             return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
         }
-
         var viewModel = new ProfileViewModel
         {
             User = user,
-            IsFriend = false // Doesn't matter here, since it's the user's own profile
+            IsFriend = false, // This is the user's own profile, so they are not a friend of themselves
+            Organisation = null, // Display organisation name only if verified and not null
+            UserAIResponse = await _airesponseService.GetLatestAIResponseAsync(user.Id)  // Get AI response for the user
         };
 
         return View("MyProfile", viewModel); // Make sure you're explicitly referring to MyProfile.cshtml
@@ -109,6 +118,4 @@ public class ProfileController : Controller
             return View("ErrorPage", "Could not send friend request.");
         }
     }
-
-
 }

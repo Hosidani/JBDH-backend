@@ -1,7 +1,7 @@
 using JBDH.Models;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 public class Friendship
 {
     public int Id { get; set; }

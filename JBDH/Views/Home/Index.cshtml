@@ -2,30 +2,52 @@
 @* This file is part of the Job Database Handler project. *@
 @* The Job Database Handler is a web application that allows users to manage job listings, applications, and related data. *@
 
+@model IEnumerable<JBDH.Models.DataFlow>
+
 @{
     ViewData["Title"] = "Home";
     var isLoggedIn = User.Identity.IsAuthenticated; // Check if the user is authenticated
     var username = User.Identity.IsAuthenticated ? User.Identity.Name : null; // Get the username from the identity
 }
 
-<div class="text-center">
-    <h1 class="display-4">Job Search</h1>
-    <p>Search for jobs by description and location.</p>
-    <form method="get" action="/Home/SearchJobs">
-        <input type="text" name="description" placeholder="Enter job description">
-        <input type="text" name="location" placeholder="Enter location">
-        <button type="submit">Search</button>
-    </form>
 
-    @if (isLoggedIn)
-    {
-        <div class="mt-4">
-            <h2>Welcome, @username!</h2>
-            <p>Feel free to search for jobs.</p>
-        </div>
-    }
-    else
-    {
-        <p>Please log in to access more features.</p>
-    }
-</div>
+
+<h2>User posts</h2>
+<a href="@Url.Action("CreateFlow")">Create new post</a>
+@foreach (var post in Model)
+{
+    <div class="dataflow-post mb-3">
+        <p>@post.Content</p>
+        <button type="button" class="btn btn-danger btn-sm" onclick="showReportForm(@post.Id)">Report</button>
+        <form asp-action="ReportDataFlow" asp-controller="Home" method="post" style="display:none;" id="reportForm_@post.Id" class="mt-2">
+            <input type="hidden" name="reportedUserId" value="@post.UserId" />
+            <input type="hidden" name="dataFlowId" value="@post.Id" />
+            <input type="hidden" name="dataFlowText" value="@post.Content" />
+            <textarea name="reason" maxlength="100" placeholder="Ange anledning (max 100 tecken)" 
+                      class="form-control mb-2" style="width:200px;display:inline-block;" 
+                      oninput="updateCharCount(this, 'charCount_@post.Id')"></textarea>
+            <div style="font-size: 0.9em; color: #666;">
+                <span id="charCount_@post.Id">100</span> tecken kvar
+            </div>
+            <button type="submit" class="btn btn-danger btn-sm mt-1">Skicka rapport</button>
+        </form>
+    </div>
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@section Scripts {
+    <script>
+        function showReportForm(postId) {
+            document.getElementById('reportForm_' + postId).style.display = 'block';
+        }
+        function updateCharCount(textarea, counterId) {
+            var max = 100;
+            var left = max - textarea.value.length;
+            document.getElementById(counterId).innerText = left;
+        }
+    </script>
+}

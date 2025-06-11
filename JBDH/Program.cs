@@ -13,41 +13,45 @@ using MySql.EntityFrameworkCore.Extensions; // For UseMySQL
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Run DbHandler.Main synchronously before starting the web application
-await Task.Run(() =>
-{
-    try
-    {
-        DatabaseHandlerService.databaseHandler(args); // Initialize database or populate tables
-    }
-    catch (Exception ex)
-    {
-        LoggingConfigService.ReturnError($"Error in DbHandler.Main: {ex.Message}");
-    }
-});
-
 // Run PlatsbankenApi.Main asynchronously before starting the web application
 await Task.Run(async () =>
 {
     try
     {
-        await JobStreamService.Main(args); // Fetch or process job data
+        await JobStreamService.Main(args); // Async job service
+        DatabaseHandlerService.databaseHandler(args); // Synchronous DB handler
     }
     catch (Exception ex)
     {
-        LoggingConfigService.ReturnError($"Error in PlatsbankenApi.Main: {ex.Message}");
+        LoggingConfigService.ReturnError($"Startup error: {ex.Message}");
+        throw; // Optional: rethrow if you want the app to fail on critical startup errors
     }
+
+// Run PlatsbankenApi.Main asynchronously before starting the web application
+
 });
-
-
 
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
- builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddSingleton<AIConfig>();
+builder.Services.AddHttpClient<IAIService, AIService>();
+builder.Services.AddScoped<IManageInputService, ManageInputService>();
+builder.Services.AddScoped<IAIHelperSwitchService, AIHelperSwitchService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
+builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
+builder.Services.AddScoped<IAIResponseService, AIResponseService>();
+builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
+builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
+builder.Services.AddScoped<IRapportUserService, RapportUserService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
 
 // Add session support
 builder.Services.AddSession(options =>
@@ -85,6 +89,20 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register SMTP config
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+// Validate SMTP settings
+var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+if (string.IsNullOrWhiteSpace(smtpSettings.Username) || string.IsNullOrWhiteSpace(smtpSettings.Password))
+{
+    throw new Exception("SMTP configuration is invalid. Please check your appsettings.json.");
+}
+
+// Usual stuff
+builder.Services.AddControllersWithViews();
+builder.Services.AddHostedService<UserBanBackgroundService>(); // Register the background service
+
 // Build the application
 var app = builder.Build();
 
@@ -95,6 +113,20 @@ var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 // SHUTDOWN HOOK:
 lifetime.ApplicationStopping.Register(() =>
 {
+    var filePath = Path.Combine(AppContext.BaseDirectory, "timestamp.txt");
+
+    if (File.Exists(filePath))
+    {
+        try
+        {
+            File.Delete(filePath);
+            Console.WriteLine("timestamp.txt deleted on shutdown.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to delete timestamp.txt: {ex.Message}");
+        }
+    }
     try
     {
         // Create a new scope to resolve scoped services
@@ -106,6 +138,8 @@ lifetime.ApplicationStopping.Register(() =>
             // Call your database flushing service
             FlushDatabaseService.FlushDatabase();
             DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            JobStreamService.DeleteTimestampFile(); // Delete the timestamp file
+            
             LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
         }
     }

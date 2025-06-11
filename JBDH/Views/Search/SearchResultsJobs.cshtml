@@ -1,0 +1,130 @@
+@model List<JobSearchResultViewModel>
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+@if (ViewData["AIAnalysisResult"] != null)
+{
+    @using Markdig
+    var html = Markdig.Markdown.ToHtml(ViewData["AIAnalysisResult"].ToString());
+    <div class="alert alert-info mb-4">
+        <strong>AI Analysis of Your CV Against the Top Job Result:</strong>
+        <br />
+        @Html.Raw(html) <!-- Use the Markdig HTML here -->
+    </div>
+}
+
+<div class="text-center">
+    <h1 class="display-4">Search Results</h1>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <p>No jobs found matching your criteria.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Priority</th>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                    <th>AI</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var item = Model[i];
+                    var jobId = item.Job.JobId;
+                    var title = item.Job.Title;
+                    var company = item.Job.Company;
+                    var location = item.Job.Location;
+                    var description = item.Job.Description;
+                    var url = item.Job.WebpageUrl;
+                <tr>
+                    <td>@item.Priority</td>
+                    <td>
+                        <a href="@url" target="_blank" class="text-primary" onclick="toggleApplyFormAndOpen(event, @i, '@url')">@title</a>
+                    </td>
+                    <td>@company</td>
+                    <td>@location</td>
+                    <td>@description</td>
+                    <td>
+                        <form asp-action="AnalyzeJob" asp-controller="Search" method="post" style="display:inline;" class="analyze-form" data-jobid="@jobId" onsubmit="event.stopPropagation();">
+                            <input type="hidden" name="jobAdUrl" value="@item.Job.WebpageUrl" />
+                            <input type="hidden" name="jobId" value="@item.Job.JobId" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Analyze with AI</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr id="ai-row-@jobId" class="ai-row" style="display:none;">
+                    <td colspan="6">
+                        <div id="ai-result-@jobId" class="ai-response">
+                            @if (item.LatestAIResponse != null)
+                            {
+                                @using Markdig
+                                var html = Markdig.Markdown.ToHtml(item.LatestAIResponse.ResponseText);
+                                <strong>AI Analysis:</strong>
+                                @Html.Raw(html)
+                            }
+                        </div>
+                    </td>
+                </tr>
+                <tr id="applyRow-@i" style="display:none;">
+                    <td colspan="6">
+                        <form asp-controller="JobApplication" asp-action="Apply" method="post">
+                            <input type="hidden" name="jobId" value="@jobId" />
+                            <textarea name="notes" placeholder="Add note (optional)" class="form-control"></textarea>
+                            <button type="submit" id="applyBtn-@i" class="btn btn-primary mt-2">✅ Mark as Applied</button>
+                        </form>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+
+
+@section Scripts {
+    <script>
+        function toggleApplyFormAndOpen(event, index, url) {
+            // Only open if not from analyze form
+            if (!event.target.closest('.analyze-form')) {
+                window.open(url, '_blank');
+                document.querySelectorAll('[id^="applyRow-"]').forEach(row => row.style.display = "none");
+                document.getElementById("applyRow-" + index).style.display = "";
+                event.preventDefault();
+            }
+        }
+
+        function markApplied(form, index) {
+            var btn = document.getElementById("applyBtn-" + index);
+            btn.classList.remove("btn-primary");
+            btn.classList.add("btn-success");
+            btn.innerText = "✅ Applied";
+            btn.disabled = true;
+            return false;
+        }
+
+        // Prevent click events inside the analyze form from bubbling up to the parent <td>/<a>
+        $(document).on('click', '.analyze-form, .analyze-form *', function (e) {
+            e.stopPropagation();
+        });
+
+        $(document).on('submit', '.analyze-form', function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            var jobId = $form.data('jobid');
+            $.post($form.attr('action'), $form.serialize(), function (data) {
+                $('#ai-row-' + jobId).show();
+                $('#ai-result-' + jobId).html(data);
+            });
+        });
+    </script>
+}

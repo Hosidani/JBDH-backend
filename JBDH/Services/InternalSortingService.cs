@@ -85,9 +85,9 @@ namespace JBDH.Services
             {
                 foreach (var row in results)
                 {
-                    if (!seen.Contains(row["job_id"]))
+                    if (!seen.Contains(row["JobId"]))
                     {
-                        seen.Add(row["job_id"]);
+                        seen.Add(row["JobId"]);
                         combined.Add(row);
                     }
                 }
@@ -112,7 +112,7 @@ namespace JBDH.Services
             {
                 using var connection = new MySqlConnection(ConnectionString);
                 connection.Open();
-                var query = "SELECT * FROM clean_table WHERE (@description = 'default' OR title LIKE @description) AND (@location = 'default' OR location LIKE @location)";
+                var query = "SELECT * FROM Jobs WHERE (@description = 'default' OR title LIKE @description) AND (@location = 'default' OR location LIKE @location)";
                 using var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@description", string.IsNullOrEmpty(description) ? "default" : $"%{description}%");
                 command.Parameters.AddWithValue("@location", string.IsNullOrEmpty(location) ? "default" : $"%{location}%");
