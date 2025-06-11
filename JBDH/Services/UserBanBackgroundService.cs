@@ -10,8 +10,7 @@ using JBDH.Services;
 public class UserBanBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    //private readonly TimeSpan _interval = TimeSpan.FromHours(1);
-    private readonly TimeSpan _interval = TimeSpan.FromSeconds(10); // For testing
+    private readonly TimeSpan _interval = TimeSpan.FromHours(24); // For testing
 
 
     public UserBanBackgroundService(IServiceProvider serviceProvider)
@@ -37,6 +36,7 @@ public class UserBanBackgroundService : BackgroundService
                         ReportedUserId = g.Key,
                         UniqueReporters = g.Select(r => r.ReporterUserId).Distinct().Count()
                     })
+                    // Below is when we ban a user if they have 2 or more unique reporters
                     .Where(x => x.UniqueReporters >= 2)
                     .Select(x => x.ReportedUserId)
                     .ToList();

@@ -17,7 +17,7 @@ namespace JBDH.Models
         public string Email { get; set; }
         public string Location { get; set; }
 
-        public string CVPath { get; set; } // Path to uploaded CV
+        public string? CVPath { get; set; } // Path to uploaded CV
         public bool? DeveloperMode { get; set; } // Developer mode
         public bool? OpenForHiring { get; set; } // Active mode
         public bool IsBanned { get; set; } = false;

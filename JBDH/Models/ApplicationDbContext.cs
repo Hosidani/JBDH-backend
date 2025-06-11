@@ -31,7 +31,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<JobAIResponse> JobAIResponses { get; set; }
 
     public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
-
+    public DbSet<UserReport> UserReports { get; set; }
+    public DbSet<PasswordReset> PasswordResets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
