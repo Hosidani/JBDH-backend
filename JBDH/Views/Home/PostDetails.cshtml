@@ -1,0 +1,22 @@
+@model JBDH.Models.DataFlow
+
+<h2>@Model.Content</h2>
+<!-- Show comments -->
+@if (Model.RelatedDataFlows != null && Model.RelatedDataFlows.Any())
+{
+    <h4>Comments:</h4>
+    <ul>
+        @foreach (var comment in Model.RelatedDataFlows)
+        {
+            <li>@comment.Content (@comment.CreatedAt.ToString("g"))</li>
+        }
+    </ul>
+}
+
+<!-- Comment form -->
+<form asp-action="CommentOnDataFlow" method="post">
+    <input type="hidden" name="dataFlowId" value="@Model.Id" />
+    <textarea name="comment" rows="3" cols="40" placeholder="Write a comment..."></textarea>
+    <br />
+    <button type="submit">Add Comment</button>
+</form>

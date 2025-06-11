@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JBDH.Models;
 using JBDH.Models.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services
 {
@@ -13,6 +14,16 @@ namespace JBDH.Services
         public DataFlowService(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        // Get all posts with comments
+        public List<DataFlow> GetAllWithComments()
+        {
+            return _context.DataFlows
+                .Where(df => df.ParentDataFlowId == null)
+                .Include(df => df.RelatedDataFlows)
+                .OrderByDescending(df => df.CreatedAt)
+                .ToList();
         }
 
         // Get all posts
@@ -53,6 +64,68 @@ namespace JBDH.Services
                 _context.DataFlows.Remove(post);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        // Add a comment to a post
+        public async Task AddCommentAsync(int dataFlowId, int userId, string comment)
+        {
+            var parent = await _context.DataFlows.FindAsync(dataFlowId);
+            if (parent == null) return; // Inlägget finns inte
+
+            var commentFlow = new DataFlow
+            {
+                ContentType = "Comment",
+                Content = comment,
+                CreatedAt = DateTime.Now,
+                UserId = userId,
+                ParentDataFlowId = dataFlowId
+            };
+
+            _context.DataFlows.Add(commentFlow);
+            await _context.SaveChangesAsync();
+        }
+
+        // Get a post with comments
+        public async Task<DataFlow?> GetPostWithCommentsAsync(int postId)
+        {
+            return await _context.DataFlows
+                .Include(df => df.RelatedDataFlows)
+                .FirstOrDefaultAsync(df => df.Id == postId);
+        }
+
+        public List<DataFlow> GetAllRecursive()
+        {
+            // 1. Load all DataFlows from the database
+            var all = _context.DataFlows.ToList();
+
+            // 2. Build a lookup so each DataFlow knows its children
+            var lookup = all.ToLookup(df => df.ParentDataFlowId);
+
+            // 3. Recursively assign replies, ordered by CreatedAt (oldest first under each parent)
+            void AssignReplies(DataFlow parent)
+            {
+                parent.RelatedDataFlows = lookup[parent.Id]
+                    .OrderBy(df => df.CreatedAt)
+                    .ToList();
+
+                foreach (var child in parent.RelatedDataFlows)
+                {
+                    AssignReplies(child);
+                }
+            }
+
+            // 4. Get root posts (no parent), ordered newest first
+            var roots = all
+                .Where(df => df.ParentDataFlowId == null)
+                .OrderByDescending(df => df.CreatedAt)
+                .ToList();
+
+            foreach (var root in roots)
+            {
+                AssignReplies(root);
+            }
+
+            return roots;
         }
     }
 }

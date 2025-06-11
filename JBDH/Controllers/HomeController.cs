@@ -32,8 +32,9 @@ namespace JBDH.Controllers
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public IActionResult Index()
         {
-            var flows = _context.DataFlows.OrderByDescending(f => f.CreatedAt).ToList();
-            return View(flows);
+            var dataFlows = _dataFlowService.GetAllRecursive();
+            var listDataFlowViewModel = new ListDataFlowViewModel { DataFlows = dataFlows };
+            return View(listDataFlowViewModel);
         }
 
         // Skapa nytt inlägg (GET)
@@ -70,12 +71,12 @@ namespace JBDH.Controllers
                 await _dataFlowService.CreateAsync(model, Int32.Parse(userId));
             }
             return RedirectToAction("Index");
-        }
+        }  
 
         public IActionResult UserPosts(int userId)
         {
-            var userPosts = _context.DataFlows.Where(df => df.UserId == userId).ToList();
-            return View(userPosts);
+            var posts = _dataFlowService.GetByUserId(userId);
+            return View(posts);
         }
 
         [HttpGet]
@@ -130,6 +131,31 @@ namespace JBDH.Controllers
             await _rapportUserService.ReportUserAsync(reporterUserId, reportedUserId, reason, dataFlowId, dataFlowText);
             TempData["Message"] = "The post has been reported.";
             return RedirectToAction("Index");
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CommentOnDataFlow(int dataFlowId, string comment)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
+            if (string.IsNullOrWhiteSpace(comment))
+            {
+                TempData["Error"] = "Comment cannot be empty.";
+                return RedirectToAction("PostDetails", new { id = dataFlowId });
+            }
+
+            await _dataFlowService.AddCommentAsync(dataFlowId, int.Parse(userId), comment);
+            return RedirectToAction("PostDetails", new { id = dataFlowId });
+        }
+
+        public async Task<IActionResult> PostDetails(int id)
+        {
+            var post = await _dataFlowService.GetPostWithCommentsAsync(id);
+            if (post == null) return NotFound();
+            return View(post); // This should render PostDetails.cshtml
         }
     }
 }
