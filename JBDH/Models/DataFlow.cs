@@ -11,5 +11,6 @@ public class DataFlow
     public DataFlow? ParentDataFlow { get; set; }
     // I-collection of related data flows
     public ICollection<DataFlow>? RelatedDataFlows { get; set; }
+    public User? User { get; set; }
 
 }

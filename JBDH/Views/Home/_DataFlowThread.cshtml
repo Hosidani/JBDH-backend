@@ -2,6 +2,7 @@
 
 <div style="margin-left: @(Model.ParentDataFlowId != null ? "30px" : "0")">
     <div>
+        <strong>@(Model.User?.Username ?? "Unknown")</strong>
         @Model.Content (@Model.CreatedAt.ToString("g"))
         <!-- Reply toggle link -->
         <a href="javascript:void(0);" onclick="toggleReplyForm(@Model.Id)">Reply</a>

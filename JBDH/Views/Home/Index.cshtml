@@ -18,7 +18,10 @@
 @foreach (var post in Model.DataFlows)
 {
     <div class="dataflow-post mb-3">
-        <p>@post.Content</p>
+        <p>
+            <strong>@(post.User?.Username ?? "Unknown")</strong><br />
+            @post.Content
+        </p>
         <button type="button" class="btn btn-danger btn-sm" onclick="toggleReportForm(@post.Id)">Report</button>
         <form asp-action="ReportDataFlow" asp-controller="Home" method="post" style="display:none;" id="reportForm_@post.Id" class="mt-2">
             <input type="hidden" name="reportedUserId" value="@post.UserId" />
