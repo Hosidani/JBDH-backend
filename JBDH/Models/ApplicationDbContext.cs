@@ -155,6 +155,11 @@ public class ApplicationDbContext : DbContext
 
             entity.Property(df => df.CreatedAt)
                 .IsRequired(); // Required field
+
+            entity.HasMany(df => df.RelatedDataFlows)
+                .WithOne(df => df.ParentDataFlow)
+                .HasForeignKey(df => df.ParentDataFlowId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<AIResponse>(entity =>
