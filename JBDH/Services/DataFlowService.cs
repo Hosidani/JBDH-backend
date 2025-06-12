@@ -72,7 +72,7 @@ namespace JBDH.Services
         public List<DataFlow> GetAllRecursive()
         {
             // 1. Load all DataFlows from the database
-            var all = _context.DataFlows.ToList();
+            var all = _context.DataFlows.Include(df => df.User).ToList();
 
             // 2. Build a lookup so each DataFlow knows its children
             var lookup = all.ToLookup(df => df.ParentDataFlowId);
