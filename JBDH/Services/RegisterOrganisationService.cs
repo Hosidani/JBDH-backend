@@ -8,7 +8,7 @@ public class RegisterOrganisationResult
     public string? ErrorMessage { get; set; }
 }
 
-public class RegisterOrganisationService
+public class RegisterOrganisationService : IRegisterOrganisationService
 {
     private readonly ApplicationDbContext _context;
 

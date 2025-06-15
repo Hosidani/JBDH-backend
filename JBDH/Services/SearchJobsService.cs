@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Services
 {
-    public class SearchJobsService
+    public class SearchJobsService : ISearchJobsService
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
@@ -21,7 +21,7 @@ namespace JBDH.Services
             _environment = environment;
         }
 
-        public List<JobSearchResultViewModel> SearchJobs(string description, string location)
+        public async Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
         {
             LoggingConfigService.ReturnInfo("SearchJobs Service called");
             try
@@ -49,7 +49,7 @@ namespace JBDH.Services
                     });
                 }
 
-                // Now assign priorities and return the view models
+                // Await the async priority assignment
                 var presentJobs = GiveJobPriorityService.AssignJobPriority(jobs, description, location);
                 return presentJobs;
             }

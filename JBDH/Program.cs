@@ -48,6 +48,10 @@ builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
 builder.Services.AddScoped<IAIResponseService, AIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<IRegisterOrganisationService, RegisterOrganisationService>();
+builder.Services.AddScoped<IUserVerificationService, UserVerificationService>();
+builder.Services.AddScoped<ISearchJobsService, SearchJobsService>();
+builder.Services.AddScoped<IJobAIResponseService, JobAIResponseService>();
 builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
