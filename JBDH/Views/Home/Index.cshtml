@@ -6,8 +6,8 @@
 
 @{
     ViewData["Title"] = "Home";
-    var isLoggedIn = User.Identity.IsAuthenticated;
-    var username = isLoggedIn ? User.Identity.Name : null;
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+    var username = isLoggedIn ? User.Identity?.Name : null;
 }
 
 <h2>Posts</h2>
@@ -50,9 +50,9 @@
             <!-- Render ONLY the comments/replies, NOT the post itself -->
             @if (post.RelatedDataFlows != null && post.RelatedDataFlows.Any())
             {
-                @foreach (var comment in post.RelatedDataFlows)
+                foreach (var comment in post.RelatedDataFlows)
                 {
-                    @Html.Partial("_DataFlowThread", comment)
+                    <partial name="_DataFlowThread" model="comment" />
                 }
             }
         </div>

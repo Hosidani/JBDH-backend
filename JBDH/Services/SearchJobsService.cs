@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Services
 {
-    public class SearchJobsService
+    public class SearchJobsService : ISearchJobsService
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
@@ -21,7 +21,7 @@ namespace JBDH.Services
             _environment = environment;
         }
 
-        public List<JobSearchResultViewModel> SearchJobs(string description, string location)
+        public async Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
         {
             LoggingConfigService.ReturnInfo("SearchJobs Service called");
             try
@@ -37,17 +37,19 @@ namespace JBDH.Services
                     LoggingConfigService.ReturnInfo("Job dictionary keys: " + string.Join(", ", dict.Keys));
                     jobs.Add(new Job
                     {
-                        JobId = dict.ContainsKey("JobId") ? dict["JobId"].ToString() : "0",
-                        Title = dict.ContainsKey("Title") ? dict["Title"].ToString() : "",
-                        Description = dict.ContainsKey("Description") ? dict["Description"].ToString() : "",
-                        Company = dict.ContainsKey("Company") ? dict["Company"].ToString() : "",
-                        Location = dict.ContainsKey("Location") ? dict["Location"].ToString() : "",
-                        PostedDate = dict.ContainsKey("PostedDate") ? (DateTime?)Convert.ToDateTime(dict["PostedDate"]) : null,
-                        WebpageUrl = dict.ContainsKey("WebpageUrl") ? dict["WebpageUrl"].ToString() : ""
+                        JobId = dict.TryGetValue("JobId", out var jobId) && jobId != null ? jobId.ToString()! : "0",
+                        Title = dict.TryGetValue("Title", out var title) && title != null ? title.ToString()! : "",
+                        Description = dict.TryGetValue("Description", out var desc) && desc != null ? desc.ToString()! : "",
+                        Company = dict.TryGetValue("Company", out var company) && company != null ? company.ToString()! : "",
+                        Location = dict.TryGetValue("Location", out var locValue) && locValue != null ? locValue.ToString()! : "",
+                        PostedDate = dict.TryGetValue("PostedDate", out var postedDate) && postedDate != null
+                            ? (DateTime?)Convert.ToDateTime(postedDate)
+                            : null,
+                        WebpageUrl = dict.TryGetValue("WebpageUrl", out var url) && url != null ? url.ToString()! : ""
                     });
                 }
 
-                // Now assign priorities and return the view models
+                // Await the async priority assignment
                 var presentJobs = GiveJobPriorityService.AssignJobPriority(jobs, description, location);
                 return presentJobs;
             }

@@ -1,6 +1,12 @@
 using JBDH.Models; 
 using Microsoft.EntityFrameworkCore;
 
+public class ReportResult
+{
+    public bool Success { get; set; }
+    public string? ErrorMessage { get; set; }
+}
+
 public class RapportUserService : IRapportUserService
 {
     private readonly ApplicationDbContext _context;
@@ -9,13 +15,16 @@ public class RapportUserService : IRapportUserService
         _context = context;
     }
 
-    public async Task ReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId, string dataFlowText)
+    public async Task<ReportResult> TryReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId, string? dataFlowText)
     {
+        if (string.IsNullOrWhiteSpace(reason))
+            return new ReportResult { Success = false, ErrorMessage = "Reason cannot be empty." };
+
         var reporterExists = await _context.Users.AnyAsync(u => u.Id == reporterUserId);
         var reportedExists = await _context.Users.AnyAsync(u => u.Id == reportedUserId);
 
         if (!reporterExists || !reportedExists)
-            throw new ArgumentException("Reporter or reported user does not exist.");
+            return new ReportResult { Success = false, ErrorMessage = "Reporter or reported user does not exist." };
 
         var report = new UserReport
         {
@@ -23,15 +32,12 @@ public class RapportUserService : IRapportUserService
             ReportedUserId = reportedUserId,
             Reason = reason,
             DataFlowId = dataFlowId,
-            DataFlowText = dataFlowText,
+            DataFlowText = dataFlowText ?? string.Empty,
             CreatedAt = DateTime.UtcNow
         };
         _context.UserReports.Add(report);
         await _context.SaveChangesAsync();
-    }
 
-    public async Task ReportUserAsync(int reporterUserId, int reportedUserId, string reason)
-    {
-        await ReportUserAsync(reporterUserId, reportedUserId, reason, null, null);
+        return new ReportResult { Success = true };
     }
 }

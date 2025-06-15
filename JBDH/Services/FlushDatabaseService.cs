@@ -6,41 +6,48 @@ namespace JBDH.Services
     public class FlushDatabaseService
     {
         public static void FlushDatabase()
+        {
+            try
             {
-                try
-                {
-                    MySqlConnection connection = Settings.OpenConnection();
-                    LoggingConfigService.ReturnInfo("Flushing database...");
+                MySqlConnection connection = Settings.OpenConnection();
+                LoggingConfigService.ReturnInfo("Flushing database...");
 
-                    // Delete all rows from raw_table
-                    var deleteRawTableCommand = new MySqlCommand(SqlQueries.SqlQuery(11), connection);
-                    var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {rawRowsDeleted} rows from raw_table.");
+                // Delete all rows from raw_table
+                var deleteRawTableCommand = new MySqlCommand(SqlQueries.SqlQuery(202), connection);
+                var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {rawRowsDeleted} rows from raw_table.");
 
-                    // Delete all rows from Jobs
-                    var deleteCleanTableCommand = new MySqlCommand(SqlQueries.SqlQuery(12), connection);
-                    var cleanRowsDeleted = deleteCleanTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {cleanRowsDeleted} rows from Jobs.");
+                // Delete all rows from Jobs
+                var deleteJobsTableCommand = new MySqlCommand(SqlQueries.SqlQuery(203), connection);
+                var jobsRowsDeleted = deleteJobsTableCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {jobsRowsDeleted} rows from Jobs.");
 
-                    // Delete all rows from email_verification table
-                    var deleteEmailVerificationTableCommand = new MySqlCommand(SqlQueries.SqlQuery(4), connection);
-                    var emailVerificationRowsDeleted = deleteEmailVerificationTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {emailVerificationRowsDeleted} rows from email_verification table.");
-                    
-                    // Delete all rows from AIResponses table
-                    var deleteAIResponsesTableCommand = new MySqlCommand(SqlQueries.SqlQuery(20), connection);
-                    var aiResponsesRowsDeleted = deleteAIResponsesTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {aiResponsesRowsDeleted} rows from AIResponses table.");
-                    // Delete all rows from Users table
-                    var deleteUserTableCommand = new MySqlCommand(SqlQueries.SqlQuery(15), connection);
-                    var userRowsDeleted = deleteUserTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {userRowsDeleted} rows from Users.");
-                    LoggingConfigService.ReturnInfo("Flushed database successfully.");
-                }
-                catch (Exception e)
-                {
-                    LoggingConfigService.ReturnError($"Error flushing database: {e.Message}");
-                }
+                // Delete all rows from EmailVerificationTokens table
+                var deleteEmailVerificationTableCommand = new MySqlCommand(SqlQueries.SqlQuery(200), connection);
+                var emailVerificationRowsDeleted = deleteEmailVerificationTableCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {emailVerificationRowsDeleted} rows from EmailVerificationTokens table.");
+
+                // Delete all rows from AIResponses table
+                var deleteAIResponsesTableCommand = new MySqlCommand(SqlQueries.SqlQuery(205), connection);
+                var aiResponsesRowsDeleted = deleteAIResponsesTableCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {aiResponsesRowsDeleted} rows from AIResponses table.");
+
+                // Delete all rows from UserRoleAssignments table (must be before Users)
+                var deleteUserRoleAssignmentsCommand = new MySqlCommand(SqlQueries.SqlQuery(206), connection);
+                var userRoleAssignmentsRowsDeleted = deleteUserRoleAssignmentsCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {userRoleAssignmentsRowsDeleted} rows from UserRoleAssignments.");
+
+                // Delete all rows from Users table
+                var deleteUsersTableCommand = new MySqlCommand(SqlQueries.SqlQuery(204), connection);
+                var userRowsDeleted = deleteUsersTableCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {userRowsDeleted} rows from Users.");
+
+                LoggingConfigService.ReturnInfo("Flushed database successfully.");
             }
+            catch (Exception e)
+            {
+                LoggingConfigService.ReturnError($"Error flushing database: {e.Message}");
+            }
+        }
     }
 }

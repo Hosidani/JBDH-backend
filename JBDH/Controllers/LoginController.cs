@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
 using JBDH.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 namespace JBDH.Controllers;
 
 public class LoginController : Controller
@@ -14,6 +15,14 @@ public class LoginController : Controller
         _context = context;
         _loginService = loginService;
         _passwordResetService = passwordResetService;
+    }
+    [HttpGet]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync("CookieAuth");  // Sign out of authentication
+        HttpContext.Session.Clear();                   // Clear the session
+        ViewData["Username"] = null;                   // Clear any ViewData
+        return RedirectToAction("Index", "Home");      // Redirect to home page
     }
 
     [HttpPost]
@@ -30,8 +39,8 @@ public class LoginController : Controller
             return RedirectToAction("Index", "Home");
         }
         // If login fails
-        ViewData["ErrorMessage"] = result.ErrorMessage;
-        LoggingConfigService.ReturnError(result.ErrorMessage);
+        ViewData["ErrorMessage"] = result.ErrorMessage ?? "Unknown error.";
+        LoggingConfigService.ReturnError(result.ErrorMessage ?? "Unknown error.");
         return View();
     }
 
@@ -39,7 +48,7 @@ public class LoginController : Controller
     public IActionResult Login()
     {
         // If the user is already authenticated, redirect them to the home page (or any page you choose)
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Index", "Home");
         }

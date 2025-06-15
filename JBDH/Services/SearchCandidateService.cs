@@ -47,7 +47,7 @@ public class SearchCandidateService : ISearchCandidateService
                 UserId = x.User.Id,
                 Username = x.User.Username,
                 Location = x.User.Location,
-                UserAIResponse = aiResponse ?? new UserAIResponse(), // Ensure non-null assignment
+                UserAIResponse = aiResponse ?? new UserAIResponse { UserId = x.User.Id, User = x.User },
                 Priority = (!string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()) ? 1 : 2
             };
         }));

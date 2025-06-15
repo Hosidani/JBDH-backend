@@ -22,7 +22,7 @@ namespace JBDH.Services
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<User> GetCurrentUserAsync()
+        public async Task<User?> GetCurrentUserAsync()
         {
             var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
             if (string.IsNullOrEmpty(username))
@@ -85,7 +85,7 @@ namespace JBDH.Services
             return true;
         }
 
-        private string GetAbsoluteCVPath(string cvFileName) // Helper method to get the absolute path of the CV file
+        private string? GetAbsoluteCVPath(string cvFileName) // Helper method to get the absolute path of the CV file
         {
             if (string.IsNullOrEmpty(cvFileName)) return null;
             return Path.Combine(_environment.WebRootPath, "uploads", cvFileName);
@@ -153,7 +153,7 @@ namespace JBDH.Services
             }
             LoggingConfigService.ReturnInfo($"CV upload success: {uploadSuccess}");
             // Run AI analysis in the background
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -165,7 +165,7 @@ namespace JBDH.Services
                     {
                         LoggingConfigService.ReturnInfo("Starting AI analysis for user CV.");
                         // Always construct the full path for AI analysis
-                        var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", user.CVPath);
+                        var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", user.CVPath ?? "");
                         AIHelperRequest request = new AIHelperRequest
                         {
                             CommandId = 0, // Assuming 0 is for CV analysis
@@ -176,6 +176,7 @@ namespace JBDH.Services
                         var aiResponse = new UserAIResponse
                         {
                             UserId = user.Id,
+                            User = user, // <-- Add this line
                             responseText = aiResponseText,
                             createdAt = DateTime.UtcNow
                         };

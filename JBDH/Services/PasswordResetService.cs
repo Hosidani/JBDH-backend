@@ -23,6 +23,7 @@ public class PasswordResetService : IPasswordResetService
         var resetEntry = new PasswordReset
         {
             UserId = user.Id,
+            User = user,
             Token = token,
             ExpirationDate = DateTime.UtcNow.AddHours(1)
         };
@@ -52,9 +53,9 @@ public class PasswordResetService : IPasswordResetService
         */
         
         //Currently solution: deleting the token after use is secure and prevents replay attacks (someone using the same link again).
-        if (entry == null)
+        if (entry == null || entry.User == null)
             return false;
-        entry.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        entry.User!.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         _context.PasswordResets.Remove(entry);
 
         await _context.SaveChangesAsync();

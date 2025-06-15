@@ -5,7 +5,7 @@ namespace JBDH.Services
     public interface IFriendService
     {
         // Methods for managing friendships
-        Task<bool> SendFriendRequestAsync(int requesterId, int addresseeId);
+        Task<ServiceResult> SendFriendRequestAsync(int requesterId, int addresseeId);
         Task<bool> AcceptFriendRequestAsync(int requestId);
         Task<List<User>> GetFriendsAsync(int userId);
         Task<List<Friendship>> GetPendingRequestsAsync(int userId);

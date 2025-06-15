@@ -37,35 +37,38 @@ class JobStreamService
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content);
+                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content) ?? new List<Dictionary<string, object>>();
             }
             catch (Exception e)
             {
                 LoggingConfigService.ReturnError($"Error fetching job ads: {e.Message}");
-                return null;
+                return new List<Dictionary<string, object>>();
             }
         }
 
-        public static async Task<List<Dictionary<string, object>>> FetchJobAdsAsync(string url, string date)
+        public static async Task<List<Dictionary<string, object>>> FetchJobAdsAsync(string url, string? date)
         {
             LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {url} with date: {date}");
             try
             {
                 using var client = new HttpClient();
 
-                // Add the date parameter to the query string
-                var fullUrl = $"{url}?date={Uri.EscapeDataString(date)}";
+                string fullUrl = url;
+                if (!string.IsNullOrEmpty(date))
+                {
+                    fullUrl = $"{url}?date={Uri.EscapeDataString(date)}";
+                }
                 LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {fullUrl}");
                 var response = await client.GetAsync(fullUrl);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content);
+                return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content) ?? new List<Dictionary<string, object>>();
             }
             catch (Exception e)
             {
                 LoggingConfigService.ReturnError($"Error fetching job ads: {e.Message}");
-                return null;
+                return new List<Dictionary<string, object>>();
             }
         }
 
@@ -80,11 +83,13 @@ class JobStreamService
 
             foreach (var job in jobAds)
             {
-                var title = job.GetValueOrDefault("headline", "").ToString().ToLower();
-                var descriptionDict = job.GetValueOrDefault("description", null) as Dictionary<string, object>;
-                var jobDescription = descriptionDict?.GetValueOrDefault("text", "").ToString().ToLower() ?? "";
-                var locationDict = job.GetValueOrDefault("workplace_address", null) as Dictionary<string, object>;
-                var jobLocation = locationDict?.GetValueOrDefault("municipality", "").ToString().ToLower() ?? "";
+                var title = job.GetValueOrDefault("headline")?.ToString()?.ToLower() ?? "";
+                job.TryGetValue("description", out var descObj);
+                var descriptionDict = descObj as Dictionary<string, object>;
+                job.TryGetValue("workplace_address", out var locObj);
+                var locationDict = locObj as Dictionary<string, object>;
+                var jobDescription = descriptionDict?.GetValueOrDefault("text")?.ToString()?.ToLower() ?? "";
+                var jobLocation = locationDict?.GetValueOrDefault("municipality")?.ToString()?.ToLower() ?? "";
 
                 if ((string.IsNullOrEmpty(description) || title.Contains(description.ToLower()) || jobDescription.Contains(description.ToLower())) &&
                     (string.IsNullOrEmpty(location) || jobLocation.Contains(location.ToLower())))
@@ -125,7 +130,7 @@ class JobStreamService
                 LoggingConfigService.ReturnError($"Error deleting timestamp file: {e.Message}");
             }
         }
-        public static async Task Main(string[] args)
+        public static async Task RunJobStreamAsync(string[] args)
         {
             LoggingConfigService.ReturnInfo("Starting job ad retrieval process...");
             // Check if this is the first run or an update

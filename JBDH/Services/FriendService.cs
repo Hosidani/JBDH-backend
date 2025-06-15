@@ -15,29 +15,37 @@ public class FriendService : IFriendService
         _context = context;
     }
 
-    public async Task<bool> SendFriendRequestAsync(int requesterId, int addresseeId)
+    public async Task<ServiceResult> SendFriendRequestAsync(int requesterId, int addresseeId)
     {
         if (requesterId == addresseeId)
-            return false;
+            return ServiceResult.Failure("You cannot send a friend request to yourself.");
 
         bool exists = await _context.Friendships.AnyAsync(f =>
             (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
             (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && f.Status == FriendshipStatus.Pending);
 
         if (exists)
-            return false;
+            return ServiceResult.Failure("A pending friend request already exists.");
+
+        var requester = await _context.Users.FindAsync(requesterId);
+        var addressee = await _context.Users.FindAsync(addresseeId);
+
+        if (requester == null || addressee == null)
+            return ServiceResult.Failure("User not found.");
 
         var friendship = new Friendship
         {
             RequesterId = requesterId,
+            Requester = requester,
             AddresseeId = addresseeId,
+            Addressee = addressee,
             Status = FriendshipStatus.Pending,
             RequestedAt = DateTime.UtcNow
         };
 
         _context.Friendships.Add(friendship);
         await _context.SaveChangesAsync();
-        return true;
+        return ServiceResult.SuccessResult();
     }
 
 

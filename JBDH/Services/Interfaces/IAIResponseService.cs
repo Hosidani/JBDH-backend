@@ -3,8 +3,8 @@ namespace JBDH.Services
 {
     public interface IAIResponseService
     {
-        AIResponse GetAIResponseFromUser(User user);
+        AIResponse? GetAIResponseFromUser(User user);
         void SaveAIResponse(AIResponse aiResponse, User user);
-        Task<UserAIResponse> GetLatestAIResponseAsync(int userId);
+        Task<UserAIResponse?> GetLatestAIResponseAsync(int userId);
     }
 }

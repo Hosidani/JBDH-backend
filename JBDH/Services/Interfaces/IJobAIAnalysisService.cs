@@ -1,7 +1,9 @@
-using System.Net.Http;
 using System.Threading.Tasks;
 
-public interface IJobAIAnalysisService
+namespace JBDH.Services.Interfaces
 {
-    Task<StringContent> AnalyzeJobAsync(string jobAdUrl);
+    public interface IJobAIAnalysisService
+    {
+        Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId);
+    }
 }

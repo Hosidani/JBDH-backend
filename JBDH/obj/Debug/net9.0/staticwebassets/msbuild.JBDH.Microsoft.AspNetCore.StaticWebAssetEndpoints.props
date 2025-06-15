@@ -28,13 +28,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\JBDH.dqwpcvk4d6.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-9Rk74OJ/8HdTIluPFqrggErU6r0RHfUSetQr7q9\u002BLuA="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1122"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u00229Rk74OJ/8HdTIluPFqrggErU6r0RHfUSetQr7q9\u002BLuA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 03 Apr 2025 09:36:45 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1122"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u00229Rk74OJ/8HdTIluPFqrggErU6r0RHfUSetQr7q9\u002BLuA=\u0022"},{"Name":"Last-Modified","Value":"Sun, 15 Jun 2025 19:41:04 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/JBDH.dqwpcvk4d6.bundle.scp.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\JBDH.dqwpcvk4d6.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"dqwpcvk4d6"},{"Name":"integrity","Value":"sha256-9Rk74OJ/8HdTIluPFqrggErU6r0RHfUSetQr7q9\u002BLuA="},{"Name":"label","Value":"_content/JBDH/JBDH.bundle.scp.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1122"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u00229Rk74OJ/8HdTIluPFqrggErU6r0RHfUSetQr7q9\u002BLuA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 03 Apr 2025 09:36:45 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1122"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u00229Rk74OJ/8HdTIluPFqrggErU6r0RHfUSetQr7q9\u002BLuA=\u0022"},{"Name":"Last-Modified","Value":"Sun, 15 Jun 2025 19:41:04 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/js/site.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))</AssetFile>
@@ -816,17 +816,17 @@
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"zel47wk24q"},{"Name":"integrity","Value":"sha256-a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk="},{"Name":"label","Value":"_content/JBDH/uploads/Daniel Nordgren CV Project lead ver. 6.1.pdf"}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"761869"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022a\u002Bwgvqv3mZ859oxIzeI85PhQe\u002BJs/tecQiDzGIj4qWk=\u0022"},{"Name":"Last-Modified","Value":"Mon, 09 Jun 2025 11:32:44 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"6fzcy72bf2"},{"Name":"integrity","Value":"sha256-rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA="},{"Name":"label","Value":"_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"200718"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA=\u0022"},{"Name":"Last-Modified","Value":"Mon, 02 Jun 2025 13:04:16 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"200718"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022rgMTQtJIPkalvIcDQ\u002BInw6JIrcFjc1E6W\u002BjzXb9r0mA=\u0022"},{"Name":"Last-Modified","Value":"Mon, 02 Jun 2025 13:04:16 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"199557"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0=\u0022"},{"Name":"Last-Modified","Value":"Sun, 15 Jun 2025 20:21:36 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.uxkptkaszo.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"uxkptkaszo"},{"Name":"integrity","Value":"sha256-QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0="},{"Name":"label","Value":"_content/JBDH/uploads/Hossein_YazdaniPajouh_CV.pdf"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"199557"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022QuM2krm/BsFypsZ6Ledc4vhv\u002BQVxsidRtcxqV/ae/q0=\u0022"},{"Name":"Last-Modified","Value":"Sun, 15 Jun 2025 20:21:36 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/JBDH/uploads/Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV_MED REFERENSER.pdf'))</AssetFile>

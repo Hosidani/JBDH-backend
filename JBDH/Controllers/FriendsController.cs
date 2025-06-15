@@ -19,13 +19,16 @@ namespace JBDH.Controllers
         public async Task<IActionResult> SendRequest(string addresseeId)
         {
             var currentUser = await _IUserPropertiesService.GetCurrentUserAsync();
-            var addresseeIdInt = int.Parse(addresseeId);
-            var success = await _friendService.SendFriendRequestAsync(currentUser.Id, addresseeIdInt);
+            if (currentUser == null)
+                return View("ErrorPage", "Could not find current user.");
 
-            if (success)
+            var addresseeIdInt = int.Parse(addresseeId);
+            var result = await _friendService.SendFriendRequestAsync(currentUser.Id, addresseeIdInt);
+
+            if (result.Success)
                 return RedirectToAction("SuccessPage", "Settings", new { message = "Friend request sent!" });
             else
-                return View("ErrorPage", "Could not send friend request.");
+                return View("ErrorPage", result.ErrorMessage ?? "Could not send friend request.");
         }
     }
 }

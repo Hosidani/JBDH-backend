@@ -67,7 +67,10 @@ namespace JBDH.Services
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-            await _httpContextAccessor.HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                await _httpContextAccessor.HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+            }
         }
 
         // Register user with organization selection
@@ -79,6 +82,8 @@ namespace JBDH.Services
             {
                 Username = username,
                 PasswordHash = passwordHash,
+                Email = "", // Set to actual email if available
+                Location = "", // Set to actual location if available
             };
 
             _context.Users.Add(user);
@@ -104,6 +109,8 @@ namespace JBDH.Services
             // Logic to send email to the manager
             var subject = "Verify User for Organization";
             var body = $"Please verify that {user.Username} is part of your organization.";
+            _ = subject;
+            _ = body;
             // Use an email service to send the email (not implemented here)
             await Task.CompletedTask; // Placeholder for email sending logic
         }

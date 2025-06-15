@@ -1236,8 +1236,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>6fzcy72bf2</Fingerprint>
-      <Integrity>rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=</Integrity>
+      <Fingerprint>uxkptkaszo</Fingerprint>
+      <Integrity>QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\Hossein_YazdaniPajouh_CV.pdf'))</OriginalItemSpec>

@@ -22,12 +22,12 @@ namespace JBDH.Services
             string text = !string.IsNullOrWhiteSpace(content) ? content : "No content found.";
             return text;
         }
-        public async Task<string> ExtractTextFromPdf(string pdfFilePath)
+        public Task<string> ExtractTextFromPdf(string pdfFilePath)
         {
             if (!File.Exists(pdfFilePath))
             {
                 LoggingConfigService.ReturnError($"PDF file not found: {pdfFilePath}");
-                return "CV file not found.";
+                return Task.FromResult("CV file not found.");
             }
             var sb = new StringBuilder();
             using (var document = PdfDocument.Open(pdfFilePath))
@@ -37,7 +37,7 @@ namespace JBDH.Services
                     sb.AppendLine(page.Text);
                 }
             }
-            return sb.ToString();
+            return Task.FromResult(sb.ToString());
         }
     }
 }

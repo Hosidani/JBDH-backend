@@ -1,23 +1,38 @@
 using JBDH.Models;
-using JBDH.Services;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using JBDH.Services;
+using JBDH.Services.Interfaces;
+
 public class JobAIAnalysisService : IJobAIAnalysisService
 {
     private readonly IUserPropertiesService _userPropertiesService;
     private readonly IAIHelperSwitchService _aiHelperSwitchService;
     private static readonly AIConfig AIConfig = new AIConfig();
+    private readonly ApplicationDbContext _context;
 
     public JobAIAnalysisService(
         IUserPropertiesService userPropertiesService,
-        IAIHelperSwitchService aiHelperSwitchService)
+        IAIHelperSwitchService aiHelperSwitchService,
+        ApplicationDbContext context)
     {
         _userPropertiesService = userPropertiesService;
         _aiHelperSwitchService = aiHelperSwitchService;
+        _context = context;
     }
 
-    public async Task<StringContent> AnalyzeJobAsync(string jobAdUrl)
+    public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId)
     {
-        LoggingConfigService.ReturnInfo($"Analyzing job ad at URL: {jobAdUrl}");
+        // 1. Check for cached response in the database
+        var cachedResponse = await _context.JobAIResponses
+            .Where(r => r.JobId == jobId)
+            .OrderByDescending(r => r.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (cachedResponse != null)
+            return cachedResponse.ResponseText;
+
+        // 2. Build and send AI request
         var user = await _userPropertiesService.GetCurrentUserAsync();
         var request = new AIHelperRequest
         {
@@ -25,19 +40,30 @@ public class JobAIAnalysisService : IJobAIAnalysisService
             JobAdUrl = jobAdUrl,
             User = user
         };
-
-        // Build the request body
         var requestContent = await _aiHelperSwitchService.HelperSwitch(request);
 
-        // Send the request to the AI API endpoint
         using (var httpClient = new HttpClient())
         {
             var apiUrl = AIConfig.OpenAIUrl;
+            if (string.IsNullOrEmpty(AIConfig.OpenAIKey))
+                throw new InvalidOperationException("OpenAI API key is not configured.");
+
             httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {AIConfig.OpenAIKey}");
 
             var response = await httpClient.PostAsync(apiUrl, requestContent);
             var responseContent = await response.Content.ReadAsStringAsync();
-            return new StringContent(responseContent, Encoding.UTF8, "application/json");
+
+            // 3. Save the new response to the database
+            var aiResponse = new JobAIResponse
+            {
+                JobId = jobId,
+                ResponseText = responseContent,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.JobAIResponses.Add(aiResponse);
+            await _context.SaveChangesAsync();
+
+            return responseContent;
         }
     }
 }

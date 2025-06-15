@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "tGk9VrtaYVAeH4OnnCpMNA2t1KMQUI5hEd6EQloQCJY=",
+  "Hash": "NE9+UQ9sNYiIlcVBsGMR+UXlTuViVHLncI7WGW6YxMo=",
   "Source": "JBDH",
   "BasePath": "_content/JBDH",
   "Mode": "Default",
@@ -2845,8 +2845,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "6fzcy72bf2",
-      "Integrity": "rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=",
+      "Fingerprint": "uxkptkaszo",
+      "Integrity": "QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf"
@@ -3537,7 +3537,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3590,7 +3590,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3627,7 +3627,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3674,7 +3674,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3735,7 +3735,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3780,7 +3780,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3835,7 +3835,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3896,7 +3896,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3941,7 +3941,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3996,7 +3996,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4049,7 +4049,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -4086,7 +4086,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 03 Apr 2025 09:36:45 GMT"
+          "Value": "Sun, 15 Jun 2025 19:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22481,51 +22481,6 @@
       ]
     },
     {
-      "Route": "uploads/Hossein_YazdaniPajouh_CV.6fzcy72bf2.pdf",
-      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "200718"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/pdf"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 13:04:16 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "6fzcy72bf2"
-        },
-        {
-          "Name": "label",
-          "Value": "uploads/Hossein_YazdaniPajouh_CV.pdf"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
-        }
-      ]
-    },
-    {
       "Route": "uploads/Hossein_YazdaniPajouh_CV.pdf",
       "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
       "Selectors": [],
@@ -22536,7 +22491,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "200718"
+          "Value": "199557"
         },
         {
           "Name": "Content-Type",
@@ -22544,11 +22499,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA=\""
+          "Value": "\"QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 02 Jun 2025 13:04:16 GMT"
+          "Value": "Sun, 15 Jun 2025 20:21:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22558,7 +22513,52 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-rgMTQtJIPkalvIcDQ+Inw6JIrcFjc1E6W+jzXb9r0mA="
+          "Value": "sha256-QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/Hossein_YazdaniPajouh_CV.uxkptkaszo.pdf",
+      "AssetFile": "C:\\Users\\yazda\\OneDrive\\Documents\\DH_MVC_APP\\JBDH\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "199557"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 15 Jun 2025 20:21:36 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "uxkptkaszo"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/Hossein_YazdaniPajouh_CV.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-QuM2krm/BsFypsZ6Ledc4vhv+QVxsidRtcxqV/ae/q0="
         }
       ]
     },

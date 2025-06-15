@@ -26,7 +26,12 @@ namespace JBDH.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
                 return Unauthorized();
-            await _jobAppService.ApplyJobAsync(user.Id, jobId, notes);
+            var result = await _jobAppService.ApplyJobAsync(user.Id, jobId, notes);
+            if (!result.Success)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("JobDetails", new { id = jobId });
+            }
             var referer = Request.Headers["Referer"].ToString();
             return Redirect(referer);
         }
@@ -39,7 +44,14 @@ namespace JBDH.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
                 return Unauthorized();
-            await _jobAppService.UnapplyJobAsync(user.Id, jobId);
+
+            var result = await _jobAppService.UnapplyJobAsync(user.Id, jobId);
+            if (!result.Success)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("JobDetails", new { id = jobId });
+            }
+
             var referer = Request.Headers["Referer"].ToString();
             return Redirect(referer);
         }

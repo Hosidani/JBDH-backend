@@ -4,6 +4,6 @@ namespace JBDH.Services
 {
     public interface IAIHelperSwitchService
     {
-        Task<StringContent>? HelperSwitch(AIHelperRequest aiHelperRequest);
+        Task<StringContent?> HelperSwitch(AIHelperRequest aiHelperRequest);
     }
 }

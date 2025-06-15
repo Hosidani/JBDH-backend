@@ -8,14 +8,15 @@ namespace JBDH.Models
         public int Id { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        public required string Username { get; set; }
 
         [Required]
-        public string PasswordHash { get; set; }
+        public required string PasswordHash { get; set; }
         
         [Required]
-        public string Email { get; set; }
-        public string Location { get; set; }
+        public required string Email { get; set; }
+        
+        public required string Location { get; set; }
 
         public string? CVPath { get; set; } // Path to uploaded CV
         public bool? DeveloperMode { get; set; } // Developer mode
@@ -28,8 +29,9 @@ namespace JBDH.Models
         public ICollection<DataFlow> DataFlows { get; set; } = new List<DataFlow>();
         public ICollection<UserAIResponse> AIResponses { get; set; } = new List<UserAIResponse>();
         public ICollection<UserRoleAssignment> Roles { get; set; } = new List<UserRoleAssignment>();
-        public int? OwnedByRecruiterId { get; set; }
-        public User OwnedByRecruiter { get; set; }
+        public ICollection<Organisation> ManagedOrganisations { get; set; } = new List<Organisation>();
         public ICollection<User> OwnedUsers { get; set; } = new List<User>();
+        public User? Owner { get; set; }
+        public int? OwnerId { get; set; }
     }
 }

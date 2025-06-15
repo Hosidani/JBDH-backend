@@ -10,8 +10,6 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
 
-    public DbSet<Manager> Managers { get; set; }
-
     public DbSet<Recruiter> Recruiters { get; set; }
 
     public DbSet<Friendship> Friendships { get; set; }
@@ -101,17 +99,8 @@ public class ApplicationDbContext : DbContext
 
             // Configure many-to-many relationship for Managers
             entity.HasMany(o => o.Managers)
-                .WithMany(m => m.ManagedOrganisations)
-                .UsingEntity<Dictionary<string, object>>(
-                    "OrganisationManagers",
-                    j => j.HasOne<Manager>().WithMany().HasForeignKey("ManagerId").OnDelete(DeleteBehavior.Cascade),
-                    j => j.HasOne<Organisation>().WithMany().HasForeignKey("OrganisationId").OnDelete(DeleteBehavior.Cascade),
-                    j =>
-                    {
-                        j.HasKey("ManagerId", "OrganisationId");
-                        j.ToTable("OrganisationManagers");
-                    });
-
+                .WithMany(u => u.ManagedOrganisations)
+                .UsingEntity(j => j.ToTable("OrganisationManagers"));
         });
 
         // Configure the Friendship relationships
@@ -204,15 +193,12 @@ public class ApplicationDbContext : DbContext
             .WithMany(u => u.Roles)
             .HasForeignKey(ura => ura.UserId);
 
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.OwnedUsers)
-            .WithOne(u => u.OwnedByRecruiter)
-            .HasForeignKey(u => u.OwnedByRecruiterId);
-
         modelBuilder.Entity<Job>()
             .HasOne(j => j.Recruiter)
             .WithMany()
-            .HasForeignKey(j => j.RecruiterId);
+            .HasForeignKey(j => j.RecruiterId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<UserReport>(entity =>
         {
@@ -241,5 +227,29 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(pr => pr.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // Foreign key to Users table
         });
+
+        // Manager owns Recruiters
+        modelBuilder.Entity<Manager>()
+            .HasMany(m => m.OwnedRecruiters)
+            .WithOne()
+            .HasForeignKey(r => r.OwnerId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Job owned by Manager or Recruiter
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.Owner)
+            .WithMany()
+            .HasForeignKey(j => j.OwnerId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // User owns Users (for both Manager and Recruiter)
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.OwnedUsers)
+            .WithOne(u => u.Owner)
+            .HasForeignKey(u => u.OwnerId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

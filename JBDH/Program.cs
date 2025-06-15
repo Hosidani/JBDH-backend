@@ -1,6 +1,7 @@
 using JBDH.Controllers;
 using JBDH.Models;
 using JBDH.Services;
+using JBDH.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
 using Microsoft.AspNetCore.Builder; // For WebApplication
 using Microsoft.Extensions.DependencyInjection; // For DI container setup
@@ -18,7 +19,7 @@ await Task.Run(async () =>
 {
     try
     {
-        await JobStreamService.Main(args); // Async job service
+        await JobStreamService.RunJobStreamAsync(args); // Asynchronous job stream service
         DatabaseHandlerService.databaseHandler(args); // Synchronous DB handler
     }
     catch (Exception ex)
@@ -47,10 +48,15 @@ builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
 builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
 builder.Services.AddScoped<IAIResponseService, AIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<IRegisterOrganisationService, RegisterOrganisationService>();
+builder.Services.AddScoped<IUserVerificationService, UserVerificationService>();
+builder.Services.AddScoped<ISearchJobsService, SearchJobsService>();
+builder.Services.AddScoped<IJobAIResponseService, JobAIResponseService>();
 builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>(); // Suggested code change
 
 
 // Add session support
@@ -86,15 +92,23 @@ builder.Services.AddCors(options =>
 builder.Services.AddDistributedMemoryCache();
 
 // Register application services
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySQL(connectionString)
+           .EnableSensitiveDataLogging()
+           .LogTo(Console.WriteLine, LogLevel.Information));
 
 // Register SMTP config
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
 // Validate SMTP settings
 var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
-if (string.IsNullOrWhiteSpace(smtpSettings.Username) || string.IsNullOrWhiteSpace(smtpSettings.Password))
+if (smtpSettings == null ||
+    string.IsNullOrWhiteSpace(smtpSettings.Username) ||
+    string.IsNullOrWhiteSpace(smtpSettings.Password))
 {
     throw new Exception("SMTP configuration is invalid. Please check your appsettings.json.");
 }

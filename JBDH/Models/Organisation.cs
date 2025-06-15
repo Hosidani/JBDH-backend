@@ -12,10 +12,10 @@ namespace JBDH.Models
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
-        public ICollection<Manager> Managers { get; set; } = new List<Manager>();
+        public ICollection<User> Managers { get; set; } = new List<User>();
 
-        public ICollection<int> Users { get; set; }
+        public ICollection<int> Users { get; set; } = new List<int>();
     }
 }

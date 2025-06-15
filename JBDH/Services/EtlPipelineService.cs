@@ -62,8 +62,8 @@ public class EtlPipeline
         {
             try
             {
-                var jobId = job.GetValueOrDefault("id") ?? "Unknown ID";
-                var rawTitle = job.GetValueOrDefault("headline", "Unknown Title").ToString();
+                var jobId = job.GetValueOrDefault("id")?.ToString() ?? "Unknown ID";
+                var rawTitle = job.GetValueOrDefault("headline")?.ToString() ?? "Unknown Title";
                 var title = rawTitle != null ? DecodeUnicodeString(rawTitle) : "Unknown Title";
 
                 // Define the DecodeUnicodeString method
@@ -155,25 +155,25 @@ public class EtlPipeline
                 string postedDate = "1970-01-01";
                 if (job.GetValueOrDefault("publication_date") is JsonElement dateElement && dateElement.ValueKind == JsonValueKind.String)
                 {
-                    postedDate = dateElement.GetString();
+                    postedDate = dateElement.GetString() ?? "1970-01-01";
                     // Optionally, parse and reformat if needed
                     if (DateTime.TryParse(postedDate, out var dt))
                         postedDate = dt.ToString("yyyy-MM-dd");
                 }
 
                 // Handle the "webpage_url" field
-                var webpageUrl = job.GetValueOrDefault("webpage_url") ?? "Unknown URL";
+                var webpageUrl = job.GetValueOrDefault("webpage_url")?.ToString() ?? "Unknown URL";
 
                 // Add the transformed job to the list
                 transformed.Add(new Dictionary<string, object>
                 {
-                    { "job_id", jobId },
-                    { "title", title },
-                    { "description", description },
-                    { "company", company },
-                    { "location", location },
-                    { "posted_date", postedDate },
-                    { "webpage_url", webpageUrl }
+                    { "job_id", jobId ?? "Unknown ID" },
+                    { "title", title ?? "Unknown Title" },
+                    { "description", description ?? "No Description" },
+                    { "company", company ?? "Unknown Company" },
+                    { "location", location ?? "Unknown Location" },
+                    { "posted_date", postedDate ?? "1970-01-01" },
+                    { "webpage_url", webpageUrl ?? "Unknown URL" }
                 });
 
             }
@@ -200,8 +200,7 @@ public class EtlPipeline
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
             {
-                //LoggingConfigService.ReturnInfo($"Inserting job_id {job["job_id"]} into raw_table...");
-                var command = new MySqlCommand(SqlQueries.SqlQuery(3), connection);
+                var command = new MySqlCommand(SqlQueries.SqlQuery(100), connection); // Use 100 for insert
                 command.Parameters.AddWithValue("@job_id", job["job_id"]);
                 command.Parameters.AddWithValue("@title", job["title"]);
                 command.Parameters.AddWithValue("@description", job["description"]);
@@ -222,7 +221,7 @@ public class EtlPipeline
             LoggingConfigService.ReturnInfo("All jobs inserted into raw_table.");
 
             // Step 2: Deduplicate data by inserting distinct rows into Jobs
-            var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(5), connection);
+            var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(101), connection); // Use 101 for deduplication
             deduplicateCommand.ExecuteNonQuery();
             LoggingConfigService.ReturnInfo("Distinct rows inserted into Jobs.");
         }

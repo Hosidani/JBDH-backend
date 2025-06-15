@@ -12,7 +12,7 @@ namespace JBDH.Services
             _context = context;
         }
 
-        public AIResponse GetAIResponseFromUser(JBDH.Models.User user)
+        public AIResponse? GetAIResponseFromUser(JBDH.Models.User user)
         {
             if (user == null)
             {
@@ -42,7 +42,7 @@ namespace JBDH.Services
             LoggingConfigService.ReturnInfo($"AIResponse saved for user {user.Username}");
         }
 
-        public async Task<UserAIResponse> GetLatestAIResponseAsync(int userId)
+        public async Task<UserAIResponse?> GetLatestAIResponseAsync(int userId)
         {
             LoggingConfigService.ReturnInfo($"Fetching latest AI response for user ID: {userId}");
             if (userId <= 0)

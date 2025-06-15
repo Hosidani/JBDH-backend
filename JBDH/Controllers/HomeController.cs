@@ -117,7 +117,13 @@ namespace JBDH.Controllers
                 return RedirectToAction("Index");
             }
 
-            await _rapportUserService.ReportUserAsync(reporterUserId, reportedUserId, reason, dataFlowId, dataFlowText);
+            var result = await _rapportUserService.TryReportUserAsync(reporterUserId, reportedUserId, reason, dataFlowId, dataFlowText);
+            if (!result.Success)
+            {
+                TempData["Error"] = result.ErrorMessage;
+                return RedirectToAction("Index");
+            }
+
             TempData["Message"] = "The post has been reported.";
             return RedirectToAction("Index");
         }

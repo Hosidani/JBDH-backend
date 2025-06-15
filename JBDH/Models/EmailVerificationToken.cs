@@ -9,7 +9,7 @@ namespace JBDH.Models
         public int Id { get; set; }
 
         [Required]
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         [Required]
         public int UserId { get; set; }
