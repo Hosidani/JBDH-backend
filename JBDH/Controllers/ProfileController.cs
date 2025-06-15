@@ -31,61 +31,40 @@ public class ProfileController : Controller
     [HttpGet]
     public async Task<IActionResult> Profile(int userId)
     {
-        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!int.TryParse(currentUserIdClaim, out var currentUserId))
-        {
+        var currentUserId = _profileService.GetCurrentUserId(User);
+        if (currentUserId == null)
             return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
-        }
 
         if (currentUserId == userId)
-        {
-            LoggingConfigService.ReturnInfo($"User {currentUserId} tried to access their own profile.");
             return RedirectToAction("MyProfile");
-        }
 
-        var user = await _profileService.GetUserByIdAsync(userId);
-        LoggingConfigService.ReturnInfo($"User {userId} profile accessed by {currentUserId}.");
-        if (user == null)
+        try
         {
-            return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+            var viewModel = await _profileService.GetProfileViewModelAsync(currentUserId.Value, userId);
+            return View(viewModel);
         }
-
-        var isFriend = await _friendService.AreFriendsAsync(currentUserId, userId);
-        var viewModel = new ProfileViewModel
+        catch (Exception ex)
         {
-            User = user,
-            IsFriend = isFriend,
-            Organisation = null, // Display organisation name only if verified and not null
-        };
-
-        return View(viewModel);
+            return View("ErrorPage", new ErrorViewModel { Message = ex.Message });
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> MyProfile()
     {
-        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!int.TryParse(currentUserIdClaim, out var currentUserId))
-        {
+        var currentUserId = _profileService.GetCurrentUserId(User);
+        if (currentUserId == null)
             return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
-        }
 
-        var user = await _profileService.GetUserByIdAsync(currentUserId);
-        if (user == null)
+        try
         {
-            return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+            var viewModel = await _profileService.GetMyProfileViewModelAsync(currentUserId.Value);
+            return View("MyProfile", viewModel);
         }
-        var viewModel = new ProfileViewModel
+        catch (Exception ex)
         {
-            User = user,
-            IsFriend = false, // This is the user's own profile, so they are not a friend of themselves
-            Organisation = null, // Display organisation name only if verified and not null
-            UserAIResponse = await _airesponseService.GetLatestAIResponseAsync(user.Id)  // Get AI response for the user
-        };
-
-        return View("MyProfile", viewModel); // Make sure you're explicitly referring to MyProfile.cshtml
+            return View("ErrorPage", new ErrorViewModel { Message = ex.Message });
+        }
     }
 
     // Method to send a friend request
@@ -104,18 +83,18 @@ public class ProfileController : Controller
 
         if (!int.TryParse(addresseeId.ToString(), out int addresseeIdInt))
         {
-            return View("ErrorPage", "Invalid addressee ID.");
+            return View("ErrorPage", new ErrorViewModel { Message = "Invalid addressee ID." });
         }
 
-        var success = await _friendService.SendFriendRequestAsync(currentUserId, addresseeIdInt);
+        var result = await _friendService.SendFriendRequestAsync(currentUserId, addresseeIdInt);
 
-        if (success)
+        if (result.Success)
         {
             return RedirectToAction("Profile", new { userId = addresseeId });
         }
         else
         {
-            return View("ErrorPage", "Could not send friend request.");
+            return View("ErrorPage", result.ErrorMessage ?? "Could not send friend request.");
         }
     }
 }

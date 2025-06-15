@@ -20,21 +20,30 @@ namespace JBDH.Services
         public static List<Dictionary<string, object>> SortByPostedDate(string date)
         {
             LoggingConfigService.ReturnInfo("Sorting by posted date...");
-            string query = SqlQueries.SqlQuery(8);
+            string query = SqlQueries.SqlQuery(102) ?? "";
             string searchPattern = date == "default" ? "%" : $"%{date}%";
             return ExecuteQuery(query, new object[] { searchPattern });
         }
         
+        
+        public static List<Dictionary<string, object>> SearchByDescriptionAndLocation(string description, string location)
+        {
+            string query = SqlQueries.SqlQuery(106) ?? "";
+            string descPattern = string.IsNullOrEmpty(description) ? "%" : $"%{description.ToLower()}%";
+            string locPattern = string.IsNullOrEmpty(location) ? "%" : $"%{location.ToLower()}%";
+            return ExecuteQuery(query, new object[] { descPattern, locPattern });
+        }
+        
         public static List<Dictionary<string, object>> SearchByDescription(string description)
         {
-            string query = SqlQueries.SqlQuery(9);
+            string query = SqlQueries.SqlQuery(103) ?? "";
             string searchPattern = description == "default" ? "%" : $"%{description.ToLower()}%";
             return ExecuteQuery(query, new object[] { searchPattern });
         }
     
         public static List<Dictionary<string, object>> SearchByLocation(string location)
         {
-            string query = SqlQueries.SqlQuery(10);
+            string query = SqlQueries.SqlQuery(104) ?? "";
             string searchPattern = location == "default" ? "%" : $"%{location.ToLower()}%";
             return ExecuteQuery(query, new object[] { searchPattern });
         }
@@ -137,20 +146,24 @@ namespace JBDH.Services
         }
         public static List<Dictionary<string, object>> InternalSortingFunction(string description, string location)
         {
-            try
+            if (!string.IsNullOrEmpty(description) && !string.IsNullOrEmpty(location))
             {
-                var results = HierarchyResults(
-                    SearchByDescription(description),
-                    SearchByLocation(location)
-                );
-                LoggingConfigService.ReturnInfo($"Returning {results.Count} results");
-                return results;
+                // Search by both
+                return SearchByDescriptionAndLocation(description, location);
             }
-            catch (Exception e)
+            else if (!string.IsNullOrEmpty(description))
             {
-                LoggingConfigService.ReturnError($"Sorting failed: {e.Message}");
-                throw;
+                return SearchByDescription(description);
+            }
+            else if (!string.IsNullOrEmpty(location))
+            {
+                return SearchByLocation(location);
+            }
+            else
+            {
+                return new List<Dictionary<string, object>>();
             }
         }
+
     }
 }

@@ -1,4 +1,4 @@
 public interface IRapportUserService
 {
-    Task ReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId = null, string dataFlowText = null);
+    Task<ReportResult> TryReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId = null, string? dataFlowText = null);
 }

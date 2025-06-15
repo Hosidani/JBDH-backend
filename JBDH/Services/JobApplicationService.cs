@@ -22,11 +22,12 @@ namespace JBDH.Services
                 .AnyAsync(ja => ja.UserId == userId && ja.JobId == jobId);
         }
 
-        public async Task<bool> ApplyJobAsync( int userId, int jobId, string notes)
+        public async Task<ServiceResult> ApplyJobAsync( int userId, int jobId, string notes)
         {
             LoggingConfigService.ReturnInfo($"User {userId} is applying for job {jobId} with notes: {notes}.");
             if (await HasUserAppliedAsync(userId, jobId))
-                return false;
+                return new ServiceResult { Success = false, ErrorMessage = "User has already applied for this job." };
+
             var application = new JobApplication
             {
                 UserId = userId,
@@ -36,19 +37,19 @@ namespace JBDH.Services
             };
             _context.JobApplications.Add(application);
             await _context.SaveChangesAsync();
-            return true;
+            return new ServiceResult { Success = true };
         }
 
-        public async Task<bool> UnapplyJobAsync( int userId, int jobId)
+        public async Task<ServiceResult> UnapplyJobAsync(int userId, int jobId)
         {
             LoggingConfigService.ReturnInfo($"User {userId} is unapplying from job {jobId}.");
             var app = await _context.JobApplications
                 .FirstOrDefaultAsync(ja => ja.UserId == userId && ja.JobId == jobId);
             if (app == null)
-                return false;
+                return new ServiceResult { Success = false, ErrorMessage = "No application found to remove." };
             _context.JobApplications.Remove(app);
             await _context.SaveChangesAsync();
-            return true;
+            return new ServiceResult { Success = true };
         }
     }
 }

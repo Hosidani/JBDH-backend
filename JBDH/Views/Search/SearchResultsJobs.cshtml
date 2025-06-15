@@ -1,13 +1,13 @@
-@model List<JobSearchResultViewModel>
+@using Markdig
 
+@model List<JobSearchResultViewModel>
 @{
     ViewData["Title"] = "Search Results";
 }
 
 @if (ViewData["AIAnalysisResult"] != null)
 {
-    @using Markdig
-    var html = Markdig.Markdown.ToHtml(ViewData["AIAnalysisResult"].ToString());
+    var html = Markdig.Markdown.ToHtml(ViewData["AIAnalysisResult"]?.ToString() ?? "");
     <div class="alert alert-info mb-4">
         <strong>AI Analysis of Your CV Against the Top Job Result:</strong>
         <br />
@@ -62,11 +62,10 @@
                     </td>
                 </tr>
                 <tr id="ai-row-@jobId" class="ai-row" style="display:none;">
-                    <td colspan="6">
+                    <td colspan="7">
                         <div id="ai-result-@jobId" class="ai-response">
                             @if (item.LatestAIResponse != null)
                             {
-                                @using Markdig
                                 var html = Markdig.Markdown.ToHtml(item.LatestAIResponse.ResponseText);
                                 <strong>AI Analysis:</strong>
                                 @Html.Raw(html)
@@ -75,7 +74,7 @@
                     </td>
                 </tr>
                 <tr id="applyRow-@i" style="display:none;">
-                    <td colspan="6">
+                    <td colspan="7">
                         <form asp-controller="JobApplication" asp-action="Apply" method="post">
                             <input type="hidden" name="jobId" value="@jobId" />
                             <textarea name="notes" placeholder="Add note (optional)" class="form-control"></textarea>

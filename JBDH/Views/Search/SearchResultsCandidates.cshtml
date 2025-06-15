@@ -62,7 +62,7 @@
                             }
                         </td>
                         <td>
-                            @(candidate.UserAIResponse?.createdAt.ToString("yyyy-MM-dd HH:mm") ?? "")
+                            @(candidate.UserAIResponse != null ? candidate.UserAIResponse.createdAt.ToString("yyyy-MM-dd HH:mm") : "")
                         </td>
                     </tr>
                 }
@@ -83,7 +83,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        @Html.Raw(Markdown.ToHtml(candidate.UserAIResponse.responseText))
+                        @Html.Raw(Markdown.ToHtml(candidate.UserAIResponse?.responseText ?? ""))
                     </div>
                 </div>
             </div>

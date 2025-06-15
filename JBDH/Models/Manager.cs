@@ -5,6 +5,7 @@ namespace JBDH.Models
     public class Manager : User
     {
         // Organizations managed by this manager
-        public ICollection<Organisation> ManagedOrganisations { get; set; } = new List<Organisation>();
+        public ICollection<User> OwnedUsers { get; set; } = new List<User>();
+        public ICollection<Recruiter> OwnedRecruiters { get; set; } = new List<Recruiter>();
     }
 }

@@ -69,6 +69,13 @@ namespace JBDH.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> TryAddCommentAsync(int dataFlowId, int userId, string comment)
+        {
+            if (string.IsNullOrWhiteSpace(comment)) return false;
+            await AddCommentAsync(dataFlowId, userId, comment);
+            return true;
+        }
+
         public List<DataFlow> GetAllRecursive()
         {
             // 1. Load all DataFlows from the database

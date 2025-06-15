@@ -19,7 +19,7 @@
     {
         foreach (var reply in Model.RelatedDataFlows)
         {
-            @Html.Partial("_DataFlowThread", reply)
+            <partial name="_DataFlowThread" model="reply" />
         }
     }
 </div>

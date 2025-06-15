@@ -7,6 +7,6 @@ namespace JBDH.Services
 {
     public interface IUserRegistrationService
     {
-        Task<(bool Success, string ErrorMessage)> RegisterUserAsync(RegisterUserViewModel model, HttpContext httpContext, IUrlHelper urlHelper);
+        Task<ServiceResult> RegisterUserAsync(RegisterUserViewModel model, HttpContext httpContext, IUrlHelper urlHelper);
     }
 }

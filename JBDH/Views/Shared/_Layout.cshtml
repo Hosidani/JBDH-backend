@@ -24,9 +24,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/Register/Register">Register</a>
                         </li>
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
-                             <li class="nav-item">
+                            <li class="nav-item">
                                 <a class="nav-link" href="/Profile/MyProfile">Profile</a> 
                             </li>
                             <li class="nav-item">

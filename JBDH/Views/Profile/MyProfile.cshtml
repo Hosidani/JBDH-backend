@@ -18,9 +18,9 @@
 
         <dt class="col-sm-3">Organisation:</dt>
         <dd class="col-sm-9">
-            @if (!string.IsNullOrEmpty(Model.Organisation))
+            @if (!string.IsNullOrEmpty(Model.Organisation?.Name))
             {
-                <span>@Model.Organisation</span>
+                <span>@Model.Organisation.Name</span>
                 @Html.ActionLink("View Organization", "Details", "Organisation", new { id = Model.User.Id }, null)
             }
             else

@@ -22,22 +22,46 @@ namespace JBDH.Services
                 if (string.IsNullOrEmpty(job.Title) || string.IsNullOrEmpty(job.Location))
                     continue;
 
-                if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase) &&
-                    job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
+                bool hasDescription = !string.IsNullOrEmpty(description);
+                bool hasLocation = !string.IsNullOrEmpty(location);
+
+                if (hasDescription && hasLocation)
                 {
-                    jobPriority = 1;
+                    if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase) &&
+                        job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        jobPriority = 1;
+                    }
+                    else if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        jobPriority = 2;
+                    }
+                    else if (job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        jobPriority = 3;
+                    }
+                    else
+                    {
+                        jobPriority = 4; // Least relevant
+                    }
                 }
-                else if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase))
+                else if (hasDescription)
                 {
-                    jobPriority = 2;
+                    if (job.Title.Contains(description, System.StringComparison.OrdinalIgnoreCase))
+                        jobPriority = 1;
+                    else
+                        jobPriority = 2;
                 }
-                else if (job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
+                else if (hasLocation)
                 {
-                    jobPriority = 3;
+                    if (job.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase))
+                        jobPriority = 1;
+                    else
+                        jobPriority = 2;
                 }
                 else
                 {
-                    jobPriority = 4; // Least relevant
+                    jobPriority = 4;
                 }
 
                 presentJobs.Add(new JobSearchResultViewModel

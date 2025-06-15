@@ -1,5 +1,6 @@
 using JBDH.Services;
 using JBDH.Models;
+using JBDH.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 public class UserRegistrationService : IUserRegistrationService
@@ -25,25 +26,25 @@ public class UserRegistrationService : IUserRegistrationService
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<(bool Success, string ErrorMessage)> RegisterUserAsync(RegisterUserViewModel model, HttpContext httpContext, IUrlHelper urlHelper)
+    public async Task<ServiceResult> RegisterUserAsync(RegisterUserViewModel model, HttpContext httpContext, IUrlHelper urlHelper)
     {
         LoggingConfigService.ReturnInfo("RegisterUser method called.");
         if (model.Password != model.ConfirmPassword)
         {
             LoggingConfigService.ReturnInfo("Passwords do not match.");
-            return (false, "Passwords do not match.");
+            return ServiceResult.Failure("Passwords do not match.");
         }
 
         if (_context.Users.Any(u => u.Username == model.Username))
         {
             LoggingConfigService.ReturnInfo("Username already exists.");
-            return (false, "Username already exists.");
+            return ServiceResult.Failure("Username already exists.");
         }
 
         if (_context.Users.Any(u => u.Email == model.Email))
         {
             LoggingConfigService.ReturnInfo("This email is already registered.");
-            return (false, "This email is already registered.");
+            return ServiceResult.Failure("This email is already registered.");
         }
 
         var user = new User
@@ -53,7 +54,7 @@ public class UserRegistrationService : IUserRegistrationService
             Email = model.Email,
             Location = model.Location,
             OpenForHiring = model.OpenForHiring,
-            DeveloperMode = false
+            DeveloperMode = false,
         };
 
         // Always assign "User" role
@@ -102,7 +103,7 @@ public class UserRegistrationService : IUserRegistrationService
         await _context.SaveChangesAsync();
 
         // Send verification email in background
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -123,7 +124,7 @@ public class UserRegistrationService : IUserRegistrationService
         httpContext.Session.SetString("Username", model.Username);
 
         // Generate AI response in background
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -139,13 +140,17 @@ public class UserRegistrationService : IUserRegistrationService
                         CVPath = user.CVPath
                     };
                     string aiResponseText = await aiService.GetAIResponse(request);
+                    var userId = user.Id;
+                    var userFromDb = await dbContext.Users.FindAsync(userId);
+
                     UserAIResponse useraiResponse = new UserAIResponse
                     {
                         responseText = aiResponseText,
                         createdAt = DateTime.UtcNow,
-                        UserId = user.Id
+                        UserId = userId,
+                        User = userFromDb // Use the entity tracked by this context
                     };
-                    aiResponseService.SaveAIResponse(useraiResponse, user);
+                    aiResponseService.SaveAIResponse(useraiResponse, userFromDb);
                 }
                 catch (Exception ex)
                 {
@@ -154,6 +159,6 @@ public class UserRegistrationService : IUserRegistrationService
             }
         });
 
-        return (true, null);
+        return ServiceResult.SuccessResult();
     }
 }

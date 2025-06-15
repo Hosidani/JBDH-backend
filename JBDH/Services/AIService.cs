@@ -46,7 +46,12 @@ namespace JBDH.Services
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
 
             LoggingConfigService.ReturnInfo($"Getting AI response for user {request.User}.");
-            var content = await _aiHelperSwitchService.HelperSwitch(request);
+            if (_aiHelperSwitchService == null)
+            {
+                LoggingConfigService.ReturnError("AIHelperSwitchService is not initialized");
+                return "AIHelperSwitchService is not initialized";
+            }
+            var content = await _aiHelperSwitchService!.HelperSwitch(request);
             if (content == null)
             {
                 LoggingConfigService.ReturnError("Content is null or empty");
@@ -56,8 +61,12 @@ namespace JBDH.Services
             LoggingConfigService.ReturnInfo($"Response status code: {response.StatusCode}");
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
-            LoggingConfigService.ReturnInfo($"Response body: {responseBody}");
-            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody);
+            if (string.IsNullOrEmpty(responseBody))
+            {
+                LoggingConfigService.ReturnError("Response body is null or empty");
+                return "No response";
+            }
+            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody!);
             return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
         }
 
