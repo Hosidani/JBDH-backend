@@ -22,14 +22,14 @@ public class SearchCandidateService : ISearchCandidateService
             User = u,
             LatestAI = _context.UserAIResponses
                 .Where(ai => ai.UserId == u.Id)
-                .OrderByDescending(ai => ai.createdAt)
+                .OrderByDescending(ai => ai.CreatedAt)
                 .FirstOrDefault()
         });
         var filtered = await userWithAI
             .Where(x =>
                 x.LatestAI != null &&
                 (string.IsNullOrEmpty(keyword) ||
-                    !string.IsNullOrEmpty(x.LatestAI.responseText) && x.LatestAI.responseText.ToLower().Contains(keyword.ToLower())) &&
+                    !string.IsNullOrEmpty(x.LatestAI.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower())) &&
                 (string.IsNullOrEmpty(location) ||
                     (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()))
             )
@@ -41,7 +41,7 @@ public class SearchCandidateService : ISearchCandidateService
         var candidates = await Task.WhenAll(filtered.Select(async x =>
         {
             var aiResponse = await _airesponseService.GetLatestAIResponseAsync(x.User.Id);
-            LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Username: {x.User.Username}, LatestAIResponse: {(aiResponse != null ? aiResponse.responseText : "NULL")}");
+            LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Username: {x.User.Username}, LatestAIResponse: {(aiResponse != null ? aiResponse.ResponseText : "NULL")}");
             return new SearchCandidateViewModel
             {
                 UserId = x.User.Id,

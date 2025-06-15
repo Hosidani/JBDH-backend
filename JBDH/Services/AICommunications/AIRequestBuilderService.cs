@@ -9,11 +9,11 @@ namespace JBDH.Services
 {
 
 
-    public class AIHelperSwitchService : IAIHelperSwitchService
+    public class AIRequestBuilderService : IAIRequestBuilderService
     {
         private AIConfig _aiConfig;
         private readonly IManageInputService _manageInputService;
-        public AIHelperSwitchService(IManageInputService manageInputService, AIConfig aiConfig)
+        public AIRequestBuilderService(IManageInputService manageInputService, AIConfig aiConfig)
         {
             _aiConfig = aiConfig;
             _manageInputService = manageInputService;

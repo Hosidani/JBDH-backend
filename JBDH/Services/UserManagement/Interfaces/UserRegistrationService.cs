@@ -2,12 +2,13 @@ using JBDH.Services;
 using JBDH.Models;
 using JBDH.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Services.AICommunications.Interfaces;
 
 public class UserRegistrationService : IUserRegistrationService
 {
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
-    private readonly IAIService _aiService;
+    private readonly IAIApiClient _aIApiClient;
     private readonly IAIResponseService _aiResponseService;
     private readonly IServiceProvider _serviceProvider;
 
@@ -15,13 +16,13 @@ public class UserRegistrationService : IUserRegistrationService
     public UserRegistrationService(
         ApplicationDbContext context,
         IEmailService emailService,
-        IAIService aiService,
+        IAIApiClient aIApiClient,
         IAIResponseService aiResponseService,
         IServiceProvider serviceProvider)
     {
         _context = context;
         _emailService = emailService;
-        _aiService = aiService;
+        _aIApiClient = aIApiClient;
         _aiResponseService = aiResponseService;
         _serviceProvider = serviceProvider;
     }
@@ -128,8 +129,8 @@ public class UserRegistrationService : IUserRegistrationService
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
-                var aiResponseService = scope.ServiceProvider.GetRequiredService<IAIResponseService>();
+                var aiService = scope.ServiceProvider.GetRequiredService<IAIApiClient>();
+                var aiResponseService = scope.ServiceProvider.GetRequiredService<IUserAIResponseService>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 try
                 {
@@ -142,15 +143,20 @@ public class UserRegistrationService : IUserRegistrationService
                     string aiResponseText = await aiService.GetAIResponse(request);
                     var userId = user.Id;
                     var userFromDb = await dbContext.Users.FindAsync(userId);
+                    if (userFromDb == null)
+                    {
+                        LoggingConfigService.ReturnError($"User with ID {userId} not found in background AI generation.");
+                        return;
+                    }
 
                     UserAIResponse useraiResponse = new UserAIResponse
                     {
-                        responseText = aiResponseText,
-                        createdAt = DateTime.UtcNow,
+                        ResponseText = aiResponseText,
+                        CreatedAt = DateTime.UtcNow,
                         UserId = userId,
-                        User = userFromDb // Use the entity tracked by this context
+                        User = userFromDb
                     };
-                    aiResponseService.SaveAIResponse(useraiResponse, userFromDb);
+                    aiResponseService.SaveUserAIResponse(useraiResponse, userFromDb);
                 }
                 catch (Exception ex)
                 {

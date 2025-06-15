@@ -14,7 +14,7 @@ public class RegisterController : Controller
     private readonly ILogger<RegisterController> _logger;
     private readonly IEmailService _emailService;
     
-    private readonly IAIService _aiService;
+    private readonly IAIApiClient _aIApiClient;
     private readonly IAIResponseService _aiResponseService;
     private readonly IUserRegistrationService _userRegistrationService;
     private readonly IRegisterOrganisationService _registerOrganisationService;
@@ -24,7 +24,7 @@ public class RegisterController : Controller
         IEmailService emailService,
         ApplicationDbContext context,
         ILogger<RegisterController> logger,
-        IAIService aiService,
+        IAIApiClient aIApiClient,
         IAIResponseService aiResponseService,
         IUserRegistrationService userRegistrationService,
         IRegisterOrganisationService registerOrganisationService,
@@ -34,7 +34,7 @@ public class RegisterController : Controller
         _emailService = emailService;
         _context = context;
         _logger = logger;
-        _aiService = aiService;
+        _aIApiClient = aIApiClient;
         _aiResponseService = aiResponseService;
         _userRegistrationService = userRegistrationService;
         _registerOrganisationService = registerOrganisationService;

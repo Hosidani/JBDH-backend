@@ -9,8 +9,8 @@ namespace JBDH.Services
         Task<User?> GetCurrentUserAsync();
         Task<bool> UpdateEmailAsync(string newEmail);
         Task<bool> UpdateOpenForHiringAsync(bool openForHiring);
-        Task<bool> UploadCVAsync(IFormFile cvFile);
+        Task<ServiceResult> UploadCVAsync(IFormFile cvFile);
         Task<bool> UpdateDeveloperModeAsync(bool developerMode);
-        Task<(bool Success, string ErrorMessage)> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId);
+        Task<ServiceResult> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId);
     }
 }

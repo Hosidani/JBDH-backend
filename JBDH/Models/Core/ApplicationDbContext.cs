@@ -153,12 +153,12 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<AIResponse>(entity =>
         {
-            entity.HasKey(ar => ar.id); // Primary key
+            entity.HasKey(ar => ar.Id); // Primary key
 
-            entity.Property(ar => ar.responseText)
+            entity.Property(ar => ar.ResponseText)
                 .IsRequired(); // Required field
 
-            entity.Property(ar => ar.createdAt)
+            entity.Property(ar => ar.CreatedAt)
                 .IsRequired(); // Required field
         });
         modelBuilder.Entity<UserAIResponse>()

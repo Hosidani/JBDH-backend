@@ -2,22 +2,22 @@ using JBDH.Models;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services;
-using JBDH.Services.Interfaces;
+using JBDH.Services.AICommunications.Interfaces;
 
 public class JobAIAnalysisService : IJobAIAnalysisService
 {
     private readonly IUserPropertiesService _userPropertiesService;
-    private readonly IAIHelperSwitchService _aiHelperSwitchService;
+    private readonly IAIRequestBuilderService _aiRequestBuilderService;
     private static readonly AIConfig AIConfig = new AIConfig();
     private readonly ApplicationDbContext _context;
 
     public JobAIAnalysisService(
         IUserPropertiesService userPropertiesService,
-        IAIHelperSwitchService aiHelperSwitchService,
+        IAIRequestBuilderService aIRequestBuilderService,
         ApplicationDbContext context)
     {
         _userPropertiesService = userPropertiesService;
-        _aiHelperSwitchService = aiHelperSwitchService;
+        _aiRequestBuilderService = aIRequestBuilderService;
         _context = context;
     }
 
@@ -40,7 +40,7 @@ public class JobAIAnalysisService : IJobAIAnalysisService
             JobAdUrl = jobAdUrl,
             User = user
         };
-        var requestContent = await _aiHelperSwitchService.HelperSwitch(request);
+        var requestContent = await _aiRequestBuilderService.HelperSwitch(request);
 
         using (var httpClient = new HttpClient())
         {

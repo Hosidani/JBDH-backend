@@ -67,7 +67,7 @@
             }
         </dd>
             @{
-                var markdown = Model.UserAIResponse?.responseText ?? "";
+                var markdown = Model.UserAIResponse?.ResponseText ?? "";
                 var html = Markdig.Markdown.ToHtml(markdown);
             }
             @if (!string.IsNullOrEmpty(markdown))

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Models;
 using JBDH.Services;
 using JBDH.Services.Interfaces;
+using JBDH.Services.AICommunications.Interfaces;
 using NLog.Config;
 using System.Threading.Tasks;
 
@@ -11,23 +12,23 @@ namespace JBDH.Controllers
     public class SearchController : Controller
     {
         private readonly IUserPropertiesService _userPropertiesService;
-        private readonly IAIHelperSwitchService _aiHelperSwitchService;
-        private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        private readonly IAIRequestBuilderService _aIRequestBuilderService;
         private readonly ISearchCandidateService _searchCandidateService; // Added service for candidate search
-        private readonly IAIService _aIService;
+        private readonly IAIApiClient _aIService;
         private readonly ISearchJobsService _searchJobsService;
         private readonly IAIResponseService _AIResponseService;
         private readonly IJobAIResponseService _jobAIResponseService;
-        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIHelperSwitchService aiHelperSwitchService, IJobAIAnalysisService jobAIAnalysisService, ISearchCandidateService searchCandidateService, IAIService aIService, ISearchJobsService searchJobsService, IAIResponseService aIResponseService, IJobAIResponseService jobAIResponseService)
+        private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIRequestBuilderService aIRequestBuilderService, ISearchCandidateService searchCandidateService, IAIApiClient aIService, ISearchJobsService searchJobsService, IAIResponseService aIResponseService, IJobAIResponseService jobAIResponseService, IJobAIAnalysisService jobAIAnalysisService)
         {
             _userPropertiesService = userPropertiesService;
-            _aiHelperSwitchService = aiHelperSwitchService;
-            _jobAIAnalysisService = jobAIAnalysisService;
+            _aIRequestBuilderService = aIRequestBuilderService;
             _searchCandidateService = searchCandidateService; // Initialize the candidate search service
             _aIService = aIService;
             _searchJobsService = searchJobsService; // Initialize the job search service
             _AIResponseService = aIResponseService; // Initialize the AI response service
             _jobAIResponseService = jobAIResponseService;
+            _jobAIAnalysisService = jobAIAnalysisService; // Initialize the job AI analysis service
         }
 
         [HttpGet]

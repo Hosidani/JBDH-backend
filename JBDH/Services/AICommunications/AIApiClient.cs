@@ -1,7 +1,10 @@
 using System.Text; 
 using System.Text.Json;
-using Newtonsoft.Json; 
+using Newtonsoft.Json;
 using JBDH.Models;
+using JBDH.Services.Interfaces;
+using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.AICommunications;
 using AIConfig = JBDH.Models.AIConfig;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Nodes;
@@ -10,18 +13,18 @@ namespace JBDH.Services
 {
 
 
-    public class AIService : IAIService
+    public class AIApiClient : IAIApiClient
     {
         private readonly HttpClient _httpClient;
         private AIConfig _aiConfig;
         private readonly IManageInputService _manageInputService;
-        private IAIHelperSwitchService _aiHelperSwitchService;
-        public AIService(HttpClient httpClient, AIConfig aiConfig, IManageInputService manageInputService, IAIHelperSwitchService aiHelperSwitchService)
+        private readonly IAIRequestBuilderService _aiRequestBuilderService;
+        public AIApiClient(HttpClient httpClient, AIConfig aiConfig, IManageInputService manageInputService, IAIRequestBuilderService aIRequestBuilderService)
         {
             _httpClient = httpClient;
             _aiConfig = aiConfig;
             _manageInputService = manageInputService;
-            _aiHelperSwitchService = aiHelperSwitchService;
+            _aiRequestBuilderService = aIRequestBuilderService;
 
         }
         public async Task<string> GetAIResponse(AIHelperRequest request)
@@ -46,12 +49,12 @@ namespace JBDH.Services
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
 
             LoggingConfigService.ReturnInfo($"Getting AI response for user {request.User}.");
-            if (_aiHelperSwitchService == null)
+            if (_aiRequestBuilderService == null)
             {
                 LoggingConfigService.ReturnError("AIHelperSwitchService is not initialized");
                 return "AIHelperSwitchService is not initialized";
             }
-            var content = await _aiHelperSwitchService!.HelperSwitch(request);
+            var content = await _aiRequestBuilderService!.HelperSwitch(request);
             if (content == null)
             {
                 LoggingConfigService.ReturnError("Content is null or empty");

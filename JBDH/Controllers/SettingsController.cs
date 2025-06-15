@@ -15,7 +15,7 @@ namespace JBDH.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         
-        private readonly IAIService _aiService;
+        private readonly IAIApiClient _aIApiClient;
         private readonly IAIResponseService _aiResponseService;
         private readonly IUserRoleService _userRoleService;
 
@@ -23,14 +23,14 @@ namespace JBDH.Controllers
             IUserPropertiesService userService,
             ApplicationDbContext context,
             IWebHostEnvironment environment,
-            IAIService aiService,
+            AIApiClient aIApiClient,
             IAIResponseService aiResponseService,
             IUserRoleService userRoleService
         )
         {
             _context = context;
             _environment = environment;
-            _aiService = aiService;
+            _aIApiClient = aIApiClient;
             _userPropertiesService = userService;
             _aiResponseService = aiResponseService;
             _userRoleService = userRoleService;

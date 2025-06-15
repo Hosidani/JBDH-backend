@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using JBDH.Services.AICommunications.Interfaces;
 
 namespace JBDH.Services
 {
@@ -91,17 +92,28 @@ namespace JBDH.Services
             return Path.Combine(_environment.WebRootPath, "uploads", cvFileName);
         }
 
-        public async Task<bool> UploadCVAsync(IFormFile cvFile) // Method to upload CV file
+        public async Task<ServiceResult> UploadCVAsync(IFormFile cvFile) 
         {
+            LoggingConfigService.ReturnInfo("UploadCVAsync method is called.");
             var user = await GetCurrentUserAsync();
-            if (user == null) return false;
+            if (user == null)
+            {
+                LoggingConfigService.ReturnInfo("User not found.");
+                return ServiceResult.Failure("User not found.");
+            }
 
             if (cvFile == null || cvFile.Length == 0)
-                return false;
+            {
+                LoggingConfigService.ReturnInfo("No CV file provided.");
+                return ServiceResult.Failure("No CV file provided.");
+            }
 
             var extension = Path.GetExtension(cvFile.FileName).ToLowerInvariant();
             if (new[] { ".exe", ".js", ".bat" }.Contains(extension))
-                return false;
+            {
+                LoggingConfigService.ReturnInfo("Invalid file type.");
+                return ServiceResult.Failure("Invalid file type.");
+            }
 
             var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
             if (!Directory.Exists(uploadsPath))
@@ -111,9 +123,17 @@ namespace JBDH.Services
 
             var newCvPath = Path.Combine(uploadsPath, cvFile.FileName);
 
-            using (var stream = new FileStream(newCvPath, FileMode.Create))
+            try
             {
-                await cvFile.CopyToAsync(stream);
+                using (var stream = new FileStream(newCvPath, FileMode.Create))
+                {
+                    await cvFile.CopyToAsync(stream);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Failed to save CV file: {ex.Message}");
+                return ServiceResult.Failure("Failed to save CV file.");
             }
 
             // Delete old CV if exists
@@ -121,15 +141,26 @@ namespace JBDH.Services
             {
                 var oldCvFullPath = GetAbsoluteCVPath(user.CVPath);
                 if (!string.IsNullOrEmpty(oldCvFullPath) && File.Exists(oldCvFullPath))
-                    File.Delete(oldCvFullPath);
+                {
+                    try
+                    {
+                        File.Delete(oldCvFullPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingConfigService.ReturnError($"Failed to delete old CV: {ex.Message}");
+                        // Not a critical error, so we continue
+                    }
+                }
             }
 
             user.CVPath = cvFile.FileName; // Store only filename
             await _context.SaveChangesAsync();
-            return true;
+            LoggingConfigService.ReturnInfo("CV uploaded and user updated successfully.");
+            return ServiceResult.SuccessResult();
         }
 
-        public async Task<(bool Success, string ErrorMessage)> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId) // Method to change CV and analyze it
+        public async Task<ServiceResult> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId) // Method to change CV and analyze it
         {
             LoggingConfigService.ReturnInfo("ChangeCVAndAnalyzeAsync method called.");
             var user = await _context.Users.FindAsync(userId);
@@ -137,38 +168,37 @@ namespace JBDH.Services
             if (user == null)
             {
                 LoggingConfigService.ReturnInfo("User not found.");
-                return (false, "User not found.");
+                return ServiceResult.Failure("User not found.");
             }
             if (cvFile == null || cvFile.Length == 0)
             {
                 LoggingConfigService.ReturnInfo("No CV file provided.");
-                return (false, "No CV file provided.");
+                return ServiceResult.Failure("No CV file provided.");
             }
             LoggingConfigService.ReturnInfo($"Received CV file: {cvFile.FileName}");
-            var uploadSuccess = await UploadCVAsync(cvFile);
-            if (!uploadSuccess)
+            var uploadResult = await UploadCVAsync(cvFile);
+            if (!uploadResult.Success)
             {
                 LoggingConfigService.ReturnInfo("Failed to upload CV.");
-                return (false, "Failed to upload CV.");
+                return ServiceResult.Failure("Failed to upload CV.");
             }
-            LoggingConfigService.ReturnInfo($"CV upload success: {uploadSuccess}");
+            LoggingConfigService.ReturnInfo($"CV upload success: {uploadResult.Success}");
             // Run AI analysis in the background
             _ = Task.Run(async () =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
-                    var aiResponseService = scope.ServiceProvider.GetRequiredService<IAIResponseService>();
+                    var aiService = scope.ServiceProvider.GetRequiredService<IAIApiClient>();
+                    var aiResponseService = scope.ServiceProvider.GetRequiredService<IUserAIResponseService>();
                     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                     try
                     {
                         LoggingConfigService.ReturnInfo("Starting AI analysis for user CV.");
-                        // Always construct the full path for AI analysis
                         var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", user.CVPath ?? "");
                         AIHelperRequest request = new AIHelperRequest
                         {
-                            CommandId = 0, // Assuming 0 is for CV analysis
+                            CommandId = 0,
                             CVPath = fullCvPath,
                             User = user
                         };
@@ -176,11 +206,11 @@ namespace JBDH.Services
                         var aiResponse = new UserAIResponse
                         {
                             UserId = user.Id,
-                            User = user, // <-- Add this line
-                            responseText = aiResponseText,
-                            createdAt = DateTime.UtcNow
+                            User = user,
+                            ResponseText = aiResponseText,
+                            CreatedAt = DateTime.UtcNow
                         };
-                        dbContext.AIResponses.Add(aiResponse);
+                        dbContext.UserAIResponses.Add(aiResponse);
                         await dbContext.SaveChangesAsync();
                         LoggingConfigService.ReturnInfo("AI analysis completed and response saved.");
                     }
@@ -192,7 +222,7 @@ namespace JBDH.Services
                 }
             });
 
-            return (true, string.Empty);
+            return ServiceResult.SuccessResult();
         }
     }
 }
