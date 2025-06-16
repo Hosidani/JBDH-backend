@@ -30,8 +30,22 @@ namespace JBDH.Controllers
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(userIdStr, out int userId))
+                {
+                    var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                    if (!userExists)
+                    {
+                        await HttpContext.SignOutAsync("CookieAuth");
+                        return RedirectToAction("Login", "Account");
+                    }
+                }
+            }
+
             var dataFlows = _dataFlowService.GetAllRecursive();
             var listDataFlowViewModel = new ListDataFlowViewModel { DataFlows = dataFlows };
             return View(listDataFlowViewModel);
