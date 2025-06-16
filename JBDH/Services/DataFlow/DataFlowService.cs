@@ -110,5 +110,47 @@ namespace JBDH.Services
 
             return roots;
         }
+
+        private DataFlowViewModel MapToViewModel(DataFlow dataFlow)
+        {
+            return new DataFlowViewModel
+            {
+                Id = dataFlow.Id,
+                UserId = dataFlow.UserId,
+                Username = dataFlow.User?.Username,
+                ContentType = dataFlow.ContentType,
+                Content = dataFlow.Content,
+                ParentDataFlowId = dataFlow.ParentDataFlowId,
+                Replies = dataFlow.RelatedDataFlows?
+                    .Select(MapToViewModel)
+                    .ToList()
+            };
+        }
+
+        public List<DataFlowViewModel> GetAllViewModels()
+        {
+            var all = _context.DataFlows
+                .Include(df => df.User)
+                .Include(df => df.RelatedDataFlows)
+                .ToList();
+
+            // Only top-level posts
+            var roots = all
+                .Where(df => df.ParentDataFlowId == null)
+                .OrderByDescending(df => df.CreatedAt)
+                .ToList();
+
+            return roots.Select(MapToViewModel).ToList();
+        }
+
+        public void DeleteDataFlow(int id)
+        {
+            var dataFlow = _context.DataFlows.Find(id);
+            if (dataFlow != null)
+            {
+                _context.DataFlows.Remove(dataFlow);
+                _context.SaveChanges();
+            }
+        }
     }
 }
