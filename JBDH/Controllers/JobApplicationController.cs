@@ -33,6 +33,8 @@ namespace JBDH.Controllers
                 return RedirectToAction("JobDetails", new { id = jobId });
             }
             var referer = Request.Headers["Referer"].ToString();
+            if (string.IsNullOrEmpty(referer))
+                return RedirectToAction("Index", "Home");
             return Redirect(referer);
         }
 
@@ -53,6 +55,8 @@ namespace JBDH.Controllers
             }
 
             var referer = Request.Headers["Referer"].ToString();
+            if (string.IsNullOrEmpty(referer))
+                return RedirectToAction("Index", "Home");
             return Redirect(referer);
         }
     }

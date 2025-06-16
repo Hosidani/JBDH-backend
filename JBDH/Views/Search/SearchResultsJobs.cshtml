@@ -75,11 +75,21 @@
                 </tr>
                 <tr id="applyRow-@i" style="display:none;">
                     <td colspan="7">
-                        <form asp-controller="JobApplication" asp-action="Apply" method="post">
-                            <input type="hidden" name="jobId" value="@jobId" />
-                            <textarea name="notes" placeholder="Add note (optional)" class="form-control"></textarea>
-                            <button type="submit" id="applyBtn-@i" class="btn btn-primary mt-2">✅ Mark as Applied</button>
-                        </form>
+                        @if (item.HasApplied)
+                        {
+                            <form asp-controller="JobApplication" asp-action="Unapply" method="post">
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <button type="submit" class="btn btn-secondary">❌ Withdraw Application</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-controller="JobApplication" asp-action="Apply" method="post">
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <textarea name="notes" placeholder="Add note (optional)" class="form-control"></textarea>
+                                <button type="submit" class="btn btn-primary mt-2">✅ Mark as Applied</button>
+                            </form>
+                        }
                     </td>
                 </tr>
                 }

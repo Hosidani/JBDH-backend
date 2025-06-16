@@ -6,6 +6,7 @@ using JBDH.Services.Interfaces;
 using JBDH.Services.AICommunications.Interfaces;
 using NLog.Config;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace JBDH.Controllers
 {
@@ -16,19 +17,31 @@ namespace JBDH.Controllers
         private readonly ISearchCandidateService _searchCandidateService; // Added service for candidate search
         private readonly IAIApiClient _aIService;
         private readonly ISearchJobsService _searchJobsService;
-        private readonly IAIResponseService _AIResponseService;
+        private readonly IUserAIResponseService _userAIResponseService;
         private readonly IJobAIResponseService _jobAIResponseService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
-        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIRequestBuilderService aIRequestBuilderService, ISearchCandidateService searchCandidateService, IAIApiClient aIService, ISearchJobsService searchJobsService, IAIResponseService aIResponseService, IJobAIResponseService jobAIResponseService, IJobAIAnalysisService jobAIAnalysisService)
+        private readonly ApplicationDbContext _context;
+        public SearchController(
+            ApplicationDbContext context,
+            IWebHostEnvironment environment,
+            IUserPropertiesService userPropertiesService,
+            IAIRequestBuilderService aIRequestBuilderService,
+            ISearchCandidateService searchCandidateService,
+            IAIApiClient aIService,
+            ISearchJobsService searchJobsService,
+            IJobAIResponseService jobAIResponseService,
+            IJobAIAnalysisService jobAIAnalysisService,
+            IUserAIResponseService userAIResponseService)
         {
             _userPropertiesService = userPropertiesService;
             _aIRequestBuilderService = aIRequestBuilderService;
-            _searchCandidateService = searchCandidateService; // Initialize the candidate search service
+            _searchCandidateService = searchCandidateService;
             _aIService = aIService;
-            _searchJobsService = searchJobsService; // Initialize the job search service
-            _AIResponseService = aIResponseService; // Initialize the AI response service
+            _searchJobsService = searchJobsService;
             _jobAIResponseService = jobAIResponseService;
-            _jobAIAnalysisService = jobAIAnalysisService; // Initialize the job AI analysis service
+            _jobAIAnalysisService = jobAIAnalysisService;
+            _userAIResponseService = userAIResponseService;
+            _context = context;
         }
 
         [HttpGet]
@@ -51,6 +64,17 @@ namespace JBDH.Controllers
 
             // Attach latest AI responses using a service
             await _jobAIResponseService.AttachLatestAIResponsesAsync(results);
+
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdStr))
+                int.TryParse(userIdStr, out userId);
+
+            foreach (var item in results)
+            {
+                item.HasApplied = userId > 0 &&
+                    await _context.JobApplications.AnyAsync(a => a.JobId.ToString() == item.Job.JobId && a.UserId == userId);
+            }
 
             return View("SearchResultsJobs", results);
         }
