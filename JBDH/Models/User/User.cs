@@ -1,6 +1,8 @@
+using JBDH.Models.Job;
+using JBDH.Models.Dataflow;
 using System.ComponentModel.DataAnnotations;
 
-namespace JBDH.Models
+namespace JBDH.Models.User
 {
     public class User
     {

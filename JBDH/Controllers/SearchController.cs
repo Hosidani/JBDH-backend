@@ -121,7 +121,7 @@ namespace JBDH.Controllers
             // Analyze the first job against the CV using AIHelperSwitchService
             if (results.Any() && results.First().Job != null)
             {
-                var aiRequest = new AIHelperRequest
+                var aiRequest = new AIRequest
                 {
                     CommandId = 2,
                     JobAdUrl = results.First().Job.WebpageUrl,

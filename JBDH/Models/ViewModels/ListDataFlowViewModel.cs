@@ -1,4 +1,5 @@
 using JBDH.Models;
+using JBDH.Models.Dataflow;
 
 namespace JBDH.Models.ViewModels
 {

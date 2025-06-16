@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using JBDH.Models;
-using JBDH.Models.AI;
+using JBDH.Models.User;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services.AICommunications.Interfaces;
 
@@ -61,6 +61,18 @@ namespace JBDH.Services.AICommunications
                 .Where(r => r.UserId == userId)
                 .OrderByDescending(r => r.CreatedAt)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task SaveUserAIResponseAsync(UserAIResponse aiResponse, User user)
+        {
+            if (aiResponse == null || user == null)
+            {
+                LoggingConfigService.ReturnError("AIResponse or User is null");
+                return;
+            }
+            _context.UserAIResponses.Add(aiResponse);
+            await _context.SaveChangesAsync();
+            LoggingConfigService.ReturnInfo($"AIResponse saved for user ID {user.Id}");
         }
     }
 }

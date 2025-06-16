@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using JBDH.Models; // For Organisation, User, ServiceResult
+using JBDH.Models;
+using JBDH.Models.User;
 
 namespace JBDH.Services
 {

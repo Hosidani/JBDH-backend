@@ -90,3 +90,70 @@
         </dd>
     </dl>
 </div>
+
+@if (Model.CVAnalysisResult != null)
+{
+    <div class="card p-4 mt-3 shadow-sm">
+        <h3>Analysis made based on CV</h3>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h5>Best Job Titles</h5>
+                <ul>
+                    @foreach (var title in Model.CVAnalysisResult.BestJobTitlesForUser ?? new List<string>())
+                    {
+                        <li>@title</li>
+                    }
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Hard Skills</h5>
+                <ul>
+                    @foreach (var skill in Model.CVAnalysisResult.HardSkills ?? new List<string>())
+                    {
+                        <li>@skill</li>
+                    }
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Soft Skills</h5>
+                <ul>
+                    @foreach (var skill in Model.CVAnalysisResult.SoftSkills ?? new List<string>())
+                    {
+                        <li>@skill</li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <br />
+        <br />
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <h5>Experiences</h5>
+                <ul>
+                    @foreach (var exp in Model.CVAnalysisResult.Experiences ?? new List<JBDH.Models.User.ExperienceItem>())
+                    {
+                        <li>
+                            <strong>@exp.Title</strong>
+                            <span class="text-muted">(@exp.Duration)</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <h5>Education & Certifications</h5>
+                <ul>
+                    @foreach (var edu in Model.CVAnalysisResult.EducationAndCertifications ?? new List<string>())
+                    {
+                        <li>@edu</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <span>No AI analysis available.</span>
+}

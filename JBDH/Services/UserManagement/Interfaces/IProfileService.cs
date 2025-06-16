@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using JBDH.Models;
+using JBDH.Models.User;
 
 public interface IProfileService
 {

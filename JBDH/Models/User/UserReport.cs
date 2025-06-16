@@ -1,3 +1,4 @@
+namespace JBDH.Models.User;
 public class UserReport
 {
     public int Id { get; set; }

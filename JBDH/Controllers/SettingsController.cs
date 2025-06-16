@@ -16,15 +16,13 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
         
         private readonly IAIApiClient _aIApiClient;
-        private readonly IAIResponseService _aiResponseService;
         private readonly IUserRoleService _userRoleService;
 
         public SettingsController(
             IUserPropertiesService userService,
             ApplicationDbContext context,
             IWebHostEnvironment environment,
-            AIApiClient aIApiClient,
-            IAIResponseService aiResponseService,
+            IAIApiClient aIApiClient,
             IUserRoleService userRoleService
         )
         {
@@ -32,7 +30,6 @@ namespace JBDH.Controllers
             _environment = environment;
             _aIApiClient = aIApiClient;
             _userPropertiesService = userService;
-            _aiResponseService = aiResponseService;
             _userRoleService = userRoleService;
         }
 
