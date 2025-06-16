@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using JBDH.Services.Interfaces;
 
 namespace JBDH.Controllers
 {
@@ -14,16 +15,25 @@ namespace JBDH.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         
-        private readonly IAIService _aiService;
+        private readonly IAIApiClient _aIApiClient;
         private readonly IAIResponseService _aiResponseService;
+        private readonly IUserRoleService _userRoleService;
 
-        public SettingsController(IUserPropertiesService userService, ApplicationDbContext context, IWebHostEnvironment environment, IAIService aiService, IAIResponseService aiResponseService)
+        public SettingsController(
+            IUserPropertiesService userService,
+            ApplicationDbContext context,
+            IWebHostEnvironment environment,
+            AIApiClient aIApiClient,
+            IAIResponseService aiResponseService,
+            IUserRoleService userRoleService
+        )
         {
             _context = context;
             _environment = environment;
-            _aiService = aiService;
+            _aIApiClient = aIApiClient;
             _userPropertiesService = userService;
             _aiResponseService = aiResponseService;
+            _userRoleService = userRoleService;
         }
 
         [HttpPost]
@@ -34,6 +44,12 @@ namespace JBDH.Controllers
             if (user == null)
             {
                 ViewData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Settings", "Home");
+            }
+
+            if (cvFile == null)
+            {
+                ViewData["ErrorMessage"] = "No file uploaded.";
                 return RedirectToAction("Settings", "Home");
             }
 
@@ -92,14 +108,14 @@ namespace JBDH.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Settings()
+        public IActionResult Settings()
         {
-            var model = new ManageRolesViewModel
-            {
-                AvailableRoles = new List<string> { "Manager", "Recruiter" }, // or your roles
-                SelectedRoles = new List<string>() // or the user's roles
-            };
-            return View(model);
+        var model = new ManageRolesViewModel
+        {
+            AvailableRoles = new List<string> { "Manager", "Recruiter" },
+            SelectedRoles = new List<string>()
+        };
+        return View(model);
         }
 
         [HttpGet]
@@ -126,27 +142,14 @@ namespace JBDH.Controllers
         {
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdString, out var userId))
-            {
-                // Handle error, e.g. return Unauthorized or similar
                 return Unauthorized();
-            }
 
-            // Remove all current roles except "User"
-            var currentRoles = _context.UserRoleAssignments.Where(ura => ura.UserId == userId && ura.Role != "User");
-            _context.UserRoleAssignments.RemoveRange(currentRoles);
+            var success = await _userRoleService.UpdateUserRolesAsync(userId, model.SelectedRoles);
+            if (success)
+                TempData["SuccessMessage"] = "Roles updated successfully!";
+            else
+                TempData["ErrorMessage"] = "Failed to update roles.";
 
-            // Add selected roles (except "User", which is always assigned)
-            foreach (var role in model.SelectedRoles)
-            {
-                if (role != "User" && !_context.UserRoleAssignments.Any(ura => ura.UserId == userId && ura.Role == role))
-                {
-                    _context.UserRoleAssignments.Add(new UserRoleAssignment { UserId = userId, Role = role });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
-            ViewData["SuccessMessage"] = "Roles updated successfully!";
             return RedirectToAction("Settings");
         }
     }

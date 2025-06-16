@@ -1,9 +1,9 @@
 @{
     ViewData["Title"] = "Search";
-    bool isLoggedIn = User.Identity.IsAuthenticated;
-    string username = isLoggedIn ? User.Identity.Name : "Guest";
+    bool isLoggedIn = User.Identity != null && User.Identity.IsAuthenticated;
+    string username = isLoggedIn && User.Identity?.Name != null ? User.Identity.Name : "Guest";
     // Optionally, get the user's CV path from ViewData or Model if you pass it from the controller
-    string userCVPath = ViewData["UserCVPath"] as string;
+    string? userCVPath = ViewData["UserCVPath"] as string;
 }
 <div class="text-center">
     <h1 class="display-4">Job Search</h1>

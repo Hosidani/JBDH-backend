@@ -1,0 +1,36 @@
+@model JBDH.Models.DataFlow
+
+<div style="margin-left: @(Model.ParentDataFlowId != null ? "30px" : "0")">
+    <div>
+        <strong>@(Model.User?.Username ?? "Unknown")</strong>
+        @Model.Content (@Model.CreatedAt.ToString("g"))
+        <!-- Reply toggle link -->
+        <a href="javascript:void(0);" onclick="toggleReplyForm(@Model.Id)">Reply</a>
+        <!-- Reply form (hidden by default) -->
+        <div id="replyForm_@Model.Id" style="display:none;">
+            <form class="reply-form" data-id="@Model.Id">
+                <input type="hidden" name="dataFlowId" value="@Model.Id" />
+                <textarea name="comment"></textarea>
+                <button type="submit">Reply</button>
+            </form>
+        </div>
+    </div>
+    @if (Model.RelatedDataFlows != null && Model.RelatedDataFlows.Any())
+    {
+        foreach (var reply in Model.RelatedDataFlows)
+        {
+            <partial name="_DataFlowThread" model="reply" />
+        }
+    }
+</div>
+
+<script>
+    function toggleReplyForm(id) {
+        var form = document.getElementById('replyForm_' + id);
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+</script>

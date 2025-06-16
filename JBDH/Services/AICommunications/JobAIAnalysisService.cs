@@ -1,0 +1,69 @@
+using JBDH.Models;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using JBDH.Services;
+using JBDH.Services.AICommunications.Interfaces;
+
+public class JobAIAnalysisService : IJobAIAnalysisService
+{
+    private readonly IUserPropertiesService _userPropertiesService;
+    private readonly IAIRequestBuilderService _aiRequestBuilderService;
+    private static readonly AIConfig AIConfig = new AIConfig();
+    private readonly ApplicationDbContext _context;
+
+    public JobAIAnalysisService(
+        IUserPropertiesService userPropertiesService,
+        IAIRequestBuilderService aIRequestBuilderService,
+        ApplicationDbContext context)
+    {
+        _userPropertiesService = userPropertiesService;
+        _aiRequestBuilderService = aIRequestBuilderService;
+        _context = context;
+    }
+
+    public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId)
+    {
+        // 1. Check for cached response in the database
+        var cachedResponse = await _context.JobAIResponses
+            .Where(r => r.JobId == jobId)
+            .OrderByDescending(r => r.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (cachedResponse != null)
+            return cachedResponse.ResponseText;
+
+        // 2. Build and send AI request
+        var user = await _userPropertiesService.GetCurrentUserAsync();
+        var request = new AIHelperRequest
+        {
+            CommandId = 1,
+            JobAdUrl = jobAdUrl,
+            User = user
+        };
+        var requestContent = await _aiRequestBuilderService.HelperSwitch(request);
+
+        using (var httpClient = new HttpClient())
+        {
+            var apiUrl = AIConfig.OpenAIUrl;
+            if (string.IsNullOrEmpty(AIConfig.OpenAIKey))
+                throw new InvalidOperationException("OpenAI API key is not configured.");
+
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {AIConfig.OpenAIKey}");
+
+            var response = await httpClient.PostAsync(apiUrl, requestContent);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            // 3. Save the new response to the database
+            var aiResponse = new JobAIResponse
+            {
+                JobId = jobId,
+                ResponseText = responseContent,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.JobAIResponses.Add(aiResponse);
+            await _context.SaveChangesAsync();
+
+            return responseContent;
+        }
+    }
+}

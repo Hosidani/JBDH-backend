@@ -45,7 +45,7 @@
             <label for="openForHiring" class="form-label">Open for Hiring</label>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" name="openForHiring" value="true" id="openForHiring"
-                    @(ViewData["OpenForHiring"] != null && (bool)ViewData["OpenForHiring"] ? "checked" : "") />
+                    @(ViewData["OpenForHiring"] as bool? == true ? "checked" : "") />
                 <label class="form-check-label" for="openForHiring">Yes, I am open for hiring</label>
             </div>
         </div>
@@ -90,4 +90,6 @@
     {
         <p class="text-success mt-3">@ViewData["SuccessMessage"]</p>
     }
+
+    @(ViewData["SomeIntValue"] as int? ?? 0)
 </div>

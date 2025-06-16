@@ -2,23 +2,27 @@
 @* This file is part of the Job Database Handler project. *@
 @* The Job Database Handler is a web application that allows users to manage job listings, applications, and related data. *@
 
-@model IEnumerable<JBDH.Models.DataFlow>
+@model JBDH.Models.ViewModels.ListDataFlowViewModel
 
 @{
     ViewData["Title"] = "Home";
-    var isLoggedIn = User.Identity.IsAuthenticated; // Check if the user is authenticated
-    var username = User.Identity.IsAuthenticated ? User.Identity.Name : null; // Get the username from the identity
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+    var username = isLoggedIn ? User.Identity?.Name : null;
 }
 
+<h2>Posts</h2>
+<div style="text-align: right;">
+    <a href="@Url.Action("CreateFlow")">Create new post</a>
+</div>
 
-
-<h2>User posts</h2>
-<a href="@Url.Action("CreateFlow")">Create new post</a>
-@foreach (var post in Model)
+@foreach (var post in Model.DataFlows)
 {
     <div class="dataflow-post mb-3">
-        <p>@post.Content</p>
-        <button type="button" class="btn btn-danger btn-sm" onclick="showReportForm(@post.Id)">Report</button>
+        <p>
+            <strong>@(post.User?.Username ?? "Unknown")</strong><br />
+            @post.Content
+        </p>
+        <button type="button" class="btn btn-danger btn-sm" onclick="toggleReportForm(@post.Id)">Report</button>
         <form asp-action="ReportDataFlow" asp-controller="Home" method="post" style="display:none;" id="reportForm_@post.Id" class="mt-2">
             <input type="hidden" name="reportedUserId" value="@post.UserId" />
             <input type="hidden" name="dataFlowId" value="@post.Id" />
@@ -31,6 +35,27 @@
             </div>
             <button type="submit" class="btn btn-danger btn-sm mt-1">Skicka rapport</button>
         </form>
+
+        <!-- Comment toggle button -->
+        <button type="button" class="btn btn-primary btn-sm" onclick="toggleComments(@post.Id)">Comments</button>
+
+        <!-- Comments, replies, and comment form (hidden by default) -->
+        <div id="commentsSection_@post.Id" style="display:none; margin-top:10px;">
+            <!-- Add Comment Form -->
+            <form asp-action="CommentOnDataFlow" method="post">
+                <input type="hidden" name="dataFlowId" value="@post.Id" />
+                <textarea name="comment"></textarea>
+                <button type="submit">Add Comment</button>
+            </form>
+            <!-- Render ONLY the comments/replies, NOT the post itself -->
+            @if (post.RelatedDataFlows != null && post.RelatedDataFlows.Any())
+            {
+                foreach (var comment in post.RelatedDataFlows)
+                {
+                    <partial name="_DataFlowThread" model="comment" />
+                }
+            }
+        </div>
     </div>
 }
 
@@ -40,14 +65,53 @@
 }
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        function showReportForm(postId) {
-            document.getElementById('reportForm_' + postId).style.display = 'block';
+        function toggleReportForm(id) {
+            var form = document.getElementById('reportForm_' + id);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
         }
         function updateCharCount(textarea, counterId) {
             var max = 100;
             var left = max - textarea.value.length;
             document.getElementById(counterId).innerText = left;
         }
+        function toggleComments(id) {
+            var section = document.getElementById('commentsSection_' + id);
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+        function toggleReplyForm(id) {
+            var form = document.getElementById('replyForm_' + id);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        // AJAX for reply forms
+        $(document).on('submit', '.reply-form', function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            $.ajax({
+                url: '@Url.Action("CommentOnDataFlow", "Home")',
+                type: 'POST',
+                data: $form.serialize(),
+                success: function (result) {
+                    location.reload(); // Reload to show the new reply
+                },
+                error: function () {
+                    alert('Failed to add reply.');
+                }
+            });
+        });
     </script>
 }

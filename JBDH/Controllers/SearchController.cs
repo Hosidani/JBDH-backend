@@ -2,59 +2,55 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Models;
 using JBDH.Services;
+using JBDH.Services.Interfaces;
+using JBDH.Services.AICommunications.Interfaces;
 using NLog.Config;
-using Markdig;
 using System.Threading.Tasks;
 
 namespace JBDH.Controllers
 {
     public class SearchController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _environment;
         private readonly IUserPropertiesService _userPropertiesService;
-        private readonly IAIHelperSwitchService _aiHelperSwitchService;
-        private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        private readonly IAIRequestBuilderService _aIRequestBuilderService;
         private readonly ISearchCandidateService _searchCandidateService; // Added service for candidate search
-        private readonly IAIService _aIService;
-
-        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIHelperSwitchService aiHelperSwitchService, IJobAIAnalysisService jobAIAnalysisService, ISearchCandidateService searchCandidateService, IAIService aIService)
+        private readonly IAIApiClient _aIService;
+        private readonly ISearchJobsService _searchJobsService;
+        private readonly IAIResponseService _AIResponseService;
+        private readonly IJobAIResponseService _jobAIResponseService;
+        private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        public SearchController(ApplicationDbContext context, IWebHostEnvironment environment, IUserPropertiesService userPropertiesService, IAIRequestBuilderService aIRequestBuilderService, ISearchCandidateService searchCandidateService, IAIApiClient aIService, ISearchJobsService searchJobsService, IAIResponseService aIResponseService, IJobAIResponseService jobAIResponseService, IJobAIAnalysisService jobAIAnalysisService)
         {
-            _context = context;
-            _environment = environment;
             _userPropertiesService = userPropertiesService;
-            _aiHelperSwitchService = aiHelperSwitchService;
-            _jobAIAnalysisService = jobAIAnalysisService;
+            _aIRequestBuilderService = aIRequestBuilderService;
             _searchCandidateService = searchCandidateService; // Initialize the candidate search service
             _aIService = aIService;
+            _searchJobsService = searchJobsService; // Initialize the job search service
+            _AIResponseService = aIResponseService; // Initialize the AI response service
+            _jobAIResponseService = jobAIResponseService;
+            _jobAIAnalysisService = jobAIAnalysisService; // Initialize the job AI analysis service
         }
 
         [HttpGet]
         public async Task<IActionResult> SearchForJobs(string description, string location)
         {
-            if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location))
+            // Only show error if both are empty
+            if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location))
             {
-                LoggingConfigService.ReturnError("Description or location is empty.");
+                LoggingConfigService.ReturnError("Both description and location are empty.");
                 return View("Error", new ErrorViewModel
                 {
                     Title = "Missing Input",
-                    Message = "Description and location cannot be empty.",
+                    Message = "Please provide at least a description or a location.",
                     ReturnUrl = Url.Action("Index", "Home")
                 });
             }
 
             // Get prioritized jobs as view models
-            var results = new SearchJobsService(_context, _environment)
-                .SearchJobs(description, location);
+            var results = await _searchJobsService.SearchJobsAsync(description, location);
 
-            // Optionally, fetch and attach the latest AI response for each job
-            foreach (var item in results)
-            {
-                item.LatestAIResponse = await _context.JobAIResponses
-                    .Where(r => r.JobId == item.Job.JobId.ToString())
-                    .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefaultAsync();
-            }
+            // Attach latest AI responses using a service
+            await _jobAIResponseService.AttachLatestAIResponsesAsync(results);
 
             return View("SearchResultsJobs", results);
         }
@@ -74,42 +70,7 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo($"AnalyzeJob called with URL: {jobAdUrl} and Job ID: {jobId}");
 
-            var existingResponse = await _context.JobAIResponses
-                .Where(r => r.JobId == jobId)
-                .OrderByDescending(r => r.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            if (existingResponse != null && !string.IsNullOrEmpty(existingResponse.ResponseText))
-            {
-                LoggingConfigService.ReturnInfo("Returning cached AI analysis result.");
-                return PartialView("_JobAIResultPartial", existingResponse.ResponseText);
-            }
-
-            var aiResult = await _jobAIAnalysisService.AnalyzeJobAsync(jobAdUrl);
-            string aiResultString;
-
-            if (aiResult is System.Net.Http.StringContent stringContent)
-            {
-                aiResultString = await stringContent.ReadAsStringAsync();
-            }
-            else
-            {
-                aiResultString = aiResult?.ToString() ?? string.Empty;
-            }
-
-            if (!string.IsNullOrEmpty(aiResultString) && aiResultString.TrimStart().StartsWith("{"))
-            {
-                try
-                {
-                    dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResultString);
-                    aiResultString = json?.choices?[0]?.message?.content?.ToString() ?? aiResultString;
-                }
-                catch (Exception ex)
-                {
-                    LoggingConfigService.ReturnError("Failed to parse AI response JSON: " + ex.Message);
-                    // Ignore parsing errors and use the original string
-                }
-            }
+            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId);
 
             if (string.IsNullOrEmpty(aiResultString))
             {
@@ -121,15 +82,6 @@ namespace JBDH.Controllers
                     ReturnUrl = Url.Action("SearchJob")
                 });
             }
-
-            var newResponse = new JobAIResponse
-            {
-                JobId = jobId,
-                ResponseText = aiResultString,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.JobAIResponses.Add(newResponse);
-            await _context.SaveChangesAsync();
 
             LoggingConfigService.ReturnInfo($"AI analysis result: {aiResultString}");
             return PartialView("_JobAIResultPartial", aiResultString);
@@ -152,7 +104,7 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo("SearchForJobsAndAnalyzeCVAgainstJob called.");
             var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(user.CVPath))
+            if (user == null || string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(user.CVPath))
             {
                 LoggingConfigService.ReturnError("Description, location, or CV path is empty.");
                 return View("Error", new ErrorViewModel
@@ -164,18 +116,17 @@ namespace JBDH.Controllers
             }
 
             // Get prioritized jobs as view models
-            var results = new SearchJobsService(_context, _environment)
-                .SearchJobs(description, location);
+            var results = await _searchJobsService.SearchJobsAsync(description, location);
 
             // Analyze the first job against the CV using AIHelperSwitchService
-            if (results.Any())
+            if (results.Any() && results.First().Job != null)
             {
                 var aiRequest = new AIHelperRequest
                 {
                     CommandId = 2,
                     JobAdUrl = results.First().Job.WebpageUrl,
-                    CVPath = user.CVPath,
-                    User = user // Make sure to set this if required by your AIService
+                    CVPath = user.CVPath ?? "",
+                    User = user
                 };
                 string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
                 ViewData["AIAnalysisResult"] = aiAnalysisResult;

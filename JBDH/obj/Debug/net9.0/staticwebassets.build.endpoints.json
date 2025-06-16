@@ -43,7 +43,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 01 May 2025 15:23:24 GMT"
+          "Value": "Sun, 15 Jun 2025 08:33:21 GMT"
         },
         {
           "Name": "Vary",
@@ -92,7 +92,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 01 May 2025 15:23:24 GMT"
+          "Value": "Sun, 15 Jun 2025 08:33:21 GMT"
         }
       ],
       "EndpointProperties": [
@@ -141,7 +141,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 01 May 2025 15:23:24 GMT"
+          "Value": "Sun, 15 Jun 2025 08:33:21 GMT"
         },
         {
           "Name": "Vary",
@@ -204,7 +204,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 01 May 2025 15:23:24 GMT"
+          "Value": "Sun, 15 Jun 2025 08:33:21 GMT"
         },
         {
           "Name": "Vary",
@@ -245,7 +245,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 01 May 2025 15:23:24 GMT"
+          "Value": "Sun, 15 Jun 2025 08:33:21 GMT"
         }
       ],
       "EndpointProperties": [
@@ -286,7 +286,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 01 May 2025 15:23:24 GMT"
+          "Value": "Sun, 15 Jun 2025 08:33:21 GMT"
         },
         {
           "Name": "Vary",
@@ -18859,7 +18859,6 @@
       ]
     },
     {
-<<<<<<< HEAD
       "Route": "uploads/CV Ale HR-specialist.aync27z9xx.pdf",
       "AssetFile": "uploads/CV Ale HR-specialist.pdf",
       "Selectors": [],
@@ -18886,7 +18885,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+          "Value": "Wed, 11 Jun 2025 09:16:17 GMT"
         }
       ],
       "EndpointProperties": [
@@ -18931,7 +18930,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 07 Jun 2025 15:24:28 GMT"
+          "Value": "Wed, 11 Jun 2025 09:16:17 GMT"
         }
       ],
       "EndpointProperties": [
@@ -18942,8 +18941,6 @@
       ]
     },
     {
-=======
->>>>>>> origin/dev
       "Route": "uploads/Cover_Letter.hk1nl53124.pdf",
       "AssetFile": "uploads/Cover_Letter.pdf",
       "Selectors": [],
@@ -19134,11 +19131,7 @@
         },
         {
           "Name": "Last-Modified",
-<<<<<<< HEAD
-          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
-=======
-          "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
->>>>>>> origin/dev
+          "Value": "Wed, 11 Jun 2025 09:29:13 GMT"
         }
       ],
       "EndpointProperties": [
@@ -19175,11 +19168,7 @@
         },
         {
           "Name": "Last-Modified",
-<<<<<<< HEAD
-          "Value": "Wed, 04 Jun 2025 10:19:59 GMT"
-=======
-          "Value": "Sat, 07 Jun 2025 18:58:45 GMT"
->>>>>>> origin/dev
+          "Value": "Wed, 11 Jun 2025 09:29:13 GMT"
         }
       ],
       "EndpointProperties": [

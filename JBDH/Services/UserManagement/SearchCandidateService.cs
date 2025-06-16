@@ -1,0 +1,66 @@
+using JBDH.Models;
+using JBDH.Services;
+using JBDH.Services.AICommunications.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+public class SearchCandidateService : ISearchCandidateService
+{
+    private readonly ApplicationDbContext _context;
+    private readonly IUserAIResponseService _userAIResponseService;
+
+    public SearchCandidateService(ApplicationDbContext context, IUserAIResponseService userAIResponseService)
+    {
+        _context = context;
+        _userAIResponseService= userAIResponseService;
+    }
+    public async Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location)
+    {
+        var users = _context.Users.Where(u => u.OpenForHiring == true);
+        LoggingConfigService.ReturnInfo($"Total users open for hiring: {await users.CountAsync()}");
+
+        var userWithAI = users.Select(u => new
+        {
+            User = u,
+            LatestAI = _context.UserAIResponses
+                .Where(ai => ai.UserId == u.Id)
+                .OrderByDescending(ai => ai.CreatedAt)
+                .FirstOrDefault()
+        });
+        var filtered = await userWithAI
+            .Where(x =>
+                x.LatestAI != null &&
+                (string.IsNullOrEmpty(keyword) ||
+                    !string.IsNullOrEmpty(x.LatestAI.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower())) &&
+                (string.IsNullOrEmpty(location) ||
+                    (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()))
+            )
+            .ToListAsync();
+
+        LoggingConfigService.ReturnInfo($"Filtered users count: {filtered.Count}");
+
+        // Bygg ViewModels och prioritera
+        var candidates = await Task.WhenAll(filtered.Select(async x =>
+        {
+            var aiResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(x.User.Id);
+            LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Username: {x.User.Username}, LatestAIResponse: {(aiResponse != null ? aiResponse.ResponseText : "NULL")}");
+            return new SearchCandidateViewModel
+            {
+                UserId = x.User.Id,
+                Username = x.User.Username,
+                Location = x.User.Location,
+                UserAIResponse = aiResponse ?? new UserAIResponse { UserId = x.User.Id, User = x.User },
+                Priority = (!string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()) ? 1 : 2
+            };
+        }));
+
+        var prioritized = candidates.OrderBy(x => x.Priority).ToList();
+
+        if (prioritized.Count == 0)
+        {
+            LoggingConfigService.ReturnError("No candidates found for the given criteria.");
+            return new List<SearchCandidateViewModel>();
+        }
+        LoggingConfigService.ReturnInfo($"Found {prioritized.Count} candidates matching the criteria: keyword='{keyword}', location='{location}'");
+        return prioritized;
+    }
+}
