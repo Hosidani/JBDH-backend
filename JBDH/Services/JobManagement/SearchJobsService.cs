@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Models;
+using JBDH.Models.Job;
 using JBDH.Services;
 using Microsoft.AspNetCore.Http;
 using System.Linq;

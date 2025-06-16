@@ -1,4 +1,5 @@
 using JBDH.Models;
+using JBDH.Models.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,13 +15,20 @@ namespace JBDH.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWebHostEnvironment _environment;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICVAnalysisService _cvAnalysisService;
 
-        public UserPropertiesService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment, IServiceProvider serviceProvider)
+        public UserPropertiesService(
+            ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IWebHostEnvironment environment,
+            IServiceProvider serviceProvider,
+            ICVAnalysisService cvAnalysisService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _environment = environment;
             _serviceProvider = serviceProvider;
+            _cvAnalysisService = cvAnalysisService;
         }
         private string? GetAbsoluteCVPath(string cvFileName) // Helper method to get the absolute path of the CV file
         {
@@ -179,41 +187,30 @@ namespace JBDH.Services
                 return ServiceResult.Failure("Failed to upload CV.");
             }
             LoggingConfigService.ReturnInfo($"CV upload success: {uploadResult.Success}");
-            // Run AI analysis in the background
+
+            // Run AI analysis in the background using the shared service
             _ = Task.Run(async () =>
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var aiService = scope.ServiceProvider.GetRequiredService<IAIApiClient>();
-                    var aiResponseService = scope.ServiceProvider.GetRequiredService<IUserAIResponseService>();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
                     try
                     {
-                        LoggingConfigService.ReturnInfo("Starting AI analysis for user CV.");
-                        var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", user.CVPath ?? "");
-                        AIHelperRequest request = new AIHelperRequest
+                        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        var cvAnalysisService = scope.ServiceProvider.GetRequiredService<ICVAnalysisService>();
+                        var userFromDb = await dbContext.Users.FindAsync(user.Id);
+                        if (userFromDb == null)
                         {
-                            CommandId = 0,
-                            CVPath = fullCvPath,
-                            User = user
-                        };
-                        string aiResponseText = await aiService.GetAIResponse(request);
-                        var aiResponse = new UserAIResponse
-                        {
-                            UserId = user.Id,
-                            User = user,
-                            ResponseText = aiResponseText,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        dbContext.UserAIResponses.Add(aiResponse);
-                        await dbContext.SaveChangesAsync();
-                        LoggingConfigService.ReturnInfo("AI analysis completed and response saved.");
+                            LoggingConfigService.ReturnError($"User with ID {user.Id} not found in background CV analysis.");
+                            return;
+                        }
+                        var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", userFromDb.CVPath ?? "");
+                        LoggingConfigService.ReturnInfo($"Starting background CV analysis for user {userFromDb.Username} at {fullCvPath}");
+                        await cvAnalysisService.AnalyzeAndSaveCVAsync(userFromDb, fullCvPath);
+                        LoggingConfigService.ReturnInfo("Background CV analysis completed.");
                     }
                     catch (Exception ex)
                     {
-                        LoggingConfigService.ReturnError($"Background AI generation failed: {ex.Message}");
-                        return;
+                        LoggingConfigService.ReturnError($"Background CV analysis failed: {ex}");
                     }
                 }
             });

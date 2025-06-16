@@ -1,4 +1,5 @@
 using JBDH.Models;
+using JBDH.Models.User;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;

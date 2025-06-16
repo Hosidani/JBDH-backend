@@ -59,6 +59,7 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>(); 
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<DataFlowService>(); 
+builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
 
 
 builder.Services.AddSession(options =>

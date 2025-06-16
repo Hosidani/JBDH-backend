@@ -4,6 +4,11 @@ using JBDH.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using JBDH.Models.ViewModels;
+using JBDH.Models.User;
+
+
 
 namespace JBDH.Controllers;
 
@@ -15,16 +20,16 @@ public class ProfileController : Controller
     private readonly IFriendService _friendService; // Add reference to FriendService
     private readonly IAIApiClient _AIApiClient;
 
-    private readonly IAIResponseService _airesponseService;
+    private readonly IUserAIResponseService _userAIResponseService; // Add reference to IUserAIResponseService
 
 
-    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIApiClient, IAIResponseService aiResponseService)
+    public ProfileController(IUserAIResponseService userAIResponseService, ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIApiClient)
     {
         _context = context;
         _profileService = profileService;
         _friendService = friendService; // Initialize FriendService
         _AIApiClient = aIApiClient;
-        _airesponseService = aiResponseService;
+        _userAIResponseService = userAIResponseService; // Initialize IUserAIResponseService
     }
 
     // GET: Profile
@@ -56,15 +61,29 @@ public class ProfileController : Controller
         if (currentUserId == null)
             return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
 
-        try
+        var user = await _context.Users.FindAsync(currentUserId.Value);
+        if (user == null)
+            return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+
+        var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+
+        CVAnalysisResult? analysisResult = null;
+        if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
         {
-            var viewModel = await _profileService.GetMyProfileViewModelAsync(currentUserId.Value);
-            return View("MyProfile", viewModel);
+            try
+            {
+                analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
+            }
+            catch { /* handle error */ }
         }
-        catch (Exception ex)
+
+        var model = new ProfileViewModel
         {
-            return View("ErrorPage", new ErrorViewModel { Message = ex.Message });
-        }
+            User = user,
+            CVAnalysisResult = analysisResult
+        };
+
+        return View("MyProfile", model);
     }
 
     // Method to send a friend request

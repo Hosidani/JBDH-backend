@@ -1,4 +1,4 @@
-namespace JBDH.Models
+namespace JBDH.Models.User
 {
     public class UserRoleAssignment
     {

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JBDH.Models;
+using JBDH.Models.User;
 using JBDH.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 

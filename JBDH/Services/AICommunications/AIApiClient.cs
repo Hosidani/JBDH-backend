@@ -27,7 +27,7 @@ namespace JBDH.Services
             _aiRequestBuilderService = aIRequestBuilderService;
 
         }
-        public async Task<string> GetAIResponse(AIHelperRequest request)
+        public async Task<string> GetAIResponse(AIRequest request)
         {
             if (request == null)
             {
@@ -54,7 +54,7 @@ namespace JBDH.Services
                 LoggingConfigService.ReturnError("AIHelperSwitchService is not initialized");
                 return "AIHelperSwitchService is not initialized";
             }
-            var content = await _aiRequestBuilderService!.HelperSwitch(request);
+            var content = await _aiRequestBuilderService!.AIRequestBuilder(request);
             if (content == null)
             {
                 LoggingConfigService.ReturnError("Content is null or empty");

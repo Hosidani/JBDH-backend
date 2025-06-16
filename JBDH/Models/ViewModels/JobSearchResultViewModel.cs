@@ -1,4 +1,6 @@
-using JBDH.Models;
+using JBDH.Models.Job;
+using JBDH.Models.AI;
+
 
 public class JobSearchResultViewModel
 {

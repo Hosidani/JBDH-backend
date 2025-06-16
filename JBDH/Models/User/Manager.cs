@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace JBDH.Models
+namespace JBDH.Models.User
 {
     public class Manager : User
     {

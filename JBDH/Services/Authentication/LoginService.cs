@@ -1,5 +1,6 @@
 using BCrypt.Net;
 using JBDH.Models;
+using JBDH.Models.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using System.Collections.Generic;

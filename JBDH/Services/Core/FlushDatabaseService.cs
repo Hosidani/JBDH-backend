@@ -32,6 +32,11 @@ namespace JBDH.Services
                 var aiResponsesRowsDeleted = deleteAIResponsesTableCommand.ExecuteNonQuery();
                 LoggingConfigService.ReturnInfo($"Deleted {aiResponsesRowsDeleted} rows from AIResponses table.");
 
+                // Delete all rows from UserAIResponses table
+                var deleteUserAIResponsesTableCommand = new MySqlCommand("DELETE FROM UserAIResponses;", connection);
+                var userAIResponsesRowsDeleted = deleteUserAIResponsesTableCommand.ExecuteNonQuery();
+                LoggingConfigService.ReturnInfo($"Deleted {userAIResponsesRowsDeleted} rows from UserAIResponses table.");
+
                 // Delete all rows from UserRoleAssignments table (must be before Users)
                 var deleteUserRoleAssignmentsCommand = new MySqlCommand(SqlQueries.SqlQuery(206), connection);
                 var userRoleAssignmentsRowsDeleted = deleteUserRoleAssignmentsCommand.ExecuteNonQuery();

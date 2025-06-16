@@ -1,4 +1,5 @@
 using JBDH.Models;
+using JBDH.Models.User;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
