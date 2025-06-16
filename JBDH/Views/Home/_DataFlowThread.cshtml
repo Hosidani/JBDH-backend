@@ -14,6 +14,11 @@
                 <button type="submit">Reply</button>
             </form>
         </div>
+        <!-- Delete button, only visible to the owner -->
+        @if (User.Identity.IsAuthenticated && Model.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value))
+        {
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">Delete</a>
+        }
     </div>
     @if (Model.RelatedDataFlows != null && Model.RelatedDataFlows.Any())
     {

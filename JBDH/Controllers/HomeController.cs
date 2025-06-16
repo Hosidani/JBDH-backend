@@ -36,7 +36,21 @@ namespace JBDH.Controllers
             var listDataFlowViewModel = new ListDataFlowViewModel { DataFlows = dataFlows };
             return View(listDataFlowViewModel);
         }
-
+        [Authorize]
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                LoggingConfigService.ReturnError("User is not authenticated.");
+                return RedirectToAction("Login", "Account");
+            }
+            LoggingConfigService.ReturnInfo($"Deleting data flow for user ID: {userId} IN CONTROLLER");
+            _dataFlowService.DeleteDataFlow(id); 
+            return RedirectToAction("Index");
+        }
+        
         // Skapa nytt inlägg (GET)
         public IActionResult CreateFlow()
         {
