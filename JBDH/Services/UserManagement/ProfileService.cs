@@ -3,21 +3,21 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using JBDH.Services;
+using JBDH.Services.AICommunications.Interfaces;
 
 public class ProfileService : IProfileService
 {
     private readonly ApplicationDbContext _context;
     private readonly IFriendService _friendService;
-    private readonly IAIResponseService _airesponseService;
-
+    private readonly IUserAIResponseService _userAIResponseService;
     public ProfileService(
         ApplicationDbContext context,
         IFriendService friendService,
-        IAIResponseService airesponseService)
+        IUserAIResponseService userAIResponseService)
     {
         _context = context;
         _friendService = friendService;
-        _airesponseService = airesponseService;
+        _userAIResponseService = userAIResponseService;
     }
 
     public async Task<User?> GetUserByIdAsync(int userId)
@@ -57,7 +57,7 @@ public class ProfileService : IProfileService
             User = user,
             IsFriend = false,
             Organisation = null,
-            UserAIResponse = await _airesponseService.GetLatestAIResponseAsync(user.Id)
+            UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id)
         };
     }
 

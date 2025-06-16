@@ -1,16 +1,17 @@
 using JBDH.Models;
 using JBDH.Services;
+using JBDH.Services.AICommunications.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 public class SearchCandidateService : ISearchCandidateService
 {
     private readonly ApplicationDbContext _context;
-    private readonly IAIResponseService _airesponseService;
+    private readonly IUserAIResponseService _userAIResponseService;
 
-    public SearchCandidateService(ApplicationDbContext context, IAIResponseService airesponseService)
+    public SearchCandidateService(ApplicationDbContext context, IUserAIResponseService userAIResponseService)
     {
         _context = context;
-        _airesponseService = airesponseService;
+        _userAIResponseService= userAIResponseService;
     }
     public async Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location)
     {
@@ -40,7 +41,7 @@ public class SearchCandidateService : ISearchCandidateService
         // Bygg ViewModels och prioritera
         var candidates = await Task.WhenAll(filtered.Select(async x =>
         {
-            var aiResponse = await _airesponseService.GetLatestAIResponseAsync(x.User.Id);
+            var aiResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(x.User.Id);
             LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Username: {x.User.Username}, LatestAIResponse: {(aiResponse != null ? aiResponse.ResponseText : "NULL")}");
             return new SearchCandidateViewModel
             {

@@ -5,7 +5,7 @@ using JBDH.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-
+using JBDH.Services.AICommunications.Interfaces;
 namespace JBDH.Controllers;
 
 public class RegisterController : Controller
@@ -15,30 +15,30 @@ public class RegisterController : Controller
     private readonly IEmailService _emailService;
     
     private readonly IAIApiClient _aIApiClient;
-    private readonly IAIResponseService _aiResponseService;
     private readonly IUserRegistrationService _userRegistrationService;
     private readonly IRegisterOrganisationService _registerOrganisationService;
     private readonly IUserVerificationService _userVerificationService;
+    private readonly IUserAIResponseService _userAIResponseService;
 
     public RegisterController(
         IEmailService emailService,
         ApplicationDbContext context,
         ILogger<RegisterController> logger,
         IAIApiClient aIApiClient,
-        IAIResponseService aiResponseService,
         IUserRegistrationService userRegistrationService,
         IRegisterOrganisationService registerOrganisationService,
-        IUserVerificationService userVerificationService
+        IUserVerificationService userVerificationService,
+        IUserAIResponseService userAIResponseService
     )
     {
         _emailService = emailService;
         _context = context;
         _logger = logger;
         _aIApiClient = aIApiClient;
-        _aiResponseService = aiResponseService;
         _userRegistrationService = userRegistrationService;
         _registerOrganisationService = registerOrganisationService;
         _userVerificationService = userVerificationService;
+        _userAIResponseService = userAIResponseService;
     }
 
     [HttpGet]

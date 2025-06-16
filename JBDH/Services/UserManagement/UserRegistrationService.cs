@@ -9,22 +9,21 @@ public class UserRegistrationService : IUserRegistrationService
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
     private readonly IAIApiClient _aIApiClient;
-    private readonly IAIResponseService _aiResponseService;
     private readonly IServiceProvider _serviceProvider;
-
+    private readonly IUserAIResponseService _userAIResponseService;
 
     public UserRegistrationService(
         ApplicationDbContext context,
         IEmailService emailService,
         IAIApiClient aIApiClient,
-        IAIResponseService aiResponseService,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IUserAIResponseService userAIResponseService)
     {
         _context = context;
         _emailService = emailService;
         _aIApiClient = aIApiClient;
-        _aiResponseService = aiResponseService;
         _serviceProvider = serviceProvider;
+        _userAIResponseService = userAIResponseService;
     }
 
     public async Task<ServiceResult> RegisterUserAsync(RegisterUserViewModel model, HttpContext httpContext, IUrlHelper urlHelper)
@@ -130,10 +129,16 @@ public class UserRegistrationService : IUserRegistrationService
             using (var scope = _serviceProvider.CreateScope())
             {
                 var aiService = scope.ServiceProvider.GetRequiredService<IAIApiClient>();
-                var aiResponseService = scope.ServiceProvider.GetRequiredService<IUserAIResponseService>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 try
                 {
+                    // Only proceed if the user has a CVPath
+                    if (string.IsNullOrEmpty(user.CVPath))
+                    {
+                        LoggingConfigService.ReturnInfo($"No CV found for user ID {user.Id}, skipping AI analysis.");
+                        return;
+                    }
+
                     AIHelperRequest request = new AIHelperRequest
                     {
                         User = user,
@@ -156,7 +161,7 @@ public class UserRegistrationService : IUserRegistrationService
                         UserId = userId,
                         User = userFromDb
                     };
-                    aiResponseService.SaveUserAIResponse(useraiResponse, userFromDb);
+                    _userAIResponseService.SaveUserAIResponse(useraiResponse, userFromDb);
                 }
                 catch (Exception ex)
                 {

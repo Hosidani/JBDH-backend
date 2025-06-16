@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Http; // For IHttpContextAccessor
 using Microsoft.EntityFrameworkCore; // For DbContext and DbContextOptionsBuilder
 using MySql.Data.MySqlClient; // For MySQL connection
 using MySql.EntityFrameworkCore.Extensions;
-using JBDH.Services.AICommunications.Interfaces; // For UseMySQL
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,8 +46,6 @@ builder.Services.AddScoped<IManageInputService, ManageInputService>();
 builder.Services.AddScoped<IAIRequestBuilderService, AIRequestBuilderService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
-builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
-builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
 builder.Services.AddScoped<IUserAIResponseService, UserAIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IRegisterOrganisationService, RegisterOrganisationService>();
@@ -59,10 +56,11 @@ builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
-builder.Services.AddScoped<IUserRoleService, UserRoleService>(); // Suggested code change
+builder.Services.AddScoped<IUserRoleService, UserRoleService>(); 
+builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddScoped<DataFlowService>(); 
 
 
-// Add session support
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Set the session timeout

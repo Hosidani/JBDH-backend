@@ -22,7 +22,11 @@ namespace JBDH.Services
             _environment = environment;
             _serviceProvider = serviceProvider;
         }
-
+        private string? GetAbsoluteCVPath(string cvFileName) // Helper method to get the absolute path of the CV file
+        {
+            if (string.IsNullOrEmpty(cvFileName)) return null;
+            return Path.Combine(_environment.WebRootPath, "uploads", cvFileName);
+        }
         public async Task<User?> GetCurrentUserAsync()
         {
             var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
@@ -64,8 +68,6 @@ namespace JBDH.Services
             }
         }
 
-        // Removed UpdateOrganisationAsync and UpdateOrganisationIdAsync as they are no longer relevant
-
         public async Task<bool> UpdateOpenForHiringAsync(bool openForHiring)
         {
             var user = await GetCurrentUserAsync();
@@ -84,12 +86,6 @@ namespace JBDH.Services
             user.DeveloperMode = developerMode; // Updated property casing
             await _context.SaveChangesAsync();
             return true;
-        }
-
-        private string? GetAbsoluteCVPath(string cvFileName) // Helper method to get the absolute path of the CV file
-        {
-            if (string.IsNullOrEmpty(cvFileName)) return null;
-            return Path.Combine(_environment.WebRootPath, "uploads", cvFileName);
         }
 
         public async Task<ServiceResult> UploadCVAsync(IFormFile cvFile) 

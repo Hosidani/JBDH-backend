@@ -7,7 +7,7 @@ public class UserAIResponse
 {
     public int Id { get; set; }
     public int UserId { get; set; }
-    public string ResponseText { get; set; } // Store the raw JSON
+    public string? ResponseText { get; set; } // Store the raw JSON
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [NotMapped]
