@@ -2,6 +2,8 @@ using JBDH.Controllers;
 using JBDH.Models;
 using JBDH.Services;
 using JBDH.Services.Interfaces;
+using JBDH.Services.AICommunications;
+using JBDH.Services.AICommunications.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
 using Microsoft.AspNetCore.Builder; // For WebApplication
 using Microsoft.Extensions.DependencyInjection; // For DI container setup
@@ -9,7 +11,7 @@ using Microsoft.Extensions.Hosting; // For environment setup
 using Microsoft.AspNetCore.Http; // For IHttpContextAccessor
 using Microsoft.EntityFrameworkCore; // For DbContext and DbContextOptionsBuilder
 using MySql.Data.MySqlClient; // For MySQL connection
-using MySql.EntityFrameworkCore.Extensions; // For UseMySQL
+using MySql.EntityFrameworkCore.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,14 +41,12 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddSingleton<AIConfig>();
-builder.Services.AddHttpClient<IAIService, AIService>();
+builder.Services.AddHttpClient<IAIApiClient, AIApiClient>();
 builder.Services.AddScoped<IManageInputService, ManageInputService>();
-builder.Services.AddScoped<IAIHelperSwitchService, AIHelperSwitchService>();
+builder.Services.AddScoped<IAIRequestBuilderService, AIRequestBuilderService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
-builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
-builder.Services.AddScoped<DataFlowService>(); // Register DataFlowService
-builder.Services.AddScoped<IAIResponseService, AIResponseService>();
+builder.Services.AddScoped<IUserAIResponseService, UserAIResponseService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IRegisterOrganisationService, RegisterOrganisationService>();
 builder.Services.AddScoped<IUserVerificationService, UserVerificationService>();
@@ -56,10 +56,11 @@ builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
-builder.Services.AddScoped<IUserRoleService, UserRoleService>(); // Suggested code change
+builder.Services.AddScoped<IUserRoleService, UserRoleService>(); 
+builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddScoped<DataFlowService>(); 
 
 
-// Add session support
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Set the session timeout

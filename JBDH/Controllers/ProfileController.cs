@@ -13,17 +13,17 @@ public class ProfileController : Controller
     private readonly ApplicationDbContext _context;
     private readonly IProfileService _profileService;
     private readonly IFriendService _friendService; // Add reference to FriendService
-    private readonly IAIService _aiService;
+    private readonly IAIApiClient _AIApiClient;
 
     private readonly IAIResponseService _airesponseService;
 
 
-    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIService aiService, IAIResponseService aiResponseService)
+    public ProfileController(ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIApiClient, IAIResponseService aiResponseService)
     {
         _context = context;
         _profileService = profileService;
         _friendService = friendService; // Initialize FriendService
-        _aiService = aiService;
+        _AIApiClient = aIApiClient;
         _airesponseService = aiResponseService;
     }
 

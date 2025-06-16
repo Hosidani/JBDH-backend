@@ -33,9 +33,9 @@
                         <td>@candidate.Username</td>
                         <td>@candidate.Location</td>
                         <td>
-                            @if (candidate.UserAIResponse != null && !string.IsNullOrEmpty(candidate.UserAIResponse.responseText) )
+                            @if (candidate.UserAIResponse != null && !string.IsNullOrEmpty(candidate.UserAIResponse.ResponseText) )
                             {
-                                var aiText = candidate.UserAIResponse.responseText;
+                                var aiText = candidate.UserAIResponse.ResponseText;
                                 if (!string.IsNullOrEmpty(keyword))
                                 {
                                     var idx = aiText.ToLower().IndexOf(keyword.ToLower());
@@ -62,7 +62,7 @@
                             }
                         </td>
                         <td>
-                            @(candidate.UserAIResponse != null ? candidate.UserAIResponse.createdAt.ToString("yyyy-MM-dd HH:mm") : "")
+                            @(candidate.UserAIResponse != null ? candidate.UserAIResponse.CreatedAt.ToString("yyyy-MM-dd HH:mm") : "")
                         </td>
                     </tr>
                 }
@@ -73,7 +73,7 @@
 
 @foreach (var candidate in Model)
 {
-    if (candidate.UserAIResponse != null && !string.IsNullOrEmpty(candidate.UserAIResponse.responseText))
+    if (candidate.UserAIResponse != null && !string.IsNullOrEmpty(candidate.UserAIResponse.ResponseText))
     {
         <div class="modal fade" id="aiModal_@candidate.UserId" tabindex="-1" aria-labelledby="aiModalLabel_@candidate.UserId" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -83,7 +83,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        @Html.Raw(Markdown.ToHtml(candidate.UserAIResponse?.responseText ?? ""))
+                        @Html.Raw(Markdown.ToHtml(candidate.UserAIResponse?.ResponseText ?? ""))
                     </div>
                 </div>
             </div>
