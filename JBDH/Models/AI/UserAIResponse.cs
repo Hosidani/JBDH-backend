@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using JBDH.Models;
 using Newtonsoft.Json;
-using JBDH.Models.AI;
+using JBDH.Models.User;
 
 public class UserAIResponse
 {

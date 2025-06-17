@@ -6,8 +6,8 @@
 
 @{
     ViewData["Title"] = "Home";
-    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
-    var username = isLoggedIn ? User.Identity?.Name : null;
+    var isLoggedIn = User.Identity.IsAuthenticated;
+    var username = isLoggedIn ? User.Identity.Name : null;
 }
 
 <h2>Posts</h2>
@@ -39,6 +39,12 @@
         <!-- Comment toggle button -->
         <button type="button" class="btn btn-primary btn-sm" onclick="toggleComments(@post.Id)">Comments</button>
 
+        <!-- Delete button, only visible to the owner -->
+        @if (User.Identity.IsAuthenticated && post.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value))
+        {
+            <a asp-action="Delete" asp-route-id="@post.Id" class="btn btn-danger btn-sm">Delete</a>
+        }
+
         <!-- Comments, replies, and comment form (hidden by default) -->
         <div id="commentsSection_@post.Id" style="display:none; margin-top:10px;">
             <!-- Add Comment Form -->
@@ -50,9 +56,9 @@
             <!-- Render ONLY the comments/replies, NOT the post itself -->
             @if (post.RelatedDataFlows != null && post.RelatedDataFlows.Any())
             {
-                foreach (var comment in post.RelatedDataFlows)
+                foreach (var reply in post.RelatedDataFlows)
                 {
-                    <partial name="_DataFlowThread" model="comment" />
+                    <partial name="_DataFlowThread" model="reply" />
                 }
             }
         </div>

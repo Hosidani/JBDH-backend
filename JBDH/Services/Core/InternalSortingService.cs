@@ -22,7 +22,7 @@ namespace JBDH.Services
             LoggingConfigService.ReturnInfo("Sorting by posted date...");
             string query = SqlQueries.SqlQuery(102) ?? "";
             string searchPattern = date == "default" ? "%" : $"%{date}%";
-            return ExecuteQuery(query, new object[] { searchPattern });
+            return ExecuteQuery(query, new MySqlParameter[] { new MySqlParameter("@date", searchPattern) });
         }
         
         
@@ -31,24 +31,35 @@ namespace JBDH.Services
             string query = SqlQueries.SqlQuery(106) ?? "";
             string descPattern = string.IsNullOrEmpty(description) ? "%" : $"%{description.ToLower()}%";
             string locPattern = string.IsNullOrEmpty(location) ? "%" : $"%{location.ToLower()}%";
-            return ExecuteQuery(query, new object[] { descPattern, locPattern });
+            return ExecuteQuery(query, new MySqlParameter[] {
+                new MySqlParameter("@desc", descPattern),
+                new MySqlParameter("@loc", locPattern)
+            });
         }
         
         public static List<Dictionary<string, object>> SearchByDescription(string description)
         {
-            string query = SqlQueries.SqlQuery(103) ?? "";
+            string queryDesc = SqlQueries.SqlQuery(103) ?? ""; // Should search description
+            string queryTitle = SqlQueries.SqlQuery(107) ?? ""; // Add this for title search
+
             string searchPattern = description == "default" ? "%" : $"%{description.ToLower()}%";
-            return ExecuteQuery(query, new object[] { searchPattern });
+
+            var resultsDesc = ExecuteQuery(queryDesc, new MySqlParameter[] { new MySqlParameter("@desc", searchPattern) });
+            var resultsTitle = ExecuteQuery(queryTitle, new MySqlParameter[] { new MySqlParameter("@desc", searchPattern) });
+
+            // Combine and deduplicate by JobId
+            var combined = HierarchyResults(resultsDesc, resultsTitle);
+            return combined;
         }
     
         public static List<Dictionary<string, object>> SearchByLocation(string location)
         {
             string query = SqlQueries.SqlQuery(104) ?? "";
             string searchPattern = location == "default" ? "%" : $"%{location.ToLower()}%";
-            return ExecuteQuery(query, new object[] { searchPattern });
+            return ExecuteQuery(query, new MySqlParameter[] { new MySqlParameter("@loc", searchPattern) });
         }
 
-        public static List<Dictionary<string, object>> ExecuteQuery(string query, object[] parameters)
+        public static List<Dictionary<string, object>> ExecuteQuery(string query, MySqlParameter[] parameters)
         {
             using var conn = new MySqlConnection(Settings.SetupConnection());
             conn.Open();
@@ -56,9 +67,9 @@ namespace JBDH.Services
             cmd.CommandText = query;
             if (parameters != null)
             {
-                for (int i = 0; i < parameters.Length; i++)
+                foreach (var param in parameters)
                 {
-                    cmd.Parameters.AddWithValue($"@param{i + 1}", parameters[i]);
+                    cmd.Parameters.Add(param);
                 }
             }
             var results = new List<Dictionary<string, object>>();
@@ -146,23 +157,27 @@ namespace JBDH.Services
         }
         public static List<Dictionary<string, object>> InternalSortingFunction(string description, string location)
         {
-            if (!string.IsNullOrEmpty(description) && !string.IsNullOrEmpty(location))
-            {
-                // Search by both
-                return SearchByDescriptionAndLocation(description, location);
-            }
-            else if (!string.IsNullOrEmpty(description))
-            {
-                return SearchByDescription(description);
-            }
-            else if (!string.IsNullOrEmpty(location))
-            {
-                return SearchByLocation(location);
-            }
-            else
-            {
-                return new List<Dictionary<string, object>>();
-            }
+            return SearchJobs(description, location);
+        }
+        public static List<Dictionary<string, object>> SearchJobs(string description, string location)
+        {
+            var whereClauses = new List<string>();
+            var parameters = new List<MySqlParameter>();
+
+            // Always add @desc
+            string descPattern = string.IsNullOrWhiteSpace(description) ? "%" : $"%{description.ToLower()}%";
+            whereClauses.Add("(LOWER(description) LIKE @desc OR LOWER(title) LIKE @desc)");
+            parameters.Add(new MySqlParameter("@desc", descPattern));
+
+            // Always add @loc
+            string locPattern = string.IsNullOrWhiteSpace(location) ? "%" : $"%{location.ToLower()}%";
+            whereClauses.Add("LOWER(location) LIKE @loc");
+            parameters.Add(new MySqlParameter("@loc", locPattern));
+
+            string where = "WHERE " + string.Join(" AND ", whereClauses);
+            string query = $"SELECT * FROM Jobs {where}";
+
+            return ExecuteQuery(query, parameters.ToArray());
         }
 
     }

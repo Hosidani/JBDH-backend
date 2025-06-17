@@ -1,16 +1,21 @@
-namespace JBDH.Models;
+using JBDH.Models.User;
 
-public class DataFlow
+namespace JBDH.Models.Dataflow
 {
-    public int Id { get; set; }
-    public string? ContentType { get; set; }
-    public string? Content { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public int? UserId { get; set; }
-    public int? ParentDataFlowId { get; set; }
-    public DataFlow? ParentDataFlow { get; set; }
-    // I-collection of related data flows
-    public ICollection<DataFlow>? RelatedDataFlows { get; set; }
-    public User? User { get; set; }
+
+    public class DataFlow
+    {
+        public int Id { get; set; }
+        public string? ContentType { get; set; }
+        public string? Content { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int? UserId { get; set; }
+        public int? ParentDataFlowId { get; set; }
+        public DataFlow? ParentDataFlow { get; set; }
+        // I-collection of related data flows
+        public ICollection<DataFlow>? RelatedDataFlows { get; set; }
+        public JBDH.Models.User.User? User { get; set; }
+
+    }
 
 }

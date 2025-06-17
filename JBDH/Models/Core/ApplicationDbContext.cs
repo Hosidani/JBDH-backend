@@ -1,3 +1,7 @@
+using JBDH.Models.User;
+using JBDH.Models.Job;
+using JBDH.Models.AI;
+using JBDH.Models.Dataflow;
 using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Models;
@@ -8,7 +12,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
-    public DbSet<User> Users { get; set; }
+    public DbSet<JBDH.Models.User.User> Users { get; set; }
 
     public DbSet<Recruiter> Recruiters { get; set; }
 
@@ -16,7 +20,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Organisation> Organisations { get; set; }
 
-    public DbSet<Job> Jobs { get; set; }
+    public DbSet<JBDH.Models.Job.Job> Jobs { get; set; }
 
     public DbSet<JobApplication> JobApplications { get; set; }
 
@@ -35,15 +39,15 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Job>().ToTable("Jobs");
-        modelBuilder.Entity<User>()
+        modelBuilder.Entity<JBDH.Models.Job.Job>().ToTable("Jobs");
+        modelBuilder.Entity<JBDH.Models.User.User>()
             .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
-            .HasValue<User>("User")
+            .HasValue<JBDH.Models.User.User>("User")
             .HasValue<Manager>("Manager")
             .HasValue<Recruiter>("Recruiter");
 
         // Configure the User table
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<JBDH.Models.User.User>(entity =>
         {
             entity.HasKey(u => u.Id); // Primary key
 
@@ -81,7 +85,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<EmailVerificationToken>(entity =>
         {
             entity.HasKey(e => e.Id); // Define primary key
-            entity.HasOne<User>()
+            entity.HasOne<JBDH.Models.User.User>()
                   .WithMany()
                   .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Cascade); // Foreign key to Users table
@@ -122,10 +126,8 @@ public class ApplicationDbContext : DbContext
             // Composite Primary Key
             entity.HasKey(ja => new { ja.UserId, ja.JobId });
 
-            // Ensure JobId matches VARCHAR(255)
-            entity.Property(ja => ja.JobId)
-                .HasMaxLength(255)
-                .IsRequired();
+            // Remove .HasMaxLength(255) for JobId
+            entity.Property(ja => ja.JobId).IsRequired();
 
             // Optional: explicitly set the table name
             entity.ToTable("JobApplications");
@@ -180,7 +182,7 @@ public class ApplicationDbContext : DbContext
                 .IsRequired();
 
             // Optional: Add a foreign key constraint if you want referential integrity
-            entity.HasOne<Job>()
+            entity.HasOne<JBDH.Models.Job.Job>()
                 .WithMany()
                 .HasForeignKey(jr => jr.JobId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -193,7 +195,7 @@ public class ApplicationDbContext : DbContext
             .WithMany(u => u.Roles)
             .HasForeignKey(ura => ura.UserId);
 
-        modelBuilder.Entity<Job>()
+        modelBuilder.Entity<JBDH.Models.Job.Job>()
             .HasOne(j => j.Recruiter)
             .WithMany()
             .HasForeignKey(j => j.RecruiterId)
@@ -237,7 +239,7 @@ public class ApplicationDbContext : DbContext
             .OnDelete(DeleteBehavior.SetNull);
 
         // Job owned by Manager or Recruiter
-        modelBuilder.Entity<Job>()
+        modelBuilder.Entity<JBDH.Models.Job.Job>()
             .HasOne(j => j.Owner)
             .WithMany()
             .HasForeignKey(j => j.OwnerId)
@@ -245,7 +247,7 @@ public class ApplicationDbContext : DbContext
             .OnDelete(DeleteBehavior.SetNull);
 
         // User owns Users (for both Manager and Recruiter)
-        modelBuilder.Entity<User>()
+        modelBuilder.Entity<JBDH.Models.User.User>()
             .HasMany(u => u.OwnedUsers)
             .WithOne(u => u.Owner)
             .HasForeignKey(u => u.OwnerId)

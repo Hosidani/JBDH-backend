@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using JBDH.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Controllers
 {
@@ -16,15 +17,13 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
         
         private readonly IAIApiClient _aIApiClient;
-        private readonly IAIResponseService _aiResponseService;
         private readonly IUserRoleService _userRoleService;
 
         public SettingsController(
             IUserPropertiesService userService,
             ApplicationDbContext context,
             IWebHostEnvironment environment,
-            AIApiClient aIApiClient,
-            IAIResponseService aiResponseService,
+            IAIApiClient aIApiClient,
             IUserRoleService userRoleService
         )
         {
@@ -32,7 +31,6 @@ namespace JBDH.Controllers
             _environment = environment;
             _aIApiClient = aIApiClient;
             _userPropertiesService = userService;
-            _aiResponseService = aiResponseService;
             _userRoleService = userRoleService;
         }
 
@@ -151,6 +149,29 @@ namespace JBDH.Controllers
                 TempData["ErrorMessage"] = "Failed to update roles.";
 
             return RedirectToAction("Settings");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser()
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                ViewData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Settings");
+            }
+
+            // Remove user from database
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            // Sign out the user
+            await HttpContext.SignOutAsync("CookieAuth");
+
+            // Optionally, show a goodbye page or redirect to home/login
+            TempData["SuccessMessage"] = "Your account has been deleted.";
+            return RedirectToAction("Index", "Home");
         }
     }
 }

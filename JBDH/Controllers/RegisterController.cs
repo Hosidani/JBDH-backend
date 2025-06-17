@@ -68,6 +68,7 @@ public class RegisterController : Controller
             ViewData["ErrorMessage"] = result.ErrorMessage;
             return View(model);
         }
+        ViewData["Email"] = model.Email;
         return View("CheckYourEmail");
     }
 
@@ -114,8 +115,7 @@ public class RegisterController : Controller
         return View("VerificationSuccess");
     }
 
-    // Resend Verification Email
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> ResendVerificationEmail(string email)
     {
         LoggingConfigService.ReturnInfo($"Resending verification email to {email}");
@@ -123,10 +123,16 @@ public class RegisterController : Controller
         if (!result.Success)
         {
             ViewData["ErrorMessage"] = result.ErrorMessage;
+            ViewData["Email"] = email;
             return View("CheckYourEmail");
         }
-        ViewData["Email"] = email;
-        return View("CheckYourEmail");
+        TempData["Email"] = email;
+        return RedirectToAction("CheckYourEmail");
     }
-    
+
+    public IActionResult CheckYourEmail()
+    {
+        ViewData["Email"] = TempData["Email"];
+        return View();
+    }
 }

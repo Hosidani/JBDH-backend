@@ -4,6 +4,6 @@ namespace JBDH.Services
 {
     public interface IAIRequestBuilderService
     {
-        Task<StringContent?> HelperSwitch(AIHelperRequest aiHelperRequest);
+        Task<StringContent?> AIRequestBuilder(AIRequest aiRequest);
     }
 }

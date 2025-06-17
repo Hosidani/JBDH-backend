@@ -1,3 +1,4 @@
+using JBDH.Models.User;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,7 +15,7 @@ namespace JBDH.Models
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public ICollection<User> Managers { get; set; } = new List<User>();
+        public ICollection<JBDH.Models.User.User> Managers { get; set; } = new List<JBDH.Models.User.User>();
 
         public ICollection<int> Users { get; set; } = new List<int>();
     }

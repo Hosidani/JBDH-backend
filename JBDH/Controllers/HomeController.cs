@@ -30,13 +30,41 @@ namespace JBDH.Controllers
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(userIdStr, out int userId))
+                {
+                    var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                    if (!userExists)
+                    {
+                        await HttpContext.SignOutAsync("CookieAuth");
+                        return RedirectToAction("Index");
+                    }
+                }
+            }
+
             var dataFlows = _dataFlowService.GetAllRecursive();
             var listDataFlowViewModel = new ListDataFlowViewModel { DataFlows = dataFlows };
             return View(listDataFlowViewModel);
         }
-
+        [Authorize]
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                LoggingConfigService.ReturnError("User is not authenticated.");
+                return RedirectToAction("Login", "Account");
+            }
+            LoggingConfigService.ReturnInfo($"Deleting data flow for user ID: {userId} IN CONTROLLER");
+            _dataFlowService.DeleteDataFlow(id); 
+            return RedirectToAction("Index");
+        }
+        
         // Skapa nytt inlägg (GET)
         public IActionResult CreateFlow()
         {

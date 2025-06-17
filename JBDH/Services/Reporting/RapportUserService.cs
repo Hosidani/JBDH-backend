@@ -1,4 +1,5 @@
-using JBDH.Models; 
+using JBDH.Models;
+using JBDH.Models.User;
 using Microsoft.EntityFrameworkCore;
 
 public class ReportResult

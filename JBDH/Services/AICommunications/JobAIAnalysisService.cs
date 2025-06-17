@@ -1,4 +1,5 @@
 using JBDH.Models;
+using JBDH.Models.AI;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services;
@@ -34,13 +35,13 @@ public class JobAIAnalysisService : IJobAIAnalysisService
 
         // 2. Build and send AI request
         var user = await _userPropertiesService.GetCurrentUserAsync();
-        var request = new AIHelperRequest
+        var request = new AIRequest
         {
             CommandId = 1,
             JobAdUrl = jobAdUrl,
             User = user
         };
-        var requestContent = await _aiRequestBuilderService.HelperSwitch(request);
+        var requestContent = await _aiRequestBuilderService.AIRequestBuilder(request);
 
         using (var httpClient = new HttpClient())
         {

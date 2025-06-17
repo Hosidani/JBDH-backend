@@ -24,6 +24,7 @@ namespace JBDH.Services
             { 11, "CREATE TABLE IF NOT EXISTS UserRoleAssignments (UserId INT NOT NULL,Role VARCHAR(50) NOT NULL,PRIMARY KEY (UserId, Role),FOREIGN KEY (UserId) REFERENCES Users(Id))" },
             { 12, "CREATE TABLE IF NOT EXISTS UserReports (Id INT PRIMARY KEY AUTO_INCREMENT, ReporterUserId INT NOT NULL, ReportedUserId INT NOT NULL, DataFlowId INT NULL, DataFlowText TEXT NULL, Reason TEXT NOT NULL, CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (ReportedUserId) REFERENCES Users(Id), FOREIGN KEY (ReporterUserId) REFERENCES Users(Id));" },
             { 13, "CREATE TABLE IF NOT EXISTS PasswordResets (Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT NOT NULL, Token VARCHAR(255) NOT NULL, ExpirationDate DATETIME NOT NULL, IsUsed BOOLEAN DEFAULT FALSE, FOREIGN KEY (UserId) REFERENCES Users(Id));" },
+            { 14, "CREATE TABLE IF NOT EXISTS UserAIResponses (Id INT PRIMARY KEY AUTO_INCREMENT, ResponseText TEXT, CreatedAt DATETIME, UserId INT, FOREIGN KEY (UserId) REFERENCES Users(Id));" },
 
             // 100-199: INSERTS/SELECTS/UPDATES
             { 100, "INSERT INTO raw_table (JobId, title, description, company, location, posted_date, webpage_url) VALUES (@job_id, @title, @description, @company, @location, @posted_date, @webpage_url);" },
@@ -33,6 +34,7 @@ namespace JBDH.Services
             { 104, "SELECT * FROM Jobs WHERE LOWER(location) LIKE @param1;" },
             { 105, "SELECT * FROM Jobs;" },
             { 106, "SELECT * FROM Jobs WHERE (LOWER(Title) LIKE @param1 OR LOWER(Description) LIKE @param1) AND LOWER(Location) LIKE @param2;" },
+            { 107, "SELECT * FROM Jobs WHERE LOWER(title) LIKE @param1" },
 
             // 200-299: DELETES
             { 200, "DELETE FROM EmailVerificationTokens;" },

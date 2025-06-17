@@ -1,6 +1,6 @@
 using System;
 
-namespace JBDH.Models
+namespace JBDH.Models.AI
 {
     public class JobAIResponse
     {
