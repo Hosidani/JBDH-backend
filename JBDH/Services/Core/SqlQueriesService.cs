@@ -34,6 +34,7 @@ namespace JBDH.Services
             { 104, "SELECT * FROM Jobs WHERE LOWER(location) LIKE @param1;" },
             { 105, "SELECT * FROM Jobs;" },
             { 106, "SELECT * FROM Jobs WHERE (LOWER(Title) LIKE @param1 OR LOWER(Description) LIKE @param1) AND LOWER(Location) LIKE @param2;" },
+            { 107, "SELECT * FROM Jobs WHERE LOWER(title) LIKE @param1" },
 
             // 200-299: DELETES
             { 200, "DELETE FROM EmailVerificationTokens;" },

@@ -1,0 +1,22 @@
+@model JobAdAIResponseViewModel
+
+@if (Model != null)
+{
+    <div class="ai-response">
+        <strong>Job Ad AI Analysis:</strong>
+        <dl>
+            <dt>Job Title</dt>
+            <dd>@Model.JobTitle</dd>
+            <dt>Hard Requirements</dt>
+            <dd>
+                <ul>
+                    @foreach (var req in Model.HardRequirements ?? new List<string>())
+                    {
+                        <li>@req</li>
+                    }
+                </ul>
+            </dd>
+            <!-- Add other fields as needed -->
+        </dl>
+    </div>
+}

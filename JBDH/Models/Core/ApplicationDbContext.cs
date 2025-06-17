@@ -126,10 +126,8 @@ public class ApplicationDbContext : DbContext
             // Composite Primary Key
             entity.HasKey(ja => new { ja.UserId, ja.JobId });
 
-            // Ensure JobId matches VARCHAR(255)
-            entity.Property(ja => ja.JobId)
-                .HasMaxLength(255)
-                .IsRequired();
+            // Remove .HasMaxLength(255) for JobId
+            entity.Property(ja => ja.JobId).IsRequired();
 
             // Optional: explicitly set the table name
             entity.ToTable("JobApplications");

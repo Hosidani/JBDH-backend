@@ -4,6 +4,8 @@ using JBDH.Services;
 using JBDH.Services.Interfaces;
 using JBDH.Services.AICommunications;
 using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.Workflows;
+using JBDH.Services.Workflows.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
 using Microsoft.AspNetCore.Builder; // For WebApplication
 using Microsoft.Extensions.DependencyInjection; // For DI container setup
@@ -15,6 +17,29 @@ using MySql.EntityFrameworkCore.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Get connection string ONCE at the top
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
+
+// Create the database if it doesn't exist (development only)
+if (builder.Environment.IsDevelopment())
+{
+    var builderWithoutDb = new MySqlConnectionStringBuilder(connectionString)
+    {
+        Database = "" // Remove the database part
+    };
+    using (var connection = new MySqlConnection(builderWithoutDb.ConnectionString))
+    {
+        connection.Open();
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "CREATE DATABASE IF NOT EXISTS testing_purposes;";
+            cmd.ExecuteNonQuery();
+        }
+    }
+}
 
 // Run PlatsbankenApi.Main asynchronously before starting the web application
 await Task.Run(async () =>
@@ -60,6 +85,7 @@ builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<DataFlowService>(); 
 builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
+builder.Services.AddScoped<ISearchWorkflowService, SearchWorkflowService>();
 
 
 builder.Services.AddSession(options =>
@@ -94,10 +120,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddDistributedMemoryCache();
 
 // Register application services
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrWhiteSpace(connectionString))
-    throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString)
            .EnableSensitiveDataLogging()
@@ -122,6 +144,16 @@ builder.Services.AddHostedService<UserBanBackgroundService>(); // Register the b
 // Build the application
 var app = builder.Build();
 
+// Ensure database is created on startup (development only)
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.EnsureCreated();
+    }
+}
+
 // Access IHostApplicationLifetime to hook into shutdown events
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 // Register a function to run when the application is stopping
@@ -145,12 +177,16 @@ lifetime.ApplicationStopping.Register(() =>
     }
     try
     {
-        // Create a new scope to resolve scoped services
         using (var scope = app.Services.CreateScope())
         {
-            // Resolve ApplicationDbContext from the scope
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
+            // Drop the database (development only)
+            if (app.Environment.IsDevelopment())
+            {
+                dbContext.Database.EnsureDeleted();
+            }
+
             // Call your database flushing service
             FlushDatabaseService.FlushDatabase();
             DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
