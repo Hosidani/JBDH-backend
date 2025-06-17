@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using JBDH.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 
 namespace JBDH.Controllers
 {
@@ -148,6 +149,29 @@ namespace JBDH.Controllers
                 TempData["ErrorMessage"] = "Failed to update roles.";
 
             return RedirectToAction("Settings");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser()
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                ViewData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Settings");
+            }
+
+            // Remove user from database
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            // Sign out the user
+            await HttpContext.SignOutAsync("CookieAuth");
+
+            // Optionally, show a goodbye page or redirect to home/login
+            TempData["SuccessMessage"] = "Your account has been deleted.";
+            return RedirectToAction("Index", "Home");
         }
     }
 }

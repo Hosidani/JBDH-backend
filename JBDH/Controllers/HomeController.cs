@@ -41,7 +41,7 @@ namespace JBDH.Controllers
                     if (!userExists)
                     {
                         await HttpContext.SignOutAsync("CookieAuth");
-                        return RedirectToAction("Login", "Account");
+                        return RedirectToAction("Index");
                     }
                 }
             }
