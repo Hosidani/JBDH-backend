@@ -1,17 +1,60 @@
 @using Markdig
-
+@using JBDH.Models.ViewModels
 @model List<JobSearchResultViewModel>
+
 @{
     ViewData["Title"] = "Search Results";
+    var aiModel = ViewData["AIAnalysisModel"] as CVJobComparisonAIResponseViewModel;
 }
 
-@if (ViewData["AIAnalysisResult"] != null)
+@if (aiModel != null)
 {
-    var html = Markdig.Markdown.ToHtml(ViewData["AIAnalysisResult"]?.ToString() ?? "");
     <div class="alert alert-info mb-4">
         <strong>AI Analysis of Your CV Against the Top Job Result:</strong>
-        <br />
-        @Html.Raw(html) <!-- Use the Markdig HTML here -->
+        <dl>
+            <dt>Fit Summary</dt>
+            <dd>@aiModel.FitSummary</dd>
+
+            <dt>Missing Requirements</dt>
+            <dd>
+                <ul>
+                    @foreach (var req in aiModel.MissingRequirements ?? new List<string>())
+                    {
+                        <li>@req</li>
+                    }
+                </ul>
+            </dd>
+
+            <dt>Matching Skills</dt>
+            <dd>
+                <ul>
+                    @foreach (var skill in aiModel.MatchingSkills ?? new List<string>())
+                    {
+                        <li>@skill</li>
+                    }
+                </ul>
+            </dd>
+
+            <dt>Relevant Experiences</dt>
+            <dd>
+                <ul>
+                    @foreach (var exp in aiModel.RelevantExperiences ?? new List<string>())
+                    {
+                        <li>@exp</li>
+                    }
+                </ul>
+            </dd>
+
+            <dt>Education and Certifications</dt>
+            <dd>
+                <ul>
+                    @foreach (var edu in aiModel.EducationAndCertifications ?? new List<string>())
+                    {
+                        <li>@edu</li>
+                    }
+                </ul>
+            </dd>
+        </dl>
     </div>
 }
 
@@ -64,12 +107,7 @@
                 <tr id="ai-row-@jobId" class="ai-row" style="display:none;">
                     <td colspan="7">
                         <div id="ai-result-@jobId" class="ai-response">
-                            @if (item.LatestAIResponse != null)
-                            {
-                                var html = Markdig.Markdown.ToHtml(item.LatestAIResponse.ResponseText);
-                                <strong>AI Analysis:</strong>
-                                @Html.Raw(html)
-                            }
+                            <!-- The partial will be loaded here via AJAX -->
                         </div>
                     </td>
                 </tr>
@@ -97,8 +135,6 @@
         </table>
     }
 </div>
-
-
 
 @section Scripts {
     <script>

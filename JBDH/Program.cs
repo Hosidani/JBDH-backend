@@ -4,6 +4,8 @@ using JBDH.Services;
 using JBDH.Services.Interfaces;
 using JBDH.Services.AICommunications;
 using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.Workflows;
+using JBDH.Services.Workflows.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
 using Microsoft.AspNetCore.Builder; // For WebApplication
 using Microsoft.Extensions.DependencyInjection; // For DI container setup
@@ -83,6 +85,7 @@ builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<DataFlowService>(); 
 builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
+builder.Services.AddScoped<ISearchWorkflowService, SearchWorkflowService>();
 
 
 builder.Services.AddSession(options =>

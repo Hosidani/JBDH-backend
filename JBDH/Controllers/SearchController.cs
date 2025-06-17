@@ -4,9 +4,13 @@ using JBDH.Models;
 using JBDH.Services;
 using JBDH.Services.Interfaces;
 using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.Workflows.Interfaces;
 using NLog.Config;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Newtonsoft.Json;
+using JBDH.Models.ViewModels;
+using System.Linq;
 
 namespace JBDH.Controllers
 {
@@ -14,13 +18,15 @@ namespace JBDH.Controllers
     {
         private readonly IUserPropertiesService _userPropertiesService;
         private readonly IAIRequestBuilderService _aIRequestBuilderService;
-        private readonly ISearchCandidateService _searchCandidateService; // Added service for candidate search
+        private readonly ISearchCandidateService _searchCandidateService;
         private readonly IAIApiClient _aIService;
         private readonly ISearchJobsService _searchJobsService;
         private readonly IUserAIResponseService _userAIResponseService;
         private readonly IJobAIResponseService _jobAIResponseService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        private readonly ISearchWorkflowService _searchWorkflowService;
         private readonly ApplicationDbContext _context;
+
         public SearchController(
             ApplicationDbContext context,
             IWebHostEnvironment environment,
@@ -31,7 +37,8 @@ namespace JBDH.Controllers
             ISearchJobsService searchJobsService,
             IJobAIResponseService jobAIResponseService,
             IJobAIAnalysisService jobAIAnalysisService,
-            IUserAIResponseService userAIResponseService)
+            IUserAIResponseService userAIResponseService,
+            ISearchWorkflowService searchWorkflowService)
         {
             _userPropertiesService = userPropertiesService;
             _aIRequestBuilderService = aIRequestBuilderService;
@@ -41,13 +48,13 @@ namespace JBDH.Controllers
             _jobAIResponseService = jobAIResponseService;
             _jobAIAnalysisService = jobAIAnalysisService;
             _userAIResponseService = userAIResponseService;
+            _searchWorkflowService = searchWorkflowService;
             _context = context;
         }
 
         [HttpGet]
         public async Task<IActionResult> SearchForJobs(string description, string location)
         {
-            // Only show error if both are empty
             if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location))
             {
                 LoggingConfigService.ReturnError("Both description and location are empty.");
@@ -59,22 +66,12 @@ namespace JBDH.Controllers
                 });
             }
 
-            // Get prioritized jobs as view models
-            var results = await _searchJobsService.SearchJobsAsync(description, location);
-
-            // Attach latest AI responses using a service
-            await _jobAIResponseService.AttachLatestAIResponsesAsync(results);
-
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = 0;
-            if (!string.IsNullOrEmpty(userIdStr))
-                int.TryParse(userIdStr, out userId);
+            int? userId = null;
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int parsedId))
+                userId = parsedId;
 
-            foreach (var item in results)
-            {
-                item.HasApplied = userId > 0 &&
-                    await _context.JobApplications.AnyAsync(a => a.JobId.ToString() == item.Job.JobId && a.UserId == userId);
-            }
+            var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
 
             return View("SearchResultsJobs", results);
         }
@@ -107,8 +104,26 @@ namespace JBDH.Controllers
                 });
             }
 
-            LoggingConfigService.ReturnInfo($"AI analysis result: {aiResultString}");
-            return PartialView("_JobAIResultPartial", aiResultString);
+            // --- Extract JSON from code block if present ---
+            if (aiResultString.Contains("```"))
+            {
+                var start = aiResultString.IndexOf("{");
+                var end = aiResultString.LastIndexOf("}");
+                if (start >= 0 && end > start)
+                    aiResultString = aiResultString.Substring(start, end - start + 1);
+            }
+
+            JobAdAIResponseViewModel jobAdModel = null;
+            try
+            {
+                jobAdModel = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(aiResultString);
+            }
+            catch
+            {
+                LoggingConfigService.ReturnError("Failed to parse job ad AI analysis result to ViewModel.");
+            }
+
+            return PartialView("_JobAdAIResultPartial", jobAdModel);
         }
 
         [HttpGet]
@@ -128,36 +143,62 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo("SearchForJobsAndAnalyzeCVAgainstJob called.");
             var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null || string.IsNullOrEmpty(description) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(user.CVPath))
+
+            if ((string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location)) || user == null || string.IsNullOrEmpty(user.CVPath))
             {
-                LoggingConfigService.ReturnError("Description, location, or CV path is empty.");
+                LoggingConfigService.ReturnError("Please provide at least a description or a location, and make sure your CV is uploaded.");
                 return View("Error", new ErrorViewModel
                 {
                     Title = "Missing Input",
-                    Message = "Description, location, and CV path cannot be empty.",
+                    Message = "Please provide at least a description or a location, and make sure your CV is uploaded.",
                     ReturnUrl = Url.Action("Index", "Home")
                 });
             }
 
-            // Get prioritized jobs as view models
-            var results = await _searchJobsService.SearchJobsAsync(description, location);
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? userId = null;
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int parsedId))
+                userId = parsedId;
 
-            // Analyze the first job against the CV using AIHelperSwitchService
+            // Use workflow service for search and meta
+            var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
+
             if (results.Any() && results.First().Job != null)
             {
                 var aiRequest = new AIRequest
                 {
                     CommandId = 2,
                     JobAdUrl = results.First().Job.WebpageUrl,
-                    CVPath = user.CVPath ?? "",
+                    CVPath = user.CVPath,
                     User = user
                 };
                 string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
-                ViewData["AIAnalysisResult"] = aiAnalysisResult;
+
+                // --- Extract JSON from code block if present ---
+                if (aiAnalysisResult.Contains("```"))
+                {
+                    var start = aiAnalysisResult.IndexOf("{");
+                    var end = aiAnalysisResult.LastIndexOf("}");
+                    if (start >= 0 && end > start)
+                        aiAnalysisResult = aiAnalysisResult.Substring(start, end - start + 1);
+                }
+
+                // Parse JSON to ViewModel
+                CVJobComparisonAIResponseViewModel aiModel = null;
+                try
+                {
+                    aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
+                }
+                catch
+                {
+                    LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
+                }
+
+                ViewData["AIAnalysisModel"] = aiModel;
             }
             else
             {
-                ViewData["AIAnalysisResult"] = "No jobs found for the given criteria.";
+                ViewData["AIAnalysisModel"] = null;
             }
 
             return View("SearchResultsJobs", results);
