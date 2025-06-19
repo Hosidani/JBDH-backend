@@ -3,3 +3,5 @@ obj/
 *.dll
 *.cache
 *.json
+!JBDH/appsettings.json
+!JBDH/appsettings.Development.json
