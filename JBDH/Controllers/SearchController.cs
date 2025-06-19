@@ -113,7 +113,7 @@ namespace JBDH.Controllers
                     aiResultString = aiResultString.Substring(start, end - start + 1);
             }
 
-            JobAdAIResponseViewModel jobAdModel = null;
+            JobAdAIResponseViewModel? jobAdModel = null;
             try
             {
                 jobAdModel = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(aiResultString);
@@ -184,7 +184,7 @@ namespace JBDH.Controllers
                 }
 
                 // Parse JSON to ViewModel
-                CVJobComparisonAIResponseViewModel aiModel = null;
+                CVJobComparisonAIResponseViewModel? aiModel = null;
                 try
                 {
                     aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
