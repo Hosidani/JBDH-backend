@@ -1,16 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using JBDH.Models;
-using JBDH.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Configuration;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Notifications;
 using JBDH.Services.UserManagement;
 using JBDH.Services.Organisation;
-using JBDH.Services.Configuration;
-namespace JBDH.Controllers;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+
+namespace JBDH.Controllers
+{
 
 public class RegisterController : Controller
 {
@@ -138,4 +141,6 @@ public class RegisterController : Controller
         ViewData["Email"] = TempData["Email"];
         return View();
     }
+}
+
 }

@@ -1,8 +1,9 @@
-using JBDH.Models;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
+using JBDH.Models.AI;
 using Newtonsoft.Json;
+
 
 namespace JBDH.Services.AICommunications
 {

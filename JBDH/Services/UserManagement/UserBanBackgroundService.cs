@@ -7,6 +7,7 @@ using System.Linq;
 using JBDH.Models;
 using JBDH.Services;
 using JBDH.Services.Configuration;
+using JBDH.Models.Core;
 
 namespace JBDH.Services.UserManagement
 {

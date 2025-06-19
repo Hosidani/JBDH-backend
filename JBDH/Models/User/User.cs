@@ -2,6 +2,8 @@ using JBDH.Models.Job;
 using JBDH.Models.Dataflow;
 using FriendshipModel = JBDH.Models.Friendship.Friendship;
 using System.ComponentModel.DataAnnotations;
+using JBDH.Models.AI;
+using Organisation = JBDH.Models.Organisation;
 
 namespace JBDH.Models.User
 {
@@ -32,7 +34,7 @@ namespace JBDH.Models.User
         public ICollection<DataFlow> DataFlows { get; set; } = new List<DataFlow>();
         public ICollection<UserAIResponse> AIResponses { get; set; } = new List<UserAIResponse>();
         public ICollection<UserRoleAssignment> Roles { get; set; } = new List<UserRoleAssignment>();
-        public ICollection<Organisation> ManagedOrganisations { get; set; } = new List<Organisation>();
+        public ICollection<JBDH.Models.Organisation.Organisation> ManagedOrganisations { get; set; } = new List<JBDH.Models.Organisation.Organisation>();
         public ICollection<User> OwnedUsers { get; set; } = new List<User>();
         public User? Owner { get; set; }
         public int? OwnerId { get; set; }

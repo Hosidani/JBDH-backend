@@ -1,9 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using JBDH.Models;
-using Microsoft.EntityFrameworkCore;
-using NLog.Fluent;
+using JBDH.Models.Core;
+using JBDH.Models.Services;
+using JBDH.Models.Job;
 using JBDH.Services.Configuration;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace JBDH.Services.JobManagement
 {

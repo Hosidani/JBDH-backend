@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace JBDH.Models
+namespace JBDH.Models.Notifications
 {
     public class EmailVerificationToken
     {

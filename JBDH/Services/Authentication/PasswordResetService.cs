@@ -2,6 +2,8 @@ using JBDH.Models;
 using JBDH.Services;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services.Notifications;
+using JBDH.Models.Core;
+using JBDH.Models.Authentication;
 
 namespace JBDH.Services.Authentication
 {

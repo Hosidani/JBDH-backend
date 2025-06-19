@@ -1,8 +1,10 @@
-using JBDH.Models;
-using JBDH.Models.Job;
 using System.Collections.Generic;
 using System.Linq;
+using JBDH.Models;
+using JBDH.Models.Job;
+using JBDH.Models.ViewModels;
 using JBDH.Services.Configuration;
+
 
 namespace JBDH.Services.Core
 {

@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using MySql.Data.MySqlClient;
-using JBDH.Models; // Assuming this is the namespace for your models
-using NLog.Fluent; // Assuming this is the namespace for your models
+using JBDH.Models.Core;
 using JBDH.Services.Configuration;
-
+using MySql.Data.MySqlClient;
+using NLog.Fluent;
 namespace JBDH.Services.Core
 {    
 

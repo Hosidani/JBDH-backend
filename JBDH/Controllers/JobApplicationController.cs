@@ -1,6 +1,7 @@
-using JBDH.Models;
 using JBDH.Services.JobManagement;
 using JBDH.Services.Configuration;
+using JBDH.Models.Core;
+using JBDH.Models.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

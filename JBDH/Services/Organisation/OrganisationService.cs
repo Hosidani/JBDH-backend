@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using JBDH.Models;
+using JBDH.Models.Core;
 using JBDH.Models.User;
-using OrganisationModel = JBDH.Models.Organisation;
+using JBDH.Models.Services;
+using OrganisationModel = JBDH.Models.Organisation.Organisation;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.Organisation
 {

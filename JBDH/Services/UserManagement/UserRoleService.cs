@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JBDH.Models;
 using JBDH.Models.User;
+using JBDH.Models.Core;
+using JBDH.Models.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.UserManagement

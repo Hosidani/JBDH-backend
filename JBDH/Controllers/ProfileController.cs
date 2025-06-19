@@ -1,120 +1,122 @@
-using JBDH.Models;
-using Microsoft.AspNetCore.Mvc;
-using JBDH.Services;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using JBDH.Services.UserManagement;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Friendship;
 using JBDH.Models.ViewModels;
 using JBDH.Models.User;
-using JBDH.Services.AICommunications;
-using JBDH.Services.UserManagement;
-using JBDH.Services.Friendship;
+using JBDH.Models.Core;
+using JBDH.Services.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
-namespace JBDH.Controllers;
-
-[Authorize]
-public class ProfileController : Controller
+namespace JBDH.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IProfileService _profileService;
-    private readonly IFriendService _friendService; // Add reference to FriendService
-    private readonly IAIApiClient _AIApiClient;
 
-    private readonly IUserAIResponseService _userAIResponseService; // Add reference to IUserAIResponseService
-
-
-    public ProfileController(IUserAIResponseService userAIResponseService, ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIApiClient)
+    [Authorize]
+    public class ProfileController : Controller
     {
-        _context = context;
-        _profileService = profileService;
-        _friendService = friendService; // Initialize FriendService
-        _AIApiClient = aIApiClient;
-        _userAIResponseService = userAIResponseService; // Initialize IUserAIResponseService
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly IProfileService _profileService;
+        private readonly IFriendService _friendService; // Add reference to FriendService
+        private readonly IAIApiClient _AIApiClient;
 
-    // GET: Profile
-    [HttpGet]
-    public async Task<IActionResult> Profile(int userId)
-    {
-        var currentUserId = _profileService.GetCurrentUserId(User);
-        if (currentUserId == null)
-            return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+        private readonly IUserAIResponseService _userAIResponseService; // Add reference to IUserAIResponseService
 
-        if (currentUserId == userId)
-            return RedirectToAction("MyProfile");
 
-        try
+        public ProfileController(IUserAIResponseService userAIResponseService, ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIApiClient)
         {
-            var viewModel = await _profileService.GetProfileViewModelAsync(currentUserId.Value, userId);
-            return View(viewModel);
+            _context = context;
+            _profileService = profileService;
+            _friendService = friendService; // Initialize FriendService
+            _AIApiClient = aIApiClient;
+            _userAIResponseService = userAIResponseService; // Initialize IUserAIResponseService
         }
-        catch (Exception ex)
+
+        // GET: Profile
+        [HttpGet]
+        public async Task<IActionResult> Profile(int userId)
         {
-            return View("ErrorPage", new ErrorViewModel { Message = ex.Message });
-        }
-    }
+            var currentUserId = _profileService.GetCurrentUserId(User);
+            if (currentUserId == null)
+                return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
 
-    [HttpGet]
-    public async Task<IActionResult> MyProfile()
-    {
-        var currentUserId = _profileService.GetCurrentUserId(User);
-        if (currentUserId == null)
-            return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+            if (currentUserId == userId)
+                return RedirectToAction("MyProfile");
 
-        var user = await _context.Users.FindAsync(currentUserId.Value);
-        if (user == null)
-            return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
-
-        var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
-
-        CVAnalysisResult? analysisResult = null;
-        if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
-        {
             try
             {
-                analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
+                var viewModel = await _profileService.GetProfileViewModelAsync(currentUserId.Value, userId);
+                return View(viewModel);
             }
-            catch { /* handle error */ }
+            catch (Exception ex)
+            {
+                return View("ErrorPage", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
-        var model = new ProfileViewModel
+        [HttpGet]
+        public async Task<IActionResult> MyProfile()
         {
-            User = user,
-            CVAnalysisResult = analysisResult
-        };
+            var currentUserId = _profileService.GetCurrentUserId(User);
+            if (currentUserId == null)
+                return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
 
-        return View("MyProfile", model);
-    }
+            var user = await _context.Users.FindAsync(currentUserId.Value);
+            if (user == null)
+                return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
 
-    // Method to send a friend request
-    [HttpPost]
-    public async Task<IActionResult> SendFriendRequest(int addresseeId)
-    {
-        var currentUserName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
 
-        if (currentUserName == null)
-        {
-            return RedirectToAction("Login", "Login");
+            CVAnalysisResult? analysisResult = null;
+            if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
+            {
+                try
+                {
+                    analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
+                }
+                catch { /* handle error */ }
+            }
+
+            var model = new ProfileViewModel
+            {
+                User = user,
+                CVAnalysisResult = analysisResult
+            };
+
+            return View("MyProfile", model);
         }
 
-        // Parse the addresseeId
-        var currentUserId = int.Parse(currentUserName);
-
-        if (!int.TryParse(addresseeId.ToString(), out int addresseeIdInt))
+        // Method to send a friend request
+        [HttpPost]
+        public async Task<IActionResult> SendFriendRequest(int addresseeId)
         {
-            return View("ErrorPage", new ErrorViewModel { Message = "Invalid addressee ID." });
-        }
+            var currentUserName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var result = await _friendService.SendFriendRequestAsync(currentUserId, addresseeIdInt);
+            if (currentUserName == null)
+            {
+                return RedirectToAction("Login", "Login");
+            }
 
-        if (result.Success)
-        {
-            return RedirectToAction("Profile", new { userId = addresseeId });
-        }
-        else
-        {
-            return View("ErrorPage", result.ErrorMessage ?? "Could not send friend request.");
+            // Parse the addresseeId
+            var currentUserId = int.Parse(currentUserName);
+
+            if (!int.TryParse(addresseeId.ToString(), out int addresseeIdInt))
+            {
+                return View("ErrorPage", new ErrorViewModel { Message = "Invalid addressee ID." });
+            }
+
+            var result = await _friendService.SendFriendRequestAsync(currentUserId, addresseeIdInt);
+
+            if (result.Success)
+            {
+                return RedirectToAction("Profile", new { userId = addresseeId });
+            }
+            else
+            {
+                return View("ErrorPage", result.ErrorMessage ?? "Could not send friend request.");
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-using JBDH.Models;
+using JBDH.Models.Core;
 using JBDH.Models.User;
 using Microsoft.EntityFrameworkCore;
 

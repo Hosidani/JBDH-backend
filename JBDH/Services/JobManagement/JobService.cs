@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using JBDH.Models.ViewModels;
-using JBDH.Models;
+using JBDH.Models.Core;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services.JobManagement;
 

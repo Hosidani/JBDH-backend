@@ -1,8 +1,11 @@
-public class LoginResult
+namespace JBDH.Models.Authentication
 {
-    public bool IsSuccess { get; set; }
-    public bool IsBanned { get; set; }
-    public bool UserExists { get; set; }
-    public bool PasswordCorrect { get; set; }
-    public string ErrorMessage { get; set; } = string.Empty;
+    public class LoginResult
+    {
+        public bool IsSuccess { get; set; }
+        public bool IsBanned { get; set; }
+        public bool UserExists { get; set; }
+        public bool PasswordCorrect { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
+    }
 }

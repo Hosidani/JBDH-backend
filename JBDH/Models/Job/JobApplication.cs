@@ -1,4 +1,4 @@
-namespace JBDH.Models
+namespace JBDH.Models.Job
 {
     public class JobApplication
     {

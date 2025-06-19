@@ -1,109 +1,112 @@
-using Microsoft.AspNetCore.Mvc;
-using JBDH.Models;
-using JBDH.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
 using JBDH.Services.Authentication;
 using JBDH.Services.Configuration;
-namespace JBDH.Controllers;
+using JBDH.Services.Authentication;
+using JBDH.Services.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 
-public class LoginController : Controller
+namespace JBDH.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ILoginService _loginService;
-    private readonly IPasswordResetService _passwordResetService;
-    public LoginController(ApplicationDbContext context, ILoginService loginService, IPasswordResetService passwordResetService)
-    {
-        _context = context;
-        _loginService = loginService;
-        _passwordResetService = passwordResetService;
-    }
-    [HttpGet]
-    public async Task<IActionResult> Logout()
-    {
-        await HttpContext.SignOutAsync("CookieAuth");  // Sign out of authentication
-        HttpContext.Session.Clear();                   // Clear the session
-        ViewData["Username"] = null;                   // Clear any ViewData
-        return RedirectToAction("Index", "Home");      // Redirect to home page
-    }
 
-    [HttpPost]
-    public async Task<IActionResult> Login(string username, string password)
+    public class LoginController : Controller
     {
-        LoggingConfigService.ReturnInfo($"Login attempt: Username={username}");
-        // Validate the user using the service
-        var result = await _loginService.ValidateUserAsync(username, password);
-        if (result.IsSuccess)
+        private readonly ApplicationDbContext _context;
+        private readonly ILoginService _loginService;
+        private readonly IPasswordResetService _passwordResetService;
+        public LoginController(ApplicationDbContext context, ILoginService loginService, IPasswordResetService passwordResetService)
         {
-            // If valid, sign in the user
-            await _loginService.SignInUserAsync(username);
-            LoggingConfigService.ReturnInfo($"User {username} logged in successfully.");
-            return RedirectToAction("Index", "Home");
+            _context = context;
+            _loginService = loginService;
+            _passwordResetService = passwordResetService;
         }
-        // If login fails
-        ViewData["ErrorMessage"] = result.ErrorMessage ?? "Unknown error.";
-        LoggingConfigService.ReturnError(result.ErrorMessage ?? "Unknown error.");
-        return View();
-    }
-
-    [HttpGet]
-    public IActionResult Login()
-    {
-        // If the user is already authenticated, redirect them to the home page (or any page you choose)
-        if (User.Identity?.IsAuthenticated == true)
+        [HttpGet]
+        public async Task<IActionResult> Logout()
         {
-            return RedirectToAction("Index", "Home");
+            await HttpContext.SignOutAsync("CookieAuth");  // Sign out of authentication
+            HttpContext.Session.Clear();                   // Clear the session
+            ViewData["Username"] = null;                   // Clear any ViewData
+            return RedirectToAction("Index", "Home");      // Redirect to home page
         }
 
-        return View(); // Render the login page
-    }
-
-    [HttpGet]
-    public IActionResult ForgetPassword()
-    {
-        return View(); // Show the email input form
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> ForgetPassword(string email)
-    {
-        await _passwordResetService.RequestPasswordResetAsync(email);
-        ViewData["Message"] = "If your email is in our system, a reset link has been sent.";
-        return View();
-    }
-
-    [HttpGet]
-    public IActionResult ResetPassword(string token)
-    {
-        if (string.IsNullOrEmpty(token))
+        [HttpPost]
+        public async Task<IActionResult> Login(string username, string password)
         {
-            return BadRequest("Invalid reset token.");
+            LoggingConfigService.ReturnInfo($"Login attempt: Username={username}");
+            // Validate the user using the service
+            var result = await _loginService.ValidateUserAsync(username, password);
+            if (result.IsSuccess)
+            {
+                // If valid, sign in the user
+                await _loginService.SignInUserAsync(username);
+                LoggingConfigService.ReturnInfo($"User {username} logged in successfully.");
+                return RedirectToAction("Index", "Home");
+            }
+            // If login fails
+            ViewData["ErrorMessage"] = result.ErrorMessage ?? "Unknown error.";
+            LoggingConfigService.ReturnError(result.ErrorMessage ?? "Unknown error.");
+            return View();
         }
 
-        var model = new ResetPasswordViewModel { Token = token };
-        return View(model); // Show form with hidden token field
-    }
-    
-    [HttpPost]
-    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-    {
-        if (!ModelState.IsValid || model.NewPassword != model.ConfirmPassword)
+        [HttpGet]
+        public IActionResult Login()
         {
-            ViewData["ErrorMessage"] = "Passwords do not match.";
-            return View(model);
+            // If the user is already authenticated, redirect them to the home page (or any page you choose)
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(); // Render the login page
         }
 
-        var success = await _passwordResetService.ResetPasswordAsync(model.Token, model.NewPassword);
-        if (!success)
+        [HttpGet]
+        public IActionResult ForgetPassword()
         {
-            ViewData["ErrorMessage"] = "Invalid or expired token.";
-            return View(model);
+            return View(); // Show the email input form
         }
 
-        ViewData["SuccessMessage"] = "Password reset successfully.";
-        return RedirectToAction("Login");
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(string email)
+        {
+            await _passwordResetService.RequestPasswordResetAsync(email);
+            ViewData["Message"] = "If your email is in our system, a reset link has been sent.";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Invalid reset token.");
+            }
+
+            var model = new ResetPasswordViewModel { Token = token };
+            return View(model); // Show form with hidden token field
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid || model.NewPassword != model.ConfirmPassword)
+            {
+                ViewData["ErrorMessage"] = "Passwords do not match.";
+                return View(model);
+            }
+
+            var success = await _passwordResetService.ResetPasswordAsync(model.Token, model.NewPassword);
+            if (!success)
+            {
+                ViewData["ErrorMessage"] = "Invalid or expired token.";
+                return View(model);
+            }
+
+            ViewData["SuccessMessage"] = "Password reset successfully.";
+            return RedirectToAction("Login");
+        }
     }
-
-
-
 }
