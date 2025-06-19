@@ -5,28 +5,31 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Models.ViewModels;
 using JBDH.Models;
 
-public class JobAIResponseService : IJobAIResponseService
+namespace JBDH.Services.AICommunications
 {
-    private readonly ApplicationDbContext _context;
-    public JobAIResponseService(ApplicationDbContext context)
+    public class JobAIResponseService : IJobAIResponseService
     {
-        _context = context;
-    }
-
-    public async Task AttachLatestAIResponsesAsync(List<JobSearchResultViewModel> jobs)
-    {
-        foreach (var item in jobs)
+        private readonly ApplicationDbContext _context;
+        public JobAIResponseService(ApplicationDbContext context)
         {
-            if (item.Job != null && item.Job.JobId != null)
+            _context = context;
+        }
+
+        public async Task AttachLatestAIResponsesAsync(List<JobSearchResultViewModel> jobs)
+        {
+            foreach (var item in jobs)
             {
-                item.LatestAIResponse = await _context.JobAIResponses
-                    .Where(r => r.JobId == item.Job.JobId.ToString())
-                    .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefaultAsync();
-            }
-            else
-            {
-                item.LatestAIResponse = null;
+                if (item.Job != null && item.Job.JobId != null)
+                {
+                    item.LatestAIResponse = await _context.JobAIResponses
+                        .Where(r => r.JobId == item.Job.JobId.ToString())
+                        .OrderByDescending(r => r.CreatedAt)
+                        .FirstOrDefaultAsync();
+                }
+                else
+                {
+                    item.LatestAIResponse = null;
+                }
             }
         }
     }

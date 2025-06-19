@@ -2,9 +2,9 @@ using System.Threading.Tasks;
 using JBDH.Models.ViewModels;
 using JBDH.Models;
 using Microsoft.EntityFrameworkCore;
-using JBDH.Services.Interfaces;
+using JBDH.Services.JobManagement;
 
-namespace JBDH.Services
+namespace JBDH.Services.JobManagement
 {
     public class JobService : IJobService
     {

@@ -2,14 +2,14 @@ using System.Text;
 using System.Text.Json;
 using Newtonsoft.Json;
 using JBDH.Models;
-using JBDH.Services.Interfaces;
-using JBDH.Services.AICommunications.Interfaces;
 using JBDH.Services.AICommunications;
 using AIConfig = JBDH.Models.AIConfig;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Nodes;
+using JBDH.Services.Helpers;
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.AICommunications
 {
 
 

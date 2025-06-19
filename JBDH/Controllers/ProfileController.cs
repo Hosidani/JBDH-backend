@@ -7,8 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using JBDH.Models.ViewModels;
 using JBDH.Models.User;
-
-
+using JBDH.Services.AICommunications;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Friendship;
 
 namespace JBDH.Controllers;
 

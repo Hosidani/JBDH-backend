@@ -1,5 +1,8 @@
-public interface IPasswordResetService
+namespace JBDH.Services.Authentication
 {
-    Task RequestPasswordResetAsync(string email);
-    Task<bool> ResetPasswordAsync(string token, string newPassword);
+    public interface IPasswordResetService
+    {
+        Task RequestPasswordResetAsync(string email);
+        Task<bool> ResetPasswordAsync(string token, string newPassword);
+    }
 }

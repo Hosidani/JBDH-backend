@@ -3,7 +3,7 @@ using System.Net.Mail;
 using Microsoft.Extensions.Options;
 using JBDH.Models;
 
-namespace JBDH.Services
+namespace JBDH.Services.Notifications
 {
     public class EmailService : IEmailService
     {

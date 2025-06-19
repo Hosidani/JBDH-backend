@@ -1,7 +1,8 @@
 using JBDH.Models;
 using MySql.Data.MySqlClient; // For MySqlConnection, MySqlCommand, etc.
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 {
     public class FlushDatabaseService
     {

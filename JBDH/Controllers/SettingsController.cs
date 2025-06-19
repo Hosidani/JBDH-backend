@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
-using JBDH.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using JBDH.Services.UserManagement;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Configuration;
 
 namespace JBDH.Controllers
 {

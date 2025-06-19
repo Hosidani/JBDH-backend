@@ -1,19 +1,21 @@
 using JBDH.Models;
-using JBDH.Services; // For IEmailService (adjust if your interface is elsewhere)
+using JBDH.Services.Notifications;
 using Microsoft.AspNetCore.Mvc; // For IUrlHelper
 using Microsoft.AspNetCore.Http; // For HttpRequest if needed
 using Microsoft.EntityFrameworkCore; // For EF Core methods
 
-public class VerificationResult
+namespace JBDH.Services.UserManagement
 {
-    public bool Success { get; set; }
-    public string? ErrorMessage { get; set; }
-}
+    public class VerificationResult
+    {
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
 
-public class UserVerificationService : IUserVerificationService
-{
-    private readonly ApplicationDbContext _context;
-    private readonly IEmailService _emailService;
+    public class UserVerificationService : IUserVerificationService
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
     public UserVerificationService(ApplicationDbContext context, IEmailService emailService)
     {
@@ -68,5 +70,6 @@ public class UserVerificationService : IUserVerificationService
         await _emailService.SendEmailAsync(user.Email, "Verify your email", $"Please verify your email by clicking this link: {verificationLink}");
 
         return new VerificationResult { Success = true };
+    }
     }
 }

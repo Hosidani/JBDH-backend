@@ -1,11 +1,18 @@
 using JBDH.Controllers;
 using JBDH.Models;
-using JBDH.Services;
-using JBDH.Services.Interfaces;
+using JBDH.Services.Configuration;
+using JBDH.Services.Core;
+using JBDH.Services.JobManagement;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Friendship;
 using JBDH.Services.AICommunications;
-using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.Helpers;
+using JBDH.Services.Notifications;
+using JBDH.Services.Organisation;
+using JBDH.Services.Authentication;
+using JBDH.Services.Reporting;
+using JBDH.Services.DataFlow;
 using JBDH.Services.Workflows;
-using JBDH.Services.Workflows.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
 using Microsoft.AspNetCore.Builder; // For WebApplication
 using Microsoft.Extensions.DependencyInjection; // For DI container setup

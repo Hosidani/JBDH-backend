@@ -1,7 +1,7 @@
 using JBDH.Models;
 using JBDH.Models.ViewModels;
 
-namespace JBDH.Services.Interfaces
+namespace JBDH.Services.JobManagement
 {
     public interface IJobService
     {

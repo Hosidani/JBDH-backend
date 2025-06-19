@@ -1,5 +1,6 @@
 using JBDH.Models.Job;
 using JBDH.Models.Dataflow;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
 using System.ComponentModel.DataAnnotations;
 
 namespace JBDH.Models.User
@@ -25,8 +26,8 @@ namespace JBDH.Models.User
         public bool? OpenForHiring { get; set; } // Active mode
         public bool IsBanned { get; set; } = false;
 
-        public ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
-        public ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
+        public ICollection<FriendshipModel> SentFriendRequests { get; set; } = new List<FriendshipModel>();
+        public ICollection<FriendshipModel> ReceivedFriendRequests { get; set; } = new List<FriendshipModel>();
         public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
         public ICollection<DataFlow> DataFlows { get; set; } = new List<DataFlow>();
         public ICollection<UserAIResponse> AIResponses { get; set; } = new List<UserAIResponse>();

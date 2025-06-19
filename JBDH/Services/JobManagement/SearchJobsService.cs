@@ -8,8 +8,10 @@ using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
+using JBDH.Services.Configuration;
+using JBDH.Services.Core;
 
-namespace JBDH.Services
+namespace JBDH.Services.JobManagement
 {
     public class SearchJobsService : ISearchJobsService
     {

@@ -1,106 +1,110 @@
 using JBDH.Models;
 using JBDH.Models.User;
-using JBDH.Services;
+using JBDH.Models.Friendship;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
-public class FriendService : IFriendService
+namespace JBDH.Services.Friendship
 {
-    private readonly ApplicationDbContext _context;
-
-    public FriendService(ApplicationDbContext context)
+    public class FriendService : IFriendService
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<ServiceResult> SendFriendRequestAsync(int requesterId, int addresseeId)
-    {
-        if (requesterId == addresseeId)
-            return ServiceResult.Failure("You cannot send a friend request to yourself.");
-
-        bool exists = await _context.Friendships.AnyAsync(f =>
-            (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
-            (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && f.Status == FriendshipStatus.Pending);
-
-        if (exists)
-            return ServiceResult.Failure("A pending friend request already exists.");
-
-        var requester = await _context.Users.FindAsync(requesterId);
-        var addressee = await _context.Users.FindAsync(addresseeId);
-
-        if (requester == null || addressee == null)
-            return ServiceResult.Failure("User not found.");
-
-        var friendship = new Friendship
+        public FriendService(ApplicationDbContext context)
         {
-            RequesterId = requesterId,
-            Requester = requester,
-            AddresseeId = addresseeId,
-            Addressee = addressee,
-            Status = FriendshipStatus.Pending,
-            RequestedAt = DateTime.UtcNow
-        };
+            _context = context;
+        }
 
-        _context.Friendships.Add(friendship);
-        await _context.SaveChangesAsync();
-        return ServiceResult.SuccessResult();
-    }
+        public async Task<ServiceResult> SendFriendRequestAsync(int requesterId, int addresseeId)
+        {
+            if (requesterId == addresseeId)
+                return ServiceResult.Failure("You cannot send a friend request to yourself.");
 
-
-
-    public async Task<bool> AreFriendsAsync(int requesterId, int addresseeId)
-    {
-        if (requesterId == addresseeId)
-            return false;
-            
-        var friendship = await _context.Friendships
-            .FirstOrDefaultAsync(f =>
+            bool exists = await _context.Friendships.AnyAsync(f =>
                 (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
-                (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && 
-                f.Status == FriendshipStatus.Friends);
+                (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && f.Status == FriendshipStatus.Pending);
 
-        return friendship != null;
-    }
+            if (exists)
+                return ServiceResult.Failure("A pending friend request already exists.");
+
+            var requester = await _context.Users.FindAsync(requesterId);
+            var addressee = await _context.Users.FindAsync(addresseeId);
+
+            if (requester == null || addressee == null)
+                return ServiceResult.Failure("User not found.");
+
+            var friendship = new FriendshipModel
+            {
+                RequesterId = requesterId,
+                Requester = requester,
+                AddresseeId = addresseeId,
+                Addressee = addressee,
+                Status = FriendshipStatus.Pending,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            _context.Friendships.Add(friendship);
+            await _context.SaveChangesAsync();
+            return ServiceResult.SuccessResult();
+        }
 
 
-    public async Task<bool> AcceptFriendRequestAsync(int requestId)
-    {
-        var friendship = await _context.Friendships
-            .FirstOrDefaultAsync(f => f.Id == requestId && f.Status == FriendshipStatus.Pending);
 
-        if (friendship == null)
-            return false;
+        public async Task<bool> AreFriendsAsync(int requesterId, int addresseeId)
+        {
+            if (requesterId == addresseeId)
+                return false;
+                
+            var friendship = await _context.Friendships
+                .FirstOrDefaultAsync(f =>
+                    (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
+                    (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && 
+                    f.Status == FriendshipStatus.Friends);
 
-        friendship.Status = FriendshipStatus.Friends;
-        await _context.SaveChangesAsync();
-        return true;
-    }
+            return friendship != null;
+        }
 
-    public async Task<List<User>> GetFriendsAsync(int userId)
-    {
-        var friendships = await _context.Friendships
-            .Where(f => (f.RequesterId == userId || f.AddresseeId == userId) && f.Status == FriendshipStatus.Friends)
-            .ToListAsync();
 
-        var friendIds = friendships
-            .Select(f => f.RequesterId == userId ? f.AddresseeId : f.RequesterId)
-            .Distinct()
-            .ToList();
+        public async Task<bool> AcceptFriendRequestAsync(int requestId)
+        {
+            var friendship = await _context.Friendships
+                .FirstOrDefaultAsync(f => f.Id == requestId && f.Status == FriendshipStatus.Pending);
 
-        var friends = await _context.Users
-            .Where(u => friendIds.Contains(u.Id))
-            .ToListAsync();
+            if (friendship == null)
+                return false;
 
-        return friends;
-    }
+            friendship.Status = FriendshipStatus.Friends;
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
-    public async Task<List<Friendship>> GetPendingRequestsAsync(int userId)
-    {
-        return await _context.Friendships
-            .Where(f => f.AddresseeId == userId && f.Status == FriendshipStatus.Pending)
-            .ToListAsync();
+        public async Task<List<User>> GetFriendsAsync(int userId)
+        {
+            var friendships = await _context.Friendships
+                .Where(f => (f.RequesterId == userId || f.AddresseeId == userId) && f.Status == FriendshipStatus.Friends)
+                .ToListAsync();
+
+            var friendIds = friendships
+                .Select(f => f.RequesterId == userId ? f.AddresseeId : f.RequesterId)
+                .Distinct()
+                .ToList();
+
+            var friends = await _context.Users
+                .Where(u => friendIds.Contains(u.Id))
+                .ToListAsync();
+
+            return friends;
+        }
+
+        public async Task<List<FriendshipModel>> GetPendingRequestsAsync(int userId)
+        {
+            return await _context.Friendships
+                .Where(f => f.AddresseeId == userId && f.Status == FriendshipStatus.Pending)
+                .ToListAsync();
+        }
     }
 }

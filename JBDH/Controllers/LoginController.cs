@@ -3,6 +3,8 @@ using JBDH.Models;
 using JBDH.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
+using JBDH.Services.Authentication;
+using JBDH.Services.Configuration;
 namespace JBDH.Controllers;
 
 public class LoginController : Controller

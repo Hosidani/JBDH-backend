@@ -1,64 +1,69 @@
 using JBDH.Models;
 using JBDH.Services;
 using Microsoft.EntityFrameworkCore;
-public class PasswordResetService : IPasswordResetService
+using JBDH.Services.Notifications;
+
+namespace JBDH.Services.Authentication
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IEmailService _emailService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public PasswordResetService(ApplicationDbContext context, IEmailService emailService, IHttpContextAccessor httpContextAccessor)
+    public class PasswordResetService : IPasswordResetService
     {
-        _context = context;
-        _emailService = emailService;
-        _httpContextAccessor = httpContextAccessor;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public async Task RequestPasswordResetAsync(string email)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        if (user == null || user.IsBanned) return;
-
-        var token = Guid.NewGuid().ToString();
-        var resetEntry = new PasswordReset
+        public PasswordResetService(ApplicationDbContext context, IEmailService emailService, IHttpContextAccessor httpContextAccessor)
         {
-            UserId = user.Id,
-            User = user,
-            Token = token,
-            ExpirationDate = DateTime.UtcNow.AddHours(1)
-        };
+            _context = context;
+            _emailService = emailService;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
-        _context.PasswordResets.Add(resetEntry);
-        await _context.SaveChangesAsync();
+        public async Task RequestPasswordResetAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null || user.IsBanned) return;
 
-        var request = _httpContextAccessor.HttpContext.Request;
-        var resetLink = $"{request.Scheme}://{request.Host}/Login/ResetPassword?token={token}";
-        var body = $"<p>Reset your password by clicking <a href='{resetLink}'>here</a>.</p>";
+            var token = Guid.NewGuid().ToString();
+            var resetEntry = new PasswordReset
+            {
+                UserId = user.Id,
+                User = user,
+                Token = token,
+                ExpirationDate = DateTime.UtcNow.AddHours(1)
+            };
 
-        await _emailService.SendEmailAsync(user.Email, "Reset Your Password", body);
-    }
+            _context.PasswordResets.Add(resetEntry);
+            await _context.SaveChangesAsync();
 
-    public async Task<bool> ResetPasswordAsync(string token, string newPassword)
-    {
-        var entry = await _context.PasswordResets
-            .Include(p => p.User)
-            .FirstOrDefaultAsync(p => p.Token == token && p.ExpirationDate > DateTime.UtcNow);
+            var request = _httpContextAccessor.HttpContext.Request;
+            var resetLink = $"{request.Scheme}://{request.Host}/Login/ResetPassword?token={token}";
+            var body = $"<p>Reset your password by clicking <a href='{resetLink}'>here</a>.</p>";
 
-        // Here is the code example if we decide to keep a history of all password reset requests (for auditing, debugging, or security monitoring).
-        /*
-        if (entry.IsUsed)
-            return false; 
-        entry.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-        entry.IsUsed = true;
-        */
-        
-        //Currently solution: deleting the token after use is secure and prevents replay attacks (someone using the same link again).
-        if (entry == null || entry.User == null)
-            return false;
-        entry.User!.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-        _context.PasswordResets.Remove(entry);
+            await _emailService.SendEmailAsync(user.Email, "Reset Your Password", body);
+        }
 
-        await _context.SaveChangesAsync();
-        return true;
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            var entry = await _context.PasswordResets
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Token == token && p.ExpirationDate > DateTime.UtcNow);
+
+            // Here is the code example if we decide to keep a history of all password reset requests (for auditing, debugging, or security monitoring).
+            /*
+            if (entry.IsUsed)
+                return false; 
+            entry.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            entry.IsUsed = true;
+            */
+            
+            //Currently solution: deleting the token after use is secure and prevents replay attacks (someone using the same link again).
+            if (entry == null || entry.User == null)
+                return false;
+            entry.User!.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.PasswordResets.Remove(entry);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

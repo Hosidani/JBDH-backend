@@ -6,10 +6,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using JBDH.Models; // Assuming this is the namespace for your models
 using JBDH.Controllers; // Assuming this is the namespace for your controllers
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 { 
-class JobStreamService
+    public class JobStreamService
     {
         private const string DbTableName = "testing_purposes";
         private const string DbFileName = "testing_purposes.db";

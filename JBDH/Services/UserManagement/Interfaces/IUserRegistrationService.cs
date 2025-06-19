@@ -3,7 +3,7 @@ using JBDH.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JBDH.Services
+namespace JBDH.Services.UserManagement
 {
     public interface IUserRegistrationService
     {

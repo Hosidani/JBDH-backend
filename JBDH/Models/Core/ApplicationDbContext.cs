@@ -3,6 +3,7 @@ using JBDH.Models.Job;
 using JBDH.Models.AI;
 using JBDH.Models.Dataflow;
 using Microsoft.EntityFrameworkCore;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
 namespace JBDH.Models;
 
@@ -16,7 +17,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Recruiter> Recruiters { get; set; }
 
-    public DbSet<Friendship> Friendships { get; set; }
+    public DbSet<FriendshipModel> Friendships { get; set; }
 
     public DbSet<Organisation> Organisations { get; set; }
 
@@ -108,14 +109,14 @@ public class ApplicationDbContext : DbContext
         });
 
         // Configure the Friendship relationships
-        modelBuilder.Entity<Friendship>()
+        modelBuilder.Entity<FriendshipModel>()
             .HasOne(f => f.Requester)
             .WithMany(u => u.SentFriendRequests)
             .HasForeignKey(f => f.RequesterId)
             .OnDelete(DeleteBehavior.NoAction);
 
         // Configure the Friendship relationships
-        modelBuilder.Entity<Friendship>()
+        modelBuilder.Entity<FriendshipModel>()
             .HasOne(f => f.Addressee)
             .WithMany(u => u.ReceivedFriendRequests)
             .HasForeignKey(f => f.AddresseeId)

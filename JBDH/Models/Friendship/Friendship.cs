@@ -2,21 +2,25 @@ using JBDH.Models;
 using JBDH.Models.User;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using UserModel = JBDH.Models.User.User;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
-public class Friendship
+namespace JBDH.Models.Friendship
 {
-    public int Id { get; set; }
+    public class Friendship
+    {
+        public int Id { get; set; }
 
-    public int RequesterId { get; set; }
+        public int RequesterId { get; set; }
 
-    [ForeignKey(nameof(RequesterId))]
-    public required User Requester { get; set; }
+        [ForeignKey(nameof(RequesterId))]
+        public required UserModel Requester { get; set; }
 
-    public int AddresseeId { get; set; }
+        public int AddresseeId { get; set; }
 
-    [ForeignKey(nameof(AddresseeId))]
-    public required User Addressee { get; set; }
+        [ForeignKey(nameof(AddresseeId))]
+        public required UserModel Addressee { get; set; }
 
-    public FriendshipStatus Status { get; set; }
-    public DateTime RequestedAt { get; set; }
+        public FriendshipStatus Status { get; set; }
+        public DateTime RequestedAt { get; set; }
+    }
 }
