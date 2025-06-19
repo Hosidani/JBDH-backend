@@ -1,7 +1,9 @@
 using JBDH.Models;
 using JBDH.Models.User;
+using JBDH.Models.Friendship;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
-namespace JBDH.Services
+namespace JBDH.Services.Friendship
 {
     public interface IFriendService
     {
@@ -9,7 +11,7 @@ namespace JBDH.Services
         Task<ServiceResult> SendFriendRequestAsync(int requesterId, int addresseeId);
         Task<bool> AcceptFriendRequestAsync(int requestId);
         Task<List<User>> GetFriendsAsync(int userId);
-        Task<List<Friendship>> GetPendingRequestsAsync(int userId);
+        Task<List<FriendshipModel>> GetPendingRequestsAsync(int userId);
         Task<bool> AreFriendsAsync(int userId1,int userId2);
     }
 }

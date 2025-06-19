@@ -5,7 +5,11 @@ using JBDH.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Notifications;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Organisation;
+using JBDH.Services.Configuration;
 namespace JBDH.Controllers;
 
 public class RegisterController : Controller
@@ -13,7 +17,6 @@ public class RegisterController : Controller
     private readonly ApplicationDbContext _context;
     private readonly ILogger<RegisterController> _logger;
     private readonly IEmailService _emailService;
-    
     private readonly IAIApiClient _aIApiClient;
     private readonly IUserRegistrationService _userRegistrationService;
     private readonly IRegisterOrganisationService _registerOrganisationService;

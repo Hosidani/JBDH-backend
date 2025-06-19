@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace JBDH.Services.AICommunications.Interfaces
+namespace JBDH.Services.AICommunications
 {
     public interface IJobAIAnalysisService
     {

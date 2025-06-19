@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace JBDH.Services
+namespace JBDH.Services.Authentication
 {
     public class LoginService : ILoginService
     {

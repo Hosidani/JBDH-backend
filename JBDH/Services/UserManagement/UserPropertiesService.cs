@@ -5,9 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using JBDH.Services.AICommunications.Interfaces;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.UserManagement
 {
     public class UserPropertiesService : IUserPropertiesService
     {

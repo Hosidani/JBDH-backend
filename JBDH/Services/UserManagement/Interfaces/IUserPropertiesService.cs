@@ -3,7 +3,7 @@ using JBDH.Models.User;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace JBDH.Services
+namespace JBDH.Services.UserManagement
 {
     public interface IUserPropertiesService
     {

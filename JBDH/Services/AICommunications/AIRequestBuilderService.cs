@@ -5,10 +5,11 @@ using JBDH.Models.User;
 using System.Text.Json.Nodes;
 using System.Text.Json;
 using Newtonsoft.Json; 
+using JBDH.Services.Helpers;
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.AICommunications
 {
-
 
     public class AIRequestBuilderService : IAIRequestBuilderService
     {

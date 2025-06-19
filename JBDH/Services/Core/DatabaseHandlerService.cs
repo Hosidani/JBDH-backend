@@ -3,8 +3,9 @@ using System.IO;
 using System.Text.Json;
 using MySql.Data.MySqlClient;
 using JBDH.Models;
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 {
     class DatabaseHandlerService
     {

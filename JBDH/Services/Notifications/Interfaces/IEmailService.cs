@@ -1,6 +1,6 @@
 using JBDH.Models;
 
-namespace JBDH.Services
+namespace JBDH.Services.Notifications
 {
     public interface IEmailService
     {

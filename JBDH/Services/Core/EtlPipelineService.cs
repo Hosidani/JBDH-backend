@@ -5,8 +5,9 @@ using System.Text.Json;
 using MySql.Data.MySqlClient;
 using JBDH.Models; // Assuming this is the namespace for your models
 using NLog.Fluent; // Assuming this is the namespace for your models
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 {    
 
 public class EtlPipeline

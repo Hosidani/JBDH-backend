@@ -4,6 +4,7 @@ using System.Security.Claims;
 using JBDH.Models;
 using JBDH.Models.ViewModels;
 using JBDH.Services;
+using JBDH.Services.JobManagement;
 
 namespace JBDH.Controllers
 {

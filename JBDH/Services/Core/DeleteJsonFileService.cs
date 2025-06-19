@@ -1,4 +1,6 @@
-namespace JBDH.Services
+using JBDH.Services.Configuration;
+
+namespace JBDH.Services.Core
 {
     public class DeleteJsonFileService
     {

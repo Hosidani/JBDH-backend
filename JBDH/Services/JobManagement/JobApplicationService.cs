@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using JBDH.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog.Fluent;
+using JBDH.Services.Configuration;
 
-namespace JBDH.Services
+namespace JBDH.Services.JobManagement
 {
     public class JobApplicationService : IJobApplicationService
     {

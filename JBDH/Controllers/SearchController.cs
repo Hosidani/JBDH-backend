@@ -2,15 +2,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Models;
 using JBDH.Services;
-using JBDH.Services.Interfaces;
-using JBDH.Services.AICommunications.Interfaces;
-using JBDH.Services.Workflows.Interfaces;
 using NLog.Config;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Newtonsoft.Json;
 using JBDH.Models.ViewModels;
 using System.Linq;
+using JBDH.Services.UserManagement;
+using JBDH.Services.AICommunications;
+using JBDH.Services.JobManagement;
+using JBDH.Services.Configuration;
+using JBDH.Services.Workflows;
 
 namespace JBDH.Controllers
 {

@@ -1,4 +1,4 @@
-namespace JBDH.Services
+namespace JBDH.Services.Helpers
 {
     public interface IManageInputService
     {

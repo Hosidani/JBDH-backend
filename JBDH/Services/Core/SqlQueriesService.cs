@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MySqlX.XDevAPI.CRUD;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 { 
     public static class SqlQueries
     {

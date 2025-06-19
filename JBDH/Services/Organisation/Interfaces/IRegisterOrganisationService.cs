@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 
-public interface IRegisterOrganisationService
+namespace JBDH.Services.Organisation
 {
-    Task<RegisterOrganisationResult> RegisterAsync(string organisationName, string managerUsername);
-    
+    public interface IRegisterOrganisationService
+    {
+        Task<RegisterOrganisationResult> RegisterAsync(string organisationName, string managerUsername);
+    }
 }

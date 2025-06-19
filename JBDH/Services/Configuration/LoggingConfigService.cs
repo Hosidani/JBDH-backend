@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using NLog;
 
-namespace JBDH.Services
+namespace JBDH.Services.Configuration
 { 
     public static class LoggingConfigService
         {
