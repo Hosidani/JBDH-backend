@@ -25,6 +25,10 @@ namespace JBDH.Services.Core
             { 12, "CREATE TABLE IF NOT EXISTS UserReports (Id INT PRIMARY KEY AUTO_INCREMENT, ReporterUserId INT NOT NULL, ReportedUserId INT NOT NULL, DataFlowId INT NULL, DataFlowText TEXT NULL, Reason TEXT NOT NULL, CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (ReportedUserId) REFERENCES Users(Id), FOREIGN KEY (ReporterUserId) REFERENCES Users(Id));" },
             { 13, "CREATE TABLE IF NOT EXISTS PasswordResets (Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT NOT NULL, Token VARCHAR(255) NOT NULL, ExpirationDate DATETIME NOT NULL, IsUsed BOOLEAN DEFAULT FALSE, FOREIGN KEY (UserId) REFERENCES Users(Id));" },
             { 14, "CREATE TABLE IF NOT EXISTS UserAIResponses (Id INT PRIMARY KEY AUTO_INCREMENT, ResponseText TEXT, CreatedAt DATETIME, UserId INT, FOREIGN KEY (UserId) REFERENCES Users(Id));" },
+            { 15, "CREATE TABLE IF NOT EXISTS Boards (Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(255) NOT NULL, OwnerId INT NOT NULL, IsOrganizationBoard BOOLEAN DEFAULT FALSE, OrganizationId INT NULL, CreatedAt DATETIME NOT NULL, UpdatedAt DATETIME NOT NULL, FOREIGN KEY (OwnerId) REFERENCES Users(Id), FOREIGN KEY (OrganizationId) REFERENCES Organisations(Id));" },
+            { 16, "CREATE TABLE IF NOT EXISTS Lists (Id INT PRIMARY KEY AUTO_INCREMENT, BoardId INT NOT NULL, Name VARCHAR(255) NOT NULL, `Order` INT NOT NULL, CreatedAt DATETIME NOT NULL, FOREIGN KEY (BoardId) REFERENCES Boards(Id));" },
+            { 17, "CREATE TABLE IF NOT EXISTS Cards (Id INT PRIMARY KEY AUTO_INCREMENT, ListId INT NOT NULL, Title VARCHAR(255) NOT NULL, Description TEXT, `Order` INT NOT NULL, CreatedAt DATETIME NOT NULL, DueDate DATETIME NULL, AssignedUserId INT NULL, FOREIGN KEY (ListId) REFERENCES Lists(Id), FOREIGN KEY (AssignedUserId) REFERENCES Users(Id));" },
+            { 18, "CREATE TABLE IF NOT EXISTS BoardMemberships (Id INT PRIMARY KEY AUTO_INCREMENT, BoardId INT NOT NULL, UserId INT NOT NULL, Role VARCHAR(50) NOT NULL, InvitedByUserId INT, InvitationAccepted BOOLEAN DEFAULT FALSE, InvitationToken VARCHAR(255), CreatedAt DATETIME NOT NULL, FOREIGN KEY (BoardId) REFERENCES Boards(Id), FOREIGN KEY (UserId) REFERENCES Users(Id), FOREIGN KEY (InvitedByUserId) REFERENCES Users(Id));" },
 
             // 100-199: INSERTS/SELECTS/UPDATES
             { 100, "INSERT INTO raw_table (JobId, title, description, company, location, posted_date, webpage_url) VALUES (@job_id, @title, @description, @company, @location, @posted_date, @webpage_url);" },
@@ -43,7 +47,27 @@ namespace JBDH.Services.Core
             { 203, "DELETE FROM Jobs;" },
             { 204, "DELETE FROM Users;" },
             { 205, "DELETE FROM AIResponses;" },
-            { 206, "DELETE FROM UserRoleAssignments;" }
+            { 206, "DELETE FROM UserRoleAssignments;" },
+
+            // 300: INSERT INTO Boards
+            { 300, "INSERT INTO Boards (Name, OwnerId, IsOrganizationBoard, OrganizationId, CreatedAt, UpdatedAt) VALUES (@Name, @OwnerId, @IsOrganizationBoard, @OrganizationId, @CreatedAt, @UpdatedAt);" },
+
+            // 301-309: INSERTS
+            { 301, "INSERT INTO Lists (BoardId, Name, `Order`, CreatedAt) VALUES (@BoardId, @Name, @Order, @CreatedAt);" },
+            { 302, "INSERT INTO Cards (ListId, Title, Description, `Order`, CreatedAt, DueDate, AssignedUserId) VALUES (@ListId, @Title, @Description, @Order, @CreatedAt, @DueDate, @AssignedUserId);" },
+            { 303, "INSERT INTO BoardMemberships (BoardId, UserId, Role, InvitedByUserId, InvitationAccepted, InvitationToken, CreatedAt) VALUES (@BoardId, @UserId, @Role, @InvitedByUserId, @InvitationAccepted, @InvitationToken, @CreatedAt);" },
+
+            // 310-319: UPDATES
+            { 310, "UPDATE Boards SET Name = @Name, UpdatedAt = @UpdatedAt WHERE Id = @Id;" },
+            { 311, "UPDATE Lists SET Name = @Name, `Order` = @Order WHERE Id = @Id;" },
+            { 312, "UPDATE Cards SET Title = @Title, Description = @Description, `Order` = @Order, DueDate = @DueDate, AssignedUserId = @AssignedUserId WHERE Id = @Id;" },
+            { 313, "UPDATE BoardMemberships SET Role = @Role, InvitationAccepted = @InvitationAccepted WHERE Id = @Id;" },
+
+            // 320-329: DELETES
+            { 320, "DELETE FROM Boards WHERE Id = @Id;" },
+            { 321, "DELETE FROM Lists WHERE Id = @Id;" },
+            { 322, "DELETE FROM Cards WHERE Id = @Id;" },
+            { 323, "DELETE FROM BoardMemberships WHERE Id = @Id;" }
         };
 
         public static string? SqlQuery(int queryId)

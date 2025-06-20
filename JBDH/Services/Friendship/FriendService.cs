@@ -53,22 +53,19 @@ namespace JBDH.Services.Friendship
             return ServiceResult.SuccessResult();
         }
 
-
-
         public async Task<bool> AreFriendsAsync(int requesterId, int addresseeId)
         {
             if (requesterId == addresseeId)
                 return false;
-                
+
             var friendship = await _context.Friendships
                 .FirstOrDefaultAsync(f =>
-                    (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
-                    (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && 
-                    f.Status == FriendshipStatus.Friends);
+                    ((f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
+                     (f.RequesterId == addresseeId && f.AddresseeId == requesterId))
+                    && f.Status == FriendshipStatus.Friends);
 
             return friendship != null;
         }
-
 
         public async Task<bool> AcceptFriendRequestAsync(int requestId)
         {

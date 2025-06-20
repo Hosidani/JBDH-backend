@@ -93,7 +93,18 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo($"AnalyzeJob called with URL: {jobAdUrl} and Job ID: {jobId}");
 
-            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId);
+            if (!int.TryParse(jobId, out int parsedJobId))
+            {
+                LoggingConfigService.ReturnError($"Invalid job ID format: {jobId}");
+                return View("Error", new ErrorViewModel
+                {
+                    Title = "Invalid Job ID",
+                    Message = "The provided job ID is not in a valid format.",
+                    ReturnUrl = Url.Action("SearchJob")
+                });
+            }
+
+            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
             if (string.IsNullOrEmpty(aiResultString))
             {

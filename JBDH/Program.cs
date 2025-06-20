@@ -23,6 +23,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
 using MySql.EntityFrameworkCore.Extensions;
+using JBDH.Services.BoardDataService;
+using JBDH.Services.ListService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,7 +96,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DataFlowService>(); 
 builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
 builder.Services.AddScoped<ISearchWorkflowService, SearchWorkflowService>();
-
+builder.Services.AddScoped<IBoardDataService, BoardDataService>();
+builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<IListService, ListService>();
 
 builder.Services.AddSession(options =>
 {

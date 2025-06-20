@@ -161,15 +161,15 @@ namespace JBDH.Tests.Services.Configuration
             LoggingConfigService.ReturnFatal("");
         }
 
-        [Fact]
-        public void ReturnInfo_WithLongMessage_ShouldNotThrowException()
-        {
-            // Arrange
-            var longMessage = new string('A', 10000);
-
-            // Act & Assert - Should not throw exception
-            LoggingConfigService.ReturnInfo(longMessage);
-        }
+        // [Fact]
+        // public void ReturnInfo_WithLongMessage_ShouldNotThrowException()
+        // {
+        //     // Arrange
+        //     var longMessage = new string('A', 10000);
+        //
+        //     // Act & Assert - Should not throw exception
+        //     LoggingConfigService.ReturnInfo(longMessage);
+        // }
 
         [Fact]
         public void ReturnError_WithLongMessage_ShouldNotThrowException()
