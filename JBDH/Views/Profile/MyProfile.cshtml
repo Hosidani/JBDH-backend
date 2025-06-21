@@ -170,3 +170,18 @@ else
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
+
+<h4>My Friends</h4>
+@if (Model.Friends != null && Model.Friends.Any())
+{
+    <ul>
+        @foreach (var friend in Model.Friends)
+        {
+            <li>@friend.Username</li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have no friends yet.</p>
+}
