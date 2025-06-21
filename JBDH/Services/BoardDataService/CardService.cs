@@ -8,38 +8,44 @@ namespace JBDH.Services.BoardDataService
 {
     public class CardService : ICardService
     {
+        private readonly ApplicationDbContext _context;
+
+        public CardService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task<IEnumerable<Card>> GetAllAsync()
         {
-            // TODO: Implement data access logic
-            return new List<Card>();
+            return await _context.Cards.ToListAsync();
         }
 
         public async Task<Card?> GetAsync(int id)
         {
-            // TODO: Implement data access logic
-            return null;
+            return await _context.Cards.FindAsync(id);
         }
 
         public async Task<Card> CreateAsync(Card card)
         {
-            // TODO: Implement data access logic
-            // Set card.BoardId by looking up the parent List's BoardId
-            // This requires access to the List data (e.g., via a ListService or DbContext)
-            return await Task.FromResult(card);
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+            return card;
         }
 
         public async Task UpdateAsync(Card card)
         {
-            // TODO: Implement data access logic
-            // Set card.BoardId by looking up the parent List's BoardId
-            // This requires access to the List data (e.g., via a ListService or DbContext)
+            _context.Entry(card).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            // TODO: Implement data access logic
-            // Ensure you can get BoardId for redirect after delete
-            // This requires access to the List data (e.g., via a ListService or DbContext)
+            var card = await _context.Cards.FindAsync(id);
+            if (card != null)
+            {
+                _context.Cards.Remove(card);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 } 

@@ -21,9 +21,17 @@ namespace JBDH.Controllers
         }
 
         // GET: /Cards/Create?listId=5
-        public IActionResult Create(int listId)
+        public async Task<IActionResult> Create(int listId)
         {
+            var list = await _listService.GetAsync(listId);
+            if (list == null)
+            {
+                return NotFound("The list you are trying to add a card to could not be found.");
+            }
+            
             var card = new Card { ListId = listId };
+            ViewBag.BoardId = list.BoardId; // For the cancel button
+            
             return View(card);
         }
 

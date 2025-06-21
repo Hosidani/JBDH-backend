@@ -4,6 +4,7 @@ using System.Text.Json;
 using JBDH.Models.Core;
 using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
+using System.Collections.Generic;
 
 namespace JBDH.Services.Core
 {
@@ -80,9 +81,8 @@ namespace JBDH.Services.Core
             }
         }
 
-        public static void databaseHandler(string[] args)
+        public static void databaseHandler(List<Dictionary<string, object>> jobData)
         {
-            LoggingConfigService.ConfigLogging();
             // Check if the database already exists
             var databaseExists = false;
             var connectionString = Settings.ConnectionString;
@@ -111,7 +111,7 @@ namespace JBDH.Services.Core
             {
                 LoggingConfigService.ReturnInfo("Connection established...");
                 EnsureTablesExist(connection);
-                EtlPipeline.RunEtlPipeline(JsonFile);
+                EtlPipeline.RunEtlPipeline(jobData);
                 LoggingConfigService.ReturnInfo("Database handler setup completed.");
             }
         }

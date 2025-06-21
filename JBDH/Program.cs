@@ -56,17 +56,15 @@ await Task.Run(async () =>
 {
     try
     {
-        await JobStreamService.RunJobStreamAsync(args); // Asynchronous job stream service
-        DatabaseHandlerService.databaseHandler(args); // Synchronous DB handler
+        LoggingConfigService.ConfigLogging(); // Configure logging first
+        var jobData = await JobStreamService.RunJobStreamAsync(args);
+        DatabaseHandlerService.databaseHandler(jobData);
     }
     catch (Exception ex)
     {
         LoggingConfigService.ReturnError($"Startup error: {ex.Message}");
         throw; // Optional: rethrow if you want the app to fail on critical startup errors
     }
-
-// Run PlatsbankenApi.Main asynchronously before starting the web application
-
 });
 
 // Add services to the container **before** calling builder.Build

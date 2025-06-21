@@ -23,18 +23,21 @@ namespace JBDH.Tests.Controllers
         }
 
         [Fact]
-        public void Create_GET_ReturnsViewWithCardModel()
+        public async Task Create_GET_ReturnsViewWithCardModel()
         {
             // Arrange
             int testListId = 1;
+            var testList = new KanbanList { Id = testListId, BoardId = 123 };
+            _mockListService.Setup(s => s.GetAsync(testListId)).ReturnsAsync(testList);
 
             // Act
-            var result = _controller.Create(testListId);
+            var result = await _controller.Create(testListId);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<Card>(viewResult.ViewData.Model);
             Assert.Equal(testListId, model.ListId);
+            Assert.Equal(123, _controller.ViewBag.BoardId);
         }
 
         [Fact]
