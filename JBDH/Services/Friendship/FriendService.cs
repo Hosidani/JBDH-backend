@@ -67,17 +67,28 @@ namespace JBDH.Services.Friendship
             return friendship != null;
         }
 
-        public async Task<bool> AcceptFriendRequestAsync(int requestId)
+        public async Task<bool> AcceptFriendRequestAsync(int friendshipId)
         {
-            var friendship = await _context.Friendships
-                .FirstOrDefaultAsync(f => f.Id == requestId && f.Status == FriendshipStatus.Pending);
+            var friendship = await _context.Friendships.FindAsync(friendshipId);
+            if (friendship != null && friendship.Status == FriendshipStatus.Pending)
+            {
+                friendship.Status = FriendshipStatus.Accepted;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
 
-            if (friendship == null)
-                return false;
-
-            friendship.Status = FriendshipStatus.Friends;
-            await _context.SaveChangesAsync();
-            return true;
+        public async Task<bool> DeclineFriendRequestAsync(int friendshipId)
+        {
+            var friendship = await _context.Friendships.FindAsync(friendshipId);
+            if (friendship != null && friendship.Status == FriendshipStatus.Pending)
+            {
+                friendship.Status = FriendshipStatus.Rejected;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<List<User>> GetFriendsAsync(int userId)

@@ -63,27 +63,8 @@ namespace JBDH.Controllers
             if (currentUserId == null)
                 return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
 
-            var user = await _context.Users.FindAsync(currentUserId.Value);
-            if (user == null)
-                return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
-
-            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
-
-            CVAnalysisResult? analysisResult = null;
-            if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
-            {
-                try
-                {
-                    analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
-                }
-                catch { /* handle error */ }
-            }
-
-            var model = new ProfileViewModel
-            {
-                User = user,
-                CVAnalysisResult = analysisResult
-            };
+            // Use your service to get the full view model
+            var model = await _profileService.GetMyProfileViewModelAsync(currentUserId.Value);
 
             return View("MyProfile", model);
         }
@@ -135,6 +116,22 @@ namespace JBDH.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "About Me updated!";
+            return RedirectToAction("MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
+        {
+            await _friendService.AcceptFriendRequestAsync(friendshipId);
+            return RedirectToAction("MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
+        {
+            await _friendService.DeclineFriendRequestAsync(friendshipId);
             return RedirectToAction("MyProfile");
         }
     }
