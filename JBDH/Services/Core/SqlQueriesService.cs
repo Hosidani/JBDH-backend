@@ -14,7 +14,7 @@ namespace JBDH.Services.Core
             { 1, "CREATE TABLE IF NOT EXISTS raw_table (JobId VARCHAR(255) PRIMARY KEY,title VARCHAR(255),description TEXT,company VARCHAR(255),location VARCHAR(255),posted_date DATE,webpage_url VARCHAR(2083));" },
             { 2, "CREATE TABLE IF NOT EXISTS Jobs (JobId VARCHAR(255) PRIMARY KEY, Title VARCHAR(255), Description TEXT, Company VARCHAR(255), Location VARCHAR(255), PostedDate DATE, WebpageUrl VARCHAR(2083), RecruiterId INT NULL, FOREIGN KEY (RecruiterId) REFERENCES Users(Id));" },
             { 3, "CREATE TABLE IF NOT EXISTS AIResponses (Id INT PRIMARY KEY AUTO_INCREMENT,Discriminator VARCHAR(128) NOT NULL DEFAULT 'AIResponse',ResponseText TEXT,CreatedAt DATETIME,UserId INT,FOREIGN KEY (UserId) REFERENCES Users(Id));" },
-            { 4, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Email VARCHAR(255) NOT NULL UNIQUE, Location VARCHAR(255), CVPath VARCHAR(2083), Organisation VARCHAR(255), DeveloperMode BOOLEAN DEFAULT FALSE, OpenForHiring BOOLEAN DEFAULT FALSE, Role VARCHAR(100) NOT NULL, IsBanned BOOLEAN DEFAULT FALSE, OwnerId INT NULL, FOREIGN KEY (OwnerId) REFERENCES Users(Id));" },
+            { 4, "CREATE TABLE IF NOT EXISTS Users ( Id INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) NOT NULL UNIQUE, PasswordHash VARCHAR(255) NOT NULL, Email VARCHAR(255) NOT NULL UNIQUE, Location VARCHAR(255), CVPath VARCHAR(2083), Organisation VARCHAR(255), DeveloperMode BOOLEAN DEFAULT FALSE, OpenForHiring BOOLEAN DEFAULT FALSE, Role VARCHAR(100) NOT NULL, IsBanned BOOLEAN DEFAULT FALSE, OwnerId INT NULL, AboutMe TEXT NULL, FOREIGN KEY (OwnerId) REFERENCES Users(Id));" },
             { 5, "CREATE TABLE IF NOT EXISTS Friendships (Id INT PRIMARY KEY AUTO_INCREMENT, RequesterId INT NOT NULL,AddresseeId INT NOT NULL, Status ENUM('Pending', 'Friends') NOT NULL, RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (RequesterId) REFERENCES Users(Id), FOREIGN KEY (AddresseeId) REFERENCES Users(Id))"},
             { 6, "CREATE TABLE IF NOT EXISTS EmailVerificationTokens ( Id INT PRIMARY KEY AUTO_INCREMENT, Token VARCHAR(255) NOT NULL, UserId INT NOT NULL, ExpirationDate DATETIME NOT NULL, IsUsed BOOLEAN DEFAULT FALSE, FOREIGN KEY (UserId) REFERENCES Users(Id) );" },
             { 7, "CREATE TABLE IF NOT EXISTS Organisations (Id INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(255) NOT NULL UNIQUE, CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP);" },
@@ -39,6 +39,7 @@ namespace JBDH.Services.Core
             { 105, "SELECT * FROM Jobs;" },
             { 106, "SELECT * FROM Jobs WHERE (LOWER(Title) LIKE @param1 OR LOWER(Description) LIKE @param1) AND LOWER(Location) LIKE @param2;" },
             { 107, "SELECT * FROM Jobs WHERE LOWER(title) LIKE @param1" },
+            { 108, "INSERT INTO Users (Username, PasswordHash, Email, Location, CVPath, Organisation, DeveloperMode, OpenForHiring, Role, IsBanned, OwnerId, AboutMe) VALUES (@Username, @PasswordHash, @Email, @Location, @CVPath, @Organisation, @DeveloperMode, @OpenForHiring, @Role, @IsBanned, @OwnerId, @AboutMe);" },
 
             // 200-299: DELETES
             { 200, "DELETE FROM EmailVerificationTokens;" },
@@ -62,6 +63,7 @@ namespace JBDH.Services.Core
             { 311, "UPDATE Lists SET Name = @Name, `Order` = @Order WHERE Id = @Id;" },
             { 312, "UPDATE Cards SET Title = @Title, Description = @Description, `Order` = @Order, DueDate = @DueDate, AssignedUserId = @AssignedUserId WHERE Id = @Id;" },
             { 313, "UPDATE BoardMemberships SET Role = @Role, InvitationAccepted = @InvitationAccepted WHERE Id = @Id;" },
+            { 314, "UPDATE Users SET AboutMe = @AboutMe WHERE Id = @UserId;" },
 
             // 320-329: DELETES
             { 320, "DELETE FROM Boards WHERE Id = @Id;" },

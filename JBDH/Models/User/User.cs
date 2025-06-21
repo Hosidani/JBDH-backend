@@ -38,5 +38,6 @@ namespace JBDH.Models.User
         public ICollection<User> OwnedUsers { get; set; } = new List<User>();
         public User? Owner { get; set; }
         public int? OwnerId { get; set; }
+        public string? AboutMe { get; set; }
     }
 }

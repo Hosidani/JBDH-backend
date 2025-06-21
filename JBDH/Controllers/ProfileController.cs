@@ -118,5 +118,24 @@ namespace JBDH.Controllers
                 return View("ErrorPage", result.ErrorMessage ?? "Could not send friend request.");
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAboutMe(string aboutMe)
+        {
+            var currentUserId = _profileService.GetCurrentUserId(User);
+            if (currentUserId == null)
+                return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+
+            var user = await _context.Users.FindAsync(currentUserId.Value);
+            if (user == null)
+                return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+
+            user.AboutMe = aboutMe;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "About Me updated!";
+            return RedirectToAction("MyProfile");
+        }
     }
 }
