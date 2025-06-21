@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog.Config;
 using Newtonsoft.Json;
+using JBDH.Models.User;
 
 namespace JBDH.Controllers
 {
@@ -215,6 +216,16 @@ namespace JBDH.Controllers
             }
 
             return View("SearchResultsJobs", results);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchUsers(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return View(new List<User>());
+
+            var users = await _userPropertiesService.SearchUsersAsync(query);
+            return View(users);
         }
     }
 }

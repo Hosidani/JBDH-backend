@@ -2,6 +2,7 @@ using JBDH.Models.User;
 using JBDH.Models.Services;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace JBDH.Services.UserManagement
 {
@@ -13,5 +14,6 @@ namespace JBDH.Services.UserManagement
         Task<ServiceResult> UploadCVAsync(IFormFile cvFile);
         Task<bool> UpdateDeveloperModeAsync(bool developerMode);
         Task<ServiceResult> ChangeCVAndAnalyzeAsync(IFormFile cvFile, int userId);
+        Task<List<User>> SearchUsersAsync(string query);
     }
 }

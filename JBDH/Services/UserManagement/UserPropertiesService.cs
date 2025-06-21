@@ -280,5 +280,12 @@ namespace JBDH.Services.UserManagement
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<User>> SearchUsersAsync(string query)
+        {
+            return await _context.Users
+                .Where(u => u.Username.Contains(query) || u.Email.Contains(query))
+                .ToListAsync();
+        }
     }
 }
