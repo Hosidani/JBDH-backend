@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using JBDH.Models.ViewModels;
 
-public interface IJobAIResponseService
+namespace JBDH.Services.AICommunications
 {
-    Task AttachLatestAIResponsesAsync(List<JobSearchResultViewModel> jobs);
+    public interface IJobAIResponseService
+    {
+        Task AttachLatestAIResponsesAsync(List<JobSearchResultViewModel> jobs);
+    }
 }

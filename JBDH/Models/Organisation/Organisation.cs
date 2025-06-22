@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JBDH.Models
+namespace JBDH.Models.Organisation
 {
     public class Organisation
     {

@@ -1,5 +1,9 @@
+using JBDH.Models.ViewModels;
 
-public interface ISearchCandidateService
+namespace JBDH.Services.UserManagement
 {
-    Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location);
+    public interface ISearchCandidateService
+    {
+        Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location);
+    }
 }

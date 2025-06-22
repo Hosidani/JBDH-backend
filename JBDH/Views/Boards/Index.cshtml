@@ -1,0 +1,31 @@
+@model IEnumerable<JBDH.Models.Kanban.Board>
+@{
+    ViewData["Title"] = "Boards";
+}
+<h2>Boards</h2>
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create")">Create New Board</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var board in Model)
+    {
+        <tr>
+            <td>@board.Name</td>
+            <td>@board.OwnerId</td>
+            <td>
+                <a class="btn btn-info btn-sm" href="@Url.Action("Details", new { id = board.Id })">Details</a>
+                <a class="btn btn-warning btn-sm" href="@Url.Action("Edit", new { id = board.Id })">Edit</a>
+                <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", new { id = board.Id })">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table> 

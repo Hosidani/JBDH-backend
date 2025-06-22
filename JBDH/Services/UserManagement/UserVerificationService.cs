@@ -1,19 +1,22 @@
-using JBDH.Models;
-using JBDH.Services; // For IEmailService (adjust if your interface is elsewhere)
-using Microsoft.AspNetCore.Mvc; // For IUrlHelper
-using Microsoft.AspNetCore.Http; // For HttpRequest if needed
-using Microsoft.EntityFrameworkCore; // For EF Core methods
+using JBDH.Models.Core;
+using JBDH.Services.Notifications;
+using JBDH.Models.Notifications;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
-public class VerificationResult
+namespace JBDH.Services.UserManagement
 {
-    public bool Success { get; set; }
-    public string? ErrorMessage { get; set; }
-}
+    public class VerificationResult
+    {
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
 
-public class UserVerificationService : IUserVerificationService
-{
-    private readonly ApplicationDbContext _context;
-    private readonly IEmailService _emailService;
+    public class UserVerificationService : IUserVerificationService
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
     public UserVerificationService(ApplicationDbContext context, IEmailService emailService)
     {
@@ -49,7 +52,12 @@ public class UserVerificationService : IUserVerificationService
 
     public async Task<VerificationResult> ResendVerificationEmailAsync(string email, IUrlHelper urlHelper, HttpRequest request)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        // Handle null or empty email
+        if (string.IsNullOrWhiteSpace(email))
+            return new VerificationResult { Success = false, ErrorMessage = "No user found with that email address." };
+
+        // Case-insensitive email lookup
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         if (user == null)
             return new VerificationResult { Success = false, ErrorMessage = "No user found with that email address." };
 
@@ -64,9 +72,19 @@ public class UserVerificationService : IUserVerificationService
         _context.EmailVerificationTokens.Add(emailVerificationToken);
         await _context.SaveChangesAsync();
 
-        var verificationLink = urlHelper.Action("VerifyEmail", "Register", new { token }, request.Scheme);
-        await _emailService.SendEmailAsync(user.Email, "Verify your email", $"Please verify your email by clicking this link: {verificationLink}");
+        try
+        {
+            var verificationLink = urlHelper.Action("VerifyEmail", "Register", new { token }, request.Scheme);
+            await _emailService.SendEmailAsync(user.Email, "Verify your email", $"Please verify your email by clicking this link: {verificationLink}");
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail the operation
+            // The token is already created and saved
+            System.Diagnostics.Debug.WriteLine($"Email service error: {ex.Message}");
+        }
 
         return new VerificationResult { Success = true };
+    }
     }
 }

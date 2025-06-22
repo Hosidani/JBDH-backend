@@ -1,31 +1,33 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using JBDH.Models;
-using Newtonsoft.Json;
 using JBDH.Models.User;
+using Newtonsoft.Json;
 
-public class UserAIResponse
+namespace JBDH.Models.AI
 {
-    public int Id { get; set; }
-    public int UserId { get; set; }
-    public string? ResponseText { get; set; } // Store the raw JSON
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [NotMapped]
-    public CVAnalysisResult? AnalysisResult
+    public class UserAIResponse
     {
-        get
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public string? ResponseText { get; set; } // Store the raw JSON
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [NotMapped]
+        public CVAnalysisResult? AnalysisResult
         {
-            if (string.IsNullOrEmpty(ResponseText)) return null;
-            try
+            get
             {
-                return JsonConvert.DeserializeObject<CVAnalysisResult>(ResponseText);
-            }
-            catch
-            {
-                return null;
+                if (string.IsNullOrEmpty(ResponseText)) return null;
+                try
+                {
+                    return JsonConvert.DeserializeObject<CVAnalysisResult>(ResponseText);
+                }
+                catch
+                {
+                    return null;
+                }
             }
         }
-    }
 
-    public required User User { get; set; }
+        public required JBDH.Models.User.User User { get; set; }
+    }
 }

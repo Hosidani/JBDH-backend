@@ -1,9 +1,12 @@
 using System.Threading.Tasks;
-using JBDH.Models;
+using JBDH.Models.Services;
 
-public interface IJobApplicationService
+namespace JBDH.Services.JobManagement
 {
-    Task<bool> HasUserAppliedAsync(int userId, int jobId);
-    Task<ServiceResult> ApplyJobAsync(int userId, int jobId, string notes);
-    Task<ServiceResult> UnapplyJobAsync(int userId, int jobId);
+    public interface IJobApplicationService
+    {
+        Task<bool> HasUserAppliedAsync(int userId, int jobId);
+        Task<ServiceResult> ApplyJobAsync(int userId, int jobId, string notes);
+        Task<ServiceResult> UnapplyJobAsync(int userId, int jobId);
+    }
 }

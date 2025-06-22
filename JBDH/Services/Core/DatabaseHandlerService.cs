@@ -1,10 +1,12 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using JBDH.Models.Core;
+using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
-using JBDH.Models;
+using System.Collections.Generic;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 {
     class DatabaseHandlerService
     {
@@ -42,6 +44,10 @@ namespace JBDH.Services
                 var createUserReportsTable         = SqlQueries.SqlQuery(12);
                 var createPasswordResetsTable      = SqlQueries.SqlQuery(13);
                 var createUserAIResponsesTable     = SqlQueries.SqlQuery(14); // <-- Added
+                var createBoardsTable              = SqlQueries.SqlQuery(15);
+                var createListsTable               = SqlQueries.SqlQuery(16);
+                var createCardsTable               = SqlQueries.SqlQuery(17);
+                var createBoardMembershipsTable    = SqlQueries.SqlQuery(18);
 
                 // Execute each create table command
                 using (var command = new MySqlCommand(createUsersTable, connection))
@@ -62,6 +68,10 @@ namespace JBDH.Services
                 using (var command = new MySqlCommand(createUserReportsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createPasswordResetsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createUserAIResponsesTable, connection)) { command.ExecuteNonQuery(); } // <-- Added
+                using (var command = new MySqlCommand(createBoardsTable, connection)) { command.ExecuteNonQuery(); }
+                using (var command = new MySqlCommand(createListsTable, connection)) { command.ExecuteNonQuery(); }
+                using (var command = new MySqlCommand(createCardsTable, connection)) { command.ExecuteNonQuery(); }
+                using (var command = new MySqlCommand(createBoardMembershipsTable, connection)) { command.ExecuteNonQuery(); }
 
                 LoggingConfigService.ReturnInfo("Ensured all tables exist.");
             }
@@ -71,9 +81,8 @@ namespace JBDH.Services
             }
         }
 
-        public static void databaseHandler(string[] args)
+        public static void databaseHandler(List<Dictionary<string, object>> jobData)
         {
-            LoggingConfigService.ConfigLogging();
             // Check if the database already exists
             var databaseExists = false;
             var connectionString = Settings.ConnectionString;
@@ -102,7 +111,7 @@ namespace JBDH.Services
             {
                 LoggingConfigService.ReturnInfo("Connection established...");
                 EnsureTablesExist(connection);
-                EtlPipeline.RunEtlPipeline(JsonFile);
+                EtlPipeline.RunEtlPipeline(jobData);
                 LoggingConfigService.ReturnInfo("Database handler setup completed.");
             }
         }

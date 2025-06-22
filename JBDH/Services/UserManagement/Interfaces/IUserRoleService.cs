@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace JBDH.Services.Interfaces
+namespace JBDH.Services.UserManagement
 {
     public interface IUserRoleService
     {

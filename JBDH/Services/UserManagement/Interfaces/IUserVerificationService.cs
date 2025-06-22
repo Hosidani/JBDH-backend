@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc; // For IUrlHelper
 
-public interface IUserVerificationService
+namespace JBDH.Services.UserManagement
 {
-    VerificationResult VerifyEmail(string token);
-    Task<VerificationResult> ResendVerificationEmailAsync(string email, IUrlHelper urlHelper, HttpRequest request);
+    public interface IUserVerificationService
+    {
+        VerificationResult VerifyEmail(string token);
+        Task<VerificationResult> ResendVerificationEmailAsync(string email, IUrlHelper urlHelper, HttpRequest request);
+    }
 }

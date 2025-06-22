@@ -1,4 +1,4 @@
-namespace JBDH.Models
+namespace JBDH.Models.Services
 {
     public class ServiceResult
     {

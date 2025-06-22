@@ -5,8 +5,10 @@ using JBDH.Models;
 using JBDH.Models.Dataflow;
 using JBDH.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using DataFlowModel = JBDH.Models.Dataflow.DataFlow;
+using JBDH.Models.Core;
 
-namespace JBDH.Services
+namespace JBDH.Services.DataFlow
 {
     public class DataFlowService
     {
@@ -18,7 +20,7 @@ namespace JBDH.Services
         }
 
         // Get posts for a specific user
-        public List<DataFlow> GetByUserId(int userId)
+        public List<DataFlowModel> GetByUserId(int userId)
         {
             return _context.DataFlows.Where(df => df.UserId == userId).OrderByDescending(df => df.CreatedAt).ToList();
         }
@@ -27,7 +29,7 @@ namespace JBDH.Services
         public async Task CreateAsync(DataFlowViewModel model, int userId)
         {
             // Map the view model to the DataFlow model
-            var dataFlow = new DataFlow
+            var dataFlow = new DataFlowModel
             {
                 ContentType = model.ContentType,
                 Content = model.Content,
@@ -57,7 +59,7 @@ namespace JBDH.Services
             var parent = await _context.DataFlows.FindAsync(dataFlowId);
             if (parent == null) return; // Inlägget finns inte
 
-            var commentFlow = new DataFlow
+            var commentFlow = new DataFlowModel
             {
                 ContentType = "Comment",
                 Content = comment,
@@ -77,7 +79,7 @@ namespace JBDH.Services
             return true;
         }
 
-        public List<DataFlow> GetAllRecursive()
+        public List<DataFlowModel> GetAllRecursive()
         {
             // 1. Load all DataFlows from the database
             var all = _context.DataFlows.Include(df => df.User).ToList();
@@ -86,7 +88,7 @@ namespace JBDH.Services
             var lookup = all.ToLookup(df => df.ParentDataFlowId);
 
             // 3. Recursively assign replies, ordered by CreatedAt (oldest first under each parent)
-            void AssignReplies(DataFlow parent)
+            void AssignReplies(DataFlowModel parent)
             {
                 parent.RelatedDataFlows = lookup[parent.Id]
                     .OrderBy(df => df.CreatedAt)
@@ -112,7 +114,7 @@ namespace JBDH.Services
             return roots;
         }
 
-        private DataFlowViewModel MapToViewModel(DataFlow dataFlow)
+        private DataFlowViewModel MapToViewModel(DataFlowModel dataFlow)
         {
             return new DataFlowViewModel
             {

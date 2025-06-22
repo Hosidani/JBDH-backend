@@ -1,5 +1,5 @@
 @using Markdig
-@model JBDH.Models.ProfileViewModel
+@model JBDH.Models.ViewModels.ProfileViewModel
 
 
 @{
@@ -156,4 +156,57 @@
 else
 {
     <span>No AI analysis available.</span>
+}
+
+<form asp-action="UpdateAboutMe" method="post" class="mt-4">
+    <div class="mb-3">
+        <label for="AboutMe" class="form-label">About Me</label>
+        <textarea id="AboutMe" name="aboutMe" class="form-control" rows="5">@Model.User.AboutMe</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Save About Me</button>
+</form>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<h4>My Friends</h4>
+@if (Model.Friends != null && Model.Friends.Any())
+{
+    <ul>
+        @foreach (var friend in Model.Friends)
+        {
+            <li>@friend.Username</li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have no friends yet.</p>
+}
+
+<h4>Pending Friend Requests</h4>
+@if (Model.PendingFriendRequests != null && Model.PendingFriendRequests.Any())
+{
+    <ul>
+        @foreach (var request in Model.PendingFriendRequests)
+        {
+            <li>
+                @request.Requester.Username
+                <form asp-action="AcceptFriendRequest" method="post" style="display:inline;">
+                    <input type="hidden" name="friendshipId" value="@request.Id" />
+                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                </form>
+                <form asp-action="DeclineFriendRequest" method="post" style="display:inline;">
+                    <input type="hidden" name="friendshipId" value="@request.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No pending friend requests.</p>
 }

@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Mail;
+using JBDH.Models.Core;
+using JBDH.Models.Services;
 using Microsoft.Extensions.Options;
-using JBDH.Models;
 
-namespace JBDH.Services
+
+namespace JBDH.Services.Notifications
 {
     public class EmailService : IEmailService
     {

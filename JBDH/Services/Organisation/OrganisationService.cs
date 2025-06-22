@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using JBDH.Models;
+using JBDH.Models.Core;
 using JBDH.Models.User;
+using JBDH.Models.Services;
+using OrganisationModel = JBDH.Models.Organisation.Organisation;
+using Microsoft.EntityFrameworkCore;
 
-namespace JBDH.Services
+namespace JBDH.Services.Organisation
 {
     public class OrganisationService : IOrganisationService
     {
@@ -27,7 +29,7 @@ namespace JBDH.Services
             if (manager == null)
                 return ServiceResult.Failure("You must be a manager to register an organisation.");
 
-            var organisation = new Organisation
+            var organisation = new OrganisationModel
             {
                 Name = name,
                 Managers = new List<User> { manager }

@@ -2,9 +2,9 @@ using UglyToad.PdfPig;
 using System.Text;
 using HtmlAgilityPack;
 using Microsoft.Playwright;
+using JBDH.Services.Configuration;
 
-
-namespace JBDH.Services
+namespace JBDH.Services.Helpers
 {
     public class ManageInputService : IManageInputService
     {

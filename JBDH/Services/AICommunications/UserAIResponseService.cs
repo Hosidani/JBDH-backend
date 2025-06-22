@@ -1,9 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
-using JBDH.Models;
 using JBDH.Models.User;
+using JBDH.Models.AI;
+using JBDH.Models.Core;
+using JBDH.Services.Configuration;
 using Microsoft.EntityFrameworkCore;
-using JBDH.Services.AICommunications.Interfaces;
 
 namespace JBDH.Services.AICommunications
 {

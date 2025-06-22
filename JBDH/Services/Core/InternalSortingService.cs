@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using JBDH.Services.Configuration;
+using JBDH.Models.Core;
 using MySql.Data.MySqlClient;
-using JBDH.Models; // Assuming this is the namespace for your models
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 { 
     class InternalSortingService
     {

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using JBDH.Services;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Friendship;
 
 namespace JBDH.Controllers
 {

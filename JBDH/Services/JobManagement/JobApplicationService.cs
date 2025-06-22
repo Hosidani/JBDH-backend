@@ -1,10 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using JBDH.Models;
+using JBDH.Models.Core;
+using JBDH.Models.Services;
+using JBDH.Models.Job;
+using JBDH.Services.Configuration;
 using Microsoft.EntityFrameworkCore;
-using NLog.Fluent;
 
-namespace JBDH.Services
+
+namespace JBDH.Services.JobManagement
 {
     public class JobApplicationService : IJobApplicationService
     {

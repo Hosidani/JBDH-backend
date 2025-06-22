@@ -1,18 +1,28 @@
-using JBDH.Services;
-using JBDH.Models;
+using System.Linq;
+using System.IO;
+using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using JBDH.Models.Core;
 using JBDH.Models.User;
 using JBDH.Models.ViewModels;
+using JBDH.Models.Services;
+using JBDH.Models.Notifications;
+using JBDH.Services.Notifications;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Mvc;
-using JBDH.Services.AICommunications.Interfaces;
 using Newtonsoft.Json;
 
-public class UserRegistrationService : IUserRegistrationService
+namespace JBDH.Services.UserManagement
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IEmailService _emailService;
-    private readonly IAIApiClient _aIApiClient;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IUserAIResponseService _userAIResponseService;
+    public class UserRegistrationService : IUserRegistrationService
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IAIApiClient _aIApiClient;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IUserAIResponseService _userAIResponseService;
 
     public UserRegistrationService(
         ApplicationDbContext context,
@@ -169,5 +179,5 @@ public class UserRegistrationService : IUserRegistrationService
 
         return ServiceResult.SuccessResult();
     }
-
+    }
 }

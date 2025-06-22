@@ -1,8 +1,11 @@
-public enum FriendshipStatus
+namespace JBDH.Models.Friendship
 {
-    Pending,
-    Accepted,
-    Friends, 
-    Rejected,
-    Blocked
+    public enum FriendshipStatus
+    {
+        Pending,
+        Accepted,
+        Friends, 
+        Rejected,
+        Blocked
+    }
 }

@@ -6,55 +6,60 @@ using System.Threading.Tasks;
 using System.Linq;
 using JBDH.Models;
 using JBDH.Services;
+using JBDH.Services.Configuration;
+using JBDH.Models.Core;
 
-public class UserBanBackgroundService : BackgroundService
+namespace JBDH.Services.UserManagement
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TimeSpan _interval = TimeSpan.FromHours(24); // For testing
-
-
-    public UserBanBackgroundService(IServiceProvider serviceProvider)
+    public class UserBanBackgroundService : BackgroundService
     {
-        _serviceProvider = serviceProvider;
-    }
+        private readonly IServiceProvider _serviceProvider;
+        private readonly TimeSpan _interval = TimeSpan.FromHours(24); // For testing
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        LoggingConfigService.ReturnInfo("🚀 UserBanBackgroundService started.");
-        while (!stoppingToken.IsCancellationRequested)
+
+        public UserBanBackgroundService(IServiceProvider serviceProvider)
         {
-            LoggingConfigService.ReturnInfo($"⏰ Checking for users to ban at {DateTime.UtcNow}");
-            using (var scope = _serviceProvider.CreateScope())
+            _serviceProvider = serviceProvider;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            LoggingConfigService.ReturnInfo("🚀 UserBanBackgroundService started.");
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                // Find users who are not banned and have 10+ unique reports
-                var usersToBan = db.UserReports
-                    .GroupBy(r => r.ReportedUserId)
-                    .Select(g => new
-                    {
-                        ReportedUserId = g.Key,
-                        UniqueReporters = g.Select(r => r.ReporterUserId).Distinct().Count()
-                    })
-                    // Below is when we ban a user if they have 2 or more unique reporters
-                    .Where(x => x.UniqueReporters >= 2)
-                    .Select(x => x.ReportedUserId)
-                    .ToList();
-
-                var users = db.Users
-                    .Where(u => usersToBan.Contains(u.Id) && !u.IsBanned)
-                    .ToList();
-
-                foreach (var user in users)
+                LoggingConfigService.ReturnInfo($"⏰ Checking for users to ban at {DateTime.UtcNow}");
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    user.IsBanned = true;
+                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    // Find users who are not banned and have 10+ unique reports
+                    var usersToBan = db.UserReports
+                        .GroupBy(r => r.ReportedUserId)
+                        .Select(g => new
+                        {
+                            ReportedUserId = g.Key,
+                            UniqueReporters = g.Select(r => r.ReporterUserId).Distinct().Count()
+                        })
+                        // Below is when we ban a user if they have 2 or more unique reporters
+                        .Where(x => x.UniqueReporters >= 2)
+                        .Select(x => x.ReportedUserId)
+                        .ToList();
+
+                    var users = db.Users
+                        .Where(u => usersToBan.Contains(u.Id) && !u.IsBanned)
+                        .ToList();
+
+                    foreach (var user in users)
+                    {
+                        user.IsBanned = true;
+                    }
+
+                    if (users.Count > 0)
+                        await db.SaveChangesAsync();
                 }
 
-                if (users.Count > 0)
-                    await db.SaveChangesAsync();
+                await Task.Delay(_interval, stoppingToken);
             }
-
-            await Task.Delay(_interval, stoppingToken);
         }
     }
 }

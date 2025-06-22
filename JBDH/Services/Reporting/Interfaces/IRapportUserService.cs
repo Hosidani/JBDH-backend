@@ -1,4 +1,7 @@
-public interface IRapportUserService
+namespace JBDH.Services.Reporting
 {
-    Task<ReportResult> TryReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId = null, string? dataFlowText = null);
+    public interface IRapportUserService
+    {
+        Task<ReportResult> TryReportUserAsync(int reporterUserId, int reportedUserId, string reason, int? dataFlowId = null, string? dataFlowText = null);
+    }
 }

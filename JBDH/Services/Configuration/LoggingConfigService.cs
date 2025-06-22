@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using NLog;
 
-namespace JBDH.Services
+namespace JBDH.Services.Configuration
 { 
     public static class LoggingConfigService
         {
@@ -86,6 +86,11 @@ namespace JBDH.Services
     
             public static void PrintCounters(List<List<int>> counters)
             {
+                if (counters == null)
+                {
+                    return;
+                }
+                
                 foreach (var counter in counters)
                 {
                     ReturnInfo(string.Join(", ", counter));

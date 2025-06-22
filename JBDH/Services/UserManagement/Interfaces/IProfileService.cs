@@ -1,10 +1,14 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
-using JBDH.Models;
 using JBDH.Models.User;
+using JBDH.Models.ViewModels;
+using JBDH.Models.Services;
+using JBDH.Models.Core;
 
-public interface IProfileService
+namespace JBDH.Services.UserManagement
 {
+    public interface IProfileService
+    {
     Task<User?> GetUserByIdAsync(int userId);
 
     // New: Get current user ID from ClaimsPrincipal
@@ -18,4 +22,5 @@ public interface IProfileService
 
     // New: Send a friend request
     Task<ServiceResult> SendFriendRequestAsync(int requesterId, int addresseeId);
+    }
 }

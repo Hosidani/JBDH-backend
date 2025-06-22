@@ -1,4 +1,6 @@
-namespace JBDH.Services
+using JBDH.Models.Authentication;
+
+namespace JBDH.Services.Authentication
 {
     public interface ILoginService
     {

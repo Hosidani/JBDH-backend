@@ -1,19 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using JBDH.Models;
-using JBDH.Services;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Configuration;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Notifications;
+using JBDH.Services.UserManagement;
+using JBDH.Services.Organisation;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using JBDH.Services.AICommunications.Interfaces;
-namespace JBDH.Controllers;
+
+namespace JBDH.Controllers
+{
 
 public class RegisterController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<RegisterController> _logger;
     private readonly IEmailService _emailService;
-    
     private readonly IAIApiClient _aIApiClient;
     private readonly IUserRegistrationService _userRegistrationService;
     private readonly IRegisterOrganisationService _registerOrganisationService;
@@ -135,4 +141,6 @@ public class RegisterController : Controller
         ViewData["Email"] = TempData["Email"];
         return View();
     }
+}
+
 }

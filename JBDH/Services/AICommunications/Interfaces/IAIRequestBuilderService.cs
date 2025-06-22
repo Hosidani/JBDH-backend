@@ -1,6 +1,6 @@
-using JBDH.Models;
+using JBDH.Models.AI;
 
-namespace JBDH.Services
+namespace JBDH.Services.AICommunications
 {
     public interface IAIRequestBuilderService
     {

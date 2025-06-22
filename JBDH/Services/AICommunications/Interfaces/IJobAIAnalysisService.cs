@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 
-namespace JBDH.Services.AICommunications.Interfaces
+namespace JBDH.Services.AICommunications
 {
     public interface IJobAIAnalysisService
     {
-        Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId);
+        Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId);
     }
 }

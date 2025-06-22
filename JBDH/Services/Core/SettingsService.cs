@@ -1,9 +1,10 @@
 using System;
-using MySql.Data.MySqlClient;
-using JBDH.Models; // Assuming this is the namespace for your models
 using JBDH.Controllers;
+using JBDH.Services.Configuration;
+using JBDH.Models.Core;
+using MySql.Data.MySqlClient;
 
-namespace JBDH.Services
+namespace JBDH.Services.Core
 { 
     public static class SettingsService
         {

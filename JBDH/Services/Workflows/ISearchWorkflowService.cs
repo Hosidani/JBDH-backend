@@ -2,7 +2,7 @@ using JBDH.Models.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace JBDH.Services.Workflows.Interfaces
+namespace JBDH.Services.Workflows
 {
     public interface ISearchWorkflowService
     {
