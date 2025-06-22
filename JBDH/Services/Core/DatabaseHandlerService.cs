@@ -48,6 +48,7 @@ namespace JBDH.Services.Core
                 var createListsTable               = SqlQueries.SqlQuery(16);
                 var createCardsTable               = SqlQueries.SqlQuery(17);
                 var createBoardMembershipsTable    = SqlQueries.SqlQuery(18);
+                var createMessagesTable             = SqlQueries.SqlQuery(19); // Use the correct query number from your SqlQueriesService
 
                 // Execute each create table command
                 using (var command = new MySqlCommand(createUsersTable, connection))
@@ -72,6 +73,7 @@ namespace JBDH.Services.Core
                 using (var command = new MySqlCommand(createListsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createCardsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createBoardMembershipsTable, connection)) { command.ExecuteNonQuery(); }
+                using (var command = new MySqlCommand(createMessagesTable, connection)) { command.ExecuteNonQuery(); } // Execute the new table creation
 
                 LoggingConfigService.ReturnInfo("Ensured all tables exist.");
             }

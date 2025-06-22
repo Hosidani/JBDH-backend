@@ -29,8 +29,9 @@ namespace JBDH.Services.Core
             { 16, "CREATE TABLE IF NOT EXISTS Lists (Id INT PRIMARY KEY AUTO_INCREMENT, BoardId INT NOT NULL, Name VARCHAR(255) NOT NULL, `Order` INT NOT NULL, CreatedAt DATETIME NOT NULL, FOREIGN KEY (BoardId) REFERENCES Boards(Id));" },
             { 17, "CREATE TABLE IF NOT EXISTS Cards (Id INT PRIMARY KEY AUTO_INCREMENT, ListId INT NOT NULL, Title VARCHAR(255) NOT NULL, Description TEXT, `Order` INT NOT NULL, CreatedAt DATETIME NOT NULL, DueDate DATETIME NULL, AssignedUserId INT NULL, FOREIGN KEY (ListId) REFERENCES Lists(Id), FOREIGN KEY (AssignedUserId) REFERENCES Users(Id));" },
             { 18, "CREATE TABLE IF NOT EXISTS BoardMemberships (Id INT PRIMARY KEY AUTO_INCREMENT, BoardId INT NOT NULL, UserId INT NOT NULL, Role VARCHAR(50) NOT NULL, InvitedByUserId INT, InvitationAccepted BOOLEAN DEFAULT FALSE, InvitationToken VARCHAR(255), CreatedAt DATETIME NOT NULL, FOREIGN KEY (BoardId) REFERENCES Boards(Id), FOREIGN KEY (UserId) REFERENCES Users(Id), FOREIGN KEY (InvitedByUserId) REFERENCES Users(Id));" },
+            { 19, "CREATE TABLE IF NOT EXISTS Messages (Id INT PRIMARY KEY AUTO_INCREMENT, SenderId INT NOT NULL, RecipientId INT NOT NULL, Content TEXT NOT NULL, SentAt DATETIME NOT NULL, IsRead BOOLEAN DEFAULT FALSE, FOREIGN KEY (SenderId) REFERENCES Users(Id), FOREIGN KEY (RecipientId) REFERENCES Users(Id));" },
 
-            // 100-199: INSERTS/SELECTS/UPDATES
+            // 100-199: CREATE TABLE/DB
             { 100, "INSERT INTO raw_table (JobId, title, description, company, location, posted_date, webpage_url) VALUES (@job_id, @title, @description, @company, @location, @posted_date, @webpage_url);" },
             { 101, "INSERT INTO Jobs (JobId, Title, Description, Company, Location, PostedDate, WebpageUrl) SELECT JobId, title, description, company, location, posted_date, webpage_url FROM raw_table;" },
             { 102, "SELECT * FROM Jobs WHERE posted_date LIKE @param1 ORDER BY posted_date DESC;" },
@@ -69,7 +70,12 @@ namespace JBDH.Services.Core
             { 320, "DELETE FROM Boards WHERE Id = @Id;" },
             { 321, "DELETE FROM Lists WHERE Id = @Id;" },
             { 322, "DELETE FROM Cards WHERE Id = @Id;" },
-            { 323, "DELETE FROM BoardMemberships WHERE Id = @Id;" }
+            { 323, "DELETE FROM BoardMemberships WHERE Id = @Id;" },
+
+            // 400-499: MESSAGES
+            { 400, "SELECT * FROM Messages WHERE (SenderId = @UserId OR RecipientId = @UserId) ORDER BY SentAt DESC;" },
+            { 401, "SELECT * FROM Messages WHERE (SenderId = @UserId1 AND RecipientId = @UserId2) OR (SenderId = @UserId2 AND RecipientId = @UserId1) ORDER BY SentAt;" },
+            { 402, "INSERT INTO Messages (SenderId, RecipientId, Content, SentAt, IsRead) VALUES (@SenderId, @RecipientId, @Content, @SentAt, @IsRead);" }
         };
 
         public static string? SqlQuery(int queryId)
