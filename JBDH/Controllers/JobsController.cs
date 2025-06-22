@@ -35,7 +35,7 @@ namespace JBDH.Controllers
 
             // Get the latest AI response for this job
             var latestAIResponse = await _context.JobAIResponses
-                .Where(r => r.JobId == id.ToString())
+                .Where(r => r.JobId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .FirstOrDefaultAsync();
 

@@ -7,6 +7,7 @@ using FriendshipModel = JBDH.Models.Friendship.Friendship;
 using JBDH.Models.Authentication;
 using JBDH.Models.Notifications;
 using JBDH.Models.Organisation;
+using JBDH.Models.Kanban;
 
 namespace JBDH.Models.Core
 {
@@ -40,6 +41,12 @@ namespace JBDH.Models.Core
         public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; }
         public DbSet<UserReport> UserReports { get; set; }
         public DbSet<PasswordReset> PasswordResets { get; set; }
+
+        public DbSet<JBDH.Models.Kanban.Board> Boards { get; set; }
+        public DbSet<JBDH.Models.Kanban.KanbanList> Lists { get; set; }
+        public DbSet<JBDH.Models.Kanban.Card> Cards { get; set; }
+        public DbSet<JBDH.Models.Kanban.BoardMembership> BoardMemberships { get; set; }
+        public DbSet<JBDH.Models.Kanban.Organization> Organizations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

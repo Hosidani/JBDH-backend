@@ -68,6 +68,9 @@ namespace JBDH.Services.UserManagement
 
         public int? GetCurrentUserId(ClaimsPrincipal user)
         {
+            if (user == null)
+                return null;
+                
             var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (int.TryParse(idClaim, out var id))
                 return id;

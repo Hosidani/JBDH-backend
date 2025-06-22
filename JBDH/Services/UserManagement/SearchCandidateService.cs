@@ -24,6 +24,10 @@ namespace JBDH.Services.UserManagement
             var users = _context.Users.Where(u => u.OpenForHiring == true);
             LoggingConfigService.ReturnInfo($"Total users open for hiring: {await users.CountAsync()}");
 
+            // Normalize input parameters
+            keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword?.Trim();
+            location = string.IsNullOrWhiteSpace(location) ? null : location?.Trim();
+
             var userWithAI = users.Select(u => new
             {
                 User = u,
@@ -35,10 +39,10 @@ namespace JBDH.Services.UserManagement
             var filtered = await userWithAI
                 .Where(x =>
                     x.LatestAI != null &&
-                    (string.IsNullOrEmpty(keyword) ||
+                    (keyword == null ||
                         !string.IsNullOrEmpty(x.LatestAI.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower())) &&
-                    (string.IsNullOrEmpty(location) ||
-                        (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()))
+                    (location == null ||
+                        (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower().Contains(location.ToLower())))
                 )
                 .ToListAsync();
 
@@ -55,7 +59,7 @@ namespace JBDH.Services.UserManagement
                     Username = x.User.Username,
                     Location = x.User.Location,
                     UserAIResponse = aiResponse ?? new UserAIResponse { UserId = x.User.Id, User = x.User },
-                    Priority = (!string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()) ? 1 : 2
+                    Priority = (location != null && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower().Contains(location.ToLower())) ? 1 : 2
                 };
             }));
 
