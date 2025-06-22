@@ -1,9 +1,9 @@
-// filepath: c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\JobAIResponseService.cs
+// filepath: c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\AICommunications/JobAIResponseService.cs
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using JBDH.Models.ViewModels;
-using JBDH.Models;
+using JBDH.Models.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.AICommunications
 {

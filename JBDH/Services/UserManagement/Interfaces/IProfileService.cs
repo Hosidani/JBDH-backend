@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
-using JBDH.Models;
 using JBDH.Models.User;
+using JBDH.Models.ViewModels;
+using JBDH.Models.Services;
+using JBDH.Models.Core;
 
 namespace JBDH.Services.UserManagement
 {

@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using JBDH.Models;
 using JBDH.Models.ViewModels;
 using JBDH.Services;
 using JBDH.Services.JobManagement;
+using JBDH.Models.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JBDH.Controllers
 {

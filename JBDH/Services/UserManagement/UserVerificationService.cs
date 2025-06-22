@@ -1,8 +1,9 @@
-using JBDH.Models;
+using JBDH.Models.Core;
 using JBDH.Services.Notifications;
-using Microsoft.AspNetCore.Mvc; // For IUrlHelper
-using Microsoft.AspNetCore.Http; // For HttpRequest if needed
-using Microsoft.EntityFrameworkCore; // For EF Core methods
+using JBDH.Models.Notifications;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.UserManagement
 {

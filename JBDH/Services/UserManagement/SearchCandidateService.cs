@@ -1,8 +1,10 @@
-using JBDH.Models;
-using JBDH.Services;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Models.AI;
+
 
 namespace JBDH.Services.UserManagement
 {

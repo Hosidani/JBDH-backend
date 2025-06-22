@@ -1,11 +1,12 @@
-using JBDH.Models;
-using JBDH.Models.User;
-using JBDH.Models.Friendship;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JBDH.Models.Core;
+using JBDH.Models.User;
+using JBDH.Models.Friendship;
+using JBDH.Models.Services;
+using Microsoft.EntityFrameworkCore;
 using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
 namespace JBDH.Services.Friendship

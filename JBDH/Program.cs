@@ -13,15 +13,16 @@ using JBDH.Services.Authentication;
 using JBDH.Services.Reporting;
 using JBDH.Services.DataFlow;
 using JBDH.Services.Workflows;
-using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
-using Microsoft.AspNetCore.Builder; // For WebApplication
-using Microsoft.Extensions.DependencyInjection; // For DI container setup
-using Microsoft.Extensions.Hosting; // For environment setup
-using Microsoft.AspNetCore.Http; // For IHttpContextAccessor
-using Microsoft.EntityFrameworkCore; // For DbContext and DbContextOptionsBuilder
-using MySql.Data.MySqlClient; // For MySQL connection
+using JBDH.Models.Core;
+using JBDH.Models.AI;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 using MySql.EntityFrameworkCore.Extensions;
-
 
 var builder = WebApplication.CreateBuilder(args);
 

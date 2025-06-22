@@ -3,7 +3,7 @@ using JBDH.Models.AI;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services.UserManagement;
-
+using JBDH.Models.Core;
 
 namespace JBDH.Services.AICommunications
 {

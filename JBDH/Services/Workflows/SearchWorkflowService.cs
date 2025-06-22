@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Services.JobManagement;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Workflows;
+using JBDH.Models.Core;
 
 namespace JBDH.Services.Workflows
 {

@@ -1,12 +1,13 @@
-using JBDH.Models;
-using JBDH.Models.User;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using JBDH.Models.Core;
+using JBDH.Models.User;
+using JBDH.Models.Services;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.UserManagement
 {

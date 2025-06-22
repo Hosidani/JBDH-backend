@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using MySql.Data.MySqlClient;
-using JBDH.Models;
+using JBDH.Models.Core;
 using JBDH.Services.Configuration;
+using MySql.Data.MySqlClient;
 
 namespace JBDH.Services.Core
 {

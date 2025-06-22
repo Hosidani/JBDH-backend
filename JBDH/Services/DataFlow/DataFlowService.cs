@@ -6,6 +6,7 @@ using JBDH.Models.Dataflow;
 using JBDH.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using DataFlowModel = JBDH.Models.Dataflow.DataFlow;
+using JBDH.Models.Core;
 
 namespace JBDH.Services.DataFlow
 {

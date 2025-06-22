@@ -1,15 +1,14 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using JBDH.Models;
-using JBDH.Models.Job;
-using JBDH.Services;
-using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication;
+using JBDH.Models.Job;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
 using JBDH.Services.Configuration;
 using JBDH.Services.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace JBDH.Services.JobManagement
 {

@@ -1,10 +1,13 @@
-using JBDH.Models;
+using JBDH.Models.AI;
 
-public class SearchCandidateViewModel
+namespace JBDH.Models.ViewModels
 {
-    public int UserId { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string Location { get; set; } = string.Empty;
-    public UserAIResponse? UserAIResponse { get; set; }
-    public int Priority { get; set; }
+    public class SearchCandidateViewModel
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
+        public UserAIResponse? UserAIResponse { get; set; }
+        public int Priority { get; set; }
+    }
 }

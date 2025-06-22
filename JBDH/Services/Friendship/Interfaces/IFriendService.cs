@@ -1,7 +1,7 @@
-using JBDH.Models;
 using JBDH.Models.User;
 using JBDH.Models.Friendship;
 using FriendshipModel = JBDH.Models.Friendship.Friendship;
+using JBDH.Models.Services;
 
 namespace JBDH.Services.Friendship
 {
