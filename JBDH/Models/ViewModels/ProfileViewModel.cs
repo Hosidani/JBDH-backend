@@ -13,5 +13,6 @@ namespace JBDH.Models.ViewModels
         public UserAIResponse? UserAIResponse { get; set; }
         public CVAnalysisResult? CVAnalysisResult { get; set; }
         public List<JBDH.Models.User.User> Friends { get; set; } = new List<JBDH.Models.User.User>();
+        public List<JBDH.Models.Friendship.Friendship> PendingFriendRequests { get; set; } = new();
     }
 }

@@ -29,7 +29,10 @@ namespace JBDH.Services.UserManagement
         public async Task<User?> GetUserByIdAsync(int userId)
         {
             return await _context.Set<User>()
-                .Include(u => u.AIResponses)
+                .Include(u => u.ReceivedFriendRequests)
+                    .ThenInclude(f => f.Requester)
+                .Include(u => u.SentFriendRequests)
+                    .ThenInclude(f => f.Addressee)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
@@ -57,7 +60,7 @@ namespace JBDH.Services.UserManagement
             var user = await GetUserByIdAsync(userId);
             if (user == null)
                 throw new System.Exception("User not found.");
-                
+
             var friends = user.SentFriendRequests
                 .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
                 .Select(f => f.Addressee)
@@ -68,13 +71,19 @@ namespace JBDH.Services.UserManagement
                 )
                 .ToList();
 
+            // Get pending requests where the current user is the addressee
+            var pendingRequests = user.ReceivedFriendRequests
+                .Where(f => f.Status == FriendshipStatus.Pending)
+                .ToList();
+
             return new ProfileViewModel
             {
                 User = user,
                 IsFriend = false,
                 Organisation = null,
                 UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id),
-                Friends = friends
+                Friends = friends,
+                PendingFriendRequests = pendingRequests
             };
         }
 
