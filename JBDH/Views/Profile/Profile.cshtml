@@ -73,3 +73,10 @@
         <p>User not found.</p>
     }
 </div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
