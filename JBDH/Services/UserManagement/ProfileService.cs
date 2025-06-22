@@ -4,6 +4,7 @@ using JBDH.Models.Core;
 using JBDH.Models.User;
 using JBDH.Models.ViewModels;
 using JBDH.Models.Services;
+using JBDH.Models.Friendship;
 using JBDH.Services.Friendship;
 using JBDH.Services.AICommunications;
 using Microsoft.EntityFrameworkCore;
@@ -56,13 +57,24 @@ namespace JBDH.Services.UserManagement
             var user = await GetUserByIdAsync(userId);
             if (user == null)
                 throw new System.Exception("User not found.");
+                
+            var friends = user.SentFriendRequests
+                .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
+                .Select(f => f.Addressee)
+                .Concat(
+                    user.ReceivedFriendRequests
+                        .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
+                        .Select(f => f.Requester)
+                )
+                .ToList();
 
             return new ProfileViewModel
             {
                 User = user,
                 IsFriend = false,
                 Organisation = null,
-                UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id)
+                UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id),
+                Friends = friends
             };
         }
 
