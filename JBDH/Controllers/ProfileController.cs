@@ -124,6 +124,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
         {
             await _friendService.AcceptFriendRequestAsync(friendshipId);
+            TempData["SuccessMessage"] = "Friend request accepted!";
             return RedirectToAction("MyProfile");
         }
 
@@ -132,6 +133,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
         {
             await _friendService.DeclineFriendRequestAsync(friendshipId);
+            TempData["SuccessMessage"] = "Friend request declined.";
             return RedirectToAction("MyProfile");
         }
     }
