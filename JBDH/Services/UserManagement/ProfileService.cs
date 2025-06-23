@@ -8,6 +8,7 @@ using JBDH.Models.Friendship;
 using JBDH.Services.Friendship;
 using JBDH.Services.AICommunications;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Models.Job;
 
 namespace JBDH.Services.UserManagement
 {
@@ -71,10 +72,14 @@ namespace JBDH.Services.UserManagement
                 )
                 .ToList();
 
-            // Get pending requests where the current user is the addressee
             var pendingRequests = user.ReceivedFriendRequests
                 .Where(f => f.Status == FriendshipStatus.Pending)
                 .ToList();
+
+            // Fetch job applications
+            var jobApplications = await _context.Set<JobApplication>()
+                .Where(j => j.UserId == userId)
+                .ToListAsync();
 
             return new ProfileViewModel
             {
@@ -83,7 +88,8 @@ namespace JBDH.Services.UserManagement
                 Organisation = null,
                 UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id),
                 Friends = friends,
-                PendingFriendRequests = pendingRequests
+                PendingFriendRequests = pendingRequests,
+                JobApplications = jobApplications
             };
         }
 

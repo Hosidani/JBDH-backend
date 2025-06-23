@@ -25,12 +25,12 @@ namespace JBDH.Controllers
         private readonly IUserAIResponseService _userAIResponseService; // Add reference to IUserAIResponseService
 
 
-        public ProfileController(IUserAIResponseService userAIResponseService, ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIApiClient)
+        public ProfileController(IUserAIResponseService userAIResponseService, ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIAApiClient)
         {
             _context = context;
             _profileService = profileService;
             _friendService = friendService; // Initialize FriendService
-            _AIApiClient = aIApiClient;
+            _AIApiClient = aIAApiClient;
             _userAIResponseService = userAIResponseService; // Initialize IUserAIResponseService
         }
 
@@ -80,7 +80,6 @@ namespace JBDH.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            // Parse the addresseeId
             var currentUserId = int.Parse(currentUserName);
 
             if (!int.TryParse(addresseeId.ToString(), out int addresseeIdInt))
@@ -92,6 +91,7 @@ namespace JBDH.Controllers
 
             if (result.Success)
             {
+                TempData["SuccessMessage"] = "Friend request sent!";
                 return RedirectToAction("Profile", new { userId = addresseeId });
             }
             else
@@ -124,6 +124,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
         {
             await _friendService.AcceptFriendRequestAsync(friendshipId);
+            TempData["SuccessMessage"] = "Friend request accepted!";
             return RedirectToAction("MyProfile");
         }
 
@@ -132,6 +133,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
         {
             await _friendService.DeclineFriendRequestAsync(friendshipId);
+            TempData["SuccessMessage"] = "Friend request declined.";
             return RedirectToAction("MyProfile");
         }
     }
