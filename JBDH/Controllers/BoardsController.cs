@@ -91,6 +91,10 @@ namespace JBDH.Controllers
                 return NotFound();
             if (ModelState.IsValid)
             {
+                // Set OwnerId from the logged-in user
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                board.OwnerId = userId;
+
                 board.UpdatedAt = DateTime.UtcNow;
                 await _boardService.UpdateAsync(board);
                 return RedirectToAction(nameof(Index));
@@ -116,4 +120,4 @@ namespace JBDH.Controllers
             return RedirectToAction(nameof(Index));
         }
     }
-} 
+}
