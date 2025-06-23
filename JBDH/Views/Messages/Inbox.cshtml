@@ -1,0 +1,38 @@
+@model List<JBDH.Models.Messaging.Message>
+
+@{
+    ViewData["Title"] = "Inbox";
+}
+
+<h2>Inbox</h2>
+
+@if (!Model.Any())
+{
+    <p>You have no messages.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>Preview</th>
+                <th>Sent At</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var msg in Model)
+        {
+            <tr>
+                <td>@msg.SenderId</td>
+                <td>@msg.Content.Substring(0, Math.Min(40, msg.Content.Length))...</td>
+                <td>@msg.SentAt.ToString("g")</td>
+                <td>
+                    <a asp-action="Conversation" asp-route-userId="@msg.SenderId">View</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

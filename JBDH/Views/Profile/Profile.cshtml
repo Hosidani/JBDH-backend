@@ -73,10 +73,12 @@
         <p>User not found.</p>
     }
 </div>
-
-@if (TempData["SuccessMessage"] != null)
+@{
+    var currentUserIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int currentUserId = 0;
+    int.TryParse(currentUserIdStr, out currentUserId);
+}
+@if (Model.User != null && Model.User.Id != currentUserId)
 {
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
+    <a asp-controller="Messages" asp-action="Send" asp-route-userId="@Model.User.Id" class="btn btn-primary">Send Message</a>
 }
