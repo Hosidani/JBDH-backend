@@ -210,3 +210,26 @@ else
 {
     <p>No pending friend requests.</p>
 }
+
+<h4>My Job Applications</h4>
+@if (Model.JobApplications != null && Model.JobApplications.Any())
+{
+    <ul>
+        @foreach (var app in Model.JobApplications)
+        {
+            <li>
+                Job ID: @app.JobId
+                <br />
+                Applied At: @app.AppliedAt.ToString("yyyy-MM-dd")
+                @if (!string.IsNullOrEmpty(app.Notes))
+                {
+                    <text><br />Notes: @app.Notes</text>
+                }
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have not applied to any jobs yet.</p>
+}
