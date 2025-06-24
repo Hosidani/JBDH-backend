@@ -2,6 +2,7 @@ using JBDH.Models;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
+using JBDH.Services.Helpers;
 using Newtonsoft.Json;
 
 namespace JBDH.Services.AICommunications
@@ -10,28 +11,13 @@ namespace JBDH.Services.AICommunications
     {
         private readonly IAIApiClient _aiApiClient;
         private readonly IUserAIResponseService _userAIResponseService;
+        private readonly IManageIOService _manageIOService;
 
-        public CVAnalysisService(IAIApiClient aiApiClient, IUserAIResponseService userAIResponseService)
+        public CVAnalysisService(IAIApiClient aiApiClient, IUserAIResponseService userAIResponseService, IManageIOService manageIOService)
         {
             _aiApiClient = aiApiClient;
             _userAIResponseService = userAIResponseService;
-        }
-
-        private string ExtractJsonFromCodeBlock(string aiResponseText)
-        {
-            if (string.IsNullOrWhiteSpace(aiResponseText))
-                return aiResponseText;
-
-            var trimmed = aiResponseText.Trim();
-            if (trimmed.StartsWith("```"))
-            {
-                var lines = trimmed.Split('\n').ToList();
-                lines.RemoveAt(0);
-                if (lines.Count > 0 && lines[^1].Trim().StartsWith("```"))
-                    lines.RemoveAt(lines.Count - 1);
-                return string.Join("\n", lines).Trim();
-            }
-            return aiResponseText;
+            _manageIOService = manageIOService;
         }
 
         public async Task AnalyzeAndSaveCVAsync(User user, string cvPath)
@@ -47,7 +33,7 @@ namespace JBDH.Services.AICommunications
             CVAnalysisResult? analysisResult = null;
             try
             {
-                aiResponseText = ExtractJsonFromCodeBlock(aiResponseText);
+                aiResponseText = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText);
                 if (!string.IsNullOrWhiteSpace(aiResponseText) && aiResponseText.TrimStart().StartsWith("{"))
                 {
                     analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(aiResponseText);

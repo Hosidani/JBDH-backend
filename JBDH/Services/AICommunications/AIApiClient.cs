@@ -17,13 +17,13 @@ namespace JBDH.Services.AICommunications
     {
         private readonly HttpClient _httpClient;
         private AIConfig _aiConfig;
-        private readonly IManageInputService _manageInputService;
+        private readonly IManageIOService _manageIOService;
         private readonly IAIRequestBuilderService _aiRequestBuilderService;
-        public AIApiClient(HttpClient httpClient, AIConfig aiConfig, IManageInputService manageInputService, IAIRequestBuilderService aIRequestBuilderService)
+        public AIApiClient(HttpClient httpClient, AIConfig aiConfig, IManageIOService manageIOService, IAIRequestBuilderService aIRequestBuilderService)
         {
             _httpClient = httpClient;
             _aiConfig = aiConfig;
-            _manageInputService = manageInputService;
+            _manageIOService = manageIOService;
             _aiRequestBuilderService = aIRequestBuilderService;
 
         }
