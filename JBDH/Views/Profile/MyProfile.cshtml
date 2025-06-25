@@ -66,27 +66,6 @@
                 <span>No CV uploaded</span>
             }
         </dd>
-            @{
-                var markdown = Model.UserAIResponse?.ResponseText ?? "";
-                var html = Markdig.Markdown.ToHtml(markdown);
-            }
-            @if (!string.IsNullOrEmpty(markdown))
-            {
-                <button type="button" class="btn btn-info btn-sm" id="analyzeCvBtn">Analyze CV</button>
-                <div id="aiResponseContent" class="markdown-body" style="display:none;">
-                    @Html.Raw(html)
-                </div>
-                <script>
-                    document.getElementById('analyzeCvBtn').addEventListener('click', function() {
-                        var content = document.getElementById('aiResponseContent');
-                        content.style.display = content.style.display === 'none' ? 'block' : 'none';
-                    });
-                </script>
-            }
-            else
-            {
-                <span>No CV available</span>
-            }
         </dd>
     </dl>
 </div>
@@ -124,7 +103,6 @@
                 </ul>
             </div>
         </div>
-        <br />
         <br />
         <div class="row">
             <div class="col-md-12 mb-3">
@@ -218,13 +196,27 @@ else
         @foreach (var app in Model.JobApplications)
         {
             <li>
-                Job ID: @app.JobId
+                <strong>
+                    @if (!string.IsNullOrEmpty(app.JobUrl))
+                    {
+                        <a href="@app.JobUrl" target="_blank">@app.JobTitle</a>
+                    }
+                    else
+                    {
+                        @app.JobTitle
+                    }
+                </strong>
+                <br />
+                <span>@app.JobDescription</span>
                 <br />
                 Applied At: @app.AppliedAt.ToString("yyyy-MM-dd")
-                @if (!string.IsNullOrEmpty(app.Notes))
-                {
-                    <text><br />Notes: @app.Notes</text>
-                }
+                <form asp-action="UpdateJobApplicationNotes" method="post" class="mt-2">
+                    <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                    <label for="notes-@app.ApplicationId">Notes:</label>
+                    <textarea id="notes-@app.ApplicationId" name="notes" class="form-control"
+                        rows="2">@app.Notes</textarea>
+                    <button type="submit" class="btn btn-primary btn-sm mt-1">Save Notes</button>
+                </form>
             </li>
         }
     </ul>

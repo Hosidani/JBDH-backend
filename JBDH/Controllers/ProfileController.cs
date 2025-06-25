@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using JBDH.Models.Job;
 
 namespace JBDH.Controllers
 {
@@ -134,6 +135,22 @@ namespace JBDH.Controllers
         {
             await _friendService.DeclineFriendRequestAsync(friendshipId);
             TempData["SuccessMessage"] = "Friend request declined.";
+            return RedirectToAction("MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateJobApplicationNotes(int applicationId, string notes)
+        {
+            var app = await _context.Set<JobApplication>().FindAsync(applicationId);
+            if (app == null)
+            {
+                TempData["ErrorMessage"] = "Job application not found.";
+                return RedirectToAction("MyProfile");
+            }
+            app.Notes = notes;
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Notes updated!";
             return RedirectToAction("MyProfile");
         }
     }

@@ -15,6 +15,17 @@ namespace JBDH.Models.ViewModels
         public CVAnalysisResult? CVAnalysisResult { get; set; }
         public List<JBDH.Models.User.User> Friends { get; set; } = new List<JBDH.Models.User.User>();
         public List<JBDH.Models.Friendship.Friendship> PendingFriendRequests { get; set; } = new();
-        public List<JobApplication> JobApplications { get; set; } = new();
+        public List<JobApplicationViewModel> JobApplications { get; set; } = new();
+
+        public class JobApplicationViewModel
+        {
+            public int ApplicationId { get; set; }
+            public int JobId { get; set; }
+            public string JobTitle { get; set; } = string.Empty;
+            public string JobUrl { get; set; } = string.Empty;
+            public string JobDescription { get; set; } = string.Empty;
+            public string? Notes { get; set; }
+            public DateTime AppliedAt { get; set; }
+        }
     }
 }
