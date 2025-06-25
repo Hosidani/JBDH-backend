@@ -30,7 +30,7 @@ namespace JBDH.Services.AICommunications
             _manageIOService = manageIOService;
         }
 
-        public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId)
+        public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId)
         {
             // 1. Check for cached response in the database
             var cachedResponse = await _context.JobAIResponses

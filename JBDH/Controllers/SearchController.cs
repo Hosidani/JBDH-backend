@@ -110,7 +110,7 @@ namespace JBDH.Controllers
                 });
             }
 
-            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
+            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId.ToString());
 
             LoggingConfigService.ReturnInfo($"job AI response: {aiResultString}");
 

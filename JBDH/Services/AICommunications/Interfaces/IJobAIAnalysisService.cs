@@ -4,6 +4,6 @@ namespace JBDH.Services.AICommunications
 {
     public interface IJobAIAnalysisService
     {
-        Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId);
+        Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId);
     }
 }

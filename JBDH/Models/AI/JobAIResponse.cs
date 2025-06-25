@@ -8,7 +8,7 @@ namespace JBDH.Models.AI
         public int Id { get; set; }
         
         [ForeignKey("Job")]
-        public int JobId { get; set; }
+        public string JobId { get; set; }
         
         public string ResponseText { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }

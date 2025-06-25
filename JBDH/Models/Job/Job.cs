@@ -6,7 +6,7 @@ namespace JBDH.Models.Job
     public class Job
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string? JobId { get; set; } // Unique identifier for the job
         public string? Title { get; set; } // Job title
         public string? Description { get; set; } // Job description

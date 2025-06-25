@@ -200,7 +200,7 @@ public class EtlPipeline
             // Step 1: Insert raw jobs into raw_table
             foreach (var job in rawJobs)
             {
-                var command = new MySqlCommand(SqlQueries.SqlQuery(100), connection); // Use 100 for insert
+                var command = new MySqlCommand(SqlQueries.SqlQuery(100), connection); 
                 command.Parameters.AddWithValue("@job_id", job["job_id"]);
                 command.Parameters.AddWithValue("@title", job["title"]);
                 command.Parameters.AddWithValue("@description", job["description"]);
