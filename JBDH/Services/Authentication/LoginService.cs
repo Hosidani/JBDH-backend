@@ -1,12 +1,13 @@
-using BCrypt.Net;
-using JBDH.Models;
 using JBDH.Models.User;
+using JBDH.Models.Core;
+using BCrypt.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Models.Authentication;
 
 namespace JBDH.Services.Authentication
 {

@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Services.DataFlow;
 using JBDH.Services.Reporting;
 using JBDH.Services.Configuration;
+using JBDH.Models.Core;
 
 namespace JBDH.Controllers
 {

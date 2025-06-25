@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using JBDH.Models;
 using JBDH.Models.ViewModels;
 using JBDH.Services;
 using JBDH.Services.JobManagement;
+using JBDH.Models.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JBDH.Controllers
 {
@@ -35,7 +35,7 @@ namespace JBDH.Controllers
 
             // Get the latest AI response for this job
             var latestAIResponse = await _context.JobAIResponses
-                .Where(r => r.JobId == id.ToString())
+                .Where(r => r.JobId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .FirstOrDefaultAsync();
 

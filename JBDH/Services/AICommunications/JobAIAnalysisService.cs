@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services.UserManagement;
 using JBDH.Services.Helpers;
-
+using JBDH.Models.Core;
 
 namespace JBDH.Services.AICommunications
 {
@@ -30,7 +30,7 @@ namespace JBDH.Services.AICommunications
             _manageIOService = manageIOService;
         }
 
-        public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId)
+        public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId)
         {
             // 1. Check for cached response in the database
             var cachedResponse = await _context.JobAIResponses

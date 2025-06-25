@@ -13,15 +13,18 @@ using JBDH.Services.Authentication;
 using JBDH.Services.Reporting;
 using JBDH.Services.DataFlow;
 using JBDH.Services.Workflows;
-using Microsoft.AspNetCore.Authentication.Cookies; // For cookie authentication
-using Microsoft.AspNetCore.Builder; // For WebApplication
-using Microsoft.Extensions.DependencyInjection; // For DI container setup
-using Microsoft.Extensions.Hosting; // For environment setup
-using Microsoft.AspNetCore.Http; // For IHttpContextAccessor
-using Microsoft.EntityFrameworkCore; // For DbContext and DbContextOptionsBuilder
-using MySql.Data.MySqlClient; // For MySQL connection
+using JBDH.Models.Core;
+using JBDH.Models.AI;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 using MySql.EntityFrameworkCore.Extensions;
-
+using JBDH.Services.BoardDataService;
+using JBDH.Services.ListService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,17 +56,15 @@ await Task.Run(async () =>
 {
     try
     {
-        await JobStreamService.RunJobStreamAsync(args); // Asynchronous job stream service
-        DatabaseHandlerService.databaseHandler(args); // Synchronous DB handler
+        LoggingConfigService.ConfigLogging(); // Configure logging first
+        var jobData = await JobStreamService.RunJobStreamAsync(args);
+        DatabaseHandlerService.databaseHandler(jobData);
     }
     catch (Exception ex)
     {
         LoggingConfigService.ReturnError($"Startup error: {ex.Message}");
         throw; // Optional: rethrow if you want the app to fail on critical startup errors
     }
-
-// Run PlatsbankenApi.Main asynchronously before starting the web application
-
 });
 
 // Add services to the container **before** calling builder.Build
@@ -93,7 +94,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DataFlowService>(); 
 builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
 builder.Services.AddScoped<ISearchWorkflowService, SearchWorkflowService>();
-
+builder.Services.AddScoped<IBoardDataService, BoardDataService>();
+builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<IListService, ListService>();
+builder.Services.AddScoped<JBDH.Services.Messaging.IMessageService, JBDH.Services.Messaging.MessageService>();
 
 builder.Services.AddSession(options =>
 {

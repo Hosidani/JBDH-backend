@@ -1,11 +1,12 @@
-using JBDH.Models;
-using JBDH.Models.User;
-using JBDH.Models.Friendship;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JBDH.Models.Core;
+using JBDH.Models.User;
+using JBDH.Models.Friendship;
+using JBDH.Models.Services;
+using Microsoft.EntityFrameworkCore;
 using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
 namespace JBDH.Services.Friendship
@@ -52,34 +53,42 @@ namespace JBDH.Services.Friendship
             return ServiceResult.SuccessResult();
         }
 
-
-
         public async Task<bool> AreFriendsAsync(int requesterId, int addresseeId)
         {
             if (requesterId == addresseeId)
                 return false;
-                
+
             var friendship = await _context.Friendships
                 .FirstOrDefaultAsync(f =>
-                    (f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
-                    (f.RequesterId == addresseeId && f.AddresseeId == requesterId) && 
-                    f.Status == FriendshipStatus.Friends);
+                    ((f.RequesterId == requesterId && f.AddresseeId == addresseeId) ||
+                     (f.RequesterId == addresseeId && f.AddresseeId == requesterId))
+                    && f.Status == FriendshipStatus.Friends);
 
             return friendship != null;
         }
 
-
-        public async Task<bool> AcceptFriendRequestAsync(int requestId)
+        public async Task<bool> AcceptFriendRequestAsync(int friendshipId)
         {
-            var friendship = await _context.Friendships
-                .FirstOrDefaultAsync(f => f.Id == requestId && f.Status == FriendshipStatus.Pending);
+            var friendship = await _context.Friendships.FindAsync(friendshipId);
+            if (friendship != null && friendship.Status == FriendshipStatus.Pending)
+            {
+                friendship.Status = FriendshipStatus.Accepted;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
 
-            if (friendship == null)
-                return false;
-
-            friendship.Status = FriendshipStatus.Friends;
-            await _context.SaveChangesAsync();
-            return true;
+        public async Task<bool> DeclineFriendRequestAsync(int friendshipId)
+        {
+            var friendship = await _context.Friendships.FindAsync(friendshipId);
+            if (friendship != null && friendship.Status == FriendshipStatus.Pending)
+            {
+                friendship.Status = FriendshipStatus.Rejected;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<List<User>> GetFriendsAsync(int userId)

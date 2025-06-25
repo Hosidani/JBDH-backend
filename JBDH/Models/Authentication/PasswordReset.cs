@@ -1,6 +1,4 @@
-using JBDH.Models.User;
-
-namespace JBDH.Models
+namespace JBDH.Models.Authentication
 {
     public class PasswordReset
     {

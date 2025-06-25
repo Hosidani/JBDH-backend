@@ -1,13 +1,13 @@
-using JBDH.Models;
-using JBDH.Services;
+using JBDH.Models.Core;
+using JBDH.Services.UserManagement;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Microsoft.AspNetCore.Authentication;
-using JBDH.Services.UserManagement;
-using JBDH.Services.AICommunications;
-using JBDH.Services.Configuration;
+using JBDH.Models.ViewModels;
 
 namespace JBDH.Controllers
 {

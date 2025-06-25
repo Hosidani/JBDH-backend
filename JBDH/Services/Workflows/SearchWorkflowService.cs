@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Services.JobManagement;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Workflows;
+using JBDH.Models.Core;
 
 namespace JBDH.Services.Workflows
 {
@@ -33,7 +34,7 @@ namespace JBDH.Services.Workflows
                 foreach (var item in results)
                 {
                     item.HasApplied = await _context.JobApplications
-                        .AnyAsync(a => a.JobId.ToString() == item.Job.JobId && a.UserId == userId.Value);
+                        .AnyAsync(a => a.JobId == item.Job.Id && a.UserId == userId.Value);
                 }
             }
 

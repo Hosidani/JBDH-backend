@@ -1,5 +1,5 @@
 @using Markdig
-@model JBDH.Models.ProfileViewModel
+@model JBDH.Models.ViewModels.ProfileViewModel
 
 
 @{
@@ -66,27 +66,6 @@
                 <span>No CV uploaded</span>
             }
         </dd>
-            @{
-                var markdown = Model.UserAIResponse?.ResponseText ?? "";
-                var html = Markdig.Markdown.ToHtml(markdown);
-            }
-            @if (!string.IsNullOrEmpty(markdown))
-            {
-                <button type="button" class="btn btn-info btn-sm" id="analyzeCvBtn">Analyze CV</button>
-                <div id="aiResponseContent" class="markdown-body" style="display:none;">
-                    @Html.Raw(html)
-                </div>
-                <script>
-                    document.getElementById('analyzeCvBtn').addEventListener('click', function() {
-                        var content = document.getElementById('aiResponseContent');
-                        content.style.display = content.style.display === 'none' ? 'block' : 'none';
-                    });
-                </script>
-            }
-            else
-            {
-                <span>No CV available</span>
-            }
         </dd>
     </dl>
 </div>
@@ -125,7 +104,6 @@
             </div>
         </div>
         <br />
-        <br />
         <div class="row">
             <div class="col-md-12 mb-3">
                 <h5>Experiences</h5>
@@ -156,4 +134,94 @@
 else
 {
     <span>No AI analysis available.</span>
+}
+
+<form asp-action="UpdateAboutMe" method="post" class="mt-4">
+    <div class="mb-3">
+        <label for="AboutMe" class="form-label">About Me</label>
+        <textarea id="AboutMe" name="aboutMe" class="form-control" rows="5">@Model.User.AboutMe</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Save About Me</button>
+</form>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<h4>My Friends</h4>
+@if (Model.Friends != null && Model.Friends.Any())
+{
+    <ul>
+        @foreach (var friend in Model.Friends)
+        {
+            <li>@friend.Username</li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have no friends yet.</p>
+}
+
+<h4>Pending Friend Requests</h4>
+@if (Model.PendingFriendRequests != null && Model.PendingFriendRequests.Any())
+{
+    <ul>
+        @foreach (var request in Model.PendingFriendRequests)
+        {
+            <li>
+                @request.Requester.Username
+                <form asp-action="AcceptFriendRequest" method="post" style="display:inline;">
+                    <input type="hidden" name="friendshipId" value="@request.Id" />
+                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                </form>
+                <form asp-action="DeclineFriendRequest" method="post" style="display:inline;">
+                    <input type="hidden" name="friendshipId" value="@request.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No pending friend requests.</p>
+}
+
+<h4>My Job Applications</h4>
+@if (Model.JobApplications != null && Model.JobApplications.Any())
+{
+    <ul>
+        @foreach (var app in Model.JobApplications)
+        {
+            <li>
+                <strong>
+                    @if (!string.IsNullOrEmpty(app.JobUrl))
+                    {
+                        <a href="@app.JobUrl" target="_blank">@app.JobTitle</a>
+                    }
+                    else
+                    {
+                        @app.JobTitle
+                    }
+                </strong>
+                <br />
+                <span>@app.JobDescription</span>
+                <br />
+                Applied At: @app.AppliedAt.ToString("yyyy-MM-dd")
+                <form asp-action="UpdateJobApplicationNotes" method="post" class="mt-2">
+                    <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                    <label for="notes-@app.ApplicationId">Notes:</label>
+                    <textarea id="notes-@app.ApplicationId" name="notes" class="form-control"
+                        rows="2">@app.Notes</textarea>
+                    <button type="submit" class="btn btn-primary btn-sm mt-1">Save Notes</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have not applied to any jobs yet.</p>
 }

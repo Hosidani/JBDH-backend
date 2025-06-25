@@ -1,17 +1,21 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using JBDH.Models;
-using JBDH.Services;
-using NLog.Config;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Newtonsoft.Json;
+using JBDH.Models.Core;
+using JBDH.Models.AI;
+using JBDH.Models.ViewModels;
 using JBDH.Services.UserManagement;
 using JBDH.Services.AICommunications;
 using JBDH.Services.JobManagement;
 using JBDH.Services.Configuration;
 using JBDH.Services.Workflows;
 using JBDH.Services.Helpers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NLog.Config;
+using Newtonsoft.Json;
+using JBDH.Models.User;
 
 namespace JBDH.Controllers
 {
@@ -95,7 +99,18 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo($"AnalyzeJob called with URL: {jobAdUrl} and Job ID: {jobId}");
 
-            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId);
+            if (!int.TryParse(jobId, out int parsedJobId))
+            {
+                LoggingConfigService.ReturnError($"Invalid job ID format: {jobId}");
+                return View("Error", new ErrorViewModel
+                {
+                    Title = "Invalid Job ID",
+                    Message = "The provided job ID is not in a valid format.",
+                    ReturnUrl = Url.Action("SearchJob")
+                });
+            }
+
+            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
             LoggingConfigService.ReturnInfo($"job AI response: {aiResultString}");
 
@@ -198,6 +213,16 @@ namespace JBDH.Controllers
             }
 
             return View("SearchResultsJobs", results);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchUsers(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return View(new List<User>());
+
+            var users = await _userPropertiesService.SearchUsersAsync(query);
+            return View(users);
         }
     }
 }

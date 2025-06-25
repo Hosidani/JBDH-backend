@@ -1,4 +1,4 @@
-using JBDH.Models;
+using JBDH.Models.Core;
 using MySql.Data.MySqlClient; // For MySqlConnection, MySqlCommand, etc.
 using JBDH.Services.Configuration;
 

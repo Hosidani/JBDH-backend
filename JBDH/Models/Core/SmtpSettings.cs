@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JBDH.Models
+namespace JBDH.Models.Core
 {
     public class SmtpSettings
     {

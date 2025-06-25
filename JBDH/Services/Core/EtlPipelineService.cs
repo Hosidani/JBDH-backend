@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using MySql.Data.MySqlClient;
-using JBDH.Models; // Assuming this is the namespace for your models
-using NLog.Fluent; // Assuming this is the namespace for your models
+using JBDH.Models.Core;
 using JBDH.Services.Configuration;
-
+using MySql.Data.MySqlClient;
+using NLog.Fluent;
 namespace JBDH.Services.Core
 {    
 
@@ -232,15 +231,17 @@ public class EtlPipeline
         }
     }
 
-    public static void RunEtlPipeline(string jsonFile)
+    public static void RunEtlPipeline(List<Dictionary<string, object>> rawData)
     {
         LoggingConfigService.ReturnInfo("Starting ETL pipeline Service...");
-        var rawData = ExtractData(jsonFile);
+        
+        // Data is already extracted, so we pass it directly to TransformData
         LoggingConfigService.ReturnInfo("Data extracted...");
-        var sqlData = TransformData(rawData);
+
+        var transformedData = TransformData(rawData);
         LoggingConfigService.ReturnInfo("Data transformed...");
-        // Call LoadData to handle loading and deduplication
-        LoadData(sqlData);
+
+        LoadData(transformedData);
         LoggingConfigService.ReturnInfo("ETL pipeline completed successfully.");
     }
 }

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using JBDH.Models;
-using OrganisationModel = JBDH.Models.Organisation;
+using JBDH.Models.Core;
+using OrganisationModel = JBDH.Models.Organisation.Organisation;
 
 namespace JBDH.Services.Organisation
 {

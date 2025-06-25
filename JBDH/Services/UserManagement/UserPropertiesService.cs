@@ -1,12 +1,16 @@
-using JBDH.Models;
-using JBDH.Models.User;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using JBDH.Models.Core;
+using JBDH.Models.User;
+using JBDH.Models.Services;
+using JBDH.Models.Friendship;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace JBDH.Services.UserManagement
 {
@@ -217,6 +221,71 @@ namespace JBDH.Services.UserManagement
             });
 
             return ServiceResult.SuccessResult();
+        }
+
+        public async Task<List<User>> GetFriendsAsync()
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) return new List<User>();
+
+            var friends = await _context.Friendships
+                .Where(f => (f.RequesterId == user.Id || f.AddresseeId == user.Id) &&
+                            (f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends))
+                .Select(f => f.RequesterId == user.Id ? f.Addressee : f.Requester)
+                .ToListAsync();
+
+            return friends;
+        }
+
+        public async Task<bool> AddFriendAsync(int friendId)
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null || user.Id == friendId) return false;
+
+            // Prevent duplicate friendships
+            var exists = await _context.Friendships.AnyAsync(f =>
+                (f.RequesterId == user.Id && f.AddresseeId == friendId) ||
+                (f.RequesterId == friendId && f.AddresseeId == user.Id));
+            if (exists) return false;
+
+            var requester = user;
+            var addressee = await _context.Users.FindAsync(friendId);
+            if (addressee == null) return false;
+
+            var friendship = new JBDH.Models.Friendship.Friendship
+            {
+                RequesterId = requester.Id,
+                AddresseeId = addressee.Id,
+                Requester = requester,
+                Addressee = addressee,
+                Status = FriendshipStatus.Pending,
+                RequestedAt = DateTime.UtcNow
+            };
+            _context.Friendships.Add(friendship);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveFriendAsync(int friendId)
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) return false;
+
+            var friendship = await _context.Friendships.FirstOrDefaultAsync(f =>
+                (f.RequesterId == user.Id && f.AddresseeId == friendId) ||
+                (f.RequesterId == friendId && f.AddresseeId == user.Id));
+            if (friendship == null) return false;
+
+            _context.Friendships.Remove(friendship);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<User>> SearchUsersAsync(string query)
+        {
+            return await _context.Users
+                .Where(u => u.Username.Contains(query) || u.Email.Contains(query))
+                .ToListAsync();
         }
     }
 }

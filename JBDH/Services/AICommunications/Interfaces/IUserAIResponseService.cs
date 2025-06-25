@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using JBDH.Models;
+using JBDH.Models.AI;
 using JBDH.Models.User;
 
 namespace JBDH.Services.AICommunications

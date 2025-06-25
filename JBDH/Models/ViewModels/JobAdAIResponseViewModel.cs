@@ -1,9 +1,12 @@
-public class JobAdAIResponseViewModel
+namespace JBDH.Models.ViewModels
 {
-    public List<string> JobTitle { get; set; }
-    public List<string> HardRequirements { get; set; }
-    public List<string> GoodToHaves { get; set; }
-    public List<string> Experiences { get; set; }
-    public List<string> EducationAndCertifications { get; set; }
-    public string JobSummary { get; set; }
+    public class JobAdAIResponseViewModel
+    {
+        public List<string> JobTitle { get; set; }
+        public List<string> HardRequirements { get; set; } = new List<string>();
+        public List<string> GoodToHaves { get; set; } = new List<string>();
+        public List<string> Experiences { get; set; } = new List<string>();
+        public List<string> EducationAndCertifications { get; set; } = new List<string>();
+        public string JobSummary { get; set; } = string.Empty;
+    }
 }

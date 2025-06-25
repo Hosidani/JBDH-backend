@@ -38,6 +38,7 @@ namespace JBDH.Services.Core
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
+                LoggingConfigService.ReturnInfo($"API Response Content: {content.Substring(0, Math.Min(content.Length, 500))}");
                 return JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content) ?? new List<Dictionary<string, object>>();
             }
             catch (Exception e)
@@ -131,17 +132,20 @@ namespace JBDH.Services.Core
                 LoggingConfigService.ReturnError($"Error deleting timestamp file: {e.Message}");
             }
         }
-        public static async Task RunJobStreamAsync(string[] args)
+        public static async Task<List<Dictionary<string, object>>> RunJobStreamAsync(string[] args)
         {
             LoggingConfigService.ReturnInfo("Starting job ad retrieval process...");
-            // Check if this is the first run or an update
-            var isFirstRun = !File.Exists("timestamp.txt"); // Use a file to track the last fetch timestamp
-            var date = isFirstRun ? null : File.ReadAllText("timestamp.txt");
+            
+            // Determine if we should force a full snapshot fetch
+            var forceSnapshot = !File.Exists(JsonFile) || new FileInfo(JsonFile).Length == 0;
+            var isFirstRun = !File.Exists(TimestampFile);
+            var date = isFirstRun ? null : File.ReadAllText(TimestampFile);
             List<Dictionary<string, object>> jobAds;
 
-            if (isFirstRun)
+            if (forceSnapshot || isFirstRun)
             {
-                LoggingConfigService.ReturnInfo("First run detected. Fetching full dataset using Snapshot...");
+                var reason = forceSnapshot ? "jobs.json is missing or empty" : "First run detected";
+                LoggingConfigService.ReturnInfo($"{reason}. Fetching full dataset using Snapshot...");
                 jobAds = await FetchJobAdsAsync(SnapshotUrl);
             }
             else
@@ -166,6 +170,7 @@ namespace JBDH.Services.Core
                 LoggingConfigService.ReturnError("Failed to fetch job ads from the API.");
             }
             LoggingConfigService.ReturnInfo("Job ads retrieval process completed.");
+            return jobAds ?? new List<Dictionary<string, object>>();
         }
     }
 }

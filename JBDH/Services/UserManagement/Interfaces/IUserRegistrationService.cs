@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
-using JBDH.Models;
+using JBDH.Models.ViewModels;
+using JBDH.Models.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace JBDH.Services.UserManagement
 {

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
-using JBDH.Models;
+using JBDH.Models.Core;
+using JBDH.Models.Services;
 
 namespace JBDH.Services.Organisation
 {
