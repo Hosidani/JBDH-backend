@@ -6,6 +6,7 @@ using JBDH.Models.Job;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
 using JBDH.Services.UserManagement;
+using JBDH.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.Protected;
@@ -18,6 +19,7 @@ namespace JBDH.Tests.Services.AICommunications
     {
         private readonly Mock<IUserPropertiesService> _mockUserPropertiesService;
         private readonly Mock<IAIRequestBuilderService> _mockAIRequestBuilderService;
+        private readonly Mock<IManageIOService> _mockManageIOService;
         private readonly ApplicationDbContext _context;
         private readonly JobAIAnalysisService _jobAIAnalysisService;
         private readonly User _testUser;
@@ -31,11 +33,13 @@ namespace JBDH.Tests.Services.AICommunications
             _context = new ApplicationDbContext(options);
             _mockUserPropertiesService = new Mock<IUserPropertiesService>();
             _mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
+            _mockManageIOService = new Mock<IManageIOService>();
 
             _jobAIAnalysisService = new JobAIAnalysisService(
                 _mockUserPropertiesService.Object,
                 _mockAIRequestBuilderService.Object,
-                _context);
+                _context,
+                _mockManageIOService.Object);
 
             _testUser = new User
             {
@@ -424,4 +428,4 @@ namespace JBDH.Tests.Services.AICommunications
             }
         }
     }
-} 
+}
