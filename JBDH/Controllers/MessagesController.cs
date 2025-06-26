@@ -17,7 +17,13 @@ namespace JBDH.Controllers
         // GET: /Messages/Inbox
         public async Task<IActionResult> Inbox()
         {
-            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            int userId = 0;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null)
+                userId = int.Parse(userIdClaim.Value);
+            else
+                return Unauthorized();
+
             var messages = await _messageService.GetInboxAsync(userId);
             return View(messages);
         }
@@ -25,7 +31,13 @@ namespace JBDH.Controllers
         // GET: /Messages/Conversation/{userId}
         public async Task<IActionResult> Conversation(int userId)
         {
-            int currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            int currentUserId = 0;
+            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (currentUserIdClaim != null)
+                currentUserId = int.Parse(currentUserIdClaim.Value);
+            else
+                return Unauthorized();
+
             var messages = await _messageService.GetConversationAsync(currentUserId, userId);
             ViewBag.OtherUserId = userId;
             return View(messages);
@@ -43,7 +55,13 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Send(int recipientId, string content)
         {
-            int senderId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            int senderId = 0;
+            var senderIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (senderIdClaim != null)
+                senderId = int.Parse(senderIdClaim.Value);
+            else
+                return Unauthorized();
+
             Console.WriteLine($"Sending from {senderId} to {recipientId}"); // For debugging
 
             if (recipientId == 0)

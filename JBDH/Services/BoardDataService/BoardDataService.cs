@@ -5,9 +5,9 @@ using MySql.Data.MySqlClient;
 
 public class BoardDataService : IBoardDataService
 {
-    public Board GetBoardWithListsAndCards(int boardId)
+    public Board? GetBoardWithListsAndCards(int boardId)
     {
-        Board board = null;
+        Board? board = null;
         using (var connection = Settings.OpenConnection())
         {
             // Load the board
@@ -86,4 +86,4 @@ public class BoardDataService : IBoardDataService
         }
         return board;
     }
-} 
+}

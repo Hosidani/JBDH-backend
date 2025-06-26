@@ -31,18 +31,19 @@ namespace JBDH.Services.UserManagement
             var userWithAI = users.Select(u => new
             {
                 User = u,
-                LatestAI = _context.UserAIResponses
+                LatestAI = (UserAIResponse?)_context.UserAIResponses
                     .Where(ai => ai.UserId == u.Id)
                     .OrderByDescending(ai => ai.CreatedAt)
                     .FirstOrDefault()
             });
+
             var filtered = await userWithAI
                 .Where(x =>
                     x.LatestAI != null &&
                     (keyword == null ||
-                        !string.IsNullOrEmpty(x.LatestAI.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower())) &&
+                        (!string.IsNullOrEmpty(x.LatestAI!.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower()))) &&
                     (location == null ||
-                        (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower().Contains(location.ToLower())))
+                        (!string.IsNullOrEmpty(x.User!.Location) && x.User.Location.ToLower().Contains(location.ToLower())))
                 )
                 .ToListAsync();
 

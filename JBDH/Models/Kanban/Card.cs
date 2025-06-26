@@ -11,7 +11,7 @@ namespace JBDH.Models.Kanban
         [Required]
         public int ListId { get; set; }
         [Required]
-        public string Title { get; set; }
+        public required string Title { get; set; }
         public string? Description { get; set; }
         public int? Order { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -27,4 +27,4 @@ namespace JBDH.Models.Kanban
         public virtual KanbanList? List { get; set; }
         // Optionally, add navigation to User if needed
     }
-} 
+}

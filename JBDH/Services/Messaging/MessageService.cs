@@ -19,10 +19,18 @@ namespace JBDH.Services.Messaging
 
         public async Task SendMessageAsync(int senderId, int recipientId, string content)
         {
+            var sender = await _context.Users.FindAsync(senderId);
+            var recipient = await _context.Users.FindAsync(recipientId);
+
+            if (sender == null || recipient == null)
+                throw new InvalidOperationException("Sender or recipient not found.");
+
             var message = new Message
             {
                 SenderId = senderId,
                 RecipientId = recipientId,
+                Sender = sender,
+                Recipient = recipient,
                 Content = content,
                 SentAt = DateTime.UtcNow,
                 IsRead = false

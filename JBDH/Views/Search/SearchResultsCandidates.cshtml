@@ -49,12 +49,18 @@
                                     }
                                     else
                                     {
-                                        <span>@aiText.Substring(0, Math.Min(40, aiText.Length)) ...</span>
+                                        @if (!string.IsNullOrEmpty(aiText))
+                                        {
+                                            <span>@aiText.Substring(0, Math.Min(40, aiText.Length)) ...</span>
+                                        }
                                     }
                                 }
                                 else
                                 {
-                                    <span>@aiText.Substring(0, Math.Min(40, aiText.Length)) ...</span>
+                                    @if (!string.IsNullOrEmpty(aiText))
+                                    {
+                                        <span>@aiText.Substring(0, Math.Min(40, aiText.Length)) ...</span>
+                                    }
                                 }
                                 <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#aiModal_@candidate.UserId">
                                     View more
