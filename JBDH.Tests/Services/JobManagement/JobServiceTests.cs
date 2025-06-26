@@ -28,8 +28,7 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var job = new Job
             {
-                Id = 1,
-                JobId = "JOB001",
+                JobId = 1,
                 Title = "Software Developer",
                 Description = "Develop software applications",
                 Company = "Tech Corp",
@@ -64,8 +63,7 @@ namespace JBDH.Tests.Services.JobManagement
 
             var job = new Job
             {
-                Id = 1,
-                JobId = "JOB001",
+                JobId = 1,
                 Title = "Software Developer",
                 Description = "Develop software applications",
                 Company = "Tech Corp",
@@ -100,8 +98,7 @@ namespace JBDH.Tests.Services.JobManagement
 
             var job = new Job
             {
-                Id = 1,
-                JobId = "JOB001",
+                JobId = 1,
                 Title = "Software Developer",
                 Description = "Develop software applications",
                 Company = "Tech Corp",
@@ -150,8 +147,7 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var job = new Job
             {
-                Id = 1,
-                JobId = "JOB001",
+                JobId = 1,
                 Title = "Software Developer",
                 Description = "Develop software applications",
                 Company = "Tech Corp",

@@ -43,7 +43,7 @@ namespace JBDH.Tests
             builder.Services.AddScoped<IFriendService, FriendService>();
             builder.Services.AddSingleton<AIConfig>();
             builder.Services.AddHttpClient<IAIApiClient, AIApiClient>();
-            builder.Services.AddScoped<IManageInputService, ManageInputService>();
+            builder.Services.AddScoped<IManageIOService, ManageIOService>();
             builder.Services.AddScoped<IAIRequestBuilderService, AIRequestBuilderService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();

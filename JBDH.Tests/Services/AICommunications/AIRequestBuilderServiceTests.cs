@@ -11,14 +11,14 @@ namespace JBDH.Tests.Services.AICommunications
 {
     public class AIRequestBuilderServiceTests
     {
-        private readonly Mock<IManageInputService> _mockManageInputService;
+        private readonly Mock<IManageIOService> _mockManageIOService;
         private readonly AIConfig _aiConfig;
         private readonly AIRequestBuilderService _aiRequestBuilderService;
         private readonly User _testUser;
 
         public AIRequestBuilderServiceTests()
         {
-            _mockManageInputService = new Mock<IManageInputService>();
+            _mockManageIOService = new Mock<IManageIOService>();
             _aiConfig = new AIConfig
             {
                 OpenAIKey = "test-api-key",
@@ -26,7 +26,7 @@ namespace JBDH.Tests.Services.AICommunications
                 OpenAIModel = "gpt-4"
             };
 
-            _aiRequestBuilderService = new AIRequestBuilderService(_mockManageInputService.Object, _aiConfig);
+            _aiRequestBuilderService = new AIRequestBuilderService(_mockManageIOService.Object, _aiConfig);
 
             _testUser = new User
             {
@@ -50,7 +50,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
 
             var expectedCvText = "Test CV content";
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
                 .ReturnsAsync(expectedCvText);
 
             // Act
@@ -69,7 +69,7 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains(expectedCvText, requestBody?.messages?[1]?.content?.ToString());
             Assert.False((bool)requestBody?.stream);
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
 
             var expectedJobAdText = "Test job ad content";
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
                 .ReturnsAsync(expectedJobAdText);
 
             // Act
@@ -103,7 +103,7 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains(expectedJobAdText, requestBody?.messages?[1]?.content?.ToString());
             Assert.False((bool)requestBody?.stream);
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
 
         [Fact]
@@ -121,9 +121,9 @@ namespace JBDH.Tests.Services.AICommunications
             var expectedCvText = "Test CV content";
             var expectedJobAdText = "Test job ad content";
             
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
                 .ReturnsAsync(expectedCvText);
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
                 .ReturnsAsync(expectedJobAdText);
 
             // Act
@@ -143,8 +143,8 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains(expectedJobAdText, requestBody?.messages?[1]?.content?.ToString());
             Assert.False((bool)requestBody?.stream);
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
 
         [Fact]
@@ -176,7 +176,7 @@ namespace JBDH.Tests.Services.AICommunications
                 CVPath = null
             };
 
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf(""))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf(""))
                 .ReturnsAsync("");
 
             // Act
@@ -189,7 +189,7 @@ namespace JBDH.Tests.Services.AICommunications
             
             Assert.Contains("Analyse this CV", requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf(""), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf(""), Times.Once);
         }
 
         [Fact]
@@ -203,7 +203,7 @@ namespace JBDH.Tests.Services.AICommunications
                 JobAdUrl = null
             };
 
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage(""))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage(""))
                 .ReturnsAsync("");
 
             // Act
@@ -216,7 +216,7 @@ namespace JBDH.Tests.Services.AICommunications
             
             Assert.Contains("Analyze the following job advertisement", requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage(""), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage(""), Times.Once);
         }
 
         [Fact]
@@ -231,9 +231,9 @@ namespace JBDH.Tests.Services.AICommunications
                 JobAdUrl = null
             };
 
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf(""))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf(""))
                 .ReturnsAsync("");
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage(""))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage(""))
                 .ReturnsAsync("");
 
             // Act
@@ -246,8 +246,8 @@ namespace JBDH.Tests.Services.AICommunications
             
             Assert.Contains("You are given a job advertisement and a candidate's CV", requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf(""), Times.Once);
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage(""), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf(""), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage(""), Times.Once);
         }
 
         [Fact]
@@ -261,7 +261,7 @@ namespace JBDH.Tests.Services.AICommunications
                 CVPath = "test-cv.pdf"
             };
 
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
                 .ReturnsAsync("");
 
             // Act
@@ -275,7 +275,7 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains("Analyse this CV", requestBody?.messages?[1]?.content?.ToString());
             Assert.Contains("CV:\n", requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
         }
 
         [Fact]
@@ -289,7 +289,7 @@ namespace JBDH.Tests.Services.AICommunications
                 JobAdUrl = "https://example.com/job"
             };
 
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
                 .ReturnsAsync("");
 
             // Act
@@ -303,7 +303,7 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains("Analyze the following job advertisement", requestBody?.messages?[1]?.content?.ToString());
             Assert.Contains("Job Ad:\n", requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
 
         [Fact]
@@ -318,9 +318,9 @@ namespace JBDH.Tests.Services.AICommunications
                 JobAdUrl = "https://example.com/job"
             };
 
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
                 .ReturnsAsync("");
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
                 .ReturnsAsync("");
 
             // Act
@@ -335,8 +335,8 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains("Job Ad:\n", requestBody?.messages?[1]?.content?.ToString());
             Assert.Contains("CV:\n", requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
 
         [Fact]
@@ -351,7 +351,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
 
             var longCvText = new string('A', 10000);
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
                 .ReturnsAsync(longCvText);
 
             // Act
@@ -365,7 +365,7 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains("Analyse this CV", requestBody?.messages?[1]?.content?.ToString());
             Assert.Contains(longCvText, requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
         }
 
         [Fact]
@@ -380,7 +380,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
 
             var longJobAdText = new string('B', 10000);
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
                 .ReturnsAsync(longJobAdText);
 
             // Act
@@ -394,7 +394,7 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains("Analyze the following job advertisement", requestBody?.messages?[1]?.content?.ToString());
             Assert.Contains(longJobAdText, requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
 
         [Fact]
@@ -412,9 +412,9 @@ namespace JBDH.Tests.Services.AICommunications
             var longCvText = new string('A', 5000);
             var longJobAdText = new string('B', 5000);
             
-            _mockManageInputService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromPdf("test-cv.pdf"))
                 .ReturnsAsync(longCvText);
-            _mockManageInputService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
+            _mockManageIOService.Setup(x => x.ExtractTextFromWebPage("https://example.com/job"))
                 .ReturnsAsync(longJobAdText);
 
             // Act
@@ -429,8 +429,8 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Contains(longCvText, requestBody?.messages?[1]?.content?.ToString());
             Assert.Contains(longJobAdText, requestBody?.messages?[1]?.content?.ToString());
 
-            _mockManageInputService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
-            _mockManageInputService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromPdf("test-cv.pdf"), Times.Once);
+            _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
     }
 } 

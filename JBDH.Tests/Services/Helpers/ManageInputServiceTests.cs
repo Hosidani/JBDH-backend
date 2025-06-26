@@ -7,13 +7,13 @@ using Xunit;
 
 namespace JBDH.Tests.Services.Helpers
 {
-    public class ManageInputServiceTests
+    public class ManageIOServiceTests
     {
-        private readonly ManageInputService _manageInputService;
+        private readonly ManageIOService _manageIOService;
 
-        public ManageInputServiceTests()
+        public ManageIOServiceTests()
         {
-            _manageInputService = new ManageInputService();
+            _manageIOService = new ManageIOService();
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace JBDH.Tests.Services.Helpers
                 // Since we can't create valid PDF files in tests, we expect the service to handle this gracefully
                 // The PDF library will throw an exception for invalid PDF format
                 await Assert.ThrowsAsync<UglyToad.PdfPig.Core.PdfDocumentFormatException>(() => 
-                    _manageInputService.ExtractTextFromPdf(tempPdfPath));
+                    _manageIOService.ExtractTextFromPdf(tempPdfPath));
             }
             finally
             {
@@ -46,7 +46,7 @@ namespace JBDH.Tests.Services.Helpers
             var nonExistentPath = "non_existent_file.pdf";
 
             // Act
-            var result = await _manageInputService.ExtractTextFromPdf(nonExistentPath);
+            var result = await _manageIOService.ExtractTextFromPdf(nonExistentPath);
 
             // Assert
             Assert.NotNull(result);
@@ -57,7 +57,7 @@ namespace JBDH.Tests.Services.Helpers
         public async Task ExtractTextFromPdf_WithNullPath_ShouldReturnErrorMessage()
         {
             // Act
-            var result = await _manageInputService.ExtractTextFromPdf(null!);
+            var result = await _manageIOService.ExtractTextFromPdf(null!);
 
             // Assert
             Assert.NotNull(result);
@@ -68,7 +68,7 @@ namespace JBDH.Tests.Services.Helpers
         public async Task ExtractTextFromPdf_WithEmptyPath_ShouldReturnErrorMessage()
         {
             // Act
-            var result = await _manageInputService.ExtractTextFromPdf("");
+            var result = await _manageIOService.ExtractTextFromPdf("");
 
             // Assert
             Assert.NotNull(result);
@@ -79,7 +79,7 @@ namespace JBDH.Tests.Services.Helpers
         public async Task ExtractTextFromPdf_WithWhitespacePath_ShouldReturnErrorMessage()
         {
             // Act
-            var result = await _manageInputService.ExtractTextFromPdf("   ");
+            var result = await _manageIOService.ExtractTextFromPdf("   ");
 
             // Assert
             Assert.NotNull(result);
@@ -98,7 +98,7 @@ namespace JBDH.Tests.Services.Helpers
                 // Act & Assert
                 // Since we can't create valid PDF files in tests, we expect the service to handle this gracefully
                 await Assert.ThrowsAsync<UglyToad.PdfPig.Core.PdfDocumentFormatException>(() => 
-                    _manageInputService.ExtractTextFromPdf(tempPdfPath));
+                    _manageIOService.ExtractTextFromPdf(tempPdfPath));
             }
             finally
             {
@@ -120,7 +120,7 @@ namespace JBDH.Tests.Services.Helpers
                 // Act & Assert
                 // Since we can't create valid PDF files in tests, we expect the service to handle this gracefully
                 await Assert.ThrowsAsync<UglyToad.PdfPig.Core.PdfDocumentFormatException>(() => 
-                    _manageInputService.ExtractTextFromPdf(tempPdfPath));
+                    _manageIOService.ExtractTextFromPdf(tempPdfPath));
             }
             finally
             {
@@ -142,7 +142,7 @@ namespace JBDH.Tests.Services.Helpers
                 // Act & Assert
                 // Since we can't create valid PDF files in tests, we expect the service to handle this gracefully
                 await Assert.ThrowsAsync<UglyToad.PdfPig.Core.PdfDocumentFormatException>(() => 
-                    _manageInputService.ExtractTextFromPdf(tempPdfPath));
+                    _manageIOService.ExtractTextFromPdf(tempPdfPath));
             }
             finally
             {
@@ -164,7 +164,7 @@ namespace JBDH.Tests.Services.Helpers
                 // Act & Assert
                 // Since we can't create valid PDF files in tests, we expect the service to handle this gracefully
                 await Assert.ThrowsAsync<UglyToad.PdfPig.Core.PdfDocumentFormatException>(() => 
-                    _manageInputService.ExtractTextFromPdf(tempPdfPath));
+                    _manageIOService.ExtractTextFromPdf(tempPdfPath));
             }
             finally
             {
@@ -185,7 +185,7 @@ namespace JBDH.Tests.Services.Helpers
             // In a real scenario, we would mock the Playwright dependencies
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(url);
+                var result = await _manageIOService.ExtractTextFromWebPage(url);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -200,7 +200,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(null!);
+                var result = await _manageIOService.ExtractTextFromWebPage(null!);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -215,7 +215,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage("");
+                var result = await _manageIOService.ExtractTextFromWebPage("");
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -233,7 +233,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(invalidUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(invalidUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -251,7 +251,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(httpsUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(httpsUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -269,7 +269,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(httpUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(httpUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -287,7 +287,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(localhostUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(localhostUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -305,7 +305,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(longUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(longUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -323,7 +323,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(specialUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(specialUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -341,7 +341,7 @@ namespace JBDH.Tests.Services.Helpers
             // Act & Assert
             try
             {
-                var result = await _manageInputService.ExtractTextFromWebPage(unicodeUrl);
+                var result = await _manageIOService.ExtractTextFromWebPage(unicodeUrl);
                 Assert.NotNull(result);
             }
             catch (Exception)
@@ -366,7 +366,7 @@ namespace JBDH.Tests.Services.Helpers
             {
                 try
                 {
-                    var result = await _manageInputService.ExtractTextFromWebPage(url);
+                    var result = await _manageIOService.ExtractTextFromWebPage(url);
                     Assert.NotNull(result);
                 }
                 catch (Exception)
@@ -388,7 +388,7 @@ namespace JBDH.Tests.Services.Helpers
             };
 
             // Act & Assert
-            var tasks = urls.Select(url => _manageInputService.ExtractTextFromWebPage(url));
+            var tasks = urls.Select(url => _manageIOService.ExtractTextFromWebPage(url));
             try
             {
                 var results = await Task.WhenAll(tasks);

@@ -49,12 +49,12 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job { JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 },
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 2, JobId = "job2", Title = "Senior Developer", Location = "Stockholm" },
+                    Job = new Job {JobId = 2, Title = "Senior Developer", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -139,7 +139,7 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job {JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -173,7 +173,7 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job {JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -218,7 +218,7 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job {JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -252,17 +252,17 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job {JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 },
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 2, JobId = "job2", Title = "Senior Developer", Location = "Stockholm" },
+                    Job = new Job {JobId = 2, Title = "Senior Developer", Location = "Stockholm" },
                     HasApplied = false
                 },
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 3, JobId = "job3", Title = "Tech Lead", Location = "Stockholm" },
+                    Job = new Job {JobId = 3, Title = "Tech Lead", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -349,7 +349,7 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job {JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -377,7 +377,7 @@ namespace JBDH.Tests.Services.Workflows
             {
                 new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = 1, JobId = "job1", Title = "Software Engineer", Location = "Stockholm" },
+                    Job = new Job {JobId = 1, Title = "Software Engineer", Location = "Stockholm" },
                     HasApplied = false
                 }
             };
@@ -410,7 +410,7 @@ namespace JBDH.Tests.Services.Workflows
             {
                 mockResults.Add(new JobSearchResultViewModel
                 {
-                    Job = new Job { Id = i, JobId = $"job{i}", Title = $"Job {i}", Location = "Stockholm" },
+                    Job = new Job {JobId = i, Title = $"Job {i}", Location = "Stockholm" },
                     HasApplied = false
                 });
             }
@@ -447,4 +447,4 @@ namespace JBDH.Tests.Services.Workflows
             }
         }
     }
-} 
+}

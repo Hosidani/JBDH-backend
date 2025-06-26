@@ -143,7 +143,7 @@ namespace JBDH.Tests.Services.Core
 
             // Assert
             Assert.NotNull(result);
-            Assert.Contains("JobId VARCHAR(255) PRIMARY KEY", result);
+            Assert.Contains("JobId INT PRIMARY KEY AUTO_INCREMENT", result);
             Assert.Contains("Title VARCHAR(255)", result);
             Assert.Contains("Description TEXT", result);
             Assert.Contains("Company VARCHAR(255)", result);
@@ -181,7 +181,7 @@ namespace JBDH.Tests.Services.Core
             Assert.NotNull(result);
             Assert.Contains("ApplicationId INT PRIMARY KEY AUTO_INCREMENT", result);
             Assert.Contains("UserId INT NOT NULL", result);
-            Assert.Contains("JobId VARCHAR(255) NOT NULL", result);
+            Assert.Contains("JobId INT NOT NULL", result);
             Assert.Contains("AppliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP", result);
             Assert.Contains("Notes TEXT", result);
         }

@@ -34,7 +34,7 @@ namespace JBDH.Services.Workflows
                 foreach (var item in results)
                 {
                     item.HasApplied = await _context.JobApplications
-                        .AnyAsync(a => a.JobId == item.Job.Id && a.UserId == userId.Value);
+                        .AnyAsync(a => a.JobId == item.Job.JobId && a.UserId == userId.Value);
                 }
             }
 

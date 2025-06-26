@@ -18,7 +18,7 @@ namespace JBDH.Tests.Services.AICommunications
         {
             _mockAIApiClient = new Mock<IAIApiClient>();
             _mockUserAIResponseService = new Mock<IUserAIResponseService>();
-            _cvAnalysisService = new CVAnalysisService(_mockAIApiClient.Object, _mockUserAIResponseService.Object);
+            //_cvAnalysisService = new CVAnalysisService(_mockAIApiClient.Object, _mockUserAIResponseService.Object);
 
             _testUser = new User
             {

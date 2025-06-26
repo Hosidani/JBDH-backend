@@ -62,7 +62,10 @@ public class EtlPipeline
         {
             try
             {
-                var jobId = job.GetValueOrDefault("id")?.ToString() ?? "Unknown ID";
+                int jobId = -1;
+                if (job.TryGetValue("id", out var idValue) && idValue != null && int.TryParse(idValue.ToString(), out var parsedId))
+                    jobId = parsedId;
+
                 var rawTitle = job.GetValueOrDefault("headline")?.ToString() ?? "Unknown Title";
                 var title = rawTitle != null ? DecodeUnicodeString(rawTitle) : "Unknown Title";
 
@@ -167,7 +170,7 @@ public class EtlPipeline
                 // Add the transformed job to the list
                 transformed.Add(new Dictionary<string, object>
                 {
-                    { "job_id", jobId ?? "Unknown ID" },
+                    { "job_id", jobId },
                     { "title", title ?? "Unknown Title" },
                     { "description", description ?? "No Description" },
                     { "company", company ?? "Unknown Company" },
