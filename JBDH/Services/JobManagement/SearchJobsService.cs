@@ -23,7 +23,7 @@ namespace JBDH.Services.JobManagement
             _environment = environment;
         }
 
-        public async Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
+        public Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
         {
             LoggingConfigService.ReturnInfo("SearchJobs Service called");
             try
@@ -32,7 +32,6 @@ namespace JBDH.Services.JobManagement
                 LoggingConfigService.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
                 LoggingConfigService.ReturnInfo($"Results count: {jobDictionaries.Count}");
 
-                // Map dictionaries to Job objects
                 var jobs = new List<Job>();
                 foreach (var dict in jobDictionaries)
                 {
@@ -51,9 +50,8 @@ namespace JBDH.Services.JobManagement
                     });
                 }
 
-                // Await the async priority assignment
                 var presentJobs = GiveJobPriorityService.AssignJobPriority(jobs, description, location);
-                return presentJobs;
+                return Task.FromResult(presentJobs);
             }
             catch (Exception ex)
             {

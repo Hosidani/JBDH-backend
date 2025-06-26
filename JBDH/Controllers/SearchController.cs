@@ -14,7 +14,6 @@ using JBDH.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog.Config;
-using Newtonsoft.Json;
 using JBDH.Models.User;
 
 namespace JBDH.Controllers
@@ -182,30 +181,38 @@ namespace JBDH.Controllers
             // Use workflow service for search and meta
             var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
 
-            if (results.Any() && results.First().Job != null)
+            if (results.Any())
             {
-                var aiRequest = new AIRequest
+                var firstResult = results.First();
+                if (firstResult.Job != null)
                 {
-                    CommandId = 2,
-                    JobAdUrl = results.First().Job.WebpageUrl,
-                    CVPath = user.CVPath,
-                    User = user
-                };
-                string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
-                aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
+                    var aiRequest = new AIRequest
+                    {
+                        CommandId = 2,
+                        JobAdUrl = firstResult.Job.WebpageUrl,
+                        CVPath = user.CVPath,
+                        User = user
+                    };
+                    string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
+                    aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
 
-                // Parse JSON to ViewModel
-                CVJobComparisonAIResponseViewModel? aiModel = null;
-                try
-                {
-                    aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
-                }
-                catch
-                {
-                    LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
-                }
+                    // Parse JSON to ViewModel
+                    CVJobComparisonAIResponseViewModel? aiModel = null;
+                    try
+                    {
+                        aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
+                    }
+                    catch
+                    {
+                        LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
+                    }
 
-                ViewData["AIAnalysisModel"] = aiModel;
+                    ViewData["AIAnalysisModel"] = aiModel;
+                }
+                else
+                {
+                    ViewData["AIAnalysisModel"] = null;
+                }
             }
             else
             {

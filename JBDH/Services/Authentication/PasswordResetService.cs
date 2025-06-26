@@ -37,7 +37,11 @@ namespace JBDH.Services.Authentication
             _context.PasswordResets.Add(resetEntry);
             await _context.SaveChangesAsync();
 
-            var request = _httpContextAccessor.HttpContext.Request;
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+                throw new InvalidOperationException("No HTTP context available for password reset link generation.");
+
+            var request = httpContext.Request;
             var resetLink = $"{request.Scheme}://{request.Host}/Login/ResetPassword?token={token}";
             var body = $"<p>Reset your password by clicking <a href='{resetLink}'>here</a>.</p>";
 

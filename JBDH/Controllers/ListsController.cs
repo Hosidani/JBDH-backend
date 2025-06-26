@@ -18,7 +18,7 @@ namespace JBDH.Controllers
         // GET: /Lists/Create?boardId=5
         public IActionResult Create(int boardId)
         {
-            var model = new KanbanList { BoardId = boardId };
+            var model = new KanbanList { BoardId = boardId, Name = string.Empty };
             return View(model);
         }
 
@@ -69,8 +69,10 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, KanbanList list)
         {
-            await _listService.EditAsync(id, list);
-            return RedirectToAction("Details", "Boards", new { id = list.BoardId });
+            var updatedList = await _listService.EditAsync(id, list);
+            if (updatedList == null)
+                return NotFound();
+            return RedirectToAction("Details", "Boards", new { id = updatedList!.BoardId });
         }
 
         // GET: /Lists/Delete/5
@@ -91,4 +93,4 @@ namespace JBDH.Controllers
             return RedirectToAction("Index", "Boards");
         }
     }
-} 
+}

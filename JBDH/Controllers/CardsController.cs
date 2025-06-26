@@ -29,7 +29,7 @@ namespace JBDH.Controllers
                 return NotFound("The list you are trying to add a card to could not be found.");
             }
             
-            var card = new Card { ListId = listId };
+            var card = new Card { ListId = listId, Title = string.Empty };
             ViewBag.BoardId = list.BoardId; // For the cancel button
             
             return View(card);
@@ -105,4 +105,4 @@ namespace JBDH.Controllers
             return NotFound();
         }
     }
-} 
+}

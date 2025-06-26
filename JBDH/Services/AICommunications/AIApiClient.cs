@@ -69,8 +69,13 @@ namespace JBDH.Services.AICommunications
                 LoggingConfigService.ReturnError("Response body is null or empty");
                 return "No response";
             }
-            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody!);
-            return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
+            dynamic? jsonResponse = JsonConvert.DeserializeObject(responseBody!);
+            if (jsonResponse == null)
+            {
+                LoggingConfigService.ReturnError("Deserialization returned null");
+                return "No response";
+            }
+            return jsonResponse.choices?[0]?.message?.content?.ToString() ?? "No response";
         }
 
     }

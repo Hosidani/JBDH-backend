@@ -70,7 +70,7 @@ namespace JBDH.Services.Helpers
                 var choices = outer?.choices;
                 if (choices != null)
                 {
-                    string content = outer?.choices?[0]?.message?.content?.ToString() ?? "";
+                    string content = outer?.choices?[0]?.message?.content != null ? outer.choices[0].message.content.ToString(): "";
                     if (!string.IsNullOrWhiteSpace(content) && content.Contains("{"))
                     {
                         var start = content.IndexOf("{");

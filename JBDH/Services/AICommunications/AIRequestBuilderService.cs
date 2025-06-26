@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using Newtonsoft.Json; 
 using JBDH.Services.Helpers;
 using JBDH.Services.Configuration;
-using JBDH.Models.AI;
 
 namespace JBDH.Services.AICommunications
 {

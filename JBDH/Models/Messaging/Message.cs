@@ -13,16 +13,16 @@ namespace JBDH.Models.Messaging
         [Required]
         public int SenderId { get; set; }
         [ForeignKey(nameof(SenderId))]
-        public JBDH.Models.User.User Sender { get; set; }
+        public required JBDH.Models.User.User Sender { get; set; }
 
         [Required]
         public int RecipientId { get; set; }
         [ForeignKey(nameof(RecipientId))]
-        public JBDH.Models.User.User Recipient { get; set; }
+        public required JBDH.Models.User.User Recipient { get; set; }
 
         [Required]
         [StringLength(2000)]
-        public string Content { get; set; }
+        public required string Content { get; set; }
 
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 

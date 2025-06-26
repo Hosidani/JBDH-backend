@@ -226,7 +226,9 @@ else
     <p>You have not applied to any jobs yet.</p>
 }
 
-@if (Model.CVAnalysisResult.Experiences != null && Model.CVAnalysisResult.Experiences.Any(e => !string.IsNullOrWhiteSpace(e.Title)))
+@if (Model.CVAnalysisResult != null && 
+     Model.CVAnalysisResult.Experiences != null && 
+     Model.CVAnalysisResult.Experiences.Any(e => !string.IsNullOrWhiteSpace(e.Title)))
 {
     <ul>
         @foreach (var exp in Model.CVAnalysisResult.Experiences)
