@@ -8,9 +8,15 @@ namespace JBDH.Services.Core
         {
             try
             {
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "jobs.json");
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "jobs.json");
                 if (File.Exists(filePath))
                 {
+                    // Remove ReadOnly attribute if set
+                    var attributes = File.GetAttributes(filePath);
+                    if ((attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    {
+                        File.SetAttributes(filePath, attributes & ~FileAttributes.ReadOnly);
+                    }
                     File.Delete(filePath);
                     LoggingConfigService.ReturnInfo($"Deleted JSON file: {filePath}");
                 }
