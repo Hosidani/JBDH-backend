@@ -1,6 +1,7 @@
 using JBDH.Models.AI;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
+using JBDH.Services.Helpers;
 using Moq;
 using Newtonsoft.Json;
 using Xunit;
@@ -11,6 +12,7 @@ namespace JBDH.Tests.Services.AICommunications
     {
         private readonly Mock<IAIApiClient> _mockAIApiClient;
         private readonly Mock<IUserAIResponseService> _mockUserAIResponseService;
+        private readonly Mock<IManageIOService> _mockManageIOService;
         private readonly CVAnalysisService _cvAnalysisService;
         private readonly User _testUser;
 
@@ -18,7 +20,11 @@ namespace JBDH.Tests.Services.AICommunications
         {
             _mockAIApiClient = new Mock<IAIApiClient>();
             _mockUserAIResponseService = new Mock<IUserAIResponseService>();
-            _cvAnalysisService = new CVAnalysisService(_mockAIApiClient.Object, _mockUserAIResponseService.Object);
+            _mockManageIOService = new Mock<IManageIOService>();
+            _cvAnalysisService = new CVAnalysisService(
+                _mockAIApiClient.Object,
+                _mockUserAIResponseService.Object,
+                _mockManageIOService.Object);
 
             _testUser = new User
             {
@@ -28,6 +34,20 @@ namespace JBDH.Tests.Services.AICommunications
                 PasswordHash = "hash",
                 Location = "Test City"
             };
+
+            // Add this setup for code block extraction
+            _mockManageIOService
+                .Setup(x => x.ExtractJsonFromCodeBlock(It.IsAny<string>()))
+                .Returns((string input) =>
+                {
+                    if (string.IsNullOrWhiteSpace(input)) return input ?? "";
+                    var match = System.Text.RegularExpressions.Regex.Match(input.Trim(), @"^```(?:\w+)?\s*([\s\S]*?)\s*```$", System.Text.RegularExpressions.RegexOptions.Multiline);
+                    if (match.Success)
+                        return match.Groups[1].Value.Trim();
+                    if (input.TrimStart().StartsWith("```"))
+                        return input.Trim().Substring(3).Trim();
+                    return input;
+                });
         }
 
         [Fact]

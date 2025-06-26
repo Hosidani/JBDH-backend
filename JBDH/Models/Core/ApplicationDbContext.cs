@@ -8,6 +8,7 @@ using JBDH.Models.Authentication;
 using JBDH.Models.Notifications;
 using JBDH.Models.Organisation;
 using JBDH.Models.Kanban;
+using JBDH.Models.Messaging; // <-- Add this at the top with your other usings
 
 namespace JBDH.Models.Core
 {
@@ -47,6 +48,8 @@ namespace JBDH.Models.Core
         public DbSet<JBDH.Models.Kanban.Card> Cards { get; set; }
         public DbSet<JBDH.Models.Kanban.BoardMembership> BoardMemberships { get; set; }
         public DbSet<JBDH.Models.Kanban.Organization> Organizations { get; set; }
+
+        public DbSet<Message> Messages { get; set; } // <-- Add this with your other DbSets
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -265,6 +268,28 @@ namespace JBDH.Models.Core
                 .HasForeignKey(u => u.OwnerId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Message>(entity =>
+            {
+                entity.HasKey(m => m.Id);
+
+                entity.HasOne(m => m.Sender)
+                    .WithMany()
+                    .HasForeignKey(m => m.SenderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(m => m.Recipient)
+                    .WithMany()
+                    .HasForeignKey(m => m.RecipientId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(m => m.Content)
+                    .IsRequired()
+                    .HasMaxLength(2000);
+
+                entity.Property(m => m.SentAt)
+                    .IsRequired();
+            });
         }
     }
 }

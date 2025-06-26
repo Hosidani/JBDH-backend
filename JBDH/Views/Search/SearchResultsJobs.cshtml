@@ -165,7 +165,7 @@
         $(document).on('submit', '.analyze-form', function (e) {
             e.preventDefault();
             var $form = $(this);
-            var jobId = $form.data('jobid');
+            var jobId = Number($form.data('jobid'));
             $.post($form.attr('action'), $form.serialize(), function (data) {
                 $('#ai-row-' + jobId).show();
                 $('#ai-result-' + jobId).html(data);

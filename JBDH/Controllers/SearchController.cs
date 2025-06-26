@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Newtonsoft.Json;
 using JBDH.Models.Core;
 using JBDH.Models.AI;
 using JBDH.Models.ViewModels;
@@ -9,6 +10,7 @@ using JBDH.Services.AICommunications;
 using JBDH.Services.JobManagement;
 using JBDH.Services.Configuration;
 using JBDH.Services.Workflows;
+using JBDH.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog.Config;
@@ -29,30 +31,33 @@ namespace JBDH.Controllers
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly ISearchWorkflowService _searchWorkflowService;
         private readonly ApplicationDbContext _context;
+        private readonly IManageIOService _manageIOService; 
 
         public SearchController(
-            ApplicationDbContext context,
-            IWebHostEnvironment environment,
             IUserPropertiesService userPropertiesService,
             IAIRequestBuilderService aIRequestBuilderService,
             ISearchCandidateService searchCandidateService,
             IAIApiClient aIService,
             ISearchJobsService searchJobsService,
+            IUserAIResponseService userAIResponseService,
             IJobAIResponseService jobAIResponseService,
             IJobAIAnalysisService jobAIAnalysisService,
-            IUserAIResponseService userAIResponseService,
-            ISearchWorkflowService searchWorkflowService)
+            ISearchWorkflowService searchWorkflowService,
+            ApplicationDbContext context,
+            IManageIOService manageIOService 
+        )
         {
             _userPropertiesService = userPropertiesService;
             _aIRequestBuilderService = aIRequestBuilderService;
             _searchCandidateService = searchCandidateService;
             _aIService = aIService;
             _searchJobsService = searchJobsService;
+            _userAIResponseService = userAIResponseService;
             _jobAIResponseService = jobAIResponseService;
             _jobAIAnalysisService = jobAIAnalysisService;
-            _userAIResponseService = userAIResponseService;
             _searchWorkflowService = searchWorkflowService;
             _context = context;
+            _manageIOService = manageIOService; 
         }
 
         [HttpGet]
@@ -105,7 +110,9 @@ namespace JBDH.Controllers
                 });
             }
 
-            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
+            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId.ToString());
+
+            LoggingConfigService.ReturnInfo($"job AI response: {aiResultString}");
 
             if (string.IsNullOrEmpty(aiResultString))
             {
@@ -118,25 +125,23 @@ namespace JBDH.Controllers
                 });
             }
 
-            // --- Extract JSON from code block if present ---
-            if (aiResultString.Contains("```"))
-            {
-                var start = aiResultString.IndexOf("{");
-                var end = aiResultString.LastIndexOf("}");
-                if (start >= 0 && end > start)
-                    aiResultString = aiResultString.Substring(start, end - start + 1);
-            }
-
+            // --- NYTT: Extrahera rätt JSON ---
+            var cleanJson = _manageIOService.ExtractInnerJsonFromJobAIResponse(aiResultString);
             JobAdAIResponseViewModel? jobAdModel = null;
             try
             {
-                jobAdModel = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(aiResultString);
+                jobAdModel = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(cleanJson);
             }
-            catch
+            catch (Exception ex)
             {
-                LoggingConfigService.ReturnError("Failed to parse job ad AI analysis result to ViewModel.");
+                LoggingConfigService.ReturnError($"Failed to parse job ad AI analysis result: {ex.Message}");
+                return View("Error", new ErrorViewModel
+                {
+                    Title = "Parsing Error",
+                    Message = "Could not parse the AI analysis result.",
+                    ReturnUrl = Url.Action("SearchJob")
+                });
             }
-
             return PartialView("_JobAdAIResultPartial", jobAdModel);
         }
 
@@ -187,15 +192,7 @@ namespace JBDH.Controllers
                     User = user
                 };
                 string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
-
-                // --- Extract JSON from code block if present ---
-                if (aiAnalysisResult.Contains("```"))
-                {
-                    var start = aiAnalysisResult.IndexOf("{");
-                    var end = aiAnalysisResult.LastIndexOf("}");
-                    if (start >= 0 && end > start)
-                        aiAnalysisResult = aiAnalysisResult.Substring(start, end - start + 1);
-                }
+                aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
 
                 // Parse JSON to ViewModel
                 CVJobComparisonAIResponseViewModel? aiModel = null;

@@ -75,7 +75,7 @@ builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddSingleton<AIConfig>();
 builder.Services.AddHttpClient<IAIApiClient, AIApiClient>();
-builder.Services.AddScoped<IManageInputService, ManageInputService>();
+builder.Services.AddScoped<IManageIOService, ManageIOService>();
 builder.Services.AddScoped<IAIRequestBuilderService, AIRequestBuilderService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
@@ -98,6 +98,7 @@ builder.Services.AddScoped<IBoardDataService, BoardDataService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IListService, ListService>();
+builder.Services.AddScoped<JBDH.Services.Messaging.IMessageService, JBDH.Services.Messaging.MessageService>();
 
 builder.Services.AddSession(options =>
 {

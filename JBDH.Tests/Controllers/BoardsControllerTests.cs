@@ -28,9 +28,10 @@ public class BoardsControllerTests
         {
             new Claim(ClaimTypes.NameIdentifier, "1")
         }, "mock"));
-        controller.ControllerContext = new ControllerContext
+
+        controller.ControllerContext = new ControllerContext()
         {
-            HttpContext = new DefaultHttpContext { User = user }
+            HttpContext = new DefaultHttpContext() { User = user }
         };
 
         // Set up TempData
@@ -52,6 +53,17 @@ public class BoardsControllerTests
         mockBoardService.Setup(s => s.UpdateAsync(It.IsAny<Board>())).Returns(Task.CompletedTask);
         var controller = new BoardsController(mockBoardService.Object);
         var board = new Board { Id = 1, Name = "Updated Board" };
+
+        // Set up fake user with NameIdentifier claim
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "1")
+        }, "mock"));
+
+        controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
 
         // Act
         var result = await controller.Edit(1, board) as RedirectToActionResult;
@@ -76,4 +88,4 @@ public class BoardsControllerTests
         Assert.NotNull(result);
         Assert.Equal("Index", result.ActionName);
     }
-} 
+}

@@ -48,7 +48,7 @@ namespace JBDH.Tests.Controllers
             Assert.NotNull(result);
             Assert.Equal("Details", result.ActionName);
             Assert.Equal("Boards", result.ControllerName);
-            Assert.Equal(kanbanList.BoardId, result.RouteValues["id"]);
+            Assert.Equal(kanbanList.BoardId, Convert.ToInt32(result.RouteValues["id"]));
             _mockListService.Verify(s => s.CreateAsync(kanbanList), Times.Once);
         }
 
@@ -69,4 +69,4 @@ namespace JBDH.Tests.Controllers
             _mockListService.Verify(s => s.CreateAsync(It.IsAny<KanbanList>()), Times.Never);
         }
     }
-} 
+}
