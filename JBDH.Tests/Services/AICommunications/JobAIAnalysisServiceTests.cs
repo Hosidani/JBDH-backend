@@ -37,6 +37,11 @@ namespace JBDH.Tests.Services.AICommunications
             _mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
             _mockManageIOService = new Mock<IManageIOService>();
 
+            // Always return a dummy JSON string for extraction
+            _mockManageIOService
+                .Setup(x => x.ExtractInnerJsonFromJobAIResponse(It.IsAny<string>()))
+                .Returns("{\"dummy\": \"json\"}");
+
             _jobAIAnalysisService = new JobAIAnalysisService(
                 _mockUserPropertiesService.Object,
                 _mockAIRequestBuilderService.Object,
@@ -51,6 +56,10 @@ namespace JBDH.Tests.Services.AICommunications
                 PasswordHash = "hash",
                 Location = "Test City"
             };
+
+            _mockManageIOService
+                .Setup(x => x.ExtractInnerJsonFromJobAIResponse(It.IsAny<string>()))
+                .Returns("some valid json");
         }
 
         [Fact]

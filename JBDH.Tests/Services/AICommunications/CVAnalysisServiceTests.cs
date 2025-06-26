@@ -34,6 +34,20 @@ namespace JBDH.Tests.Services.AICommunications
                 PasswordHash = "hash",
                 Location = "Test City"
             };
+
+            // Add this setup for code block extraction
+            _mockManageIOService
+                .Setup(x => x.ExtractJsonFromCodeBlock(It.IsAny<string>()))
+                .Returns((string input) =>
+                {
+                    if (string.IsNullOrWhiteSpace(input)) return input ?? "";
+                    var match = System.Text.RegularExpressions.Regex.Match(input.Trim(), @"^```(?:\w+)?\s*([\s\S]*?)\s*```$", System.Text.RegularExpressions.RegexOptions.Multiline);
+                    if (match.Success)
+                        return match.Groups[1].Value.Trim();
+                    if (input.TrimStart().StartsWith("```"))
+                        return input.Trim().Substring(3).Trim();
+                    return input;
+                });
         }
 
         [Fact]
