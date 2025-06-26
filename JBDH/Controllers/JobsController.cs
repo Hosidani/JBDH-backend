@@ -18,21 +18,20 @@ namespace JBDH.Controllers
             _jobService = jobService;
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(string id)
         {
             var job = await _context.Jobs.FindAsync(id);
             if (job == null)
                 return NotFound();
 
-            // Get current user ID from claims
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = 0;
-            if (!string.IsNullOrEmpty(userIdStr))
-                int.TryParse(userIdStr, out userId);
-
-            bool hasApplied = userId > 0 &&
-            await _context.JobApplications.AnyAsync(a => a.JobId == id && a.UserId == userId);
-
+            bool hasApplied = false;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Check if the user has already applied for this job
+                hasApplied = await _context.JobApplications
+                    .AnyAsync(a => a.JobId.ToString() == id && a.UserId.ToString() == userId);
+            }
             // Get the latest AI response for this job
             var latestAIResponse = await _context.JobAIResponses
                 .Where(r => r.JobId == id)

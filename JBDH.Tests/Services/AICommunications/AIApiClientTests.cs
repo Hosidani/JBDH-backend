@@ -20,13 +20,14 @@ namespace JBDH.Tests.Services.AICommunications
         private readonly AIConfig _aiConfig;
         private readonly AIApiClient _aiApiClient;
         private readonly User _testUser;
+        private readonly ManageIOService _manageIOService;
 
         public AIApiClientTests()
         {
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
             _mockManageIOService = new Mock<IManageIOService>();
             _mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
-            
+
             _aiConfig = new AIConfig
             {
                 OpenAIKey = "test-api-key",
@@ -395,4 +396,4 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Equal("No response", result);
         }
     }
-} 
+}

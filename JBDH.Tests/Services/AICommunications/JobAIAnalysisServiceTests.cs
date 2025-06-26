@@ -6,6 +6,7 @@ using JBDH.Models.Job;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
 using JBDH.Services.UserManagement;
+using JBDH.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.Protected;

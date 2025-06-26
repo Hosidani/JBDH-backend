@@ -433,4 +433,4 @@ namespace JBDH.Tests.Services.AICommunications
             _mockManageIOService.Verify(x => x.ExtractTextFromWebPage("https://example.com/job"), Times.Once);
         }
     }
-} 
+}

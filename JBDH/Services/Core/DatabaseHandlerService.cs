@@ -43,20 +43,16 @@ namespace JBDH.Services.Core
                 var createUserRoleAssignmentsTable = SqlQueries.SqlQuery(11);
                 var createUserReportsTable         = SqlQueries.SqlQuery(12);
                 var createPasswordResetsTable      = SqlQueries.SqlQuery(13);
-                var createUserAIResponsesTable     = SqlQueries.SqlQuery(14); // <-- Added
+                var createUserAIResponsesTable     = SqlQueries.SqlQuery(14);
                 var createBoardsTable              = SqlQueries.SqlQuery(15);
                 var createListsTable               = SqlQueries.SqlQuery(16);
                 var createCardsTable               = SqlQueries.SqlQuery(17);
                 var createBoardMembershipsTable    = SqlQueries.SqlQuery(18);
-                var createMessagesTable             = SqlQueries.SqlQuery(19); // Use the correct query number from your SqlQueriesService
+                var createMessagesTable             = SqlQueries.SqlQuery(19);
 
                 // Execute each create table command
-                using (var command = new MySqlCommand(createUsersTable, connection))
-                {
-                    command.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo("Users table created.");
-                }
-                using (var command = new MySqlCommand(createRawTable, connection)) { command.ExecuteNonQuery(); }
+                using (var command = new MySqlCommand(createUsersTable, connection)){command.ExecuteNonQuery();LoggingConfigService.ReturnInfo("Users table created.");                }
+                using (var command = new MySqlCommand(createRawTable, connection)) { command.ExecuteNonQuery();LoggingConfigService.ReturnInfo("Raw table created."); }
                 using (var command = new MySqlCommand(createJobsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createAIResponsesTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createFriendshipsTable, connection)) { command.ExecuteNonQuery(); }
@@ -68,18 +64,18 @@ namespace JBDH.Services.Core
                 using (var command = new MySqlCommand(createUserRoleAssignmentsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createUserReportsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createPasswordResetsTable, connection)) { command.ExecuteNonQuery(); }
-                using (var command = new MySqlCommand(createUserAIResponsesTable, connection)) { command.ExecuteNonQuery(); } // <-- Added
+                using (var command = new MySqlCommand(createUserAIResponsesTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createBoardsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createListsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createCardsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createBoardMembershipsTable, connection)) { command.ExecuteNonQuery(); }
-                using (var command = new MySqlCommand(createMessagesTable, connection)) { command.ExecuteNonQuery(); } // Execute the new table creation
+                using (var command = new MySqlCommand(createMessagesTable, connection)) { command.ExecuteNonQuery(); } 
 
                 LoggingConfigService.ReturnInfo("Ensured all tables exist.");
             }
             catch (Exception e)
             {
-                LoggingConfigService.ReturnError($"Error ensuring tables exist: {e.Message}");
+                LoggingConfigService.ReturnError($"Error ensuring tables exist: {e.Message}, {e.StackTrace}");
             }
         }
 

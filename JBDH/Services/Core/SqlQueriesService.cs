@@ -5,8 +5,6 @@ namespace JBDH.Services.Core
 { 
     public static class SqlQueries
     {
-        // BUG : Number 6 doenst work.
-        // BUG : Change name of the tables to PascalCase.
         private static readonly Dictionary<int, string> Queries = new Dictionary<int, string>
         {
             // 0-99: CREATE TABLE/DB
