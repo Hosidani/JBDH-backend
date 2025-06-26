@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using JBDH.Services.Core;
 using Xunit;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace JBDH.Tests.Services.Core
 {
@@ -165,7 +168,7 @@ namespace JBDH.Tests.Services.Core
             Assert.Contains("Id INT PRIMARY KEY AUTO_INCREMENT", result);
             Assert.Contains("RequesterId INT NOT NULL", result);
             Assert.Contains("AddresseeId INT NOT NULL", result);
-            Assert.Contains("Status ENUM('Pending', 'Friends') NOT NULL", result);
+            Assert.Contains("Status INT NOT NULL", result);
             Assert.Contains("RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP", result);
             Assert.Contains("FOREIGN KEY (RequesterId) REFERENCES Users(Id)", result);
             Assert.Contains("FOREIGN KEY (AddresseeId) REFERENCES Users(Id)", result);
@@ -335,4 +338,4 @@ namespace JBDH.Tests.Services.Core
             Assert.Contains("DELETE FROM Jobs", deleteAllJobsQuery);
         }
     }
-} 
+}

@@ -168,7 +168,7 @@ namespace JBDH.Tests.Services.Friendship
             Assert.True(result);
             var updatedFriendship = await _context.Friendships.FindAsync(friendship.Id);
             Assert.NotNull(updatedFriendship);
-            Assert.Equal(FriendshipStatus.Friends, updatedFriendship.Status);
+            Assert.Equal(FriendshipStatus.Accepted, updatedFriendship.Status);
         }
 
         [Fact]
@@ -499,4 +499,4 @@ namespace JBDH.Tests.Services.Friendship
             _context.Dispose();
         }
     }
-} 
+}

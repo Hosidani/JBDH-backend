@@ -22,7 +22,11 @@ namespace JBDH.Controllers
         // GET: /Boards
         public async Task<IActionResult> Index()
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
+            var userId = int.Parse(userIdClaim.Value);
+
             var boards = await _boardService.GetAllAsync(); // TODO: Filter by userId in service
             return View(boards);
         }
@@ -52,7 +56,11 @@ namespace JBDH.Controllers
             {
                 try
                 {
-                    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                    if (userIdClaim == null)
+                        return Unauthorized();
+                    var userId = int.Parse(userIdClaim.Value);
+
                     board.OwnerId = userId;
                     board.CreatedAt = DateTime.UtcNow;
                     board.UpdatedAt = DateTime.UtcNow;
@@ -91,7 +99,11 @@ namespace JBDH.Controllers
             if (ModelState.IsValid)
             {
                 // Set OwnerId from the logged-in user
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized();
+                var userId = int.Parse(userIdClaim.Value);
+
                 board.OwnerId = userId;
 
                 board.UpdatedAt = DateTime.UtcNow;
