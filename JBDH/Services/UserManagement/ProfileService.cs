@@ -80,7 +80,7 @@ namespace JBDH.Services.UserManagement
             // Fetch job applications
             var jobApplications = await (
                 from app in _context.JobApplications
-                join job in _context.Jobs on app.JobId.ToString() equals job.JobId
+                join job in _context.Jobs on app.JobId equals job.JobId
                 where app.UserId == userId
                 select new JBDH.Models.ViewModels.ProfileViewModel.JobApplicationViewModel
                 {

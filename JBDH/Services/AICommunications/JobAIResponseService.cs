@@ -19,10 +19,10 @@ namespace JBDH.Services.AICommunications
         {
             foreach (var item in jobs)
             {
-                if (item.Job != null && item.Job.Id > 0)
+                if (item.Job != null && item.Job.JobId > 0)
                 {
                     item.LatestAIResponse = await _context.JobAIResponses
-                        .Where(r => r.JobId == item.Job.Id)
+                        .Where(r => r.JobId == item.Job.JobId)
                         .OrderByDescending(r => r.CreatedAt)
                         .FirstOrDefaultAsync();
                 }

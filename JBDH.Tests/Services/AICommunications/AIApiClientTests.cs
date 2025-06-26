@@ -15,18 +15,19 @@ namespace JBDH.Tests.Services.AICommunications
     public class AIApiClientTests
     {
         private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
-        private readonly Mock<IManageInputService> _mockManageInputService;
+        private readonly Mock<IManageIOService> _mockManageIOService;
         private readonly Mock<IAIRequestBuilderService> _mockAIRequestBuilderService;
         private readonly AIConfig _aiConfig;
         private readonly AIApiClient _aiApiClient;
         private readonly User _testUser;
+        private readonly ManageIOService _manageIOService;
 
         public AIApiClientTests()
         {
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            _mockManageInputService = new Mock<IManageInputService>();
+            _mockManageIOService = new Mock<IManageIOService>();
             _mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
-            
+
             _aiConfig = new AIConfig
             {
                 OpenAIKey = "test-api-key",
@@ -34,7 +35,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
 
             var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
-            _aiApiClient = new AIApiClient(httpClient, _aiConfig, _mockManageInputService.Object, _mockAIRequestBuilderService.Object);
+            _aiApiClient = new AIApiClient(httpClient, _aiConfig, _mockManageIOService.Object, _mockAIRequestBuilderService.Object);
 
             _testUser = new User
             {
@@ -150,7 +151,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
 
             var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
-            var aiApiClient = new AIApiClient(httpClient, _aiConfig, _mockManageInputService.Object, null!);
+            var aiApiClient = new AIApiClient(httpClient, _aiConfig, _mockManageIOService.Object, null!);
 
             // Act
             var result = await aiApiClient.GetAIResponse(request);
@@ -395,4 +396,4 @@ namespace JBDH.Tests.Services.AICommunications
             Assert.Equal("No response", result);
         }
     }
-} 
+}

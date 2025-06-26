@@ -13,11 +13,11 @@ namespace JBDH.Services.AICommunications
     public class AIRequestBuilderService : IAIRequestBuilderService
     {
         private AIConfig _aiConfig;
-        private readonly IManageInputService _manageInputService;
-        public AIRequestBuilderService(IManageInputService manageInputService, AIConfig aiConfig)
+        private readonly IManageIOService _manageIOService;
+        public AIRequestBuilderService(IManageIOService manageIOService, AIConfig aiConfig)
         {
             _aiConfig = aiConfig;
-            _manageInputService = manageInputService;
+            _manageIOService = manageIOService;
         }
 
         private static readonly Dictionary<int, string> UserMessageTemplates = new()
@@ -35,7 +35,7 @@ namespace JBDH.Services.AICommunications
             [1] = "Analyze the following job advertisement. " +
                   "Extract and summarize the key requirements and characteristics of the ideal candidate. " +
                   "Return ONLY a valid JSON object with the following fields: " +
-                  "\"JobTitle\" (the main job title), " +
+                  "\"JobTitle\" (a short list, maximum 10 relevant job titles which are suitable to the job annons.), " +
                   "\"HardRequirements\" (a short list, maximum 10 must-have requirements or skills), " +
                   "\"GoodToHaves\" (a short list, maximum 10 nice-to-have skills or traits), " +
                   "\"Experiences\" (a short list, maximum 10 relevant experiences), " +
@@ -61,7 +61,7 @@ namespace JBDH.Services.AICommunications
             if (aiRequest.CommandId == 0)
             {
                 LoggingConfigService.ReturnInfo("CommandId is 0, processing CV.");
-                var cvText = await _manageInputService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                var cvText = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
                 userMessage = UserMessageTemplates[0].Replace("{CVText}", cvText);
 
                 var requestBody = new
@@ -81,7 +81,7 @@ namespace JBDH.Services.AICommunications
             if (aiRequest.CommandId == 1)
             {
                 LoggingConfigService.ReturnInfo("CommandId is 1, processing job ad.");
-                var jobAdText = await _manageInputService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
+                var jobAdText = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
                 userMessage = UserMessageTemplates[1].Replace("{JobAdText}", jobAdText);
 
                 var requestBody = new
@@ -102,8 +102,8 @@ namespace JBDH.Services.AICommunications
             {
                 LoggingConfigService.ReturnInfo("CommandId is 2, processing job ad and CV.");
 
-                var jobAdText = await _manageInputService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
-                var cvText = await _manageInputService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                var jobAdText = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
+                var cvText = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
 
                 userMessage = UserMessageTemplates[2]
                     .Replace("{JobAdText}", jobAdText)

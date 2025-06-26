@@ -39,7 +39,7 @@ namespace JBDH.Services.JobManagement
                     LoggingConfigService.ReturnInfo("Job dictionary keys: " + string.Join(", ", dict.Keys));
                     jobs.Add(new Job
                     {
-                        JobId = dict.TryGetValue("JobId", out var jobId) && jobId != null ? jobId.ToString()! : "0",
+                        JobId = dict.TryGetValue("JobId", out var jobId) && jobId != null && int.TryParse(jobId.ToString(), out var parsedId) ? parsedId : 0,
                         Title = dict.TryGetValue("Title", out var title) && title != null ? title.ToString()! : "",
                         Description = dict.TryGetValue("Description", out var desc) && desc != null ? desc.ToString()! : "",
                         Company = dict.TryGetValue("Company", out var company) && company != null ? company.ToString()! : "",

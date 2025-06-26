@@ -32,8 +32,8 @@ namespace JBDH.Tests
         {
             var builder = WebApplication.CreateBuilder();
 
-            // Get connection string for tests
-            var connectionString = "Server=localhost;Database=testing_purposes;User=root;Password=;";
+            // Get connection string for tests.
+            // var connectionString = "Server=localhost;Database=testing_purposes;User=root;Password=;";
 
             // Add services to the container for tests (skip startup operations)
             builder.Services.AddControllersWithViews();
@@ -43,7 +43,7 @@ namespace JBDH.Tests
             builder.Services.AddScoped<IFriendService, FriendService>();
             builder.Services.AddSingleton<AIConfig>();
             builder.Services.AddHttpClient<IAIApiClient, AIApiClient>();
-            builder.Services.AddScoped<IManageInputService, ManageInputService>();
+            builder.Services.AddScoped<IManageIOService, ManageIOService>();
             builder.Services.AddScoped<IAIRequestBuilderService, AIRequestBuilderService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();

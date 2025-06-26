@@ -5,7 +5,7 @@ namespace JBDH.Models.ViewModels
 {
     public class JobViewModel
     {
-        public string JobId { get; set; } = string.Empty;
+        public int JobId { get; set; } = 0;
         public string Title { get; set; } = string.Empty;
         public string Company { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
