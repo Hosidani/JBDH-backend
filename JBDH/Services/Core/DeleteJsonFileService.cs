@@ -25,6 +25,10 @@ namespace JBDH.Services.Core
                     LoggingConfigService.ReturnInfo($"JSON file not found: {filePath}");
                 }
             }
+            catch (FileNotFoundException)
+            {
+                LoggingConfigService.ReturnInfo("File not found when attempting to delete jobs.json (handled gracefully).");
+            }
             catch (Exception e)
             {
                 LoggingConfigService.ReturnError($"Error deleting JSON file: {e.Message}");
