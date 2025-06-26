@@ -32,7 +32,7 @@ namespace JBDH.Tests
         {
             var builder = WebApplication.CreateBuilder();
 
-            // Get connection string for tests
+            // Get connection string for tests.
             // var connectionString = "Server=localhost;Database=testing_purposes;User=root;Password=;";
 
             // Add services to the container for tests (skip startup operations)
