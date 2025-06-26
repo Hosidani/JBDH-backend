@@ -57,7 +57,7 @@ namespace JBDH.Tests.Controllers
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Details", redirectToActionResult.ActionName);
             Assert.Equal("Boards", redirectToActionResult.ControllerName);
-            Assert.Equal(123, redirectToActionResult.RouteValues["id"]);
+            Assert.Equal(123, Convert.ToInt32(redirectToActionResult.RouteValues["id"]));
             _mockCardService.Verify(s => s.CreateAsync(cardToCreate), Times.Once);
         }
 

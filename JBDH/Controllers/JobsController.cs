@@ -18,7 +18,7 @@ namespace JBDH.Controllers
             _jobService = jobService;
         }
 
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(int id)
         {
             var job = await _context.Jobs.FindAsync(id);
             if (job == null)
@@ -30,7 +30,7 @@ namespace JBDH.Controllers
             {
                 // Check if the user has already applied for this job
                 hasApplied = await _context.JobApplications
-                    .AnyAsync(a => a.JobId.ToString() == id && a.UserId.ToString() == userId);
+                    .AnyAsync(a => a.JobId == id && a.UserId.ToString() == userId);
             }
             // Get the latest AI response for this job
             var latestAIResponse = await _context.JobAIResponses

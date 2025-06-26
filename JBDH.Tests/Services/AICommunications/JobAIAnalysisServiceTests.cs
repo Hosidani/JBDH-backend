@@ -58,13 +58,13 @@ namespace JBDH.Tests.Services.AICommunications
         {
             // Arrange
             var jobAdUrl = "https://example.com/job";
-            var jobId = 1;
+            var jobId = "1";
             var cachedResponseText = "Cached AI analysis response";
 
             var cachedResponse = new JobAIResponse
             {
                 Id = 1,
-                JobId = jobId,
+                JobId = int.Parse(jobId), // rätt typ!
                 ResponseText = cachedResponseText,
                 CreatedAt = DateTime.UtcNow.AddHours(-1)
             };
@@ -73,7 +73,7 @@ namespace JBDH.Tests.Services.AICommunications
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId);
+            var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId.ToString());
 
             // Assert
             Assert.Equal(cachedResponseText, result);
@@ -109,7 +109,7 @@ namespace JBDH.Tests.Services.AICommunications
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId);
+            var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId.ToString());
 
             // Assert
             Assert.Equal(latestResponseText, result);
@@ -132,7 +132,7 @@ namespace JBDH.Tests.Services.AICommunications
             // Act & Assert - This will likely fail due to network/API issues, but we can test the setup
             try
             {
-                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId);
+                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId.ToString());
                 // If it succeeds, that's fine too
             }
             catch (HttpRequestException)
@@ -179,7 +179,7 @@ namespace JBDH.Tests.Services.AICommunications
             // Act & Assert - This will likely fail due to network/API issues, but we can test the setup
             try
             {
-                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId2);
+                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, jobId2.ToString());
                 // If it succeeds, that's fine too
             }
             catch (HttpRequestException)
@@ -210,7 +210,7 @@ namespace JBDH.Tests.Services.AICommunications
             // Act & Assert - This will likely fail due to network/API issues, but we can test the setup
             try
             {
-                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(nullJobAdUrl!, jobId);
+                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(nullJobAdUrl!, jobId.ToString());
                 // If it succeeds, that's fine too
             }
             catch (HttpRequestException)
@@ -244,7 +244,7 @@ namespace JBDH.Tests.Services.AICommunications
             // Act & Assert - This will likely fail due to network/API issues, but we can test the setup
             try
             {
-                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(emptyJobAdUrl, jobId);
+                var result = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(emptyJobAdUrl, jobId.ToString());
                 // If it succeeds, that's fine too
             }
             catch (HttpRequestException)
@@ -267,7 +267,7 @@ namespace JBDH.Tests.Services.AICommunications
         {
             // Arrange
             var jobAdUrl = "https://example.com/job";
-            var jobId = 1;
+            var jobId = "1";
 
             _mockUserPropertiesService.Setup(x => x.GetCurrentUserAsync())
                 .ReturnsAsync((User?)null);
@@ -301,7 +301,7 @@ namespace JBDH.Tests.Services.AICommunications
         {
             // Arrange
             var jobAdUrl = "https://example.com/job";
-            var jobId = 1;
+            var jobId = "1";
             StringContent? nullContent = null;
 
             _mockUserPropertiesService.Setup(x => x.GetCurrentUserAsync())
@@ -333,7 +333,7 @@ namespace JBDH.Tests.Services.AICommunications
         {
             // Arrange
             var jobAdUrl = "https://example.com/job";
-            var jobId = 1;
+            var jobId = "1";
 
             _mockUserPropertiesService.Setup(x => x.GetCurrentUserAsync())
                 .ReturnsAsync(_testUser);
@@ -364,7 +364,7 @@ namespace JBDH.Tests.Services.AICommunications
         {
             // Arrange
             var jobAdUrl = "https://example.com/job";
-            var jobId = 1;
+            var jobId = "1";
 
             _mockUserPropertiesService.Setup(x => x.GetCurrentUserAsync())
                 .ReturnsAsync(_testUser);
@@ -395,7 +395,7 @@ namespace JBDH.Tests.Services.AICommunications
         {
             // Arrange
             var jobAdUrl = "https://example.com/job";
-            var jobId = 1;
+            var jobId = "1";
 
             _mockUserPropertiesService.Setup(x => x.GetCurrentUserAsync())
                 .ReturnsAsync(_testUser);
