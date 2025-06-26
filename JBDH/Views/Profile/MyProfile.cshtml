@@ -225,3 +225,26 @@ else
 {
     <p>You have not applied to any jobs yet.</p>
 }
+
+@if (Model.CVAnalysisResult.Experiences != null && Model.CVAnalysisResult.Experiences.Any(e => !string.IsNullOrWhiteSpace(e.Title)))
+{
+    <ul>
+        @foreach (var exp in Model.CVAnalysisResult.Experiences)
+        {
+            if (!string.IsNullOrWhiteSpace(exp.Title))
+            {
+                <li>
+                    <strong>@exp.Title</strong>
+                    @if (!string.IsNullOrWhiteSpace(exp.Duration))
+                    {
+                        <span class="text-muted">(@exp.Duration)</span>
+                    }
+                </li>
+            }
+        }
+    </ul>
+}
+else
+{
+    <span>No experiences found.</span>
+}
