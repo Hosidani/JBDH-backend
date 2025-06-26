@@ -156,9 +156,11 @@ namespace JBDH.Tests.Services.Core
             finally
             {
                 // Cleanup
-                File.SetAttributes(_testFilePath, FileAttributes.Normal);
                 if (File.Exists(_testFilePath))
+                {
+                    File.SetAttributes(_testFilePath, FileAttributes.Normal);
                     File.Delete(_testFilePath);
+                }
             }
         }
 
@@ -466,4 +468,4 @@ namespace JBDH.Tests.Services.Core
             File.WriteAllText(filePath, content);
         }
     }
-} 
+}
