@@ -1,6 +1,4 @@
-using JBDH.Models.User;
-
-namespace JBDH.Models
+namespace JBDH.Models.AI
 {
     public class AIRequest
     {

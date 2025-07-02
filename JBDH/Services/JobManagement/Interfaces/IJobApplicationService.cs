@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using JBDH.Models;
+using JBDH.Models.Services;
 
 namespace JBDH.Services.JobManagement
 {

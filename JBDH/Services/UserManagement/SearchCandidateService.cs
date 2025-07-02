@@ -1,8 +1,10 @@
-using JBDH.Models;
-using JBDH.Services;
+using JBDH.Models.Core;
+using JBDH.Models.ViewModels;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Models.AI;
+
 
 namespace JBDH.Services.UserManagement
 {
@@ -22,21 +24,26 @@ namespace JBDH.Services.UserManagement
             var users = _context.Users.Where(u => u.OpenForHiring == true);
             LoggingConfigService.ReturnInfo($"Total users open for hiring: {await users.CountAsync()}");
 
+            // Normalize input parameters
+            keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword?.Trim();
+            location = string.IsNullOrWhiteSpace(location) ? null : location?.Trim();
+
             var userWithAI = users.Select(u => new
             {
                 User = u,
-                LatestAI = _context.UserAIResponses
+                LatestAI = (UserAIResponse?)_context.UserAIResponses
                     .Where(ai => ai.UserId == u.Id)
                     .OrderByDescending(ai => ai.CreatedAt)
                     .FirstOrDefault()
             });
+
             var filtered = await userWithAI
                 .Where(x =>
                     x.LatestAI != null &&
-                    (string.IsNullOrEmpty(keyword) ||
-                        !string.IsNullOrEmpty(x.LatestAI.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower())) &&
-                    (string.IsNullOrEmpty(location) ||
-                        (!string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()))
+                    (keyword == null ||
+                        (!string.IsNullOrEmpty(x.LatestAI!.ResponseText) && x.LatestAI.ResponseText.ToLower().Contains(keyword.ToLower()))) &&
+                    (location == null ||
+                        (!string.IsNullOrEmpty(x.User!.Location) && x.User.Location.ToLower().Contains(location.ToLower())))
                 )
                 .ToListAsync();
 
@@ -53,7 +60,7 @@ namespace JBDH.Services.UserManagement
                     Username = x.User.Username,
                     Location = x.User.Location,
                     UserAIResponse = aiResponse ?? new UserAIResponse { UserId = x.User.Id, User = x.User },
-                    Priority = (!string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower() == location.ToLower()) ? 1 : 2
+                    Priority = (location != null && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower().Contains(location.ToLower())) ? 1 : 2
                 };
             }));
 

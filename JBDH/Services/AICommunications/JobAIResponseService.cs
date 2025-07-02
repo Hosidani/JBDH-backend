@@ -1,9 +1,9 @@
-// filepath: c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\JobAIResponseService.cs
+// filepath: c:\Users\danie\Documents\JBDH_V0.1\JBDH\Services\AICommunications/JobAIResponseService.cs
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using JBDH.Models.ViewModels;
-using JBDH.Models;
+using JBDH.Models.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.AICommunications
 {
@@ -19,10 +19,10 @@ namespace JBDH.Services.AICommunications
         {
             foreach (var item in jobs)
             {
-                if (item.Job != null && item.Job.JobId != null)
+                if (item.Job != null && item.Job.JobId > 0)
                 {
                     item.LatestAIResponse = await _context.JobAIResponses
-                        .Where(r => r.JobId == item.Job.JobId.ToString())
+                        .Where(r => r.JobId == item.Job.JobId)
                         .OrderByDescending(r => r.CreatedAt)
                         .FirstOrDefaultAsync();
                 }

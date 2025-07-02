@@ -1,4 +1,4 @@
-@model JBDH.Models.ProfileViewModel
+@model JBDH.Models.ViewModels.ProfileViewModel
 
 @{
     ViewData["Title"] = "Profile";
@@ -73,3 +73,12 @@
         <p>User not found.</p>
     }
 </div>
+@{
+    var currentUserIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int currentUserId = 0;
+    int.TryParse(currentUserIdStr, out currentUserId);
+}
+@if (Model.User != null && Model.User.Id != currentUserId)
+{
+    <a asp-controller="Messages" asp-action="Send" asp-route-userId="@Model.User.Id" class="btn btn-primary">Send Message</a>
+}

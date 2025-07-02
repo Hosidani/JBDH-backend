@@ -1,13 +1,13 @@
 using System.Text; 
 using System.Text.Json;
-using Newtonsoft.Json;
-using JBDH.Models;
-using JBDH.Services.AICommunications;
-using AIConfig = JBDH.Models.AIConfig;
-using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Nodes;
+using Newtonsoft.Json;
+using JBDH.Services.AICommunications;
+using AIConfig = JBDH.Models.AI.AIConfig;
 using JBDH.Services.Helpers;
 using JBDH.Services.Configuration;
+using JBDH.Models.AI;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JBDH.Services.AICommunications
 {
@@ -69,8 +69,13 @@ namespace JBDH.Services.AICommunications
                 LoggingConfigService.ReturnError("Response body is null or empty");
                 return "No response";
             }
-            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody!);
-            return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
+            dynamic? jsonResponse = JsonConvert.DeserializeObject(responseBody!);
+            if (jsonResponse == null)
+            {
+                LoggingConfigService.ReturnError("Deserialization returned null");
+                return "No response";
+            }
+            return jsonResponse.choices?[0]?.message?.content?.ToString() ?? "No response";
         }
 
     }

@@ -1,9 +1,7 @@
 using System.Text; 
 using JBDH.Services;
-using JBDH.Models;
-using JBDH.Models.User;
+using JBDH.Models.AI;
 using System.Text.Json.Nodes;
-using System.Text.Json;
 using Newtonsoft.Json; 
 using JBDH.Services.Helpers;
 using JBDH.Services.Configuration;

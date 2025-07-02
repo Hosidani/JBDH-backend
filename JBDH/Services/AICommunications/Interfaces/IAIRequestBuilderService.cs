@@ -1,4 +1,4 @@
-using JBDH.Models;
+using JBDH.Models.AI;
 
 namespace JBDH.Services.AICommunications
 {

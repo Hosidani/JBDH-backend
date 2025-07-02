@@ -1,10 +1,12 @@
 using JBDH.Models.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace JBDH.Models.Job
 {
     public class Job
     {
-        public string? JobId { get; set; } // Unique identifier for the job
+        [Key]
+        public int JobId { get; set; } // Unique identifier for the job
         public string? Title { get; set; } // Job title
         public string? Description { get; set; } // Job description
         public string? Company { get; set; } // Company offering the job

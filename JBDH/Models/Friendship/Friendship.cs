@@ -1,8 +1,7 @@
-using JBDH.Models;
-using JBDH.Models.User;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using UserModel = JBDH.Models.User.User;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace JBDH.Models.Friendship
 {

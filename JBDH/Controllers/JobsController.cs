@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using JBDH.Models;
 using JBDH.Models.ViewModels;
 using JBDH.Services;
 using JBDH.Services.JobManagement;
+using JBDH.Models.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JBDH.Controllers
 {
@@ -24,18 +24,17 @@ namespace JBDH.Controllers
             if (job == null)
                 return NotFound();
 
-            // Get current user ID from claims
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = 0;
-            if (!string.IsNullOrEmpty(userIdStr))
-                int.TryParse(userIdStr, out userId);
-
-            bool hasApplied = userId > 0 &&
-            await _context.JobApplications.AnyAsync(a => a.JobId == id && a.UserId == userId);
-
+            bool hasApplied = false;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Check if the user has already applied for this job
+                hasApplied = await _context.JobApplications
+                    .AnyAsync(a => a.JobId == id && a.UserId.ToString() == userId);
+            }
             // Get the latest AI response for this job
             var latestAIResponse = await _context.JobAIResponses
-                .Where(r => r.JobId == id.ToString())
+                .Where(r => r.JobId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .FirstOrDefaultAsync();
 

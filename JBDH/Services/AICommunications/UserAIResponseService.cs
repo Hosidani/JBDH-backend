@@ -1,9 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
-using JBDH.Models;
 using JBDH.Models.User;
-using Microsoft.EntityFrameworkCore;
+using JBDH.Models.AI;
+using JBDH.Models.Core;
 using JBDH.Services.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.AICommunications
 {
@@ -36,7 +37,7 @@ namespace JBDH.Services.AICommunications
             }
             var aiResponse = new AIResponse
             {
-                Id = userAIResponse.Id,
+                Id = userAIResponse.Id.ToString(), // Map Id to string
                 ResponseText = userAIResponse.ResponseText, // Map Content to ResponseText
                 CreatedAt = userAIResponse.CreatedAt
             };

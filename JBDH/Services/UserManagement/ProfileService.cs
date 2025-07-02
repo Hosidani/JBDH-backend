@@ -1,11 +1,15 @@
-using JBDH.Models;
-using JBDH.Models.User;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using JBDH.Services;
+using JBDH.Models.Core;
+using JBDH.Models.User;
+using JBDH.Models.ViewModels;
+using JBDH.Models.Services;
+using JBDH.Models.Friendship;
 using JBDH.Services.Friendship;
 using JBDH.Services.AICommunications;
+using Microsoft.EntityFrameworkCore;
+using JBDH.Models.Job;
+using System.Text.Json;
 
 namespace JBDH.Services.UserManagement
 {
@@ -27,7 +31,10 @@ namespace JBDH.Services.UserManagement
         public async Task<User?> GetUserByIdAsync(int userId)
         {
             return await _context.Set<User>()
-                .Include(u => u.AIResponses)
+                .Include(u => u.ReceivedFriendRequests)
+                    .ThenInclude(f => f.Requester)
+                .Include(u => u.SentFriendRequests)
+                    .ThenInclude(f => f.Addressee)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
@@ -56,17 +63,75 @@ namespace JBDH.Services.UserManagement
             if (user == null)
                 throw new System.Exception("User not found.");
 
-            return new ProfileViewModel
+            var friends = user.SentFriendRequests
+                .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
+                .Select(f => f.Addressee)
+                .Concat(
+                    user.ReceivedFriendRequests
+                        .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
+                        .Select(f => f.Requester)
+                )
+                .ToList();
+
+            var pendingRequests = user.ReceivedFriendRequests
+                .Where(f => f.Status == FriendshipStatus.Pending)
+                .ToList();
+
+            // Fetch job applications
+            var jobApplications = await (
+                from app in _context.JobApplications
+                join job in _context.Jobs on app.JobId equals job.JobId
+                where app.UserId == userId
+                select new JBDH.Models.ViewModels.ProfileViewModel.JobApplicationViewModel
+                {
+                    ApplicationId = app.ApplicationId,
+                    JobId = app.JobId,
+                    JobTitle = job.Title,
+                    JobUrl = job.WebpageUrl,
+                    JobDescription = job.Description,
+                    Notes = app.Notes,
+                    AppliedAt = app.AppliedAt
+                }
+            ).ToListAsync();
+
+            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+
+            var model = new ProfileViewModel
             {
                 User = user,
                 IsFriend = false,
                 Organisation = null,
-                UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id)
+                UserAIResponse = userAIResponse,
+                Friends = friends,
+                PendingFriendRequests = pendingRequests,
+                JobApplications = jobApplications
             };
+
+            // Example using System.Text.Json
+            if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
+            {
+                try
+                {
+                    model.CVAnalysisResult = JsonSerializer.Deserialize<CVAnalysisResult>(userAIResponse.ResponseText);
+                }
+                catch
+                {
+                    model.CVAnalysisResult = null; // or handle error
+                }
+            }
+            else
+            {
+                model.CVAnalysisResult = null;
+            }
+
+            return model;
         }
 
         public int? GetCurrentUserId(ClaimsPrincipal user)
         {
+            if (user == null)
+                return null;
+                
             var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (int.TryParse(idClaim, out var id))
                 return id;

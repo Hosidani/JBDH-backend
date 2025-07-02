@@ -86,6 +86,11 @@ namespace JBDH.Services.Configuration
     
             public static void PrintCounters(List<List<int>> counters)
             {
+                if (counters == null)
+                {
+                    return;
+                }
+                
                 foreach (var counter in counters)
                 {
                     ReturnInfo(string.Join(", ", counter));

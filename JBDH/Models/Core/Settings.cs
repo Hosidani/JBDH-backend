@@ -5,7 +5,7 @@ using JBDH.Controllers;
 using JBDH.Services;
 using JBDH.Services.Configuration;
 
-namespace JBDH.Models
+namespace JBDH.Models.Core
 {
     public static class Settings
     {
