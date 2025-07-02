@@ -169,13 +169,15 @@ namespace JBDH.Controllers
 
             if (results.Any() && results.First().Job != null)
             {
+                
                 var aiRequest = new AIRequest
                 {
-                    CommandId = 2,
-                    JobAdUrl = results.First().Job.WebpageUrl,
-                    CVPath = user.CVPath,
+                    CommandId = 3,
+                    JobAIResponse = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(results.First().Job.WebpageUrl, results.First().Job.JobId),
+                    UserAIResponse = user.AIResponses.FirstOrDefault()?.ResponseText,
                     User = user
-                };
+                };              
+
                 string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
                 aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
 
