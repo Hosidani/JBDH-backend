@@ -30,13 +30,11 @@ namespace JBDH.Services.AICommunications
             _manageIOService = manageIOService;
         }
 
-        public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, string jobId)
+        public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId)
         {
-            int jobIdInt = int.Parse(jobId);
-
             // 1. Check for cached response in the database
             var cachedResponse = await _context.JobAIResponses
-                .Where(r => r.JobId == jobIdInt)
+                .Where(r => r.JobId == jobId)
                 .OrderByDescending(r => r.CreatedAt)
                 .FirstOrDefaultAsync();
 
@@ -80,7 +78,7 @@ namespace JBDH.Services.AICommunications
                 // 3. Save the new response to the database
                 var aiResponse = new JobAIResponse
                 {
-                    JobId = jobIdInt,
+                    JobId = jobId,
                     ResponseText = cleanJson, // Save only the clean JSON!
                     CreatedAt = DateTime.UtcNow
                 };

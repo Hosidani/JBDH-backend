@@ -109,7 +109,7 @@ namespace JBDH.Controllers
                 });
             }
 
-            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId.ToString());
+            var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
             LoggingConfigService.ReturnInfo($"job AI response: {aiResultString}");
 
@@ -180,39 +180,33 @@ namespace JBDH.Controllers
 
             // Use workflow service for search and meta
             var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
+            LoggingConfigService.ReturnInfo($"Search results count: {results.Count}");
 
-            if (results.Any())
+            if (results.Any() && results.First().Job != null)
             {
-                var firstResult = results.First();
-                if (firstResult.Job != null)
-                {
-                    var aiRequest = new AIRequest
-                    {
-                        CommandId = 2,
-                        JobAdUrl = firstResult.Job.WebpageUrl,
-                        CVPath = user.CVPath,
-                        User = user
-                    };
-                    string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
-                    aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
 
-                    // Parse JSON to ViewModel
-                    CVJobComparisonAIResponseViewModel? aiModel = null;
-                    try
-                    {
-                        aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
-                    }
-                    catch
-                    {
-                        LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
-                    }
-
-                    ViewData["AIAnalysisModel"] = aiModel;
-                }
-                else
+                var aiRequest = new AIRequest
                 {
-                    ViewData["AIAnalysisModel"] = null;
+                    CommandId = 3,
+                    JobAIResponse = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(results.First().Job.WebpageUrl, results.First().Job.JobId),
+                    UserAIResponse = user.AIResponses.FirstOrDefault()?.ResponseText,
+                    User = user
+                };
+                LoggingConfigService.ReturnInfo($"AI Request built with CommandId: {aiRequest.CommandId}, JobAdUrl: {results.First().Job.WebpageUrl}, UserAIResponse: {user.AIResponses.FirstOrDefault()?.ResponseText}");  
+                string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
+                aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
+                // Parse JSON to ViewModel
+                CVJobComparisonAIResponseViewModel? aiModel = null;
+                try
+                {
+                    aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
                 }
+                catch
+                {
+                    LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
+                }
+
+                ViewData["AIAnalysisModel"] = aiModel;
             }
             else
             {
