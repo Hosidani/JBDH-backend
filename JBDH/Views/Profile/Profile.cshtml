@@ -82,3 +82,15 @@
 {
     <a asp-controller="Messages" asp-action="Send" asp-route-userId="@Model.User.Id" class="btn btn-primary">Send Message</a>
 }
+@{
+    var isDeveloper = User.IsInRole("Developer") || (ViewBag.CurrentUser?.DeveloperMode ?? false);
+}
+@if (isDeveloper)
+{
+    <form asp-action="DeleteUserFromProfile" asp-controller="Profile" method="post" asp-route-userId="@Model.User.Id">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">
+            Delete User
+        </button>
+        @Html.AntiForgeryToken()
+    </form>
+}
