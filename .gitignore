@@ -5,3 +5,10 @@ obj/
 *.json
 !JBDH/appsettings.json
 !JBDH/appsettings.Development.json
+
+# Coverage reports
+coveragereport/
+coverage.*
+TestResults/
+*.lcov
+*.cobertura.xml
