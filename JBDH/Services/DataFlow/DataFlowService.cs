@@ -120,7 +120,7 @@ namespace JBDH.Services.DataFlow
             {
                 Id = dataFlow.Id,
                 UserId = dataFlow.UserId,
-                Username = dataFlow.User?.Username,
+                Username = dataFlow.User?.Email,
                 ContentType = dataFlow.ContentType,
                 Content = dataFlow.Content,
                 ParentDataFlowId = dataFlow.ParentDataFlowId,

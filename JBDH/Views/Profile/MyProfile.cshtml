@@ -10,9 +10,6 @@
 
 <div class="card p-4 mt-3 shadow-sm">
     <dl class="row">
-        <dt class="col-sm-3">Username:</dt>
-        <dd class="col-sm-9">@Model.User.Username</dd>
-
         <dt class="col-sm-3">Email:</dt>
         <dd class="col-sm-9">@Model.User.Email</dd>
 
@@ -155,7 +152,7 @@ else
     <ul>
         @foreach (var friend in Model.Friends)
         {
-            <li>@friend.Username</li>
+            <li>@friend.Email</li> <!-- or @friend.Id -->
         }
     </ul>
 }
@@ -171,7 +168,7 @@ else
         @foreach (var request in Model.PendingFriendRequests)
         {
             <li>
-                @request.Requester.Username
+                @request.Requester.Email <!-- or @request.Requester.Id -->
                 <form asp-action="AcceptFriendRequest" method="post" style="display:inline;">
                     <input type="hidden" name="friendshipId" value="@request.Id" />
                     <button type="submit" class="btn btn-success btn-sm">Accept</button>

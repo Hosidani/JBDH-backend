@@ -90,6 +90,7 @@ public class RegisterController : Controller
     public async Task<IActionResult> RegisterOrganization(string name)
     {
         var managerUsername = User.Identity?.Name;
+        var managerEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
         if (string.IsNullOrEmpty(managerUsername))
         {
             ViewData["ErrorMessage"] = "You must be logged in to register an organisation.";

@@ -66,10 +66,6 @@ namespace JBDH.Models.Core
             {
                 entity.HasKey(u => u.Id); // Primary key
 
-                entity.Property(u => u.Username)
-                    .IsRequired()
-                    .HasMaxLength(100); // Required field with max length
-
                 entity.Property(u => u.PasswordHash)
                     .IsRequired(); // Required field
 

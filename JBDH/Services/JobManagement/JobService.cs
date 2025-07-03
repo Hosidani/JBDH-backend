@@ -15,12 +15,12 @@ namespace JBDH.Services.JobManagement
             _context = context;
         }
 
-        public async Task<JobDetailsViewModel?> GetJobDetailsAsync(int jobId, string? username)
+        public async Task<JobDetailsViewModel?> GetJobDetailsAsync(int jobId, string? email)
         {
             var job = await _context.Jobs.FindAsync(jobId);
             if (job == null) return null;
 
-            var user = username != null ? await _context.Users.FirstOrDefaultAsync(u => u.Username == username) : null;
+            var user = email != null ? await _context.Users.FirstOrDefaultAsync(u => u.Email == email) : null;
             var hasApplied = user != null && await _context.JobApplications.AnyAsync(j => j.UserId == user.Id && j.JobId == jobId);
 
             return new JobDetailsViewModel
