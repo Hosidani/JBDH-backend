@@ -37,7 +37,7 @@ namespace JBDH.Services.AICommunications
             }
             var aiResponse = new AIResponse
             {
-                Id = userAIResponse.Id,
+                Id = userAIResponse.Id.ToString(), // Map Id to string
                 ResponseText = userAIResponse.ResponseText, // Map Content to ResponseText
                 CreatedAt = userAIResponse.CreatedAt
             };

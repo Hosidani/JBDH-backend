@@ -6,11 +6,14 @@ using JBDH.Models.Job;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
 using JBDH.Services.UserManagement;
+using JBDH.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
 using Xunit;
+using JBDH.Services.Helpers;
+
 
 namespace JBDH.Tests.Services.AICommunications
 {
@@ -18,6 +21,7 @@ namespace JBDH.Tests.Services.AICommunications
     {
         private readonly Mock<IUserPropertiesService> _mockUserPropertiesService;
         private readonly Mock<IAIRequestBuilderService> _mockAIRequestBuilderService;
+        private readonly Mock<IManageIOService> _mockManageIOService;
         private readonly ApplicationDbContext _context;
         private readonly JobAIAnalysisService _jobAIAnalysisService;
         private readonly User _testUser;
@@ -31,11 +35,18 @@ namespace JBDH.Tests.Services.AICommunications
             _context = new ApplicationDbContext(options);
             _mockUserPropertiesService = new Mock<IUserPropertiesService>();
             _mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
+            _mockManageIOService = new Mock<IManageIOService>();
+
+            // Always return a dummy JSON string for extraction
+            _mockManageIOService
+                .Setup(x => x.ExtractInnerJsonFromJobAIResponse(It.IsAny<string>()))
+                .Returns("{\"dummy\": \"json\"}");
 
             _jobAIAnalysisService = new JobAIAnalysisService(
                 _mockUserPropertiesService.Object,
                 _mockAIRequestBuilderService.Object,
-                _context);
+                _context,
+                _mockManageIOService.Object);
 
             _testUser = new User
             {
@@ -45,6 +56,10 @@ namespace JBDH.Tests.Services.AICommunications
                 PasswordHash = "hash",
                 Location = "Test City"
             };
+
+            _mockManageIOService
+                .Setup(x => x.ExtractInnerJsonFromJobAIResponse(It.IsAny<string>()))
+                .Returns("some valid json");
         }
 
         [Fact]
@@ -58,7 +73,7 @@ namespace JBDH.Tests.Services.AICommunications
             var cachedResponse = new JobAIResponse
             {
                 Id = 1,
-                JobId = jobId,
+                JobId = jobId, // rätt typ!
                 ResponseText = cachedResponseText,
                 CreatedAt = DateTime.UtcNow.AddHours(-1)
             };
@@ -424,4 +439,4 @@ namespace JBDH.Tests.Services.AICommunications
             }
         }
     }
-} 
+}

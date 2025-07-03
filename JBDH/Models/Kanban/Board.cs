@@ -10,7 +10,7 @@ namespace JBDH.Models.Kanban
         [Key]
         public int Id { get; set; }
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         [Required]
         public int OwnerId { get; set; }
         public bool IsOrganizationBoard { get; set; }
@@ -22,4 +22,4 @@ namespace JBDH.Models.Kanban
         public virtual ICollection<KanbanList> Lists { get; set; } = new List<KanbanList>();
         public virtual ICollection<BoardMembership> Memberships { get; set; } = new List<BoardMembership>();
     }
-} 
+}

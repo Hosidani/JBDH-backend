@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using JBDH.Services.Core;
 using Xunit;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace JBDH.Tests.Services.Core
 {
@@ -143,7 +146,7 @@ namespace JBDH.Tests.Services.Core
 
             // Assert
             Assert.NotNull(result);
-            Assert.Contains("JobId VARCHAR(255) PRIMARY KEY", result);
+            Assert.Contains("JobId INT PRIMARY KEY AUTO_INCREMENT", result);
             Assert.Contains("Title VARCHAR(255)", result);
             Assert.Contains("Description TEXT", result);
             Assert.Contains("Company VARCHAR(255)", result);
@@ -165,7 +168,7 @@ namespace JBDH.Tests.Services.Core
             Assert.Contains("Id INT PRIMARY KEY AUTO_INCREMENT", result);
             Assert.Contains("RequesterId INT NOT NULL", result);
             Assert.Contains("AddresseeId INT NOT NULL", result);
-            Assert.Contains("Status ENUM('Pending', 'Friends') NOT NULL", result);
+            Assert.Contains("Status INT NOT NULL", result);
             Assert.Contains("RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP", result);
             Assert.Contains("FOREIGN KEY (RequesterId) REFERENCES Users(Id)", result);
             Assert.Contains("FOREIGN KEY (AddresseeId) REFERENCES Users(Id)", result);
@@ -181,7 +184,7 @@ namespace JBDH.Tests.Services.Core
             Assert.NotNull(result);
             Assert.Contains("ApplicationId INT PRIMARY KEY AUTO_INCREMENT", result);
             Assert.Contains("UserId INT NOT NULL", result);
-            Assert.Contains("JobId VARCHAR(255) NOT NULL", result);
+            Assert.Contains("JobId INT NOT NULL", result);
             Assert.Contains("AppliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP", result);
             Assert.Contains("Notes TEXT", result);
         }
@@ -335,4 +338,4 @@ namespace JBDH.Tests.Services.Core
             Assert.Contains("DELETE FROM Jobs", deleteAllJobsQuery);
         }
     }
-} 
+}

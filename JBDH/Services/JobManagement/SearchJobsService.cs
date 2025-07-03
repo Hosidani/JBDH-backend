@@ -23,7 +23,7 @@ namespace JBDH.Services.JobManagement
             _environment = environment;
         }
 
-        public async Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
+        public Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
         {
             LoggingConfigService.ReturnInfo("SearchJobs Service called");
             try
@@ -32,14 +32,13 @@ namespace JBDH.Services.JobManagement
                 LoggingConfigService.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
                 LoggingConfigService.ReturnInfo($"Results count: {jobDictionaries.Count}");
 
-                // Map dictionaries to Job objects
                 var jobs = new List<Job>();
                 foreach (var dict in jobDictionaries)
                 {
                     LoggingConfigService.ReturnInfo("Job dictionary keys: " + string.Join(", ", dict.Keys));
                     jobs.Add(new Job
                     {
-                        JobId = dict.TryGetValue("JobId", out var jobId) && jobId != null ? jobId.ToString()! : "0",
+                        JobId = dict.TryGetValue("JobId", out var jobId) && jobId != null && int.TryParse(jobId.ToString(), out var parsedId) ? parsedId : 0,
                         Title = dict.TryGetValue("Title", out var title) && title != null ? title.ToString()! : "",
                         Description = dict.TryGetValue("Description", out var desc) && desc != null ? desc.ToString()! : "",
                         Company = dict.TryGetValue("Company", out var company) && company != null ? company.ToString()! : "",
@@ -51,9 +50,8 @@ namespace JBDH.Services.JobManagement
                     });
                 }
 
-                // Await the async priority assignment
                 var presentJobs = GiveJobPriorityService.AssignJobPriority(jobs, description, location);
-                return presentJobs;
+                return Task.FromResult(presentJobs);
             }
             catch (Exception ex)
             {

@@ -1,0 +1,12 @@
+controllers:
+  - 'JBDH/Controllers/**'
+models:
+  - 'JBDH/Models/**'
+services:
+  - 'JBDH/Services/**'
+views:
+  - 'JBDH/Views/**'
+tests:
+  - 'JBDH.Tests/**'
+docs:
+  - '**/*.md'

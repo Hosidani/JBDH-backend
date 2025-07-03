@@ -45,7 +45,7 @@ namespace JBDH.Services.ListService
 
         public async Task<KanbanList?> GetAsync(int id)
         {
-            return await _context.Lists.FindAsync(id);
+            return await _context.Lists.FindAsync(id) as KanbanList;
         }
 
         public async Task<IEnumerable<KanbanList>> GetListsByBoardIdAsync(int boardId)

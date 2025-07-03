@@ -6,7 +6,6 @@ using JBDH.Services.UserManagement;
 using JBDH.Services.Configuration;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Notifications;
-using JBDH.Services.UserManagement;
 using JBDH.Services.Organisation;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;

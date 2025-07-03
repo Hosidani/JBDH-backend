@@ -1,8 +1,10 @@
 using JBDH.Models;
 using JBDH.Models.AI;
+using JBDH.Services.Configuration;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Services.UserManagement;
+using JBDH.Services.Helpers;
 using JBDH.Models.Core;
 
 namespace JBDH.Services.AICommunications
@@ -12,17 +14,20 @@ namespace JBDH.Services.AICommunications
     {
         private readonly IUserPropertiesService _userPropertiesService;
         private readonly IAIRequestBuilderService _aiRequestBuilderService;
+        private readonly IManageIOService _manageIOService;
         private static readonly AIConfig AIConfig = new AIConfig();
         private readonly ApplicationDbContext _context;
 
         public JobAIAnalysisService(
             IUserPropertiesService userPropertiesService,
             IAIRequestBuilderService aIRequestBuilderService,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IManageIOService manageIOService)
         {
             _userPropertiesService = userPropertiesService;
             _aiRequestBuilderService = aIRequestBuilderService;
             _context = context;
+            _manageIOService = manageIOService;
         }
 
         public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId)
@@ -55,19 +60,32 @@ namespace JBDH.Services.AICommunications
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {AIConfig.OpenAIKey}");
 
                 var response = await httpClient.PostAsync(apiUrl, requestContent);
+
+                if (response == null)
+                    throw new Exception("HTTP response is null.");
+
                 var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent == null)
+                    throw new Exception("AI response content is null.");
+
+                if (_manageIOService == null)
+                    throw new Exception("_manageIOService is null!");
+
+                var cleanJson = _manageIOService.ExtractInnerJsonFromJobAIResponse(responseContent);
+                if (cleanJson == null)
+                    throw new Exception("Extracted JSON is null.");
 
                 // 3. Save the new response to the database
                 var aiResponse = new JobAIResponse
                 {
                     JobId = jobId,
-                    ResponseText = responseContent,
+                    ResponseText = cleanJson, // Save only the clean JSON!
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.JobAIResponses.Add(aiResponse);
                 await _context.SaveChangesAsync();
 
-                return responseContent;
+                return cleanJson; // Return the clean JSON as well
             }
         }
     }

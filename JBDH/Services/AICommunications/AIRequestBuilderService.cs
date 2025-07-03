@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using Newtonsoft.Json; 
 using JBDH.Services.Helpers;
 using JBDH.Services.Configuration;
-using JBDH.Models.AI;
 
 namespace JBDH.Services.AICommunications
 {
@@ -13,11 +12,11 @@ namespace JBDH.Services.AICommunications
     public class AIRequestBuilderService : IAIRequestBuilderService
     {
         private AIConfig _aiConfig;
-        private readonly IManageInputService _manageInputService;
-        public AIRequestBuilderService(IManageInputService manageInputService, AIConfig aiConfig)
+        private readonly IManageIOService _manageIOService;
+        public AIRequestBuilderService(IManageIOService manageIOService, AIConfig aiConfig)
         {
             _aiConfig = aiConfig;
-            _manageInputService = manageInputService;
+            _manageIOService = manageIOService;
         }
 
         private static readonly Dictionary<int, string> UserMessageTemplates = new()
@@ -35,7 +34,7 @@ namespace JBDH.Services.AICommunications
             [1] = "Analyze the following job advertisement. " +
                   "Extract and summarize the key requirements and characteristics of the ideal candidate. " +
                   "Return ONLY a valid JSON object with the following fields: " +
-                  "\"JobTitle\" (the main job title), " +
+                  "\"JobTitle\" (a short list, maximum 10 relevant job titles which are suitable to the job annons.), " +
                   "\"HardRequirements\" (a short list, maximum 10 must-have requirements or skills), " +
                   "\"GoodToHaves\" (a short list, maximum 10 nice-to-have skills or traits), " +
                   "\"Experiences\" (a short list, maximum 10 relevant experiences), " +
@@ -53,6 +52,19 @@ namespace JBDH.Services.AICommunications
                   "\"RelevantExperiences\" (list of relevant experiences from the CV), " +
                   "\"EducationAndCertifications\" (from the CV, relevant to the job ad). " +
                   "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}",
+
+            [3] = "You are given two AI-generated JSON objects: one is a summary of a user's CV, the other is a summary of a job ad. " +
+                  "Compare the user's qualifications, skills, and experiences to the requirements in the job ad. " +
+                  "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. " +
+                  "Return ONLY a valid JSON object with ALL of the following fields (do not omit any): " +
+                  "\"Percentage\" (a number between 0 and 100 representing the match), " +
+                  "\"FitSummary\" (brief summary of fit), " +
+                  "\"MissingRequirements\" (list of gaps or missing requirements), " +
+                  "\"MatchingSkills\" (list of skills from the user that match the job ad), " +
+                  "\"RelevantExperiences\" (list of relevant experiences from the user), " +
+                  "\"EducationAndCertifications\" (from the user, relevant to the job ad). " +
+                  "Example: { \"Percentage\": 85, ... }" +
+                  "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobAIResponse:\n{JobAIResponse}"
         };      
 
         public async Task<StringContent?> AIRequestBuilder(AIRequest aiRequest)
@@ -61,7 +73,7 @@ namespace JBDH.Services.AICommunications
             if (aiRequest.CommandId == 0)
             {
                 LoggingConfigService.ReturnInfo("CommandId is 0, processing CV.");
-                var cvText = await _manageInputService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                var cvText = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
                 userMessage = UserMessageTemplates[0].Replace("{CVText}", cvText);
 
                 var requestBody = new
@@ -81,7 +93,7 @@ namespace JBDH.Services.AICommunications
             if (aiRequest.CommandId == 1)
             {
                 LoggingConfigService.ReturnInfo("CommandId is 1, processing job ad.");
-                var jobAdText = await _manageInputService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
+                var jobAdText = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
                 userMessage = UserMessageTemplates[1].Replace("{JobAdText}", jobAdText);
 
                 var requestBody = new
@@ -102,12 +114,38 @@ namespace JBDH.Services.AICommunications
             {
                 LoggingConfigService.ReturnInfo("CommandId is 2, processing job ad and CV.");
 
-                var jobAdText = await _manageInputService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
-                var cvText = await _manageInputService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                var jobAdText = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
+                var cvText = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
 
                 userMessage = UserMessageTemplates[2]
                     .Replace("{JobAdText}", jobAdText)
                     .Replace("{CVText}", cvText);
+
+                var requestBody = new
+                {
+                    model = _aiConfig.OpenAIModel,
+                    messages = new[]
+                    {
+                        new { role = "system", content = "You are to answer my questions." },
+                        new { role = "user", content = userMessage }
+                    },
+                    stream = false
+                };
+                var requestJson = JsonConvert.SerializeObject(requestBody);
+                var request = new StringContent(requestJson, Encoding.UTF8, "application/json");
+                return request;
+            }
+            if (aiRequest.CommandId == 3)
+            {
+                LoggingConfigService.ReturnInfo("CommandId is 3, comparing UserAIResponse and JobAIResponse.");
+
+                // These should be set in the AIRequest object
+                var userAIResponse = aiRequest.UserAIResponse ?? "";
+                var jobAIResponse = aiRequest.JobAIResponse ?? "";
+
+                userMessage = UserMessageTemplates[3]
+                    .Replace("{UserAIResponse}", userAIResponse)
+                    .Replace("{JobAIResponse}", jobAIResponse);
 
                 var requestBody = new
                 {

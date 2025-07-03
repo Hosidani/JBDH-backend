@@ -17,13 +17,13 @@ namespace JBDH.Services.AICommunications
     {
         private readonly HttpClient _httpClient;
         private AIConfig _aiConfig;
-        private readonly IManageInputService _manageInputService;
+        private readonly IManageIOService _manageIOService;
         private readonly IAIRequestBuilderService _aiRequestBuilderService;
-        public AIApiClient(HttpClient httpClient, AIConfig aiConfig, IManageInputService manageInputService, IAIRequestBuilderService aIRequestBuilderService)
+        public AIApiClient(HttpClient httpClient, AIConfig aiConfig, IManageIOService manageIOService, IAIRequestBuilderService aIRequestBuilderService)
         {
             _httpClient = httpClient;
             _aiConfig = aiConfig;
-            _manageInputService = manageInputService;
+            _manageIOService = manageIOService;
             _aiRequestBuilderService = aIRequestBuilderService;
 
         }
@@ -69,8 +69,13 @@ namespace JBDH.Services.AICommunications
                 LoggingConfigService.ReturnError("Response body is null or empty");
                 return "No response";
             }
-            dynamic jsonResponse = JsonConvert.DeserializeObject(responseBody!);
-            return jsonResponse?.choices?[0]?.message?.content?.ToString() ?? "No response";
+            dynamic? jsonResponse = JsonConvert.DeserializeObject(responseBody!);
+            if (jsonResponse == null)
+            {
+                LoggingConfigService.ReturnError("Deserialization returned null");
+                return "No response";
+            }
+            return jsonResponse.choices?[0]?.message?.content?.ToString() ?? "No response";
         }
 
     }

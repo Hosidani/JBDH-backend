@@ -15,7 +15,12 @@
             </form>
         </div>
         <!-- Delete button, only visible to the owner -->
-        @if (User.Identity.IsAuthenticated && Model.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value))
+        @if (
+            User.Identity != null &&
+            User.Identity.IsAuthenticated &&
+            User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) != null &&
+            Model.UserId == int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
+        )
         {
             <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">Delete</a>
         }

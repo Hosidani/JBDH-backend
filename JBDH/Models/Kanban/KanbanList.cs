@@ -12,7 +12,7 @@ namespace JBDH.Models.Kanban
         [Required]
         public int BoardId { get; set; }
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public int Order { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -21,4 +21,4 @@ namespace JBDH.Models.Kanban
         public virtual Board? Board { get; set; }
         public virtual ICollection<Card> Cards { get; set; } = new List<Card>();
     }
-} 
+}

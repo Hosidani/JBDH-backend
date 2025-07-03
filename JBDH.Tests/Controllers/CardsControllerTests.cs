@@ -27,7 +27,7 @@ namespace JBDH.Tests.Controllers
         {
             // Arrange
             int testListId = 1;
-            var testList = new KanbanList { Id = testListId, BoardId = 123 };
+            var testList = new KanbanList { Id = testListId, BoardId = 123, Name = "Test List" };
             _mockListService.Setup(s => s.GetAsync(testListId)).ReturnsAsync(testList);
 
             // Act
@@ -45,7 +45,7 @@ namespace JBDH.Tests.Controllers
         {
             // Arrange
             var cardToCreate = new Card { ListId = 1, Title = "New Test Card" };
-            var parentList = new KanbanList { Id = 1, BoardId = 123 };
+            var parentList = new KanbanList { Id = 1, BoardId = 123, Name = "Parent List" };
 
             _mockListService.Setup(s => s.GetAsync(cardToCreate.ListId)).ReturnsAsync(parentList);
             _mockCardService.Setup(s => s.CreateAsync(It.IsAny<Card>())).ReturnsAsync(cardToCreate);
@@ -57,7 +57,7 @@ namespace JBDH.Tests.Controllers
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Details", redirectToActionResult.ActionName);
             Assert.Equal("Boards", redirectToActionResult.ControllerName);
-            Assert.Equal(123, redirectToActionResult.RouteValues["id"]);
+            Assert.Equal(123, Convert.ToInt32(redirectToActionResult.RouteValues["id"]));
             _mockCardService.Verify(s => s.CreateAsync(cardToCreate), Times.Once);
         }
 
@@ -65,7 +65,7 @@ namespace JBDH.Tests.Controllers
         public async Task Create_POST_InvalidModel_ReturnsView()
         {
             // Arrange
-            var cardToCreate = new Card { ListId = 1 }; // Missing Title
+            var cardToCreate = new Card { ListId = 1, Title = string.Empty }; // Title is required, use empty string for invalid model
             _controller.ModelState.AddModelError("Title", "The Title field is required.");
 
             // Act
@@ -92,4 +92,4 @@ namespace JBDH.Tests.Controllers
             _mockCardService.Verify(s => s.CreateAsync(It.IsAny<Card>()), Times.Never);
         }
     }
-} 
+}

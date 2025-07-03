@@ -8,6 +8,8 @@ using JBDH.Models.Friendship;
 using JBDH.Services.Friendship;
 using JBDH.Services.AICommunications;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Models.Job;
+using System.Text.Json;
 
 namespace JBDH.Services.UserManagement
 {
@@ -71,20 +73,58 @@ namespace JBDH.Services.UserManagement
                 )
                 .ToList();
 
-            // Get pending requests where the current user is the addressee
             var pendingRequests = user.ReceivedFriendRequests
                 .Where(f => f.Status == FriendshipStatus.Pending)
                 .ToList();
 
-            return new ProfileViewModel
+            // Fetch job applications
+            var jobApplications = await (
+                from app in _context.JobApplications
+                join job in _context.Jobs on app.JobId equals job.JobId
+                where app.UserId == userId
+                select new JBDH.Models.ViewModels.ProfileViewModel.JobApplicationViewModel
+                {
+                    ApplicationId = app.ApplicationId,
+                    JobId = app.JobId,
+                    JobTitle = job.Title,
+                    JobUrl = job.WebpageUrl,
+                    JobDescription = job.Description,
+                    Notes = app.Notes,
+                    AppliedAt = app.AppliedAt
+                }
+            ).ToListAsync();
+
+            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+
+            var model = new ProfileViewModel
             {
                 User = user,
                 IsFriend = false,
                 Organisation = null,
-                UserAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id),
+                UserAIResponse = userAIResponse,
                 Friends = friends,
-                PendingFriendRequests = pendingRequests
+                PendingFriendRequests = pendingRequests,
+                JobApplications = jobApplications
             };
+
+            // Example using System.Text.Json
+            if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
+            {
+                try
+                {
+                    model.CVAnalysisResult = JsonSerializer.Deserialize<CVAnalysisResult>(userAIResponse.ResponseText);
+                }
+                catch
+                {
+                    model.CVAnalysisResult = null; // or handle error
+                }
+            }
+            else
+            {
+                model.CVAnalysisResult = null;
+            }
+
+            return model;
         }
 
         public int? GetCurrentUserId(ClaimsPrincipal user)

@@ -14,6 +14,9 @@
         <dl>
             <dt>Fit Summary</dt>
             <dd>@aiModel.FitSummary</dd>
+            
+            <dt>Percentage Score</dt>
+            <dd>@aiModel.Percentage</dd>
 
             <dt>Missing Requirements</dt>
             <dd>
@@ -82,12 +85,12 @@
                 @for (int i = 0; i < Model.Count; i++)
                 {
                     var item = Model[i];
-                    var jobId = item.Job.JobId;
-                    var title = item.Job.Title;
-                    var company = item.Job.Company;
-                    var location = item.Job.Location;
-                    var description = item.Job.Description;
-                    var url = item.Job.WebpageUrl;
+                    var jobId = item.Job?.JobId;
+                    var title = item.Job?.Title ?? "No title";
+                    var company = item.Job?.Company ?? "No company";
+                    var location = item.Job?.Location ?? "No location";
+                    var description = item.Job?.Description ?? "No description";
+                    var url = item.Job?.WebpageUrl ?? "#";
                 <tr>
                     <td>@item.Priority</td>
                     <td>
@@ -98,8 +101,8 @@
                     <td>@description</td>
                     <td>
                         <form asp-action="AnalyzeJob" asp-controller="Search" method="post" style="display:inline;" class="analyze-form" data-jobid="@jobId" onsubmit="event.stopPropagation();">
-                            <input type="hidden" name="jobAdUrl" value="@item.Job.WebpageUrl" />
-                            <input type="hidden" name="jobId" value="@item.Job.JobId" />
+                            <input type="hidden" name="jobAdUrl" value="@(item.Job?.WebpageUrl ?? "")" />
+                            <input type="hidden" name="jobId" value="@(item.Job?.JobId ?? 0)" />
                             <button type="submit" class="btn btn-secondary btn-sm">Analyze with AI</button>
                         </form>
                     </td>
@@ -165,7 +168,7 @@
         $(document).on('submit', '.analyze-form', function (e) {
             e.preventDefault();
             var $form = $(this);
-            var jobId = $form.data('jobid');
+            var jobId = Number($form.data('jobid'));
             $.post($form.attr('action'), $form.serialize(), function (data) {
                 $('#ai-row-' + jobId).show();
                 $('#ai-result-' + jobId).html(data);
