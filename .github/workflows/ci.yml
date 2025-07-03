@@ -31,7 +31,7 @@ jobs:
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
     - name: Generate coverage report
-      run: reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:coveragereport -reporttypes:Html
+      run: dotnet tool run reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:coveragereport -reporttypes:Html
       env:
         PATH: ${{ runner.tool_cache }}/dotnet/tools:${{ env.PATH }}
 
