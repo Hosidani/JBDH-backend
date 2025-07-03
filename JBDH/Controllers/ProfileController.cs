@@ -49,6 +49,9 @@ namespace JBDH.Controllers
             try
             {
                 var viewModel = await _profileService.GetProfileViewModelAsync(currentUserId.Value, userId);
+                var currentUser = await _context.Users.FindAsync(currentUserId.Value);
+                ViewBag.CurrentUser = currentUser;
+
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -152,6 +155,35 @@ namespace JBDH.Controllers
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Notes updated!";
             return RedirectToAction("MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUserFromProfile(int userId)
+        {
+            // Get current user
+            var currentUserId = _profileService.GetCurrentUserId(User);
+            if (currentUserId == null)
+                return Unauthorized();
+
+            var currentUser = await _context.Users.FindAsync(currentUserId.Value);
+            if (currentUser == null || currentUser.DeveloperMode != true)
+                return Forbid();
+
+            // Prevent self-deletion here if you want
+            if (currentUser.Id == userId)
+                return BadRequest("You cannot delete yourself from this action.");
+
+            // Reuse the logic from SettingsController (or call the service if you moved it)
+            var userToDelete = await _context.Users.FindAsync(userId);
+            if (userToDelete == null)
+                return NotFound();
+
+            _context.Users.Remove(userToDelete);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "User deleted successfully.";
+            return RedirectToAction("Index", "Home");
         }
     }
 }
