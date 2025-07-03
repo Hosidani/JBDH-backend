@@ -99,11 +99,7 @@ namespace JBDH.Controllers
             if (ModelState.IsValid)
             {
                 // Set OwnerId from the logged-in user
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
-                    return Unauthorized();
-                var userId = int.Parse(userIdClaim.Value);
-
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 board.OwnerId = userId;
 
                 board.UpdatedAt = DateTime.UtcNow;
