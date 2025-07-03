@@ -69,6 +69,10 @@ namespace JBDH.Services.UserManagement
             LoggingConfigService.ReturnInfo("This email is already registered.");
             return ServiceResult.Failure("This email is already registered.");
         }
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            return new ServiceResult { Success = false, ErrorMessage = "Email is required" };
+        }
         var user = new User
         {
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
