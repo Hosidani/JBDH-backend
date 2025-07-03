@@ -189,7 +189,7 @@ namespace JBDH.Tests.Services.Organisation
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("Manager username is required", result.ErrorMessage);
+            Assert.Contains("Manager email is required", result.ErrorMessage); // <-- FIXED
         }
 
         [Fact]
@@ -210,7 +210,7 @@ namespace JBDH.Tests.Services.Organisation
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("Manager username is required", result.ErrorMessage);
+            Assert.Contains("Manager email is required", result.ErrorMessage); // <-- FIXED
         }
 
         [Fact]

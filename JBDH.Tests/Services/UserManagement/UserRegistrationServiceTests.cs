@@ -350,13 +350,14 @@ namespace JBDH.Tests.Services.UserManagement
         }
 
         [Fact]
-        public async Task RegisterUserAsync_WithEmptyEmail_ShouldCreateUser()
+        public async Task RegisterUserAsync_WithEmptyEmail_ShouldReturnFailure()
         {
             // Arrange
             var model = new RegisterUserViewModel
             {
                 Password = "TestPassword123!",
-                Email = "test@example.com",
+                ConfirmPassword = "TestPassword123!",
+                Email = "",
                 Location = "Test Location"
             };
 
@@ -364,9 +365,8 @@ namespace JBDH.Tests.Services.UserManagement
             var result = await _userRegistrationService.RegisterUserAsync(model, _mockHttpContext.Object, _urlHelper);
 
             // Assert
-            Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-            Assert.Equal(model.Email, user.Email);
+            Assert.False(result.Success);
+            Assert.Contains("Email is required", result.ErrorMessage);
         }
 
         [Fact]

@@ -65,10 +65,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -84,10 +84,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -99,10 +99,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             string? name = null;
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name!, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name!, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -114,10 +114,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            var managerUsername = "user1"; // Regular user, not a manager
+            var managerEmail = "user1@test.com"; // Regular user, not a manager
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -129,10 +129,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            var managerUsername = "nonexistent";
+            var managerEmail = "nonexistent@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -144,10 +144,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "   ";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -159,7 +159,7 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Create first organisation
             var existingOrganisation = new OrganisationModel
@@ -170,7 +170,7 @@ namespace JBDH.Tests.Services.Organisation
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -182,10 +182,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = new string('A', 100); // 100 character name
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -201,10 +201,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation & Co. (Ltd.)";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -220,10 +220,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation with Unicode: 测试组织";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -240,16 +240,16 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             var name1 = "Test Organisation 1";
             var name2 = "Test Organisation 2";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result1 = await _registerOrganisationService.RegisterAsync(name1, managerUsername);
-            var result2 = await _registerOrganisationService.RegisterAsync(name2, managerUsername);
+            var result1 = await _registerOrganisationService.RegisterAsync(name1, managerEmail);
+            var result2 = await _registerOrganisationService.RegisterAsync(name2, managerEmail);
 
             // Assert
             Assert.True(result1.Success);
             Assert.True(result2.Success);
-            
+
             var organisations = await _context.Organisations
                 .Where(o => o.Name.StartsWith("Test Organisation"))
                 .ToListAsync();
@@ -261,7 +261,7 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Add Admin role to manager user (already has Manager role)
             var additionalRole = new UserRoleAssignment
@@ -275,7 +275,7 @@ namespace JBDH.Tests.Services.Organisation
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -291,10 +291,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            var managerUsername = "";
+            var managerEmail = "";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -306,10 +306,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation";
-            string? managerUsername = null;
+            string? managerEmail = null;
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername!);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail!);
 
             // Assert
             Assert.False(result.Success);
@@ -321,10 +321,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test ORGANISATION";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -340,10 +340,10 @@ namespace JBDH.Tests.Services.Organisation
         {
             // Arrange
             var name = "Test Organisation 123";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
+            var result = await _registerOrganisationService.RegisterAsync(name, managerEmail);
 
             // Assert
             Assert.True(result.Success);
