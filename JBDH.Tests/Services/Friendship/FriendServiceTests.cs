@@ -33,7 +33,6 @@ namespace JBDH.Tests.Services.Friendship
             _user1 = new User
             {
                 Id = 1,
-                Username = "user1",
                 PasswordHash = "hash1",
                 Email = "user1@test.com",
                 Location = "Location1"
@@ -42,7 +41,6 @@ namespace JBDH.Tests.Services.Friendship
             _user2 = new User
             {
                 Id = 2,
-                Username = "user2",
                 PasswordHash = "hash2",
                 Email = "user2@test.com",
                 Location = "Location2"
@@ -51,7 +49,6 @@ namespace JBDH.Tests.Services.Friendship
             _user3 = new User
             {
                 Id = 3,
-                Username = "user3",
                 PasswordHash = "hash3",
                 Email = "user3@test.com",
                 Location = "Location3"

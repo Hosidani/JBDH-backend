@@ -50,7 +50,6 @@ namespace JBDH.Tests.Services.Authentication
             var user = new User
             {
                 Id = 1,
-                Username = "testuser",
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("OldPassword123!"),
                 Location = "Test Location",
@@ -107,7 +106,6 @@ namespace JBDH.Tests.Services.Authentication
             var user = new User
             {
                 Id = 1,
-                Username = "banneduser",
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("OldPassword123!"),
                 Location = "Banned Location",
@@ -136,7 +134,6 @@ namespace JBDH.Tests.Services.Authentication
             var user = new User
             {
                 Id = 1,
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("OldPassword123!"),
                 Location = "Test Location",
@@ -195,7 +192,6 @@ namespace JBDH.Tests.Services.Authentication
             var user = new User
             {
                 Id = 1,
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("OldPassword123!"),
                 Location = "Test Location",
@@ -266,7 +262,6 @@ namespace JBDH.Tests.Services.Authentication
             var user = new User
             {
                 Id = 1,
-                Username = "testuser",
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("OldPassword123!"),
                 Location = "Test Location",
@@ -294,4 +289,4 @@ namespace JBDH.Tests.Services.Authentication
             _context.Dispose();
         }
     }
-} 
+}

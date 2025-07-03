@@ -32,7 +32,6 @@ namespace JBDH.Tests.Services.Organisation
             _managerUser = new User
             {
                 Id = 1,
-                Username = "manager1",
                 PasswordHash = "hash1",
                 Email = "manager1@test.com",
                 Location = "Location1"
@@ -41,7 +40,6 @@ namespace JBDH.Tests.Services.Organisation
             _regularUser = new User
             {
                 Id = 2,
-                Username = "user1",
                 PasswordHash = "hash2",
                 Email = "user1@test.com",
                 Location = "Location2"
@@ -362,4 +360,4 @@ namespace JBDH.Tests.Services.Organisation
             _context.Dispose();
         }
     }
-} 
+}

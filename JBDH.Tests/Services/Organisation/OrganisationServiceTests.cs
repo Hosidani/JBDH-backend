@@ -32,7 +32,6 @@ namespace JBDH.Tests.Services.Organisation
             _managerUser = new User
             {
                 Id = 1,
-                Username = "manager1",
                 PasswordHash = "hash1",
                 Email = "manager1@test.com",
                 Location = "Location1"
@@ -41,7 +40,6 @@ namespace JBDH.Tests.Services.Organisation
             _regularUser = new User
             {
                 Id = 2,
-                Username = "user1",
                 PasswordHash = "hash2",
                 Email = "user1@test.com",
                 Location = "Location2"
@@ -68,10 +66,10 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             var name = "Test Organisation";
             var description = "Test Description";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerUsername);
+            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -80,7 +78,7 @@ namespace JBDH.Tests.Services.Organisation
                 .FirstOrDefaultAsync(o => o.Name == name);
             Assert.NotNull(organisation);
             Assert.Single(organisation.Managers);
-            Assert.Contains(organisation.Managers, m => m.Username == managerUsername);
+            Assert.Contains(organisation.Managers, m => m.Email == managerEmail);
         }
 
         [Fact]
@@ -89,10 +87,10 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             var name = "";
             var description = "Test Description";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerUsername);
+            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -105,10 +103,10 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             string? name = null;
             var description = "Test Description";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.RegisterOrganisationAsync(name!, description, managerUsername);
+            var result = await _organisationService.RegisterOrganisationAsync(name!, description, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -121,10 +119,10 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             var name = "Test Organisation";
             var description = "Test Description";
-            var managerUsername = "user1"; // Regular user, not a manager
+            var managerEmail = "user1@test.com"; // Regular user, not a manager
 
             // Act
-            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerUsername);
+            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -137,10 +135,10 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             var name = "Test Organisation";
             var description = "Test Description";
-            var managerUsername = "nonexistent";
+            var managerEmail = "nonexistent@test.com";
 
             // Act
-            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerUsername);
+            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -158,10 +156,10 @@ namespace JBDH.Tests.Services.Organisation
             _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, managerUsername);
+            var result = await _organisationService.AddManagerAsync(organisation.Id, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -170,7 +168,7 @@ namespace JBDH.Tests.Services.Organisation
                 .FirstOrDefaultAsync(o => o.Id == organisation.Id);
             Assert.NotNull(updatedOrganisation);
             Assert.Single(updatedOrganisation.Managers);
-            Assert.Contains(updatedOrganisation.Managers, m => m.Username == managerUsername);
+            Assert.Contains(updatedOrganisation.Managers, m => m.Email == managerEmail);
         }
 
         [Fact]
@@ -184,10 +182,10 @@ namespace JBDH.Tests.Services.Organisation
             _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            var managerUsername = "";
+            var managerEmail = "";
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, managerUsername);
+            var result = await _organisationService.AddManagerAsync(organisation.Id, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -205,10 +203,10 @@ namespace JBDH.Tests.Services.Organisation
             _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            string? managerUsername = null;
+            string? managerEmail = null;
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, managerUsername!);
+            var result = await _organisationService.AddManagerAsync(organisation.Id, managerEmail!);
 
             // Assert
             Assert.False(result.Success);
@@ -219,10 +217,10 @@ namespace JBDH.Tests.Services.Organisation
         public async Task AddManagerAsync_WithNonExistentOrganisation_ShouldReturnFailure()
         {
             // Arrange
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.AddManagerAsync(999, managerUsername);
+            var result = await _organisationService.AddManagerAsync(999, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -240,10 +238,10 @@ namespace JBDH.Tests.Services.Organisation
             _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            var managerUsername = "user1"; // Regular user, not a manager
+            var managerEmail = "user1@test.com"; // Regular user, not a manager
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, managerUsername);
+            var result = await _organisationService.AddManagerAsync(organisation.Id, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -261,10 +259,10 @@ namespace JBDH.Tests.Services.Organisation
             _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            var managerUsername = "nonexistent";
+            var managerEmail = "nonexistent@test.com";
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, managerUsername);
+            var result = await _organisationService.AddManagerAsync(organisation.Id, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -283,10 +281,10 @@ namespace JBDH.Tests.Services.Organisation
             _context.Organisations.Add(organisation);
             await _context.SaveChangesAsync();
 
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, managerUsername);
+            var result = await _organisationService.AddManagerAsync(organisation.Id, managerEmail);
 
             // Assert
             Assert.False(result.Success);
@@ -299,10 +297,10 @@ namespace JBDH.Tests.Services.Organisation
             // Arrange
             var name = "Test Organisation";
             var description = "Test Description";
-            var managerUsername = "manager1";
+            var managerEmail = "manager1@test.com";
 
             // Act
-            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerUsername);
+            var result = await _organisationService.RegisterOrganisationAsync(name, description, managerEmail);
 
             // Assert
             Assert.True(result.Success);
@@ -329,7 +327,6 @@ namespace JBDH.Tests.Services.Organisation
             var secondManager = new User
             {
                 Id = 3,
-                Username = "manager2",
                 PasswordHash = "hash3",
                 Email = "manager2@test.com",
                 Location = "Location3"
@@ -346,7 +343,7 @@ namespace JBDH.Tests.Services.Organisation
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _organisationService.AddManagerAsync(organisation.Id, "manager2");
+            var result = await _organisationService.AddManagerAsync(organisation.Id, "manager2@test.com");
 
             // Assert
             Assert.True(result.Success);
@@ -355,8 +352,8 @@ namespace JBDH.Tests.Services.Organisation
                 .FirstOrDefaultAsync(o => o.Id == organisation.Id);
             Assert.NotNull(updatedOrganisation);
             Assert.Equal(2, updatedOrganisation.Managers.Count);
-            Assert.Contains(updatedOrganisation.Managers, m => m.Username == "manager1");
-            Assert.Contains(updatedOrganisation.Managers, m => m.Username == "manager2");
+            Assert.Contains(updatedOrganisation.Managers, m => m.Email == "manager1@test.com");
+            Assert.Contains(updatedOrganisation.Managers, m => m.Email == "manager2@test.com");
         }
 
         public void Dispose()
@@ -365,4 +362,4 @@ namespace JBDH.Tests.Services.Organisation
             _context.Dispose();
         }
     }
-} 
+}
