@@ -56,12 +56,14 @@ namespace JBDH.Services.AICommunications
             [3] = "You are given two AI-generated JSON objects: one is a summary of a user's CV, the other is a summary of a job ad. " +
                   "Compare the user's qualifications, skills, and experiences to the requirements in the job ad. " +
                   "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. " +
-                  "Return ONLY a valid JSON object with the following fields: " +
+                  "Return ONLY a valid JSON object with ALL of the following fields (do not omit any): " +
+                  "\"Percentage\" (a number between 0 and 100 representing the match), " +
                   "\"FitSummary\" (brief summary of fit), " +
                   "\"MissingRequirements\" (list of gaps or missing requirements), " +
                   "\"MatchingSkills\" (list of skills from the user that match the job ad), " +
                   "\"RelevantExperiences\" (list of relevant experiences from the user), " +
                   "\"EducationAndCertifications\" (from the user, relevant to the job ad). " +
+                  "Example: { \"Percentage\": 85, ... }" +
                   "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobAIResponse:\n{JobAIResponse}"
         };      
 
