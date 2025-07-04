@@ -175,5 +175,16 @@ namespace JBDH.Controllers
             TempData["SuccessMessage"] = "Your account has been deleted.";
             return RedirectToAction("Index", "Home");
         }
+
+        private async Task<bool> DeleteUserByIdAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return false;
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
