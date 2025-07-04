@@ -41,7 +41,6 @@ namespace JBDH.Tests.Services.UserManagement
             _user1 = new User
             {
                 Id = 1,
-                Username = "user1",
                 PasswordHash = "hash1",
                 Email = "user1@test.com",
                 Location = "Location1"
@@ -50,7 +49,6 @@ namespace JBDH.Tests.Services.UserManagement
             _user2 = new User
             {
                 Id = 2,
-                Username = "user2",
                 PasswordHash = "hash2",
                 Email = "user2@test.com",
                 Location = "Location2"
@@ -69,7 +67,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Assert
             Assert.NotNull(result);
             Assert.Equal(_user1.Id, result.Id);
-            Assert.Equal(_user1.Username, result.Username);
             Assert.Equal(_user1.Email, result.Email);
         }
 
@@ -347,4 +344,4 @@ namespace JBDH.Tests.Services.UserManagement
             _context.Dispose();
         }
     }
-} 
+}

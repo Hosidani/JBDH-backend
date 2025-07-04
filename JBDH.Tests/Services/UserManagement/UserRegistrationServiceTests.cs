@@ -65,7 +65,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -79,9 +78,8 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
-            Assert.Equal(model.Username, user.Username);
             Assert.Equal(model.Email, user.Email);
             Assert.Equal(model.Location, user.Location);
             Assert.Equal(model.OpenForHiring, user.OpenForHiring);
@@ -95,7 +93,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "DifferentPassword123!",
                 Email = "test@example.com",
@@ -111,43 +108,11 @@ namespace JBDH.Tests.Services.UserManagement
         }
 
         [Fact]
-        public async Task RegisterUserAsync_WithExistingUsername_ShouldReturnFailure()
-        {
-            // Arrange
-            var existingUser = new User
-            {
-                Username = "existinguser",
-                PasswordHash = "hash",
-                Email = "existing@example.com",
-                Location = "Location"
-            };
-            _context.Users.Add(existingUser);
-            await _context.SaveChangesAsync();
-
-            var model = new RegisterUserViewModel
-            {
-                Username = "existinguser",
-                Password = "TestPassword123!",
-                ConfirmPassword = "TestPassword123!",
-                Email = "test@example.com",
-                Location = "Test Location"
-            };
-
-            // Act
-            var result = await _userRegistrationService.RegisterUserAsync(model, _mockHttpContext.Object, _urlHelper);
-
-            // Assert
-            Assert.False(result.Success);
-            Assert.Contains("Username already exists", result.ErrorMessage);
-        }
-
-        [Fact]
         public async Task RegisterUserAsync_WithExistingEmail_ShouldReturnFailure()
         {
             // Arrange
             var existingUser = new User
             {
-                Username = "existinguser",
                 PasswordHash = "hash",
                 Email = "existing@example.com",
                 Location = "Location"
@@ -157,7 +122,6 @@ namespace JBDH.Tests.Services.UserManagement
 
             var model = new RegisterUserViewModel
             {
-                Username = "newuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "existing@example.com",
@@ -178,7 +142,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -193,7 +156,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.True(result.Success);
             var user = await _context.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == model.Username);
+                .FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.Equal(3, user.Roles.Count); // User + Manager + Recruiter
             Assert.Contains(user.Roles, r => r.Role == "User");
@@ -207,7 +170,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -222,7 +184,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.True(result.Success);
             var user = await _context.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == model.Username);
+                .FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.Equal(3, user.Roles.Count); // User + Manager + Recruiter (no duplicates)
             Assert.Contains(user.Roles, r => r.Role == "User");
@@ -236,7 +198,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -251,7 +212,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.True(result.Success);
             var user = await _context.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == model.Username);
+                .FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.Equal(2, user.Roles.Count); // User + Manager (no duplicate User role)
             Assert.Contains(user.Roles, r => r.Role == "User");
@@ -264,7 +225,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -284,7 +244,7 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.NotNull(user.CVPath);
             Assert.Contains("test_cv.pdf", user.CVPath);
@@ -296,7 +256,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -309,7 +268,7 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.Null(user.CVPath);
         }
@@ -320,7 +279,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -338,7 +296,7 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.Null(user.CVPath);
         }
@@ -349,7 +307,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -361,9 +318,9 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
-            
+
             var token = await _context.EmailVerificationTokens
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
             Assert.NotNull(token);
@@ -378,7 +335,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -394,34 +350,11 @@ namespace JBDH.Tests.Services.UserManagement
         }
 
         [Fact]
-        public async Task RegisterUserAsync_WithEmptyUsername_ShouldCreateUser()
+        public async Task RegisterUserAsync_WithEmptyEmail_ShouldReturnFailure()
         {
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "",
-                Password = "TestPassword123!",
-                ConfirmPassword = "TestPassword123!",
-                Email = "test@example.com",
-                Location = "Test Location"
-            };
-
-            // Act
-            var result = await _userRegistrationService.RegisterUserAsync(model, _mockHttpContext.Object, _urlHelper);
-
-            // Assert
-            Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == "");
-            Assert.NotNull(user);
-        }
-
-        [Fact]
-        public async Task RegisterUserAsync_WithEmptyEmail_ShouldCreateUser()
-        {
-            // Arrange
-            var model = new RegisterUserViewModel
-            {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "",
@@ -432,9 +365,8 @@ namespace JBDH.Tests.Services.UserManagement
             var result = await _userRegistrationService.RegisterUserAsync(model, _mockHttpContext.Object, _urlHelper);
 
             // Assert
-            Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == "");
-            Assert.NotNull(user);
+            Assert.False(result.Success);
+            Assert.Contains("Email is required", result.ErrorMessage);
         }
 
         [Fact]
@@ -443,7 +375,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -465,7 +396,6 @@ namespace JBDH.Tests.Services.UserManagement
             // Arrange
             var model = new RegisterUserViewModel
             {
-                Username = "testuser",
                 Password = "TestPassword123!",
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
@@ -478,7 +408,7 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
             Assert.False(user.OpenForHiring);
         }
@@ -489,4 +419,4 @@ namespace JBDH.Tests.Services.UserManagement
             _context.Dispose();
         }
     }
-} 
+}

@@ -54,7 +54,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -75,7 +74,7 @@ namespace JBDH.Tests.Services.JobManagement
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _jobService.GetJobDetailsAsync(1, user.Username);
+            var result = await _jobService.GetJobDetailsAsync(1, user.Email);
 
             // Assert
             Assert.NotNull(result);
@@ -89,7 +88,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -120,7 +118,7 @@ namespace JBDH.Tests.Services.JobManagement
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _jobService.GetJobDetailsAsync(1, user.Username);
+            var result = await _jobService.GetJobDetailsAsync(1, user.Email);
 
             // Assert
             Assert.NotNull(result);
@@ -173,4 +171,4 @@ namespace JBDH.Tests.Services.JobManagement
             _context.Dispose();
         }
     }
-} 
+}

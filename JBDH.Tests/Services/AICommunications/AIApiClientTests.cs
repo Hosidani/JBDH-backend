@@ -40,7 +40,6 @@ namespace JBDH.Tests.Services.AICommunications
             _testUser = new User
             {
                 Id = 1,
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = "hash",
                 Location = "Test City"

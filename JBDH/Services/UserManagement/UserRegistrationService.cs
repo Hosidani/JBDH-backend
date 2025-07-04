@@ -64,19 +64,17 @@ namespace JBDH.Services.UserManagement
             LoggingConfigService.ReturnInfo("Passwords do not match.");
             return ServiceResult.Failure("Passwords do not match.");
         }
-        if (_context.Users.Any(u => u.Username == model.Username))
-        {
-            LoggingConfigService.ReturnInfo("Username already exists.");
-            return ServiceResult.Failure("Username already exists.");
-        }
         if (_context.Users.Any(u => u.Email == model.Email))
         {
             LoggingConfigService.ReturnInfo("This email is already registered.");
             return ServiceResult.Failure("This email is already registered.");
         }
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            return new ServiceResult { Success = false, ErrorMessage = "Email is required" };
+        }
         var user = new User
         {
-            Username = model.Username,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
             Email = model.Email,
             Location = model.Location,
@@ -142,7 +140,7 @@ namespace JBDH.Services.UserManagement
         });
 
         // Set session
-        httpContext.Session.SetString("Username", model.Username);
+        // httpContext.Session.SetString("Email", model.Email); // Uncomment if you want to store email in session
 
         // Generate AI response in background using shared service
         _ = Task.Run(async () =>

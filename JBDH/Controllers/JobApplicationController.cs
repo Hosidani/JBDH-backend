@@ -24,8 +24,8 @@ namespace JBDH.Controllers
         public async Task<IActionResult> Apply(int jobId, string notes)
         {
             LoggingConfigService.ReturnInfo($"Applying for job {jobId} with notes: {notes} IN CONTROLLER");
-            var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var email = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
                 return Unauthorized();
             var result = await _jobAppService.ApplyJobAsync(user.Id, jobId, notes);
@@ -44,8 +44,8 @@ namespace JBDH.Controllers
         public async Task<IActionResult> Unapply(int jobId)
         {
             LoggingConfigService.ReturnInfo($"Unapplying from job {jobId} IN CONTROLLER");
-            var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var email = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
                 return Unauthorized();
 

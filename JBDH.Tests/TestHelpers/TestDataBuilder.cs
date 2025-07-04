@@ -8,13 +8,11 @@ namespace JBDH.Tests.TestHelpers
     public static class TestDataBuilder
     {
         public static RegisterUserViewModel CreateValidRegisterUserViewModel(
-            string username = "testuser",
             string email = "test@example.com",
             string password = "TestPassword123!")
         {
             return new RegisterUserViewModel
             {
-                Username = username,
                 Email = email,
                 Password = password,
                 ConfirmPassword = password,
@@ -25,13 +23,11 @@ namespace JBDH.Tests.TestHelpers
         }
 
         public static User CreateTestUser(
-            string username = "testuser",
             string email = "test@example.com",
             string location = "Test City")
         {
             return new User
             {
-                Username = username,
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = location,
@@ -42,12 +38,11 @@ namespace JBDH.Tests.TestHelpers
 
         public static User CreateTestUserWithId(
             int id,
-            string username = "testuser",
             string email = "test@example.com")
         {
-            var user = CreateTestUser(username, email);
+            var user = CreateTestUser(email);
             user.Id = id;
             return user;
         }
     }
-} 
+}

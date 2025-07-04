@@ -20,12 +20,12 @@ namespace JBDH.Services.Organisation
             _context = context;
         }
 
-        public async Task<RegisterOrganisationResult> RegisterAsync(string organisationName, string managerUsername)
+        public async Task<RegisterOrganisationResult> RegisterAsync(string organisationName, string managerEmail)
         {
             if (string.IsNullOrWhiteSpace(organisationName))
                 return new RegisterOrganisationResult { Success = false, ErrorMessage = "Organisation name cannot be empty." };
 
-            var manager = await _context.Users.FirstOrDefaultAsync(u => u.Username == managerUsername);
+            var manager = await _context.Users.FirstOrDefaultAsync(u => u.Email == managerEmail);
             if (manager == null)
                 return new RegisterOrganisationResult { Success = false, ErrorMessage = "Manager user not found." };
 

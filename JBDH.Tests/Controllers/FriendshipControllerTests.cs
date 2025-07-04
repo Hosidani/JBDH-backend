@@ -21,7 +21,6 @@ namespace JBDH.Tests.Controllers
             var fakeUser = new JBDH.Models.User.User
             {
                 Id = 42,
-                Username = "testuser",
                 PasswordHash = "hash",
                 Email = "test@example.com",
                 Location = "Testville"

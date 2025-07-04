@@ -40,7 +40,6 @@ namespace JBDH.Tests.Services.UserManagement
             _user = new User
             {
                 Id = 1,
-                Username = "testuser",
                 PasswordHash = "hash",
                 Email = "test@example.com",
                 Location = "Test Location"
@@ -73,7 +72,7 @@ namespace JBDH.Tests.Services.UserManagement
             // Assert
             Assert.True(result.Success);
             Assert.Null(result.ErrorMessage);
-            
+
             var updatedToken = _context.EmailVerificationTokens.FirstOrDefault(t => t.Token == token);
             Assert.NotNull(updatedToken);
             Assert.True(updatedToken.IsUsed);
@@ -193,7 +192,7 @@ namespace JBDH.Tests.Services.UserManagement
             // Assert
             Assert.True(result.Success);
             Assert.Null(result.ErrorMessage);
-            
+
             var updatedToken = _context.EmailVerificationTokens.FirstOrDefault(t => t.Token == token);
             Assert.NotNull(updatedToken);
             Assert.True(updatedToken.IsUsed);
@@ -211,13 +210,13 @@ namespace JBDH.Tests.Services.UserManagement
             // Assert
             Assert.True(result.Success);
             Assert.Null(result.ErrorMessage);
-            
+
             var newToken = await _context.EmailVerificationTokens
                 .FirstOrDefaultAsync(t => t.UserId == _user.Id && !t.IsUsed);
             Assert.NotNull(newToken);
             Assert.True(newToken.ExpirationDate > DateTime.UtcNow);
             Assert.True(newToken.ExpirationDate <= DateTime.UtcNow.AddDays(1));
-            
+
             _mockEmailService.Verify(x => x.SendEmailAsync(email, "Verify your email", It.IsAny<string>()), Times.Once);
         }
 
@@ -233,7 +232,7 @@ namespace JBDH.Tests.Services.UserManagement
             // Assert
             Assert.False(result.Success);
             Assert.Contains("No user found with that email address", result.ErrorMessage);
-            
+
             _mockEmailService.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -301,7 +300,7 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            
+
             var tokens = await _context.EmailVerificationTokens
                 .Where(t => t.UserId == _user.Id)
                 .ToListAsync();
@@ -330,7 +329,7 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            
+
             var tokens = await _context.EmailVerificationTokens
                 .Where(t => t.UserId == _user.Id)
                 .ToListAsync();
@@ -348,10 +347,10 @@ namespace JBDH.Tests.Services.UserManagement
 
             // Assert
             Assert.True(result.Success);
-            
+
             _mockEmailService.Verify(x => x.SendEmailAsync(
-                email, 
-                "Verify your email", 
+                email,
+                "Verify your email",
                 It.Is<string>(body => body.Contains("verify"))), // Check for any verification link
                 Times.Once);
         }
@@ -392,4 +391,4 @@ namespace JBDH.Tests.Services.UserManagement
             _context.Dispose();
         }
     }
-} 
+}

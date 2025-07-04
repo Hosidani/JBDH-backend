@@ -50,7 +50,6 @@ public class HomeControllerTests
         context.Users.Add(new JBDH.Models.User.User
         {
             Id = 1,
-            Username = "testuser",
             PasswordHash = "hash",
             Email = "test@example.com",
             Location = "Test City"
