@@ -17,7 +17,7 @@ namespace JBDH.Tests.TestHelpers
                 Password = password,
                 ConfirmPassword = password,
                 Location = "Test City",
-                OpenForHiring = true,
+                Open = true,
                 SelectedRoles = new List<string> { "Developer" }
             };
         }
@@ -31,7 +31,7 @@ namespace JBDH.Tests.TestHelpers
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = location,
-                OpenForHiring = true,
+                Open = true,
                 DeveloperMode = false
             };
         }
@@ -42,6 +42,7 @@ namespace JBDH.Tests.TestHelpers
         {
             var user = CreateTestUser(email);
             user.Id = id;
+            user.Open = true;
             return user;
         }
     }
