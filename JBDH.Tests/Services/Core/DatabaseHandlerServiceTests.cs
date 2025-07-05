@@ -133,7 +133,7 @@ namespace JBDH.Tests.Services.Core
             Assert.Contains("CVPath VARCHAR(2083)", result);
             Assert.Contains("Organisation VARCHAR(255)", result);
             Assert.Contains("DeveloperMode BOOLEAN DEFAULT FALSE", result);
-            Assert.Contains("OpenForHiring BOOLEAN DEFAULT FALSE", result);
+            Assert.Contains("Open BOOLEAN DEFAULT FALSE", result);
             Assert.Contains("Role VARCHAR(100) NOT NULL", result);
             Assert.Contains("IsBanned BOOLEAN DEFAULT FALSE", result);
         }
