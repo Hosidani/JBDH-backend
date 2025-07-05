@@ -84,8 +84,8 @@ namespace JBDH.Models.Core
                     .IsRequired(false) // Optional field
                     .HasDefaultValue(false); // Default value for boolean field
 
-                entity.Property(u => u.OpenForHiring)
-                    .IsRequired(false) // Optional field
+                entity.Property(u => u.Open)
+                    .IsRequired(false)
                     .HasDefaultValue(false); // Default value for boolean field
 
                 entity.Property(u => u.Id)
