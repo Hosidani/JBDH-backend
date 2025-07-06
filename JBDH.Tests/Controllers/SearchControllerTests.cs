@@ -175,6 +175,12 @@ namespace JBDH.Tests.Controllers
                 mockMatchingAlgorithmCVJobService.Object
             );
 
+            // Simulate a non-AJAX request 
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
             // Act
             var result = await controller.AnalyzeJob("url", "1");
 
