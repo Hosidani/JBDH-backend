@@ -16,7 +16,7 @@ namespace JBDH.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IJobService _jobService;
         private readonly IFriendService _friendService;
-        public JobsController(ApplicationDbContext context, JobService jobService, IFriendService friendService)
+        public JobsController(ApplicationDbContext context, IJobService jobService, IFriendService friendService)
         {
             _context = context;
             _jobService = jobService;
@@ -33,11 +33,9 @@ namespace JBDH.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!string.IsNullOrEmpty(userId))
             {
-                // Check if the user has already applied for this job
                 hasApplied = await _context.JobApplications
                     .AnyAsync(a => a.JobId == id && a.UserId.ToString() == userId);
             }
-            // Get the latest AI response for this job
             var latestAIResponse = await _context.JobAIResponses
                 .Where(r => r.JobId == id)
                 .OrderByDescending(r => r.CreatedAt)
@@ -48,12 +46,9 @@ namespace JBDH.Controllers
                 Job = job,
                 JobId = id,
                 HasApplied = hasApplied,
-                // Add this if you want to show the AI response in the details view:
-                // LatestAIResponse = latestAIResponse
             };
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // Conver currentUserId to int
             if (!int.TryParse(currentUserId, out int currentUserIdInt))
             {
                 TempData["Error"] = "Invalid user ID.";
