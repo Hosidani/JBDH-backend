@@ -167,6 +167,9 @@ namespace JBDH.Services.UserManagement
                     }
 
                     await cvAnalysisService.AnalyzeAndSaveCVAsync(userFromDb, userFromDb.CVPath);
+                    // Add AIUserCoursesPropsals service call
+                    var aiUserCourseProposalService = scope.ServiceProvider.GetRequiredService<IAIUserCourseProposalService>();
+                    await aiUserCourseProposalService.GenerateAndSaveCourseProposalAsync(userFromDb);
                 }
                 catch (Exception ex)
                 {

@@ -99,6 +99,7 @@ builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IListService, ListService>();
 builder.Services.AddScoped<JBDH.Services.Messaging.IMessageService, JBDH.Services.Messaging.MessageService>();
+builder.Services.AddScoped<IAIUserCourseProposalService, AIUserCourseProposalService>();
 
 builder.Services.AddSession(options =>
 {

@@ -223,27 +223,55 @@ else
     <p>You have not applied to any jobs yet.</p>
 }
 
-@if (Model.CVAnalysisResult != null && 
-     Model.CVAnalysisResult.Experiences != null && 
-     Model.CVAnalysisResult.Experiences.Any(e => !string.IsNullOrWhiteSpace(e.Title)))
-{
-    <ul>
-        @foreach (var exp in Model.CVAnalysisResult.Experiences)
+<h4>My Recommended Courses to take</h4>
+
+@{
+    var proposalJson = Model.CourseProposals?.ProposalJson;
+    if (!string.IsNullOrWhiteSpace(proposalJson))
+    {
+        // Remove markdown code fences if present
+        proposalJson = proposalJson.Trim();
+        if (proposalJson.StartsWith("```"))
         {
-            if (!string.IsNullOrWhiteSpace(exp.Title))
+            var firstNewline = proposalJson.IndexOf('\n');
+            var lastBackticks = proposalJson.LastIndexOf("```");
+            if (firstNewline != -1 && lastBackticks != -1 && lastBackticks > firstNewline)
             {
-                <li>
-                    <strong>@exp.Title</strong>
-                    @if (!string.IsNullOrWhiteSpace(exp.Duration))
-                    {
-                        <span class="text-muted">(@exp.Duration)</span>
-                    }
-                </li>
+                proposalJson = proposalJson.Substring(firstNewline + 1, lastBackticks - firstNewline - 1).Trim();
             }
         }
-    </ul>
+    }
+}
+@if (!string.IsNullOrWhiteSpace(proposalJson))
+{
+    var courses = new List<dynamic>();
+    try
+    {
+        var json = Newtonsoft.Json.Linq.JObject.Parse(proposalJson);
+        if (json["Courses"] != null)
+        {
+            courses = json["Courses"].ToObject<List<dynamic>>();
+        }
+    }
+    catch { }
+    if (courses.Any())
+    {
+        <ul>
+            @foreach (var course in courses)
+            {
+                <li>
+                    <strong>@course.title</strong><br />
+                    <span>@course.description</span>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <span>No course proposals available.</span>
+    }
 }
 else
 {
-    <span>No experiences found.</span>
+    <span>No course proposals available.</span>
 }
