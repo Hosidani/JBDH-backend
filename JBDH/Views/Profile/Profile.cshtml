@@ -8,18 +8,15 @@
 
 <div class="card p-4 mt-3 shadow-sm">
     <dl class="row">
-        <dt class="col-sm-3">Username:</dt>
-        <dd class="col-sm-9">@Model.User.Username</dd>
-
         <dt class="col-sm-3">Email:</dt>
         <dd class="col-sm-9">@Model.User.Email</dd>
 
         <dt class="col-sm-3">Organisation:</dt>
         <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.Organisation?.Name) ? Model.Organisation.Name : "N/A")</dd>
 
-        <dt class="col-sm-3">Open for Hiring:</dt>
+        <dt class="col-sm-3">Open for new work:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.OpenForHiring == true)
+            @if (Model.User.Open == true)
             {
                 <span class="badge bg-success">Open</span>
             }
@@ -81,4 +78,16 @@
 @if (Model.User != null && Model.User.Id != currentUserId)
 {
     <a asp-controller="Messages" asp-action="Send" asp-route-userId="@Model.User.Id" class="btn btn-primary">Send Message</a>
+}
+@{
+    var isDeveloper = User.IsInRole("Developer") || (ViewBag.CurrentUser?.DeveloperMode ?? false);
+}
+@if (isDeveloper)
+{
+    <form asp-action="DeleteUserFromProfile" asp-controller="Profile" method="post" asp-route-userId="@Model.User.Id">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">
+            Delete User
+        </button>
+        @Html.AntiForgeryToken()
+    </form>
 }

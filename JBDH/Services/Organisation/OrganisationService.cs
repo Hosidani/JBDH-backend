@@ -17,14 +17,14 @@ namespace JBDH.Services.Organisation
             _context = context;
         }
 
-        public async Task<ServiceResult> RegisterOrganisationAsync(string name, string description, string managerUsername)
+        public async Task<ServiceResult> RegisterOrganisationAsync(string name, string description, string managerEmail)
         {
             if (string.IsNullOrEmpty(name))
                 return ServiceResult.Failure("Organisation name is required.");
 
             var manager = await _context.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == managerUsername && u.Roles.Any(r => r.Role == "Manager"));
+                .FirstOrDefaultAsync(u => u.Email == managerEmail && u.Roles.Any(r => r.Role == "Manager"));
 
             if (manager == null)
                 return ServiceResult.Failure("You must be a manager to register an organisation.");
@@ -41,10 +41,10 @@ namespace JBDH.Services.Organisation
             return ServiceResult.SuccessResult();
         }
 
-        public async Task<ServiceResult> AddManagerAsync(int organisationId, string managerUsername)
+        public async Task<ServiceResult> AddManagerAsync(int organisationId, string managerEmail)
         {
-            if (string.IsNullOrEmpty(managerUsername))
-                return ServiceResult.Failure("Manager username is required.");
+            if (string.IsNullOrEmpty(managerEmail))
+                return ServiceResult.Failure("Manager email is required.");
 
             var organisation = await _context.Organisations
                 .Include(o => o.Managers)
@@ -55,7 +55,7 @@ namespace JBDH.Services.Organisation
 
             var managerToAdd = await _context.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == managerUsername && u.Roles.Any(r => r.Role == "Manager"));
+                .FirstOrDefaultAsync(u => u.Email == managerEmail && u.Roles.Any(r => r.Role == "Manager"));
 
             if (managerToAdd == null)
                 return ServiceResult.Failure("Manager not found.");

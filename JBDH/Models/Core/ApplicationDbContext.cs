@@ -50,6 +50,7 @@ namespace JBDH.Models.Core
         public DbSet<JBDH.Models.Kanban.Organization> Organizations { get; set; }
 
         public DbSet<Message> Messages { get; set; } // <-- Add this with your other DbSets
+        public DbSet<AIUserCourseProposal> AIUserCourseProposals { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,10 +66,6 @@ namespace JBDH.Models.Core
             modelBuilder.Entity<JBDH.Models.User.User>(entity =>
             {
                 entity.HasKey(u => u.Id); // Primary key
-
-                entity.Property(u => u.Username)
-                    .IsRequired()
-                    .HasMaxLength(100); // Required field with max length
 
                 entity.Property(u => u.PasswordHash)
                     .IsRequired(); // Required field
@@ -88,8 +85,8 @@ namespace JBDH.Models.Core
                     .IsRequired(false) // Optional field
                     .HasDefaultValue(false); // Default value for boolean field
 
-                entity.Property(u => u.OpenForHiring)
-                    .IsRequired(false) // Optional field
+                entity.Property(u => u.Open)
+                    .IsRequired(false)
                     .HasDefaultValue(false); // Default value for boolean field
 
                 entity.Property(u => u.Id)
@@ -289,6 +286,17 @@ namespace JBDH.Models.Core
 
                 entity.Property(m => m.SentAt)
                     .IsRequired();
+            });
+
+            modelBuilder.Entity<AIUserCourseProposal>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ProposalJson).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

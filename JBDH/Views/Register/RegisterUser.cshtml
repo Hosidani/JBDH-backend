@@ -8,11 +8,6 @@
 
 <form asp-action="RegisterUser" method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label asp-for="Username"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
-    </div>
-    <div class="form-group">
         <label asp-for="Password"></label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
@@ -38,8 +33,8 @@
         <span asp-validation-for="CVFile" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="OpenForHiring"></label>
-        <input asp-for="OpenForHiring" type="checkbox" />
+        <label asp-for="Open">Open for new work</label>
+        <input asp-for="Open" type="checkbox" />
     </div>
     <div class="form-group">
         <label>Roles</label>

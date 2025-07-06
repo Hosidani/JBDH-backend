@@ -29,7 +29,6 @@ namespace JBDH.Tests.Services.Reporting
             _reporterUser = new User
             {
                 Id = 1,
-                Username = "reporter",
                 Email = "reporter@test.com",
                 PasswordHash = "hash1",
                 Location = "Stockholm"
@@ -38,7 +37,6 @@ namespace JBDH.Tests.Services.Reporting
             _reportedUser = new User
             {
                 Id = 2,
-                Username = "reported",
                 Email = "reported@test.com",
                 PasswordHash = "hash2",
                 Location = "Gothenburg"
@@ -391,4 +389,4 @@ namespace JBDH.Tests.Services.Reporting
             _context?.Dispose();
         }
     }
-} 
+}

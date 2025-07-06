@@ -34,7 +34,7 @@ namespace JBDH.Services.AICommunications
                 LoggingConfigService.ReturnError("Request is null");
                 return "Request is null";
             }
-            if (request.User == null)
+            if (request.User == null && request.CommandId != 4)
             {
                 LoggingConfigService.ReturnError("User is null");
                 return "User is null";

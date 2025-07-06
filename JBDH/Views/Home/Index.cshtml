@@ -19,7 +19,7 @@
 {
     <div class="dataflow-post mb-3">
         <p>
-            <strong>@(post.User!.Username ?? "Unknown")</strong><br />
+            <strong>@(post.User!.Email ?? "Unknown")</strong><br />
             @post.Content
         </p>
         <button type="button" class="btn btn-danger btn-sm" onclick="toggleReportForm(@post.Id)">Report</button>

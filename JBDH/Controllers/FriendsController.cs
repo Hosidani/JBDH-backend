@@ -5,12 +5,12 @@ using JBDH.Services.Friendship;
 
 namespace JBDH.Controllers
 {
-    public class FriendshipController : Controller
+    public class FriendsController : Controller
     {
         private readonly IUserPropertiesService _IUserPropertiesService;
         private readonly IFriendService _friendService;
 
-        public FriendshipController(IUserPropertiesService userPropertiesService, IFriendService friendService)
+        public FriendsController(IUserPropertiesService userPropertiesService, IFriendService friendService)
         {
             _IUserPropertiesService = userPropertiesService;
             _friendService = friendService;

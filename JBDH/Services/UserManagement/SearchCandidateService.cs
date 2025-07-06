@@ -21,7 +21,7 @@ namespace JBDH.Services.UserManagement
 
         public async Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location)
         {
-            var users = _context.Users.Where(u => u.OpenForHiring == true);
+            var users = _context.Users.Where(u => u.Open == true);
             LoggingConfigService.ReturnInfo($"Total users open for hiring: {await users.CountAsync()}");
 
             // Normalize input parameters
@@ -53,11 +53,11 @@ namespace JBDH.Services.UserManagement
             var candidates = await Task.WhenAll(filtered.Select(async x =>
             {
                 var aiResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(x.User.Id);
-                LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Username: {x.User.Username}, LatestAIResponse: {(aiResponse != null ? aiResponse.ResponseText : "NULL")}");
+                LoggingConfigService.ReturnInfo($"UserId: {x.User.Id}, Email: {x.User.Email}, LatestAIResponse: {(aiResponse != null ? aiResponse.ResponseText : "NULL")}");
                 return new SearchCandidateViewModel
                 {
                     UserId = x.User.Id,
-                    Username = x.User.Username,
+                    Email = x.User.Email, // Use Email instead of Username
                     Location = x.User.Location,
                     UserAIResponse = aiResponse ?? new UserAIResponse { UserId = x.User.Id, User = x.User },
                     Priority = (location != null && !string.IsNullOrEmpty(x.User.Location) && x.User.Location.ToLower().Contains(location.ToLower())) ? 1 : 2

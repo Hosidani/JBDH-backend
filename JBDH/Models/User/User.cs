@@ -13,9 +13,6 @@ namespace JBDH.Models.User
         public int Id { get; set; }
 
         [Required]
-        public required string Username { get; set; }
-
-        [Required]
         public required string PasswordHash { get; set; }
         
         [Required]
@@ -25,7 +22,7 @@ namespace JBDH.Models.User
 
         public string? CVPath { get; set; } // Path to uploaded CV
         public bool? DeveloperMode { get; set; } // Developer mode
-        public bool? OpenForHiring { get; set; } // Active mode
+        public bool? Open { get; set; } // Active mode
         public bool IsBanned { get; set; } = false;
 
         public ICollection<FriendshipModel> SentFriendRequests { get; set; } = new List<FriendshipModel>();

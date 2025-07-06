@@ -19,7 +19,7 @@
             <thead>
                 <tr>
                     <th>Priority</th>
-                    <th>Username</th>
+                    <th>Email</th>
                     <th>Location</th>
                     <th>AI Response</th>
                     <th>AI Response Date</th>
@@ -30,7 +30,7 @@
                 {
                     <tr>
                         <td>@candidate.Priority</td>
-                        <td>@candidate.Username</td>
+                        <td>@candidate.Email</td>
                         <td>@candidate.Location</td>
                         <td>
                             @if (candidate.UserAIResponse != null && !string.IsNullOrEmpty(candidate.UserAIResponse.ResponseText) )
