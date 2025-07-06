@@ -21,7 +21,7 @@ namespace JBDH.Services.UserManagement
 
         public async Task<List<SearchCandidateViewModel>> SearchCandidates(string keyword, string location)
         {
-            var users = _context.Users.Where(u => u.OpenForHiring == true);
+            var users = _context.Users.Where(u => u.Open == true);
             LoggingConfigService.ReturnInfo($"Total users open for hiring: {await users.CountAsync()}");
 
             // Normalize input parameters

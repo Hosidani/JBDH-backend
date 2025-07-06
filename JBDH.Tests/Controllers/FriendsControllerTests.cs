@@ -9,7 +9,7 @@ using Xunit;
 
 namespace JBDH.Tests.Controllers
 {
-    public class FriendshipControllerTests
+    public class FriendsControllerTests
     {
         [Fact]
         public async Task SendRequest_HappyPath_RedirectsToSuccessPage()
@@ -31,7 +31,7 @@ namespace JBDH.Tests.Controllers
             mockFriendService.Setup(s => s.SendFriendRequestAsync(42, 99))
                 .ReturnsAsync(new ServiceResult { Success = true });
 
-            var controller = new FriendshipController(mockUserService.Object, mockFriendService.Object);
+            var controller = new FriendsController(mockUserService.Object, mockFriendService.Object);
 
             // Act
             var result = await controller.SendRequest("99");
