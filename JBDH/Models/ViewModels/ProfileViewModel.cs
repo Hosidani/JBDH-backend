@@ -16,6 +16,8 @@ namespace JBDH.Models.ViewModels
         public List<JBDH.Models.User.User> Friends { get; set; } = new List<JBDH.Models.User.User>();
         public List<JBDH.Models.Friendship.Friendship> PendingFriendRequests { get; set; } = new();
         public List<JobApplicationViewModel> JobApplications { get; set; } = new();
+        public AIUserCourseProposal CourseProposals { get; set; } // or string if you want to show raw JSON
+
 
         public class JobApplicationViewModel
         {

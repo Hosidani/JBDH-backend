@@ -64,7 +64,11 @@ namespace JBDH.Services.AICommunications
                   "\"RelevantExperiences\" (list of relevant experiences from the user), " +
                   "\"EducationAndCertifications\" (from the user, relevant to the job ad). " +
                   "Example: { \"Percentage\": 85, ... }" +
-                  "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobAIResponse:\n{JobAIResponse}"
+                  "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobAIResponse:\n{JobAIResponse}",
+            [4] = "Can you give me a proposal for courses that would help this user improve their skills? " +
+                  "Return ONLY a valid JSON object with the following fields: " +
+                  "\"Courses\" (a short list, maximum 10 courses, with titles and brief descriptions). " +
+                  "\n\nCV:\n{CVText}"
         };      
 
         public async Task<StringContent?> AIRequestBuilder(AIRequest aiRequest)
@@ -146,6 +150,30 @@ namespace JBDH.Services.AICommunications
                 userMessage = UserMessageTemplates[3]
                     .Replace("{UserAIResponse}", userAIResponse)
                     .Replace("{JobAIResponse}", jobAIResponse);
+
+                var requestBody = new
+                {
+                    model = _aiConfig.OpenAIModel,
+                    messages = new[]
+                    {
+                        new { role = "system", content = "You are to answer my questions." },
+                        new { role = "user", content = userMessage }
+                    },
+                    stream = false
+                };
+                var requestJson = JsonConvert.SerializeObject(requestBody);
+                var request = new StringContent(requestJson, Encoding.UTF8, "application/json");
+                return request;
+            }
+            if (aiRequest.CommandId == 4)
+            {
+                LoggingConfigService.ReturnInfo("CommandId is 4, proposing courses for user.");
+
+                // Extract CV text
+                var cvText = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+
+                userMessage = UserMessageTemplates[4]
+                    .Replace("{CVText}", cvText);
 
                 var requestBody = new
                 {
