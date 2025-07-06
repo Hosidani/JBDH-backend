@@ -8,6 +8,7 @@ using JBDH.Models.ViewModels;
 using JBDH.Services.JobManagement;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Workflows;
+using JBDH.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -18,6 +19,7 @@ namespace JBDH.Tests.Services.Workflows
     {
         private readonly Mock<ISearchJobsService> _mockSearchJobsService;
         private readonly Mock<IJobAIResponseService> _mockJobAIResponseService;
+        private readonly Mock<IMatchingAlgorithmCVJobService> _mockMatchingAlgorithmCVJobService;
         private readonly ApplicationDbContext _context;
         private readonly SearchWorkflowService _searchWorkflowService;
 
@@ -30,11 +32,14 @@ namespace JBDH.Tests.Services.Workflows
             _context = new ApplicationDbContext(options);
             _mockSearchJobsService = new Mock<ISearchJobsService>();
             _mockJobAIResponseService = new Mock<IJobAIResponseService>();
+            _mockMatchingAlgorithmCVJobService = new Mock<IMatchingAlgorithmCVJobService>();
 
             _searchWorkflowService = new SearchWorkflowService(
                 _mockSearchJobsService.Object,
                 _mockJobAIResponseService.Object,
-                _context);
+                _context,
+                _mockMatchingAlgorithmCVJobService.Object
+            );
         }
 
         [Fact]

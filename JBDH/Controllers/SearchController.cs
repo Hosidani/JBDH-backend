@@ -99,21 +99,17 @@ namespace JBDH.Controllers
         [HttpPost]
         public async Task<IActionResult> AnalyzeJob(string jobAdUrl, string jobId)
         {
-
-
             LoggingConfigService.ReturnInfo($"AnalyzeJob called with URL: {jobAdUrl} and Job ID: {jobId}");
-            
-            
+
             if (!int.TryParse(jobId, out int parsedJobId))
             {
                 LoggingConfigService.ReturnError($"Invalid job ID format: {jobId}");
-                return View("Error", new ErrorViewModel
-                {
-                    Title = "Invalid Job ID",
-                    Message = "The provided job ID is not in a valid format.",
-                    ReturnUrl = Url.Action("SearchJob")
-                });
+                return Content("Invalid job ID");
             }
+
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Content("User not found");
 
             var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
@@ -130,7 +126,7 @@ namespace JBDH.Controllers
                 });
             }
 
-            // --- NYTT: Extrahera rätt JSON ---
+            // Extract and parse
             var cleanJson = _manageIOService.ExtractInnerJsonFromJobAIResponse(aiResultString);
             JobAdAIResponseViewModel? jobAdModel = null;
             try
@@ -147,8 +143,37 @@ namespace JBDH.Controllers
                     ReturnUrl = Url.Action("SearchJob")
                 });
             }
-            return PartialView("_JobAdAIResultPartial", jobAdModel);
-            
+
+            // --- Calculate CV Match Percent ---
+            int matchPercent = 0;
+            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+            if (userAIResponse == null)
+                Console.WriteLine("userAIResponse is null");
+            else if (string.IsNullOrEmpty(userAIResponse.ResponseText))
+                Console.WriteLine("userAIResponse.ResponseText is null or empty");
+            else if (jobAdModel == null)
+                Console.WriteLine("jobAdModel is null");
+            else
+            {
+                var cvAI = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
+                if (cvAI != null)
+                    matchPercent = _matchingAlgorithmCVJobService.CalculateJobTitleMatchPercentage(jobAdModel, cvAI);
+            }
+            var percentHtml = $"<span class='badge bg-info'>CV Match: {matchPercent}%</span>";
+
+            // --- Return for AJAX or normal partial ---
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                // Render the partial view as string
+                var analysisHtml = await this.RenderViewAsync("_JobAdAIResultPartial", jobAdModel, true);
+                return Json(new { percentHtml, analysisHtml });
+            }
+            else
+            {
+                // Fallback for non-AJAX
+                ViewBag.CVMatchPercent = matchPercent;
+                return PartialView("_JobAdAIResultPartial", jobAdModel);
+            }
         }
 
         [HttpGet]

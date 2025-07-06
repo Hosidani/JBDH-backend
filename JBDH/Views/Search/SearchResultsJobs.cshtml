@@ -65,13 +65,6 @@
     var jobTitleMatchPercent = ViewData["JobTitleMatchPercent"] as int? ?? 0;
 }
 
-@if (jobTitleMatchPercent > 0)
-{
-    <div class="alert alert-success">
-        <strong>Job Title Match:</strong> @jobTitleMatchPercent%
-    </div>
-}
-
 <div class="text-center">
     <h1 class="display-4">Search Results</h1>
 
@@ -116,7 +109,16 @@
                             <input type="hidden" name="jobId" value="@(item.Job?.JobId ?? 0)" />
                             <button type="submit" class="btn btn-secondary btn-sm">Analyze with AI</button>
                         </form>
-                        <span id="job-title-match-result-@jobId" style="margin-left:10px;"></span>
+                        <span id="job-title-match-result-@jobId" style="margin-left:10px;">
+                            @if (item.CVMatchPercent.HasValue)
+                            {
+                                <span class="badge bg-info">CV Match: @item.CVMatchPercent%</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">CV Match: ?</span>
+                            }
+                        </span>
                     </td>
                 </tr>
                 <tr id="ai-row-@jobId" class="ai-row" style="display:none;">
@@ -182,7 +184,9 @@
             var $form = $(this);
             var jobId = Number($form.data('jobid'));
             $.post($form.attr('action'), $form.serialize(), function (data) {
-                $('#job-title-match-result-' + jobId).html('<span class="badge bg-success">Job Title Match: ' + data + '</span>');
+                $('#job-title-match-result-' + jobId).html(data.percentHtml);
+                $('#ai-result-' + jobId).html(data.analysisHtml);
+                $('#ai-row-' + jobId).show();
             });
         });
     </script>
