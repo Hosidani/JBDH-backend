@@ -10,7 +10,7 @@ namespace JBDH.Tests.Services.JobManagement
     public class JobServiceTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly JobService _jobService;
+        private readonly IJobService _jobService;
 
         public JobServiceTests()
         {
