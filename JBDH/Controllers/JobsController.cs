@@ -11,8 +11,8 @@ namespace JBDH.Controllers
     public class JobsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly JobService _jobService;
-        public JobsController(ApplicationDbContext context, JobService jobService)
+        private readonly IJobService _jobService;
+        public JobsController(ApplicationDbContext context, IJobService jobService)
         {
             _context = context;
             _jobService = jobService;
