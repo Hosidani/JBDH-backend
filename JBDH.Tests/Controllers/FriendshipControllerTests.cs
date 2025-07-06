@@ -31,7 +31,7 @@ namespace JBDH.Tests.Controllers
             mockFriendService.Setup(s => s.SendFriendRequestAsync(42, 99))
                 .ReturnsAsync(new ServiceResult { Success = true });
 
-            var controller = new FriendshipController(mockUserService.Object, mockFriendService.Object);
+            var controller = new FriendsController(mockUserService.Object, mockFriendService.Object);
 
             // Act
             var result = await controller.SendRequest("99");
