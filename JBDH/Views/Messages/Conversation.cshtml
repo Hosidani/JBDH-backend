@@ -4,6 +4,20 @@
     var otherUserId = (int)ViewBag.OtherUserId;
 }
 
+@functions {
+    // Simple URL to clickable link
+    public static string Linkify(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        var urlPattern = @"(http[s]?://[^\s]+)";
+        return System.Text.RegularExpressions.Regex.Replace(
+            text,
+            urlPattern,
+            "<a href=\"$1\" target=\"_blank\" rel=\"noopener\">$1</a>"
+        );
+    }
+}
+
 <h2>Conversation with User @otherUserId</h2>
 
 @if (!Model.Any())
@@ -17,7 +31,7 @@ else
     {
         <li class="list-group-item">
             <strong>@(msg.SenderId == otherUserId ? "Them" : "You"):</strong>
-            @msg.Content
+            @Html.Raw(Linkify(msg.Content))
             <span class="text-muted float-end">@msg.SentAt.ToString("g")</span>
         </li>
     }

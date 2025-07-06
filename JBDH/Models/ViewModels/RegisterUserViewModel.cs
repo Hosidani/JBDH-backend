@@ -8,7 +8,7 @@ namespace JBDH.Models.ViewModels
         public string Email { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public IFormFile? CVFile { get; set; }
-        public bool OpenForHiring { get; set; }
+        public bool Open { get; set; }
         public List<string> AvailableRoles { get; set; } = new List<string> { "Manager", "Recruiter" };
         public List<string> SelectedRoles { get; set; } = new List<string>();
     }

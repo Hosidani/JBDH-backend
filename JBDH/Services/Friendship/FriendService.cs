@@ -72,7 +72,7 @@ namespace JBDH.Services.Friendship
             var friendship = await _context.Friendships.FindAsync(friendshipId);
             if (friendship != null && friendship.Status == FriendshipStatus.Pending)
             {
-                friendship.Status = FriendshipStatus.Accepted;
+                friendship.Status = FriendshipStatus.Friends;
                 await _context.SaveChangesAsync();
                 return true;
             }

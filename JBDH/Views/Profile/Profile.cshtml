@@ -14,9 +14,9 @@
         <dt class="col-sm-3">Organisation:</dt>
         <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.Organisation?.Name) ? Model.Organisation.Name : "N/A")</dd>
 
-        <dt class="col-sm-3">Open for Hiring:</dt>
+        <dt class="col-sm-3">Open for new work:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.OpenForHiring == true)
+            @if (Model.User.Open == true)
             {
                 <span class="badge bg-success">Open</span>
             }

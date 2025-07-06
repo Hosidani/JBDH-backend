@@ -69,7 +69,7 @@ namespace JBDH.Tests.Services.UserManagement
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
                 Location = "Test Location",
-                OpenForHiring = true,
+                Open = true,
                 SelectedRoles = new List<string> { "Manager" }
             };
 
@@ -82,7 +82,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.NotNull(user);
             Assert.Equal(model.Email, user.Email);
             Assert.Equal(model.Location, user.Location);
-            Assert.Equal(model.OpenForHiring, user.OpenForHiring);
+            Assert.Equal(model.Open, user.Open);
             Assert.False(user.DeveloperMode);
             Assert.True(BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash));
         }
@@ -400,7 +400,7 @@ namespace JBDH.Tests.Services.UserManagement
                 ConfirmPassword = "TestPassword123!",
                 Email = "test@example.com",
                 Location = "Test Location",
-                OpenForHiring = false
+                Open = false
             };
 
             // Act
@@ -410,7 +410,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.True(result.Success);
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
-            Assert.False(user.OpenForHiring);
+            Assert.False(user.Open);
         }
 
         public void Dispose()
