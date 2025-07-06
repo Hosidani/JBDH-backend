@@ -86,7 +86,7 @@ namespace JBDH.Services.UserManagement
             var user = await GetCurrentUserAsync();
             if (user == null) return false;
 
-            user.OpenForHiring = openForHiring; // Updated property casing
+            user.Open = openForHiring; // Updated property casing
             await _context.SaveChangesAsync();
             return true;
         }
@@ -229,8 +229,7 @@ namespace JBDH.Services.UserManagement
             if (user == null) return new List<User>();
 
             var friends = await _context.Friendships
-                .Where(f => (f.RequesterId == user.Id || f.AddresseeId == user.Id) &&
-                            (f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends))
+                .Where(f => (f.RequesterId == user.Id || f.AddresseeId == user.Id) && (f.Status == FriendshipStatus.Friends))
                 .Select(f => f.RequesterId == user.Id ? f.Addressee : f.Requester)
                 .ToListAsync();
 

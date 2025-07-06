@@ -44,7 +44,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash1",
                 Email = "dev1@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
 
             _user2 = new User
@@ -53,7 +53,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash2",
                 Email = "dev2@test.com",
                 Location = "Gothenburg",
-                OpenForHiring = true
+                Open = true
             };
 
             _user3 = new User
@@ -62,7 +62,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash3",
                 Email = "dev3@test.com",
                 Location = "Stockholm",
-                OpenForHiring = false
+                Open = false
             };
 
             // Create AI responses
@@ -259,7 +259,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash4",
                 Email = "dev4@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             var aiResponse4 = new UserAIResponse
             {
@@ -310,7 +310,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash5",
                 Email = "dev5@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             _context.Users.Add(userWithoutAI);
             await _context.SaveChangesAsync();
@@ -336,7 +336,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash6",
                 Email = "dev6@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             var emptyAIResponse = new UserAIResponse
             {
@@ -371,7 +371,7 @@ namespace JBDH.Tests.Services.UserManagement
                 PasswordHash = "hash7",
                 Email = "dev7@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             _context.Users.Add(userWithNullAI);
             await _context.SaveChangesAsync();

@@ -89,11 +89,6 @@ namespace JBDH.Services.Core
                                 description = textElement.GetString() ?? "No Description";
                                 description = DecodeUnicodeString(description);
                                 description = description.Replace("\n", " ").Replace("\r", " ").Trim();
-                                int maxLength = 200;
-                                if (description.Length > maxLength)
-                                {
-                                    description = description.Substring(0, maxLength) + "...";
-                                }
                             }
                             catch
                             {
