@@ -10,6 +10,7 @@ using JBDH.Services.AICommunications;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Models.Job;
 using System.Text.Json;
+using JBDH.Services.Configuration;
 
 namespace JBDH.Services.UserManagement
 {
@@ -95,7 +96,7 @@ namespace JBDH.Services.UserManagement
             ).ToListAsync();
 
             var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
-
+            LoggingConfigService.ReturnDebug($"UserAIResponse for user {user.Id} retrieved: {userAIResponse?.ResponseText ?? "No response"}");
             var model = new ProfileViewModel
             {
                 User = user,
