@@ -69,6 +69,14 @@ namespace JBDH.Controllers
 
             // Use your service to get the full view model
             var model = await _profileService.GetMyProfileViewModelAsync(currentUserId.Value);
+            
+            // Get the latest course proposal for the user
+            var latestProposal = await _context.AIUserCourseProposals
+                .Where(p => p.UserId == currentUserId.Value)
+                .OrderByDescending(p => p.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            model.CourseProposals = latestProposal;
 
             return View("MyProfile", model);
         }

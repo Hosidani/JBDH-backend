@@ -49,13 +49,12 @@ namespace JBDH.Tests.Services.Authentication
         public async Task ValidateUserAsync_WithValidCredentials_ShouldReturnSuccess()
         {
             // Arrange
-            var username = "testuser";
+            var email = "testuser@example.com";
             var password = "TestPassword123!";
             var user = new User
             {
-                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                Email = "test@example.com",
+                Email = email,
                 Location = "Test Location",
                 IsBanned = false
             };
@@ -63,7 +62,7 @@ namespace JBDH.Tests.Services.Authentication
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _loginService.ValidateUserAsync(username, password);
+            var result = await _loginService.ValidateUserAsync(email, password);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -74,34 +73,33 @@ namespace JBDH.Tests.Services.Authentication
         }
 
         [Fact]
-        public async Task ValidateUserAsync_WithInvalidUsername_ShouldReturnFailure()
+        public async Task ValidateUserAsync_WithInvalidEmail_ShouldReturnFailure()
         {
             // Arrange
-            var username = "nonexistentuser";
+            var email = "nonexistentuser@example.com";
             var password = "TestPassword123!";
 
             // Act
-            var result = await _loginService.ValidateUserAsync(username, password);
+            var result = await _loginService.ValidateUserAsync(email, password);
 
             // Assert
             Assert.False(result.IsSuccess);
             Assert.False(result.UserExists);
             Assert.False(result.PasswordCorrect);
-            Assert.Equal("Invalid username or password.", result.ErrorMessage);
+            Assert.Equal("Invalid email or password.", result.ErrorMessage);
         }
 
         [Fact]
         public async Task ValidateUserAsync_WithInvalidPassword_ShouldReturnFailure()
         {
             // Arrange
-            var username = "testuser";
+            var email = "testuser@example.com";
             var correctPassword = "TestPassword123!";
             var wrongPassword = "WrongPassword123!";
             var user = new User
             {
-                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(correctPassword),
-                Email = "test@example.com",
+                Email = email,
                 Location = "Test Location",
                 IsBanned = false
             };
@@ -109,26 +107,25 @@ namespace JBDH.Tests.Services.Authentication
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _loginService.ValidateUserAsync(username, wrongPassword);
+            var result = await _loginService.ValidateUserAsync(email, wrongPassword);
 
             // Assert
             Assert.False(result.IsSuccess);
             Assert.True(result.UserExists);
             Assert.False(result.PasswordCorrect);
-            Assert.Equal("Invalid username or password.", result.ErrorMessage);
+            Assert.Equal("Invalid email or password.", result.ErrorMessage);
         }
 
         [Fact]
         public async Task ValidateUserAsync_WithBannedUser_ShouldReturnBanned()
         {
             // Arrange
-            var username = "banneduser";
+            var email = "banned@example.com";
             var password = "TestPassword123!";
             var user = new User
             {
-                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                Email = "banned@example.com",
+                Email = email,
                 Location = "Banned Location",
                 IsBanned = true
             };
@@ -136,7 +133,7 @@ namespace JBDH.Tests.Services.Authentication
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _loginService.ValidateUserAsync(username, password);
+            var result = await _loginService.ValidateUserAsync(email, password);
 
             // Assert
             Assert.False(result.IsSuccess);
@@ -149,13 +146,12 @@ namespace JBDH.Tests.Services.Authentication
         public async Task SignInUserAsync_WithValidUser_ShouldSignInUser()
         {
             // Arrange
-            var username = "testuser";
+            var email = "testuser@example.com";
             var user = new User
             {
                 Id = 1,
-                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
-                Email = "test@example.com",
+                Email = email,
                 Location = "Test Location",
                 IsBanned = false
             };
@@ -170,14 +166,14 @@ namespace JBDH.Tests.Services.Authentication
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _loginService.SignInUserAsync(username);
+            await _loginService.SignInUserAsync(email);
 
             // Assert
             _mockAuthenticationService.Verify(x => x.SignInAsync(
                 _mockHttpContext.Object,
                 "CookieAuth",
                 It.Is<ClaimsPrincipal>(p => 
-                    p.HasClaim(c => c.Type == ClaimTypes.Name && c.Value == username) &&
+                    p.HasClaim(c => c.Type == ClaimTypes.Name && c.Value == email) &&
                     p.HasClaim(c => c.Type == ClaimTypes.NameIdentifier && c.Value == "1")),
                 null), Times.Once);
         }
@@ -186,10 +182,10 @@ namespace JBDH.Tests.Services.Authentication
         public async Task SignInUserAsync_WithNonexistentUser_ShouldNotSignIn()
         {
             // Arrange
-            var username = "nonexistentuser";
+            var email = "nonexistentuser@example.com";
 
             // Act
-            await _loginService.SignInUserAsync(username);
+            await _loginService.SignInUserAsync(email);
 
             // Assert
             _mockAuthenticationService.Verify(x => x.SignInAsync(
@@ -203,12 +199,11 @@ namespace JBDH.Tests.Services.Authentication
         public async Task SignInUserAsync_WithBannedUser_ShouldNotSignIn()
         {
             // Arrange
-            var username = "banneduser";
+            var email = "banned@example.com";
             var user = new User
             {
-                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
-                Email = "banned@example.com",
+                Email = email,
                 Location = "Banned Location",
                 IsBanned = true
             };
@@ -216,7 +211,7 @@ namespace JBDH.Tests.Services.Authentication
             await _context.SaveChangesAsync();
 
             // Act
-            await _loginService.SignInUserAsync(username);
+            await _loginService.SignInUserAsync(email);
 
             // Assert
             _mockAuthenticationService.Verify(x => x.SignInAsync(
@@ -230,17 +225,17 @@ namespace JBDH.Tests.Services.Authentication
         public async Task RegisterUserAsync_WithBasicInfo_ShouldCreateUser()
         {
             // Arrange
-            var username = "newuser";
+            var email = "newuser@example.com";
             var password = "TestPassword123!";
 
             // Act
-            await _loginService.RegisterUserAsync(username, password, null);
+            await _loginService.RegisterUserAsync(email, password, null);
 
             // Assert
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             Assert.NotNull(user);
             Assert.True(BCrypt.Net.BCrypt.Verify(password, user.PasswordHash));
-            Assert.Empty(user.Email);
+            Assert.Equal(email, user.Email);
             Assert.Empty(user.Location);
         }
 
@@ -248,7 +243,7 @@ namespace JBDH.Tests.Services.Authentication
         public async Task RegisterUserAsync_WithOrganization_ShouldCreateUserAndNotifyManagers()
         {
             // Arrange
-            var username = "newuser";
+            var email = "newuser@example.com";
             var password = "TestPassword123!";
             var organization = new OrganisationModel
             {
@@ -258,14 +253,12 @@ namespace JBDH.Tests.Services.Authentication
                 {
                     new User 
                     { 
-                        Username = "manager1",
                         PasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager1Pass!"),
                         Email = "manager1@test.com",
                         Location = "Manager1 Location"
                     },
                     new User 
                     { 
-                        Username = "manager2",
                         PasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager2Pass!"),
                         Email = "manager2@test.com",
                         Location = "Manager2 Location"
@@ -276,10 +269,10 @@ namespace JBDH.Tests.Services.Authentication
             await _context.SaveChangesAsync();
 
             // Act
-            await _loginService.RegisterUserAsync(username, password, organization.Id);
+            await _loginService.RegisterUserAsync(email, password, organization.Id);
 
             // Assert
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             Assert.NotNull(user);
             Assert.True(BCrypt.Net.BCrypt.Verify(password, user.PasswordHash));
         }
@@ -290,4 +283,4 @@ namespace JBDH.Tests.Services.Authentication
             _context.Dispose();
         }
     }
-} 
+}

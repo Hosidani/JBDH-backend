@@ -24,15 +24,15 @@ namespace JBDH.Services.Authentication
         }
 
         // Validate user credentials
-        public async Task<LoginResult> ValidateUserAsync(string username, string password)
+        public async Task<LoginResult> ValidateUserAsync(string email, string password)
         {
             var result = new LoginResult();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
                 result.UserExists = false;
-                result.ErrorMessage = "Invalid username or password.";
+                result.ErrorMessage = "Invalid email or password.";
                 return result;
             }
             result.UserExists = true;
@@ -41,7 +41,7 @@ namespace JBDH.Services.Authentication
             {
                 result.IsBanned = true;
                 result.ErrorMessage = "This account has been banned.";
-                return result; // Stop here if banned!
+                return result;
             }
 
             result.PasswordCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
@@ -49,21 +49,21 @@ namespace JBDH.Services.Authentication
 
             if (!result.IsSuccess)
             {
-                result.ErrorMessage = "Invalid username or password.";
+                result.ErrorMessage = "Invalid email or password.";
             }
             return result;
         }
 
 
         // Sign in the user
-        public async Task SignInUserAsync(string username)
+        public async Task SignInUserAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null || user.IsBanned)
                 return;
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Name, user.Email),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
@@ -76,15 +76,14 @@ namespace JBDH.Services.Authentication
         }
 
         // Register user with organization selection
-        public async Task RegisterUserAsync(string username, string password, int? organizationId)
+        public async Task RegisterUserAsync(string email, string password, int? organizationId)
         {
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
             var user = new User
             {
-                Username = username,
+                Email = email,
                 PasswordHash = passwordHash,
-                Email = "", // Set to actual email if available
                 Location = "", // Set to actual location if available
             };
 
@@ -110,7 +109,7 @@ namespace JBDH.Services.Authentication
         {
             // Logic to send email to the manager
             var subject = "Verify User for Organization";
-            var body = $"Please verify that {user.Username} is part of your organization.";
+            var body = $"Please verify that {user.Email} is part of your organization.";
             _ = subject;
             _ = body;
             // Use an email service to send the email (not implemented here)

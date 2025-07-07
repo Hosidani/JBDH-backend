@@ -42,11 +42,11 @@ namespace JBDH.Services.UserManagement
         }
         public async Task<User?> GetCurrentUserAsync()
         {
-            var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
-            if (string.IsNullOrEmpty(username))
+            var email = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
                 return null;
 
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<bool> UpdateEmailAsync(string newEmail)
@@ -86,7 +86,7 @@ namespace JBDH.Services.UserManagement
             var user = await GetCurrentUserAsync();
             if (user == null) return false;
 
-            user.OpenForHiring = openForHiring; // Updated property casing
+            user.Open = openForHiring; // Updated property casing
             await _context.SaveChangesAsync();
             return true;
         }
@@ -173,7 +173,7 @@ namespace JBDH.Services.UserManagement
         {
             LoggingConfigService.ReturnInfo("ChangeCVAndAnalyzeAsync method called.");
             var user = await _context.Users.FindAsync(userId);
-            LoggingConfigService.ReturnInfo($"User found: {user?.Username ?? "null"}");
+            LoggingConfigService.ReturnInfo($"User found: {user?.Email ?? "null"}");
             if (user == null)
             {
                 LoggingConfigService.ReturnInfo("User not found.");
@@ -209,7 +209,7 @@ namespace JBDH.Services.UserManagement
                             return;
                         }
                         var fullCvPath = Path.Combine(_environment.WebRootPath, "uploads", userFromDb.CVPath ?? "");
-                        LoggingConfigService.ReturnInfo($"Starting background CV analysis for user {userFromDb.Username} at {fullCvPath}");
+                        LoggingConfigService.ReturnInfo($"Starting background CV analysis for user {userFromDb.Email} at {fullCvPath}");
                         await cvAnalysisService.AnalyzeAndSaveCVAsync(userFromDb, fullCvPath);
                         LoggingConfigService.ReturnInfo("Background CV analysis completed.");
                     }
@@ -229,8 +229,7 @@ namespace JBDH.Services.UserManagement
             if (user == null) return new List<User>();
 
             var friends = await _context.Friendships
-                .Where(f => (f.RequesterId == user.Id || f.AddresseeId == user.Id) &&
-                            (f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends))
+                .Where(f => (f.RequesterId == user.Id || f.AddresseeId == user.Id) && (f.Status == FriendshipStatus.Friends))
                 .Select(f => f.RequesterId == user.Id ? f.Addressee : f.Requester)
                 .ToListAsync();
 
@@ -284,7 +283,7 @@ namespace JBDH.Services.UserManagement
         public async Task<List<User>> SearchUsersAsync(string query)
         {
             return await _context.Users
-                .Where(u => u.Username.Contains(query) || u.Email.Contains(query))
+                .Where(u => u.Email.Contains(query))
                 .ToListAsync();
         }
     }

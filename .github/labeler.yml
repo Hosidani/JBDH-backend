@@ -8,5 +8,5 @@ views:
   - 'JBDH/Views/**'
 tests:
   - 'JBDH.Tests/**'
-docs:
+documentation:
   - '**/*.md'

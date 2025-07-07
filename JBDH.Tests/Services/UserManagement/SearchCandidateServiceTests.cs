@@ -41,31 +41,28 @@ namespace JBDH.Tests.Services.UserManagement
             _user1 = new User
             {
                 Id = 1,
-                Username = "developer1",
                 PasswordHash = "hash1",
                 Email = "dev1@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
 
             _user2 = new User
             {
                 Id = 2,
-                Username = "developer2",
                 PasswordHash = "hash2",
                 Email = "dev2@test.com",
                 Location = "Gothenburg",
-                OpenForHiring = true
+                Open = true
             };
 
             _user3 = new User
             {
                 Id = 3,
-                Username = "developer3",
                 PasswordHash = "hash3",
                 Email = "dev3@test.com",
                 Location = "Stockholm",
-                OpenForHiring = false
+                Open = false
             };
 
             // Create AI responses
@@ -131,7 +128,7 @@ namespace JBDH.Tests.Services.UserManagement
             // Assert
             Assert.Single(result);
             Assert.Equal(_user1.Id, result[0].UserId);
-            Assert.Equal("developer1", result[0].Username);
+            Assert.Equal(_user1.Email, result[0].Email);
         }
 
         [Fact]
@@ -259,11 +256,10 @@ namespace JBDH.Tests.Services.UserManagement
             var user4 = new User
             {
                 Id = 4,
-                Username = "developer4",
                 PasswordHash = "hash4",
                 Email = "dev4@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             var aiResponse4 = new UserAIResponse
             {
@@ -311,11 +307,10 @@ namespace JBDH.Tests.Services.UserManagement
             var userWithoutAI = new User
             {
                 Id = 5,
-                Username = "developer5",
                 PasswordHash = "hash5",
                 Email = "dev5@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             _context.Users.Add(userWithoutAI);
             await _context.SaveChangesAsync();
@@ -338,11 +333,10 @@ namespace JBDH.Tests.Services.UserManagement
             var userWithEmptyAI = new User
             {
                 Id = 6,
-                Username = "developer6",
                 PasswordHash = "hash6",
                 Email = "dev6@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             var emptyAIResponse = new UserAIResponse
             {
@@ -374,11 +368,10 @@ namespace JBDH.Tests.Services.UserManagement
             var userWithNullAI = new User
             {
                 Id = 7,
-                Username = "developer7",
                 PasswordHash = "hash7",
                 Email = "dev7@test.com",
                 Location = "Stockholm",
-                OpenForHiring = true
+                Open = true
             };
             _context.Users.Add(userWithNullAI);
             await _context.SaveChangesAsync();
@@ -421,4 +414,4 @@ namespace JBDH.Tests.Services.UserManagement
             _context.Dispose();
         }
     }
-} 
+}
