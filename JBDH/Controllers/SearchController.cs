@@ -31,6 +31,7 @@ namespace JBDH.Controllers
         private readonly ISearchWorkflowService _searchWorkflowService;
         private readonly ApplicationDbContext _context;
         private readonly IManageIOService _manageIOService; 
+        private readonly IMatchingAlgorithmCVJobService _matchingAlgorithmCVJobService;
 
         public SearchController(
             IUserPropertiesService userPropertiesService,
@@ -43,7 +44,8 @@ namespace JBDH.Controllers
             IJobAIAnalysisService jobAIAnalysisService,
             ISearchWorkflowService searchWorkflowService,
             ApplicationDbContext context,
-            IManageIOService manageIOService 
+            IManageIOService manageIOService ,
+            IMatchingAlgorithmCVJobService matchingAlgorithmCVJobService
         )
         {
             _userPropertiesService = userPropertiesService;
@@ -57,6 +59,7 @@ namespace JBDH.Controllers
             _searchWorkflowService = searchWorkflowService;
             _context = context;
             _manageIOService = manageIOService; 
+            _matchingAlgorithmCVJobService = matchingAlgorithmCVJobService;
         }
 
         [HttpGet]
@@ -101,13 +104,12 @@ namespace JBDH.Controllers
             if (!int.TryParse(jobId, out int parsedJobId))
             {
                 LoggingConfigService.ReturnError($"Invalid job ID format: {jobId}");
-                return View("Error", new ErrorViewModel
-                {
-                    Title = "Invalid Job ID",
-                    Message = "The provided job ID is not in a valid format.",
-                    ReturnUrl = Url.Action("SearchJob")
-                });
+                return Content("Invalid job ID");
             }
+
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Content("User not found");
 
             var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
@@ -124,7 +126,7 @@ namespace JBDH.Controllers
                 });
             }
 
-            // --- NYTT: Extrahera rätt JSON ---
+            // Extract and parse
             var cleanJson = _manageIOService.ExtractInnerJsonFromJobAIResponse(aiResultString);
             JobAdAIResponseViewModel? jobAdModel = null;
             try
@@ -141,7 +143,37 @@ namespace JBDH.Controllers
                     ReturnUrl = Url.Action("SearchJob")
                 });
             }
-            return PartialView("_JobAdAIResultPartial", jobAdModel);
+
+            // --- Calculate CV Match Percent ---
+            int matchPercent = 0;
+            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+            if (userAIResponse == null)
+                Console.WriteLine("userAIResponse is null");
+            else if (string.IsNullOrEmpty(userAIResponse.ResponseText))
+                Console.WriteLine("userAIResponse.ResponseText is null or empty");
+            else if (jobAdModel == null)
+                Console.WriteLine("jobAdModel is null");
+            else
+            {
+                var cvAI = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
+                if (cvAI != null)
+                    matchPercent = _matchingAlgorithmCVJobService.CalculateJobTitleMatchPercentage(jobAdModel, cvAI);
+            }
+            var percentHtml = $"<span class='badge bg-info'>CV Match: {matchPercent}%</span>";
+
+            // --- Return for AJAX or normal partial ---
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                // Render the partial view as string
+                var analysisHtml = await this.RenderViewAsync("_JobAdAIResultPartial", jobAdModel, true);
+                return Json(new { percentHtml, analysisHtml });
+            }
+            else
+            {
+                // Fallback for non-AJAX
+                ViewBag.CVMatchPercent = matchPercent;
+                return PartialView("_JobAdAIResultPartial", jobAdModel);
+            }
         }
 
         [HttpGet]
@@ -168,7 +200,7 @@ namespace JBDH.Controllers
                 return View("Error", new ErrorViewModel
                 {
                     Title = "Missing Input",
-                    Message = "Please provide at least a description or a location, and make sure your CV is uploaded.",
+                    Message = "Please provide at least a description or a location, and make sure your CV is uploaded and you are logged in.",
                     ReturnUrl = Url.Action("Index", "Home")
                 });
             }
@@ -181,38 +213,53 @@ namespace JBDH.Controllers
             // Use workflow service for search and meta
             var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
             LoggingConfigService.ReturnInfo($"Search results count: {results.Count}");
+            /*
+                        if (results.Any() && results.First().Job != null)
+                        {
 
-            if (results.Any() && results.First().Job != null)
-            {
+                            var aiRequest = new AIRequest
+                            {
+                                CommandId = 3,
+                                JobAIResponse = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(results.First().Job.WebpageUrl, results.First().Job.JobId),
+                                UserAIResponse = user.AIResponses.FirstOrDefault()?.ResponseText,
+                                User = user
+                            };
+                            LoggingConfigService.ReturnInfo($"AI Request built with CommandId: {aiRequest.CommandId}, JobAdUrl: {results.First().Job.WebpageUrl}, UserAIResponse: {user.AIResponses.FirstOrDefault()?.ResponseText}");
+                            string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
+                            aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
+                            // Parse JSON to ViewModel
+                            CVJobComparisonAIResponseViewModel? aiModel = null;
+                            try
+                            {
+                                aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
+                            }
+                            catch
+                            {
+                                LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
+                            }
 
-                var aiRequest = new AIRequest
-                {
-                    CommandId = 3,
-                    JobAIResponse = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(results.First().Job.WebpageUrl, results.First().Job.JobId),
-                    UserAIResponse = user.AIResponses.FirstOrDefault()?.ResponseText,
-                    User = user
-                };
-                LoggingConfigService.ReturnInfo($"AI Request built with CommandId: {aiRequest.CommandId}, JobAdUrl: {results.First().Job.WebpageUrl}, UserAIResponse: {user.AIResponses.FirstOrDefault()?.ResponseText}");  
-                string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
-                aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
-                // Parse JSON to ViewModel
-                CVJobComparisonAIResponseViewModel? aiModel = null;
-                try
-                {
-                    aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
-                }
-                catch
-                {
-                    LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
-                }
+                            ViewData["AIAnalysisModel"] = aiModel;
+                        }
+                        else
+                        {
+                            ViewData["AIAnalysisModel"] = null;
+                        }
+                       */
+            int matchPercent = 0;
+            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+            var jobAIResponse = await _jobAIResponseService.GetLatestJobAIResponseAsync(results.First().Job.JobId);
 
-                ViewData["AIAnalysisModel"] = aiModel;
-            }
-            else
-            {
-                ViewData["AIAnalysisModel"] = null;
-            }
+            var cvAI = userAIResponse != null ? JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText) : null;
+            var jobAI = jobAIResponse != null ? JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(jobAIResponse.ResponseText) : null;
 
+
+            if (cvAI != null && jobAI != null)
+                matchPercent = _matchingAlgorithmCVJobService.CalculateJobTitleMatchPercentage(jobAI, cvAI);
+
+            ViewData["JobTitleMatchPercent"] = matchPercent;
+            // Return as plain text (or you can use ContentResult or Json)
+            //return Content($"{matchPercent}%", "text/plain");
+            // create a new ViewData dictionary to hold the data of matchningen mellan CV och job ad
             return View("SearchResultsJobs", results);
         }
 

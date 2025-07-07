@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using JBDH.Models.ViewModels;
 using JBDH.Models.Core;
+using JBDH.Models.AI; 
 using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.AICommunications
@@ -31,6 +32,14 @@ namespace JBDH.Services.AICommunications
                     item.LatestAIResponse = null;
                 }
             }
+        }
+
+        public async Task<JobAIResponse?> GetLatestJobAIResponseAsync(int jobId)
+        {
+            return await _context.JobAIResponses
+                .Where(r => r.JobId == jobId)
+                .OrderByDescending(r => r.CreatedAt)
+                .FirstOrDefaultAsync();
         }
     }
 }
