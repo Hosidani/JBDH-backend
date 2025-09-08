@@ -95,8 +95,34 @@ namespace JBDH.Services.UserManagement
                 }
             ).ToListAsync();
 
-            var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
-            LoggingConfigService.ReturnDebug($"UserAIResponse for user {user.Id} retrieved: {userAIResponse?.ResponseText ?? "No response"}");
+                var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
+
+                // Detailed logging for debugging AI response
+                if (userAIResponse == null)
+                {
+                    LoggingConfigService.ReturnDebug("userAIResponse is null.");
+                }
+                else
+                {
+                    LoggingConfigService.ReturnDebug("userAIResponse.ResponseText: " + userAIResponse.ResponseText);
+
+                    if (!string.IsNullOrEmpty(userAIResponse.ResponseText))
+                    {
+                        try
+                        {
+                            var testResult = System.Text.Json.JsonSerializer.Deserialize<CVAnalysisResult>(userAIResponse.ResponseText);
+                            LoggingConfigService.ReturnDebug("Deserialization to CVAnalysisResult succeeded.");
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggingConfigService.ReturnDebug("Deserialization to CVAnalysisResult failed: " + ex.Message);
+                        }
+                    }
+                    else
+                    {
+                        LoggingConfigService.ReturnDebug("userAIResponse.ResponseText is null or empty.");
+                    }
+                }
             var model = new ProfileViewModel
             {
                 User = user,

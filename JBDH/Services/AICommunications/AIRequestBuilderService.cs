@@ -27,7 +27,7 @@ namespace JBDH.Services.AICommunications
                   "\"ReasoningBehindJobTitles\" (brief), " +
                   "\"HardSkills\" (a short list, maximum 10 skills), " +
                   "\"SoftSkills\" (a short list, maximum 10 skills), " +
-                  "\"Experiences\" (a short list, maximum 10 experiences which states titles and approximate experience time), and " +
+                  "\"Experiences\" (a list of objects, each with \"title\" (string) and \"duration\" (string, e.g. \"3.5 years\")), and " +
                   "\"EducationAndCertifications\" (a short list, maximum 10 items, brief). " +
                   "\n\nCV:\n{CVText}",
 
@@ -52,19 +52,20 @@ namespace JBDH.Services.AICommunications
                   "\"RelevantExperiences\" (list of relevant experiences from the CV), " +
                   "\"EducationAndCertifications\" (from the CV, relevant to the job ad). " +
                   "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}",
-
             [3] = "You are given two AI-generated JSON objects: one is a summary of a user's CV, the other is a summary of a job ad. " +
-                  "Compare the user's qualifications, skills, and experiences to the requirements in the job ad. " +
-                  "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. " +
-                  "Return ONLY a valid JSON object with ALL of the following fields (do not omit any): " +
-                  "\"Percentage\" (a number between 0 and 100 representing the match), " +
-                  "\"FitSummary\" (brief summary of fit), " +
-                  "\"MissingRequirements\" (list of gaps or missing requirements), " +
-                  "\"MatchingSkills\" (list of skills from the user that match the job ad), " +
-                  "\"RelevantExperiences\" (list of relevant experiences from the user), " +
-                  "\"EducationAndCertifications\" (from the user, relevant to the job ad). " +
-                  "Example: { \"Percentage\": 85, ... }" +
-                  "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobAIResponse:\n{JobAIResponse}",
+                "Compare the user's qualifications, skills, experiences, and education/certifications to the requirements in the job ad. " +
+                "For each skill, experience, and education/certification, check if there is a direct or close match. " +
+                "Return ONLY a valid JSON object with ALL of the following fields (do not omit any): " +
+                "\"Percentage\" (a number between 0 and 100 representing the match, based on actual overlap), " +
+                "\"FitSummary\" (brief summary of fit), " +
+                "\"MissingRequirements\" (list of gaps or missing requirements), " +
+                "\"MatchingSkills\" (list of skills from the user that match the job ad), " +
+                "\"RelevantExperiences\" (list of relevant experiences from the user that match the job ad), " +
+                "\"EducationAndCertifications\" (from the user, relevant to the job ad), " +
+                "\"Reasoning\" (explain how you calculated the percentage and why). " +
+                "Example: { \"Percentage\": 85, ... }" +
+                "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobAIResponse:\n{JobAIResponse}",
+
             [4] = "Can you give me a proposal for courses that would help this user improve their skills? " +
                   "Return ONLY a valid JSON object with the following fields: " +
                   "\"Courses\" (a short list, maximum 10 courses, with titles and brief descriptions). " +
@@ -146,6 +147,8 @@ namespace JBDH.Services.AICommunications
                 // These should be set in the AIRequest object
                 var userAIResponse = aiRequest.UserAIResponse ?? "";
                 var jobAIResponse = aiRequest.JobAIResponse ?? "";
+
+                LoggingConfigService.ReturnInfo("AIRequestBuilder: CommandId 3 is running. userAIResponse length: " + userAIResponse.Length + ", jobAIResponse length: " + jobAIResponse.Length);
 
                 userMessage = UserMessageTemplates[3]
                     .Replace("{UserAIResponse}", userAIResponse)
