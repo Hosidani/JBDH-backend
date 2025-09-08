@@ -29,7 +29,7 @@ namespace JBDH.Services.Helpers
             var jobTitles = jobAI.JobTitle?.Select(j => j.ToLowerInvariant()).ToList() ?? new List<string>();
             var cvTitles = cvAI.BestJobTitlesForUser?.Select(c => c.ToLowerInvariant()).ToList() ?? new List<string>();
             int titleMatches = jobTitles.Count == 0 ? 0 : jobTitles.Count(jt => cvTitles.Any(ct => ct.Contains(jt) || jt.Contains(ct)));
-            double titleScore = jobTitles.Count == 0 ? 0 : (titleMatches / (double)jobTitles.Count) * 100;
+            double titleScore = jobTitles.Count == 0 ? 0 : titleMatches * 100;
 
             // Hard Skills
             var jobSkills = jobAI.HardRequirements?.Select(s => s.ToLowerInvariant()).ToList() ?? new List<string>();
@@ -47,7 +47,7 @@ namespace JBDH.Services.Helpers
             var jobEdu = jobAI.EducationAndCertifications?.Select(e => e.ToLowerInvariant()).ToList() ?? new List<string>();
             var cvEdu = cvAI.EducationAndCertifications?.Select(e => e.ToLowerInvariant()).ToList() ?? new List<string>();
             int eduMatches = jobEdu.Count == 0 ? 0 : jobEdu.Count(je => cvEdu.Any(ce => ce.Contains(je) || je.Contains(ce)));
-            double eduScore = jobEdu.Count == 0 ? 0 : (eduMatches / (double)jobEdu.Count) * 100;
+            double eduScore = jobEdu.Count == 0 ? 0 : eduMatches * 100;
 
             // Weights
             double finalScore =
