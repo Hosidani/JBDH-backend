@@ -126,14 +126,14 @@ namespace JBDH.Tests.Services.Core
             // Assert
             Assert.NotNull(result);
             Assert.Contains("Id INT PRIMARY KEY AUTO_INCREMENT", result);
-            Assert.Contains("Username VARCHAR(255) NOT NULL UNIQUE", result);
+            // Username column removed
             Assert.Contains("PasswordHash VARCHAR(255) NOT NULL", result);
             Assert.Contains("Email VARCHAR(255) NOT NULL UNIQUE", result);
             Assert.Contains("Location VARCHAR(255)", result);
             Assert.Contains("CVPath VARCHAR(2083)", result);
             Assert.Contains("Organisation VARCHAR(255)", result);
             Assert.Contains("DeveloperMode BOOLEAN DEFAULT FALSE", result);
-            Assert.Contains("OpenForHiring BOOLEAN DEFAULT FALSE", result);
+            Assert.Contains("Open BOOLEAN DEFAULT FALSE", result);
             Assert.Contains("Role VARCHAR(100) NOT NULL", result);
             Assert.Contains("IsBanned BOOLEAN DEFAULT FALSE", result);
         }

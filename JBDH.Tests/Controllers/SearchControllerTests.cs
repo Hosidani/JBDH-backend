@@ -116,7 +116,6 @@ namespace JBDH.Tests.Controllers
                 .ReturnsAsync(new User
                 {
                     Id = 1,
-                    Username = "testuser",
                     PasswordHash = "hash",
                     Email = "test@example.com",
                     Location = "Testville"
@@ -133,7 +132,6 @@ namespace JBDH.Tests.Controllers
                     User = new User
                     {
                         Id = 1,
-                        Username = "testuser",
                         PasswordHash = "hash",
                         Email = "test@example.com",
                         Location = "Testville"
@@ -213,7 +211,6 @@ namespace JBDH.Tests.Controllers
                 {
                     Id = 1,
                     CVPath = "cv.pdf",
-                    Username = "testuser",
                     PasswordHash = "hash",
                     Email = "test@example.com",
                     Location = "Testville"
@@ -238,7 +235,6 @@ namespace JBDH.Tests.Controllers
                     {
                         Id = 1,
                         CVPath = "cv.pdf",
-                        Username = "testuser",
                         PasswordHash = "hash",
                         Email = "test@example.com",
                         Location = "Testville"
@@ -280,7 +276,6 @@ namespace JBDH.Tests.Controllers
                     {
                         Id = 2,
                         CVPath = "cv2.pdf",
-                        Username = "anotheruser",
                         PasswordHash = "hash2",
                         Email = "another@example.com",
                         Location = "Anotherville"

@@ -10,9 +10,6 @@
 
 <div class="card p-4 mt-3 shadow-sm">
     <dl class="row">
-        <dt class="col-sm-3">Username:</dt>
-        <dd class="col-sm-9">@Model.User.Username</dd>
-
         <dt class="col-sm-3">Email:</dt>
         <dd class="col-sm-9">@Model.User.Email</dd>
 
@@ -31,7 +28,7 @@
 
         <dt class="col-sm-3">Open for Hiring:</dt>
         <dd class="col-sm-9">
-            @if (Model.User.OpenForHiring == true)
+            @if (Model.User.Open == true)
             {
                 <span class="badge bg-success">Open</span>
             }
@@ -155,7 +152,7 @@ else
     <ul>
         @foreach (var friend in Model.Friends)
         {
-            <li>@friend.Username</li>
+            <li>@friend.Email</li> <!-- or @friend.Id -->
         }
     </ul>
 }
@@ -171,7 +168,7 @@ else
         @foreach (var request in Model.PendingFriendRequests)
         {
             <li>
-                @request.Requester.Username
+                @request.Requester.Email <!-- or @request.Requester.Id -->
                 <form asp-action="AcceptFriendRequest" method="post" style="display:inline;">
                     <input type="hidden" name="friendshipId" value="@request.Id" />
                     <button type="submit" class="btn btn-success btn-sm">Accept</button>
@@ -226,27 +223,55 @@ else
     <p>You have not applied to any jobs yet.</p>
 }
 
-@if (Model.CVAnalysisResult != null && 
-     Model.CVAnalysisResult.Experiences != null && 
-     Model.CVAnalysisResult.Experiences.Any(e => !string.IsNullOrWhiteSpace(e.Title)))
-{
-    <ul>
-        @foreach (var exp in Model.CVAnalysisResult.Experiences)
+<h4>My Recommended Courses to take</h4>
+
+@{
+    var proposalJson = Model.CourseProposals?.ProposalJson;
+    if (!string.IsNullOrWhiteSpace(proposalJson))
+    {
+        // Remove markdown code fences if present
+        proposalJson = proposalJson.Trim();
+        if (proposalJson.StartsWith("```"))
         {
-            if (!string.IsNullOrWhiteSpace(exp.Title))
+            var firstNewline = proposalJson.IndexOf('\n');
+            var lastBackticks = proposalJson.LastIndexOf("```");
+            if (firstNewline != -1 && lastBackticks != -1 && lastBackticks > firstNewline)
             {
-                <li>
-                    <strong>@exp.Title</strong>
-                    @if (!string.IsNullOrWhiteSpace(exp.Duration))
-                    {
-                        <span class="text-muted">(@exp.Duration)</span>
-                    }
-                </li>
+                proposalJson = proposalJson.Substring(firstNewline + 1, lastBackticks - firstNewline - 1).Trim();
             }
         }
-    </ul>
+    }
+}
+@if (!string.IsNullOrWhiteSpace(proposalJson))
+{
+    var courses = new List<dynamic>();
+    try
+    {
+        var json = Newtonsoft.Json.Linq.JObject.Parse(proposalJson);
+        if (json["Courses"] != null)
+        {
+            courses = json["Courses"].ToObject<List<dynamic>>();
+        }
+    }
+    catch { }
+    if (courses.Any())
+    {
+        <ul>
+            @foreach (var course in courses)
+            {
+                <li>
+                    <strong>@course.title</strong><br />
+                    <span>@course.description</span>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <span>No course proposals available.</span>
+    }
 }
 else
 {
-    <span>No experiences found.</span>
+    <span>No course proposals available.</span>
 }

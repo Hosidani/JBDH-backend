@@ -65,11 +65,11 @@ namespace JBDH.Services.UserManagement
                 throw new System.Exception("User not found.");
 
             var friends = user.SentFriendRequests
-                .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
+                .Where(f => f.Status == FriendshipStatus.Friends)
                 .Select(f => f.Addressee)
                 .Concat(
                     user.ReceivedFriendRequests
-                        .Where(f => f.Status == FriendshipStatus.Accepted || f.Status == FriendshipStatus.Friends)
+                        .Where(f => f.Status == FriendshipStatus.Friends)
                         .Select(f => f.Requester)
                 )
                 .ToList();
@@ -123,8 +123,6 @@ namespace JBDH.Services.UserManagement
                         LoggingConfigService.ReturnDebug("userAIResponse.ResponseText is null or empty.");
                     }
                 }
-                
-
             var model = new ProfileViewModel
             {
                 User = user,

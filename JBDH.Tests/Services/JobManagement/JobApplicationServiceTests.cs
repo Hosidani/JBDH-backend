@@ -42,7 +42,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -83,7 +82,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -124,7 +122,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -169,7 +166,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -205,7 +201,6 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user = new User
             {
-                Username = "testuser",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -265,14 +260,12 @@ namespace JBDH.Tests.Services.JobManagement
             // Arrange
             var user1 = new User
             {
-                Username = "user1",
                 Email = "user1@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
             };
             var user2 = new User
             {
-                Username = "user2",
                 Email = "user2@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = "Test Location"
@@ -317,4 +310,4 @@ namespace JBDH.Tests.Services.JobManagement
             _context.Dispose();
         }
     }
-} 
+}

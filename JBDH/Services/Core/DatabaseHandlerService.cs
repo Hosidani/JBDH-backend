@@ -47,6 +47,7 @@ namespace JBDH.Services.Core
                 var createCardsTable               = SqlQueries.SqlQuery(17);
                 var createBoardMembershipsTable    = SqlQueries.SqlQuery(18);
                 var createMessagesTable            = SqlQueries.SqlQuery(19);
+                var createAIUserCourseProposalsTable = SqlQueries.SqlQuery(20); // Add this line
 
                 // Execute each create table command (no per-table logging)
                 using (var command = new MySqlCommand(createUsersTable, connection)) { command.ExecuteNonQuery(); }
@@ -68,6 +69,7 @@ namespace JBDH.Services.Core
                 using (var command = new MySqlCommand(createCardsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createBoardMembershipsTable, connection)) { command.ExecuteNonQuery(); }
                 using (var command = new MySqlCommand(createMessagesTable, connection)) { command.ExecuteNonQuery(); }
+                using (var command = new MySqlCommand(createAIUserCourseProposalsTable, connection)) { command.ExecuteNonQuery(); } // <-- Add this line
 
                 LoggingConfigService.ReturnInfo("All required tables ensured.");
             }

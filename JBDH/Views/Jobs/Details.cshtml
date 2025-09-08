@@ -1,8 +1,30 @@
 @using JBDH.Models.ViewModels
 @model JobDetailsViewModel
 
-<h2>Job Details</h2>
+<h2>@Model.Job.Title</h2>
+<p><strong>Company:</strong> @Model.Job.Company</p>
+<p><strong>Location:</strong> @Model.Job.Location</p>
+<p><strong>Posted:</strong> @Model.Job.PostedDate</p>
 
+<div>
+    <strong>Description:</strong>
+    <div style="white-space: pre-wrap;">
+        @Model.Job.Description
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Job.WebpageUrl))
+{
+    <p>
+        <strong>Job URL:</strong>
+        <a href="@Model.Job.WebpageUrl" target="_blank" rel="noopener">
+            @Model.Job.WebpageUrl
+        </a>
+    </p>
+}
+
+<hr />
+<!-- Application form logic below -->
 @if (Model.HasApplied)
 {
     <form asp-action="Unapply" method="post">
@@ -18,3 +40,16 @@ else
         <button type="submit" class="btn btn-primary mt-2">✅ Mark as Applied</button>
     </form>
 }
+
+<!-- Send to Friend Form -->
+<form asp-action="SendToFriend" method="post" class="mb-3">
+    <input type="hidden" name="jobId" value="@Model.JobId" />
+    <label for="friendId">Send to friend:</label>
+    <select name="friendId" id="friendId" class="form-control" required>
+        @foreach (var friend in Model.Friends)
+        {
+            <option value="@friend.Id">@friend.Email</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-info mt-2">📨 Send Job</button>
+</form>
