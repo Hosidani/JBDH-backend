@@ -11,6 +11,7 @@ namespace JBDH.Models.ViewModels
         public int Priority { get; set; }
         public bool HasApplied { get; set; }
         public JobAIResponse? LatestAIResponse { get; set; } // <-- Add this line
+        public int? CVMatchPercent { get; set; }
         // ... other properties ...
     }
 }

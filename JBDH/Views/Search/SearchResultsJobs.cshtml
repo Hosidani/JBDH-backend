@@ -5,60 +5,64 @@
 @{
     ViewData["Title"] = "Search Results";
     var aiModel = ViewData["AIAnalysisModel"] as CVJobComparisonAIResponseViewModel;
-}
+    // Old code for AI analysis display (kept as command)
+    /*
+    if (aiModel != null)
+    {
+        <div class="alert alert-info mb-4">
+            <strong>AI Analysis of Your CV Against the Top Job Result:</strong>
+            <dl>
+                <dt>Fit Summary</dt>
+                <dd>@aiModel.FitSummary</dd>
+                
+                <dt>Percentage Score</dt>
+                <dd>@aiModel.Percentage</dd>
 
-@if (aiModel != null)
-{
-    <div class="alert alert-info mb-4">
-        <strong>AI Analysis of Your CV Against the Top Job Result:</strong>
-        <dl>
-            <dt>Fit Summary</dt>
-            <dd>@aiModel.FitSummary</dd>
-            
-            <dt>Percentage Score</dt>
-            <dd>@aiModel.Percentage</dd>
+                <dt>Missing Requirements</dt>
+                <dd>
+                    <ul>
+                        @foreach (var req in aiModel.MissingRequirements ?? new List<string>())
+                        {
+                            <li>@req</li>
+                        }
+                    </ul>
+                </dd>
 
-            <dt>Missing Requirements</dt>
-            <dd>
-                <ul>
-                    @foreach (var req in aiModel.MissingRequirements ?? new List<string>())
-                    {
-                        <li>@req</li>
-                    }
-                </ul>
-            </dd>
+                <dt>Matching Skills</dt>
+                <dd>
+                    <ul>
+                        @foreach (var skill in aiModel.MatchingSkills ?? new List<string>())
+                        {
+                            <li>@skill</li>
+                        }
+                    </ul>
+                </dd>
 
-            <dt>Matching Skills</dt>
-            <dd>
-                <ul>
-                    @foreach (var skill in aiModel.MatchingSkills ?? new List<string>())
-                    {
-                        <li>@skill</li>
-                    }
-                </ul>
-            </dd>
+                <dt>Relevant Experiences</dt>
+                <dd>
+                    <ul>
+                        @foreach (var exp in aiModel.RelevantExperiences ?? new List<string>())
+                        {
+                            <li>@exp</li>
+                        }
+                    </ul>
+                </dd>
 
-            <dt>Relevant Experiences</dt>
-            <dd>
-                <ul>
-                    @foreach (var exp in aiModel.RelevantExperiences ?? new List<string>())
-                    {
-                        <li>@exp</li>
-                    }
-                </ul>
-            </dd>
-
-            <dt>Education and Certifications</dt>
-            <dd>
-                <ul>
-                    @foreach (var edu in aiModel.EducationAndCertifications ?? new List<string>())
-                    {
-                        <li>@edu</li>
-                    }
-                </ul>
-            </dd>
-        </dl>
-    </div>
+                <dt>Education and Certifications</dt>
+                <dd>
+                    <ul>
+                        @foreach (var edu in aiModel.EducationAndCertifications ?? new List<string>())
+                        {
+                            <li>@edu</li>
+                        }
+                    </ul>
+                </dd>
+            </dl>
+        </div>
+    }
+    */
+    // New code: Show job title match percentage
+    var jobTitleMatchPercent = ViewData["JobTitleMatchPercent"] as int? ?? 0;
 }
 
 <div class="text-center">
@@ -98,13 +102,32 @@
                     </td>
                     <td>@company</td>
                     <td>@location</td>
-                    <td>@description</td>
+                        <td>
+                            @{
+                                int maxLength = 120; // Adjust for 1-2 lines as needed
+                                string desc = item.Job?.Description ?? "No description";
+                                string shortDesc = desc.Length > maxLength
+                                    ? desc.Substring(0, maxLength) + "..."
+                                    : desc;
+                            }
+                            @shortDesc
+                        </td>
                     <td>
                         <form asp-action="AnalyzeJob" asp-controller="Search" method="post" style="display:inline;" class="analyze-form" data-jobid="@jobId" onsubmit="event.stopPropagation();">
                             <input type="hidden" name="jobAdUrl" value="@(item.Job?.WebpageUrl ?? "")" />
                             <input type="hidden" name="jobId" value="@(item.Job?.JobId ?? 0)" />
                             <button type="submit" class="btn btn-secondary btn-sm">Analyze with AI</button>
                         </form>
+                        <span id="job-title-match-result-@jobId" style="margin-left:10px;">
+                            @if (item.CVMatchPercent.HasValue)
+                            {
+                                <span class="badge bg-info">CV Match: @item.CVMatchPercent%</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">CV Match: ?</span>
+                            }
+                        </span>
                     </td>
                 </tr>
                 <tr id="ai-row-@jobId" class="ai-row" style="display:none;">
@@ -170,8 +193,9 @@
             var $form = $(this);
             var jobId = Number($form.data('jobid'));
             $.post($form.attr('action'), $form.serialize(), function (data) {
+                $('#job-title-match-result-' + jobId).html(data.percentHtml);
+                $('#ai-result-' + jobId).html(data.analysisHtml);
                 $('#ai-row-' + jobId).show();
-                $('#ai-result-' + jobId).html(data);
             });
         });
     </script>

@@ -196,10 +196,13 @@ namespace JBDH.Services.UserManagement
             // Run AI analysis in the background using the shared service
             _ = Task.Run(async () =>
             {
+                LoggingConfigService.ReturnInfo("Starting background CV analysis task.");
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                    LoggingConfigService.ReturnInfo("Created new service scope for background CV analysis.");
                     try
                     {
+                        LoggingConfigService.ReturnInfo("Resolving services for background CV analysis.");
                         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                         var cvAnalysisService = scope.ServiceProvider.GetRequiredService<ICVAnalysisService>();
                         var userFromDb = await dbContext.Users.FindAsync(user.Id);
