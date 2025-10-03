@@ -14,6 +14,7 @@ using JBDH.Services.DataFlow;
 using JBDH.Services.Reporting;
 using JBDH.Services.Configuration;
 using JBDH.Models.Core;
+using JBDH.Services.AICommunications; // Add this if not present
 
 namespace JBDH.Controllers
 {
@@ -24,12 +25,21 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly DataFlowService _dataFlowService;
         private readonly IRapportUserService _rapportUserService;
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, DataFlowService dataFlowService, IRapportUserService rapportUserService)
+        private readonly IAIRequestBuilderService _aiRequestBuilderService; // <-- Add this line
+
+        public HomeController(
+            ApplicationDbContext context,
+            IWebHostEnvironment environment,
+            DataFlowService dataFlowService,
+            IRapportUserService rapportUserService,
+            IAIRequestBuilderService aiRequestBuilderService // <-- Add this parameter
+        )
         {
             _context = context;
             _environment = environment;
             _dataFlowService = dataFlowService;
             _rapportUserService = rapportUserService;
+            _aiRequestBuilderService = aiRequestBuilderService; // <-- Assign here
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -175,6 +185,21 @@ namespace JBDH.Controllers
 
             await _dataFlowService.AddCommentAsync(dataFlowId, int.Parse(userId), comment);
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CompareCvToJobAd(string cvPath, string jobAdText)
+        {
+            var aiRequest = new JBDH.Models.AI.AIRequest
+            {
+                CommandId = 2,
+                CVPath = cvPath,
+                JobAdUrl = jobAdText // If your model uses JobAdUrl, assign the text here
+            };
+
+            var requestContent = await _aiRequestBuilderService.AIRequestBuilder(aiRequest);
+            dynamic resultObj = Newtonsoft.Json.JsonConvert.DeserializeObject(requestContent.ToString());
+            return View("~/Views/Result/View.cshtml", resultObj);
         }
     }
 }
