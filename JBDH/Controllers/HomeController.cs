@@ -51,7 +51,7 @@ namespace JBDH.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteDataFlow(int id)
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
             if (authResult.ErrorResult != null)
@@ -102,7 +102,7 @@ namespace JBDH.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult ErrorPage()
         {
             return this.ErrorPage("An unexpected error occurred. Please try again later.");
         }
