@@ -29,19 +29,27 @@ namespace JBDH.Services.AICommunications
                 CommandId = 0,
                 CVPath = cvPath
             };
-            var aiResponseText = await _aiApiClient.GetAIResponse(request);
+            var aiResult = await _aiApiClient.GetAIResponse(request);
+            var aiResponseText = aiResult.Response;
             LoggingConfigService.ReturnInfo($"Raw AI response: {aiResponseText}");
             CVAnalysisResult? analysisResult = null;
             try
             {
-                aiResponseText = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText);
-                if (!string.IsNullOrWhiteSpace(aiResponseText) && aiResponseText.TrimStart().StartsWith("{"))
+                if (!string.IsNullOrWhiteSpace(aiResponseText))
                 {
-                    analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(aiResponseText);
+                    var extractedJson = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText);
+                    if (!string.IsNullOrWhiteSpace(extractedJson) && extractedJson.TrimStart().StartsWith("{"))
+                    {
+                        analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(extractedJson);
+                    }
+                    else
+                    {
+                        LoggingConfigService.ReturnError("AI response is not valid JSON.");
+                    }
                 }
                 else
                 {
-                    LoggingConfigService.ReturnError("AI response is not valid JSON.");
+                    LoggingConfigService.ReturnError("AI response is null or whitespace.");
                 }
 
                 if (analysisResult != null)
