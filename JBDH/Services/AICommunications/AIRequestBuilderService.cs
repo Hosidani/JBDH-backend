@@ -58,6 +58,15 @@ namespace JBDH.Services.AICommunications
                         .Replace("{CVText}", cvText4);
                     return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
 
+                case 5:
+                    LoggingConfigService.ReturnInfo("CommandId is 5, processing job ad and CV.");
+                    LoggingConfigService.ReturnInfo(aiRequest.CVPath ?? "No CV path provided.");
+                    var cvText3 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    userMessage = AIMessageTemplates.UserMessageTemplates[5]
+                        .Replace("{JobAdText}", aiRequest.JobAdText ?? "")
+                        .Replace("{CVText}", cvText3 ?? "");
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+
                 default:
                     return null;
             }

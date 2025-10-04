@@ -5,6 +5,8 @@ using JBDH.Services.DataFlow;
 using JBDH.Services.Reporting;
 using JBDH.Models.Core;
 using JBDH.Helpers;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Configuration;
 
 namespace JBDH.Controllers
 {
@@ -14,18 +16,20 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly DataFlowService _dataFlowService;
         private readonly IRapportUserService _rapportUserService;
+        private readonly IAIRequestBuilderService _aiRequestBuilderService;
 
         public HomeController(
             ApplicationDbContext context,
             IWebHostEnvironment environment,
             DataFlowService dataFlowService,
-            IRapportUserService rapportUserService)
+            IRapportUserService rapportUserService,
+            IAIRequestBuilderService aiRequestBuilderService)
         {
             _context = context;
             _environment = environment;
             _dataFlowService = dataFlowService;
             _rapportUserService = rapportUserService;
-            _aiRequestBuilderService = aiRequestBuilderService; // <-- Assign here
+            _aiRequestBuilderService = aiRequestBuilderService;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -159,18 +163,23 @@ namespace JBDH.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CompareCvToJobAd(string cvPath, string jobAdText)
+        public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
+            
         {
             var aiRequest = new JBDH.Models.AI.AIRequest
             {
-                CommandId = 2,
-                CVPath = cvPath,
-                JobAdUrl = jobAdText // If your model uses JobAdUrl, assign the text here
+                CommandId = 5,
+                CVPath = model.CvPath.ToString(),
+                JobAdText = model.JobAdText // If your model uses JobAdUrl, assign the text here
             };
-
+            LoggingConfigService.ReturnInfo(aiRequest.CVPath ?? "No CV path provided.");
             var requestContent = await _aiRequestBuilderService.AIRequestBuilder(aiRequest);
             dynamic resultObj = Newtonsoft.Json.JsonConvert.DeserializeObject(requestContent.ToString());
-            return View("~/Views/Result/View.cshtml", resultObj);
+            return this.SetSuccessAndRedirect(
+                "Comparison completed successfully!",
+                redirectAction: "~/Views/Result/View.cshtml",
+                routeValues: new { result = resultObj }
+            );
         }
     }
 }
