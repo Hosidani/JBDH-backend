@@ -35,9 +35,10 @@ namespace JBDH.Services.AICommunications
                 CVPath = user.CVPath // Pass the path to the CV PDF
             };
 
-            var proposalJson = await _aiApiClient.GetAIResponse(aiRequest);
+            var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
+            var proposalJson = aiResult.Response;
 
-            if (string.IsNullOrWhiteSpace(proposalJson) || proposalJson.Trim() == "User is null")
+            if (string.IsNullOrWhiteSpace(proposalJson) || proposalJson?.Trim() == "User is null")
             {
                 LoggingConfigService.ReturnError("AI did not return a valid course proposal.");
                 return;

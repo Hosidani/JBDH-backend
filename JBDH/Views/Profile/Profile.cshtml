@@ -70,6 +70,65 @@
         <p>User not found.</p>
     }
 </div>
+
+<!-- AI CV Analysis Section -->
+@if (Model.CVAnalysisResult != null)
+{
+    <div class="card mt-4 p-3 shadow-sm">
+        <h4>AI CV Analysis</h4>
+        <dl class="row">
+            <dt class="col-sm-3">Best Job Titles:</dt>
+            <dd class="col-sm-9">
+                @foreach (var title in Model.CVAnalysisResult.BestJobTitlesForUser)
+                {
+                    <span class="badge bg-primary me-1">@title</span>
+                }
+            </dd>
+            <dt class="col-sm-3">Reasoning:</dt>
+            <dd class="col-sm-9">@Model.CVAnalysisResult.ReasoningBehindJobTitles</dd>
+            <dt class="col-sm-3">Hard Skills:</dt>
+            <dd class="col-sm-9">
+                @foreach (var skill in Model.CVAnalysisResult.HardSkills)
+                {
+                    <span class="badge bg-success me-1">@skill</span>
+                }
+            </dd>
+            <dt class="col-sm-3">Soft Skills:</dt>
+            <dd class="col-sm-9">
+                @foreach (var skill in Model.CVAnalysisResult.SoftSkills)
+                {
+                    <span class="badge bg-info me-1">@skill</span>
+                }
+            </dd>
+            <dt class="col-sm-3">Experience:</dt>
+            <dd class="col-sm-9">
+                <ul>
+                @foreach (var exp in Model.CVAnalysisResult.Experiences)
+                {
+                    <li>@exp.Title (@exp.Duration)</li>
+                }
+                </ul>
+            </dd>
+            <dt class="col-sm-3">Education & Certifications:</dt>
+            <dd class="col-sm-9">
+                @foreach (var edu in Model.CVAnalysisResult.EducationAndCertifications)
+                {
+                    <span class="badge bg-secondary me-1">@edu</span>
+                }
+            </dd>
+        </dl>
+    </div>
+}
+
+<!-- AI Course Proposals Section -->
+@if (Model.CourseProposals != null && !string.IsNullOrEmpty(Model.CourseProposals.ProposalJson))
+{
+    <div class="card mt-4 p-3 shadow-sm">
+        <h4>AI Course Proposals</h4>
+        <pre>@Model.CourseProposals.ProposalJson</pre>
+    </div>
+}
+
 @{
     var currentUserIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     int currentUserId = 0;

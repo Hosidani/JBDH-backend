@@ -75,7 +75,7 @@ namespace JBDH.Tests
                 .AddCookie("CookieAuth", options =>
                 {
                     options.Cookie.Name = "MyCookieName";
-                    options.LoginPath = "/Login/Login";
+                    options.LoginPath = "/Login";
                     options.LogoutPath = "/Logout/Logout";
                 });
 
