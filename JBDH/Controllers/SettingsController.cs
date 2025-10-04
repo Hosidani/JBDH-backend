@@ -4,10 +4,9 @@ using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
 using Microsoft.AspNetCore.Authentication;
 using JBDH.Models.ViewModels;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -42,24 +41,16 @@ namespace JBDH.Controllers
             LoggingConfigService.ReturnInfo("ChangeCV method called with file: " + (cvFile?.FileName ?? "No file uploaded"));
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user == null)
-            {
-                ViewData["ErrorMessage"] = "User not found.";
-                return RedirectToAction("Settings", "Home");
-            }
+                return this.ErrorPage("User not found.");
 
             if (cvFile == null)
-            {
-                ViewData["ErrorMessage"] = "No file uploaded.";
-                return RedirectToAction("Settings", "Home");
-            }
+                return this.ErrorPage("No file uploaded.");
 
             var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(cvFile, user.Id);
             if (result.Success)
-                ViewData["SuccessMessage"] = "CV updated successfully!";
+                return this.SetSuccessAndRedirect("CV updated successfully!", "Settings", new { controller = "Home" });
             else
-                ViewData["ErrorMessage"] = result.ErrorMessage;
-
-            return RedirectToAction("Settings", "Home");
+                return this.SetErrorAndRedirect(result.ErrorMessage ?? "Failed to update CV.", "Settings", new { controller = "Home" });
         }
         
         [HttpPost]
@@ -67,11 +58,9 @@ namespace JBDH.Controllers
         {
             var success = await _userPropertiesService.UpdateOpenForHiringAsync(openForHiring);
             if (success)
-                ViewData["SuccessMessage"] = "Open for hiring status updated successfully!";
+                return this.SetSuccessAndRedirect("Open for hiring status updated successfully!", "Settings", new { controller = "Home" });
             else
-                ViewData["ErrorMessage"] = "Failed to update status.";
-
-            return RedirectToAction("Settings", "Home");
+                return this.SetErrorAndRedirect("Failed to update status.", "Settings", new { controller = "Home" });
         }
 
         [HttpPost]
@@ -81,24 +70,17 @@ namespace JBDH.Controllers
             {
                 var success = await _userPropertiesService.UpdateEmailAsync(newEmail);
                 if (success)
-                {
-                    return RedirectToAction("SuccessPage");
-                }
+                    return this.SetSuccessAndRedirect("Email updated successfully!", "SuccessPage");
                 else
-                {
-                    ViewData["ErrorMessage"] = "Email update failed.";
-                    return View("ErrorPage");
-                }
+                    return this.ErrorPage("Email update failed.");
             }
             catch (ArgumentException ex)
             {
-                ViewData["ErrorMessage"] = ex.Message;
-                return View("ErrorPage");
+                return this.ErrorPage(ex.Message);
             }
             catch (Exception ex)
             {
-                ViewData["ErrorMessage"] = "An error occurred: " + ex.Message;
-                return View("ErrorPage");
+                return this.ErrorPage("An error occurred: " + ex.Message);
             }
         }
 
@@ -142,15 +124,13 @@ namespace JBDH.Controllers
         {
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdString, out var userId))
-                return Unauthorized();
+                return this.ErrorPage("Invalid user ID.");
 
             var success = await _userRoleService.UpdateUserRolesAsync(userId, model.SelectedRoles);
             if (success)
-                TempData["SuccessMessage"] = "Roles updated successfully!";
+                return this.SetSuccessAndRedirect("Roles updated successfully!", "Settings");
             else
-                TempData["ErrorMessage"] = "Failed to update roles.";
-
-            return RedirectToAction("Settings");
+                return this.SetErrorAndRedirect("Failed to update roles.", "Settings");
         }
 
         [HttpPost]
@@ -159,21 +139,12 @@ namespace JBDH.Controllers
         {
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user == null)
-            {
-                ViewData["ErrorMessage"] = "User not found.";
-                return RedirectToAction("Settings");
-            }
+                return this.ErrorPage("User not found.");
 
-            // Remove user from database
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-
-            // Sign out the user
             await HttpContext.SignOutAsync("CookieAuth");
-
-            // Optionally, show a goodbye page or redirect to home/login
-            TempData["SuccessMessage"] = "Your account has been deleted.";
-            return RedirectToAction("Index", "Home");
+            return this.SetSuccessAndRedirect("Your account has been deleted.", "Index", new { controller = "Home" });
         }
 
         private async Task<bool> DeleteUserByIdAsync(int userId)

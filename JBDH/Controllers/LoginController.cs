@@ -4,6 +4,7 @@ using JBDH.Services.Authentication;
 using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -22,27 +23,24 @@ namespace JBDH.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync("CookieAuth");  // Sign out of authentication
-            HttpContext.Session.Clear();                   // Clear the session
-            ViewData["Username"] = null;                   // Clear any ViewData
-            return RedirectToAction("Index", "Home");      // Redirect to home page
+            await HttpContext.SignOutAsync("CookieAuth");
+            HttpContext.Session.Clear();
+            ViewData["Username"] = null;
+            return this.RedirectToHome();
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
             LoggingConfigService.ReturnInfo($"Login attempt: Username={username}");
-            // Validate the user using the service
             var result = await _loginService.ValidateUserAsync(username, password);
             if (result.IsSuccess)
             {
-                // If valid, sign in the user
                 await _loginService.SignInUserAsync(username);
                 LoggingConfigService.ReturnInfo($"User {username} logged in successfully.");
-                return RedirectToAction("Index", "Home");
+                return this.RedirectToHome();
             }
-            // If login fails
-            ViewData["ErrorMessage"] = result.ErrorMessage ?? "Unknown error.";
+            this.SetErrorMessage(result.ErrorMessage ?? "Unknown error.");
             LoggingConfigService.ReturnError(result.ErrorMessage ?? "Unknown error.");
             return View();
         }
@@ -69,7 +67,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> ForgetPassword(string email)
         {
             await _passwordResetService.RequestPasswordResetAsync(email);
-            ViewData["Message"] = "If your email is in our system, a reset link has been sent.";
+            this.SetSuccessMessage("If your email is in our system, a reset link has been sent.");
             return View();
         }
 
@@ -90,19 +88,19 @@ namespace JBDH.Controllers
         {
             if (!ModelState.IsValid || model.NewPassword != model.ConfirmPassword)
             {
-                ViewData["ErrorMessage"] = "Passwords do not match.";
+                this.SetErrorMessage("Passwords do not match.");
                 return View(model);
             }
 
             var success = await _passwordResetService.ResetPasswordAsync(model.Token, model.NewPassword);
             if (!success)
             {
-                ViewData["ErrorMessage"] = "Invalid or expired token.";
+                this.SetErrorMessage("Invalid or expired token.");
                 return View(model);
             }
 
-            ViewData["SuccessMessage"] = "Password reset successfully.";
-            return RedirectToAction("Login");
+            this.SetSuccessMessage("Password reset successfully.");
+            return this.RedirectTo("Login");
         }
     }
 }

@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using JBDH.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using JBDH.Services.Organisation;
 using JBDH.Models.Core;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -31,36 +29,23 @@ namespace JBDH.Controllers
         {
             var managerUsername = User.Identity?.Name;
             if (string.IsNullOrEmpty(managerUsername))
-            {
-                ViewData["ErrorMessage"] = "You must be logged in to register an organisation.";
-                return View();
-            }
+                return this.ErrorPage("You must be logged in to register an organisation.");
 
             var result = await _organisationService.RegisterOrganisationAsync(name, description, managerUsername);
-
             if (!result.Success)
-            {
-                ViewData["ErrorMessage"] = result.ErrorMessage;
-                return View();
-            }
+                return this.ErrorPage(result.ErrorMessage ?? "Could not register organisation.");
 
-            ViewData["SuccessMessage"] = "Organisation registered successfully!";
-            return RedirectToAction("Index", "Home");
+            return this.SetSuccessAndRedirect("Organisation registered successfully!", "Index", new { controller = "Home" });
         }
 
         [HttpPost]
         public async Task<IActionResult> AddManager(int organisationId, string managerUsername)
         {
             var result = await _organisationService.AddManagerAsync(organisationId, managerUsername);
-
             if (!result.Success)
-            {
-                ViewData["ErrorMessage"] = result.ErrorMessage;
-                return RedirectToAction("Details", new { id = organisationId });
-            }
+                return this.SetErrorAndRedirect(result.ErrorMessage ?? "Could not add manager.", "Details", new { id = organisationId });
 
-            ViewData["SuccessMessage"] = "Manager added to the organisation successfully!";
-            return RedirectToAction("Details", new { id = organisationId });
+            return this.SetSuccessAndRedirect("Manager added to the organisation successfully!", "Details", new { id = organisationId });
         }
     }
 }

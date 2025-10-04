@@ -12,9 +12,56 @@ using JBDH.Models.ViewModels;
 
 namespace JBDH.Helpers
 {
+    public static class ControllerAdvancedExtensions
+    {
+        public static async Task<IActionResult> ValidateModelOrReturnViewAsync(this Controller controller, object model, string errorMessage, Func<Task<IActionResult>> successFunc)
+        {
+            if (!controller.ModelState.IsValid)
+            {
+                controller.SetModelError(string.Empty, errorMessage);
+                return controller.View(model);
+            }
+            return await successFunc();
+        }
+
+        public static async Task<TUser?> GetAuthenticatedUserAsync<TUser>(this Controller controller, DbContext context) where TUser : class
+        {
+            var authResult = controller.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.Value.HasValue)
+            {
+                return await context.Set<TUser>().FindAsync(authResult.Value.Value);
+            }
+            return null;
+        }
+    }
+    public static class EntityExtensions
+    {
+        public static void SetTimestamps(this object entity)
+        {
+            var type = entity.GetType();
+            var createdAtProp = type.GetProperty("CreatedAt");
+            var updatedAtProp = type.GetProperty("UpdatedAt");
+            var now = DateTime.UtcNow;
+            if (createdAtProp != null && createdAtProp.CanWrite)
+                createdAtProp.SetValue(entity, now);
+            if (updatedAtProp != null && updatedAtProp.CanWrite)
+                updatedAtProp.SetValue(entity, now);
+        }
+    }
+
+    public static class ControllerEntityExtensions
+    {
+        public static async Task<IActionResult> GetOrError<T>(this Controller controller, Func<Task<T>> getter, string errorMessage, Func<T, IActionResult> onSuccess)
+        {
+            var entity = await getter();
+            if (entity == null)
+                return controller.ErrorPage(errorMessage);
+            return onSuccess(entity);
+        }
+    }
+
     public static class ControllerExtensions
     {
-        // Generalized TempData message setter
         public static void SetTempDataMessage(this Controller controller, string key, string message)
         {
             controller.TempData[key] = message;
@@ -27,7 +74,6 @@ namespace JBDH.Helpers
         public static void SetErrorMessage(this Controller controller, string message)
             => controller.SetTempDataMessage("ErrorMessage", message);
 
-        // Generalized model error setter
         public static void SetModelError(this Controller controller, string key, string message)
         {
             controller.SetErrorMessage(message);
@@ -55,13 +101,13 @@ namespace JBDH.Helpers
         public static void LogAction(this Controller controller, string message)
             => LoggingConfigService.ReturnInfo($"[Controller:{controller.GetType().Name}] {message}");
 
-        // Generic redirect helper
-        public static IActionResult RedirectTo(this Controller controller, string action, string controllerName = null, object routeValues = null)
+        public static IActionResult RedirectTo(this Controller controller, string action, string? controllerName = null, object? routeValues = null)
         {
             controller.LogAction($"Redirecting to {action} in {controllerName ?? controller.GetType().Name}");
-            return controllerName == null
-                ? controller.RedirectToAction(action, routeValues)
-                : controller.RedirectToAction(action, controllerName, routeValues);
+            if (controllerName == null)
+                return controller.RedirectToAction(action, routeValues);
+            else
+                return controller.RedirectToAction(action, controllerName, routeValues);
         }
 
         public static IActionResult RedirectToLogin(this Controller controller)
@@ -114,7 +160,6 @@ namespace JBDH.Helpers
             return userId.Value;
         }
 
-        // Use a result class for tuple returns
         public class ActionResultWithValue<T>
         {
             public T? Value { get; set; }
@@ -192,9 +237,11 @@ namespace JBDH.Helpers
             using (var writer = new StringWriter())
             {
                 var viewEngine = controller.HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
+                if (viewEngine == null)
+                    throw new InvalidOperationException("View engine not found.");
                 var viewResult = viewEngine.FindView(controller.ControllerContext, viewName, !partial);
 
-                if (!viewResult.Success)
+                if (!viewResult.Success || viewResult.View == null)
                     throw new FileNotFoundException($"View {viewName} not found.");
 
                 var viewContext = new ViewContext(
