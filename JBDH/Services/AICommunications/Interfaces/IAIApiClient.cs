@@ -4,6 +4,6 @@ namespace JBDH.Services.AICommunications
 {
     public interface IAIApiClient
     {
-        Task<string> GetAIResponse(AIRequest request);
+        Task<AIResult> GetAIResponse(AIRequest request);
     }
 }
