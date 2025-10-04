@@ -1,114 +1,110 @@
-using System.Security.Claims;
 using JBDH.Services.UserManagement;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Friendship;
-using JBDH.Models.ViewModels;
-using JBDH.Models.User;
 using JBDH.Models.Core;
-using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using JBDH.Models.Job;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
-
     [Authorize]
     public class ProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IProfileService _profileService;
-        private readonly IFriendService _friendService; // Add reference to FriendService
+        private readonly IFriendService _friendService;
         private readonly IAIApiClient _AIApiClient;
+        private readonly IUserAIResponseService _userAIResponseService;
 
-        private readonly IUserAIResponseService _userAIResponseService; // Add reference to IUserAIResponseService
-
-
-        public ProfileController(IUserAIResponseService userAIResponseService, ApplicationDbContext context, IProfileService profileService, IFriendService friendService, IAIApiClient aIAApiClient)
+        public ProfileController(
+            IUserAIResponseService userAIResponseService,
+            ApplicationDbContext context,
+            IProfileService profileService,
+            IFriendService friendService,
+            IAIApiClient aIAApiClient)
         {
             _context = context;
             _profileService = profileService;
-            _friendService = friendService; // Initialize FriendService
+            _friendService = friendService;
             _AIApiClient = aIAApiClient;
-            _userAIResponseService = userAIResponseService; // Initialize IUserAIResponseService
+            _userAIResponseService = userAIResponseService;
         }
 
-        // GET: Profile
         [HttpGet]
         public async Task<IActionResult> Profile(int userId)
         {
-            var currentUserId = _profileService.GetCurrentUserId(User);
-            if (currentUserId == null)
-                return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
 
-            if (currentUserId == userId)
-                return RedirectToAction("MyProfile");
+            if (authResult.Value.HasValue && authResult.Value.Value == userId)
+                return this.RedirectToMyProfile();
+
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
 
             try
             {
-                var viewModel = await _profileService.GetProfileViewModelAsync(currentUserId.Value, userId);
-                var currentUser = await _context.Users.FindAsync(currentUserId.Value);
+                var viewModel = await _profileService.GetProfileViewModelAsync(authResult.Value.Value, userId);
+                var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
                 ViewBag.CurrentUser = currentUser;
-
                 return View(viewModel);
             }
             catch (Exception ex)
             {
-                return View("ErrorPage", new ErrorViewModel { Message = ex.Message });
+                return this.ErrorPage(ex.Message);
             }
         }
 
         [HttpGet]
         public async Task<IActionResult> MyProfile()
         {
-            var currentUserId = _profileService.GetCurrentUserId(User);
-            if (currentUserId == null)
-                return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
 
-            // Use your service to get the full view model
-            var model = await _profileService.GetMyProfileViewModelAsync(currentUserId.Value);
-            
-            // Get the latest course proposal for the user
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+
+            var model = await _profileService.GetMyProfileViewModelAsync(authResult.Value.Value);
             var latestProposal = await _context.AIUserCourseProposals
-                .Where(p => p.UserId == currentUserId.Value)
+                .Where(p => p.UserId == authResult.Value.Value)
                 .OrderByDescending(p => p.CreatedAt)
                 .FirstOrDefaultAsync();
 
-            model.CourseProposals = latestProposal;
-
+            if (latestProposal != null)
+                model.CourseProposals = latestProposal;
+            // If CourseProposals is not nullable, this prevents null assignment.
             return View("MyProfile", model);
         }
 
-        // Method to send a friend request
         [HttpPost]
         public async Task<IActionResult> SendFriendRequest(int addresseeId)
         {
-            var currentUserName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
 
-            if (currentUserName == null)
-            {
-                return RedirectToAction("Login", "Login");
-            }
+            var parseResult = this.ValidateAndHandleParseError(addresseeId.ToString(), "Invalid addressee ID.");
+            if (parseResult.ErrorResult != null)
+                return parseResult.ErrorResult;
 
-            var currentUserId = int.Parse(currentUserName);
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+            if (!parseResult.Value.HasValue)
+                return this.ErrorPage("Parsed addressee ID is missing.");
 
-            if (!int.TryParse(addresseeId.ToString(), out int addresseeIdInt))
-            {
-                return View("ErrorPage", new ErrorViewModel { Message = "Invalid addressee ID." });
-            }
-
-            var result = await _friendService.SendFriendRequestAsync(currentUserId, addresseeIdInt);
-
+            var result = await _friendService.SendFriendRequestAsync(authResult.Value.Value, parseResult.Value.Value);
             if (result.Success)
             {
-                TempData["SuccessMessage"] = "Friend request sent!";
-                return RedirectToAction("Profile", new { userId = addresseeId });
+                return this.SetSuccessAndRedirect("Friend request sent!", "Profile", new { userId = addresseeId });
             }
             else
             {
-                return View("ErrorPage", result.ErrorMessage ?? "Could not send friend request.");
+                return this.ErrorPage(result.ErrorMessage ?? "Could not send friend request.");
             }
         }
 
@@ -116,19 +112,21 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAboutMe(string aboutMe)
         {
-            var currentUserId = _profileService.GetCurrentUserId(User);
-            if (currentUserId == null)
-                return View("ErrorPage", new ErrorViewModel { Message = "Invalid user context." });
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
 
-            var user = await _context.Users.FindAsync(currentUserId.Value);
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+
+            var user = await _context.Users.FindAsync(authResult.Value.Value);
             if (user == null)
-                return View("ErrorPage", new ErrorViewModel { Message = "User not found." });
+                return this.ErrorPage("User not found.");
 
             user.AboutMe = aboutMe;
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "About Me updated!";
-            return RedirectToAction("MyProfile");
+            return this.SetSuccessAndRedirect("About Me updated!", "MyProfile");
         }
 
         [HttpPost]
@@ -136,8 +134,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
         {
             await _friendService.AcceptFriendRequestAsync(friendshipId);
-            TempData["SuccessMessage"] = "Friend request accepted!";
-            return RedirectToAction("MyProfile");
+            return this.SetSuccessAndRedirect("Friend request accepted!", "MyProfile");
         }
 
         [HttpPost]
@@ -145,8 +142,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
         {
             await _friendService.DeclineFriendRequestAsync(friendshipId);
-            TempData["SuccessMessage"] = "Friend request declined.";
-            return RedirectToAction("MyProfile");
+            return this.SetSuccessAndRedirect("Friend request declined.", "MyProfile");
         }
 
         [HttpPost]
@@ -155,43 +151,39 @@ namespace JBDH.Controllers
         {
             var app = await _context.Set<JobApplication>().FindAsync(applicationId);
             if (app == null)
-            {
-                TempData["ErrorMessage"] = "Job application not found.";
-                return RedirectToAction("MyProfile");
-            }
+                return this.ErrorPage("Job application not found.");
+
             app.Notes = notes;
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Notes updated!";
-            return RedirectToAction("MyProfile");
+            return this.SetSuccessAndRedirect("Notes updated!", "MyProfile");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUserFromProfile(int userId)
         {
-            // Get current user
-            var currentUserId = _profileService.GetCurrentUserId(User);
-            if (currentUserId == null)
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
                 return Unauthorized();
 
-            var currentUser = await _context.Users.FindAsync(currentUserId.Value);
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+
+            var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
             if (currentUser == null || currentUser.DeveloperMode != true)
-                return Forbid();
+                return this.ForbidWithMessage("You do not have permission to perform this action.");
 
-            // Prevent self-deletion here if you want
             if (currentUser.Id == userId)
-                return BadRequest("You cannot delete yourself from this action.");
+                return this.BadRequestMessage("You cannot delete yourself from this action.");
 
-            // Reuse the logic from SettingsController (or call the service if you moved it)
             var userToDelete = await _context.Users.FindAsync(userId);
             if (userToDelete == null)
-                return NotFound();
+                return this.ErrorPage("User not found.");
 
             _context.Users.Remove(userToDelete);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "User deleted successfully.";
-            return RedirectToAction("Index", "Home");
+            return this.SetSuccessAndRedirect("User deleted successfully.", "Index", new { controller = "Home" });
         }
     }
 }
