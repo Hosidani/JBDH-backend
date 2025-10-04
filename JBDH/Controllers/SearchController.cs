@@ -1,9 +1,6 @@
-using System.Linq;
-using System.Threading.Tasks;
 using System.Security.Claims;
 using Newtonsoft.Json;
 using JBDH.Models.Core;
-using JBDH.Models.AI;
 using JBDH.Models.ViewModels;
 using JBDH.Services.UserManagement;
 using JBDH.Services.AICommunications;
@@ -12,8 +9,6 @@ using JBDH.Services.Configuration;
 using JBDH.Services.Workflows;
 using JBDH.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NLog.Config;
 using JBDH.Helpers;
 using JBDH.Models.User;
 

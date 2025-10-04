@@ -4,8 +4,6 @@ using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
 using Microsoft.AspNetCore.Authentication;
 using JBDH.Models.ViewModels;
 using JBDH.Helpers;
