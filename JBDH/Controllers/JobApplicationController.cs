@@ -1,9 +1,9 @@
 using JBDH.Services.JobManagement;
 using JBDH.Services.Configuration;
 using JBDH.Models.Core;
-using JBDH.Models.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -27,16 +27,15 @@ namespace JBDH.Controllers
             var email = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
-                return Unauthorized();
+                return this.ErrorPage("User not found.");
+
             var result = await _jobAppService.ApplyJobAsync(user.Id, jobId, notes);
             if (!result.Success)
-            {
-                TempData["ErrorMessage"] = result.ErrorMessage;
-                return RedirectToAction("JobDetails", new { id = jobId });
-            }
+                return this.SetErrorAndRedirect(result.ErrorMessage ?? "Could not apply for job.", "JobDetails", new { id = jobId });
+
             var referer = Request.Headers["Referer"].ToString();
             if (string.IsNullOrEmpty(referer))
-                return RedirectToAction("Index", "Home");
+                return this.RedirectToHome();
             return Redirect(referer);
         }
 
@@ -47,18 +46,15 @@ namespace JBDH.Controllers
             var email = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
-                return Unauthorized();
+                return this.ErrorPage("User not found.");
 
             var result = await _jobAppService.UnapplyJobAsync(user.Id, jobId);
             if (!result.Success)
-            {
-                TempData["ErrorMessage"] = result.ErrorMessage;
-                return RedirectToAction("JobDetails", new { id = jobId });
-            }
+                return this.SetErrorAndRedirect(result.ErrorMessage ?? "Could not unapply from job.", "JobDetails", new { id = jobId });
 
             var referer = Request.Headers["Referer"].ToString();
             if (string.IsNullOrEmpty(referer))
-                return RedirectToAction("Index", "Home");
+                return this.RedirectToHome();
             return Redirect(referer);
         }
     }

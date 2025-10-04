@@ -1,7 +1,6 @@
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Services.Messaging;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -17,28 +16,26 @@ namespace JBDH.Controllers
         // GET: /Messages/Inbox
         public async Task<IActionResult> Inbox()
         {
-            int userId = 0;
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim != null)
-                userId = int.Parse(userIdClaim.Value);
-            else
-                return Unauthorized();
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
 
-            var messages = await _messageService.GetInboxAsync(userId);
+            var messages = await _messageService.GetInboxAsync(authResult.Value.Value);
             return View(messages);
         }
 
         // GET: /Messages/Conversation/{userId}
         public async Task<IActionResult> Conversation(int userId)
         {
-            int currentUserId = 0;
-            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (currentUserIdClaim != null)
-                currentUserId = int.Parse(currentUserIdClaim.Value);
-            else
-                return Unauthorized();
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
 
-            var messages = await _messageService.GetConversationAsync(currentUserId, userId);
+            var messages = await _messageService.GetConversationAsync(authResult.Value.Value, userId);
             ViewBag.OtherUserId = userId;
             return View(messages);
         }
@@ -55,23 +52,19 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Send(int recipientId, string content)
         {
-            int senderId = 0;
-            var senderIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (senderIdClaim != null)
-                senderId = int.Parse(senderIdClaim.Value);
-            else
-                return Unauthorized();
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
 
-            Console.WriteLine($"Sending from {senderId} to {recipientId}"); // For debugging
+            Console.WriteLine($"Sending from {authResult.Value.Value} to {recipientId}");
 
             if (recipientId == 0)
-            {
-                TempData["ErrorMessage"] = "Invalid recipient.";
-                return RedirectToAction("Inbox");
-            }
+                return this.SetErrorAndRedirect("Invalid recipient.", "Inbox");
 
-            await _messageService.SendMessageAsync(senderId, recipientId, content);
-            return RedirectToAction("Conversation", new { userId = recipientId });
+            await _messageService.SendMessageAsync(authResult.Value.Value, recipientId, content);
+            return this.SetSuccessAndRedirect("Message sent!", "Conversation", new { userId = recipientId });
         }
     }
 }

@@ -1,5 +1,4 @@
 using JBDH.Models.ViewModels;
-using JBDH.Services;
 using JBDH.Services.JobManagement;
 using JBDH.Models.Core;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +7,7 @@ using System.Security.Claims;
 using JBDH.Models.Messaging;
 using JBDH.Services.Friendship;
 using JBDH.Services.Configuration;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -27,39 +27,30 @@ namespace JBDH.Controllers
         {
             var job = await _context.Jobs.FindAsync(id);
             if (job == null)
-                return NotFound();
+                return this.ErrorPage("Job not found.");
 
-            bool hasApplied = false;
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!string.IsNullOrEmpty(userId))
-            {
-                hasApplied = await _context.JobApplications
-                    .AnyAsync(a => a.JobId == id && a.UserId.ToString() == userId);
-            }
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdStr, out int userId))
+                return this.ErrorPage("Invalid user ID.");
+
+            bool hasApplied = await _context.JobApplications.AnyAsync(a => a.JobId == id && a.UserId == userId);
             var latestAIResponse = await _context.JobAIResponses
                 .Where(r => r.JobId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .FirstOrDefaultAsync();
+
+            var friends = await _friendService.GetFriendsAsync(userId);
+            LoggingConfigService.ReturnInfo($"Friend count: {friends.Count}");
+            foreach (var f in friends)
+                LoggingConfigService.ReturnInfo($"{f.Id} - {f.Email}");
 
             var model = new JobDetailsViewModel
             {
                 Job = job,
                 JobId = id,
                 HasApplied = hasApplied,
+                Friends = friends
             };
-
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(currentUserId, out int currentUserIdInt))
-            {
-                TempData["Error"] = "Invalid user ID.";
-                return RedirectToAction("Index", "Home");
-            }
-            var friends = await _friendService.GetFriendsAsync(currentUserIdInt);
-            LoggingConfigService.ReturnInfo($"Friend count: {friends.Count}");
-            foreach (var f in friends)
-                LoggingConfigService.ReturnInfo($"{f.Id} - {f.Email}");
-
-            model.Friends = friends;
 
             return View(model);
         }
@@ -68,24 +59,16 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendToFriend(int jobId, int friendId)
         {
-            var senderId = User.FindFirstValue(ClaimTypes.NameIdentifier).ToString();
-            if (string.IsNullOrEmpty(senderId))
-            {
-                TempData["Error"] = "You must be logged in to send a job to a friend.";
-                return RedirectToAction("Login", "Account");
-            }
+            var senderIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(senderIdStr, out int senderIdInt))
+                return this.ErrorPage("You must be logged in to send a job to a friend.");
+
             var job = await _context.Jobs.FindAsync(jobId);
-            if (job == null) return NotFound();
+            if (job == null)
+                return this.ErrorPage("Job not found.");
 
             var jobUrl = Url.Action("Details", "Jobs", new { id = jobId }, Request.Scheme);
             var messageText = $"Check out this job: <a href='{jobUrl}'>{job.Title}</a>";
-            // change senderId to int
-            var senderIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(senderIdString, out int senderIdInt))
-            {
-                TempData["Error"] = "Invalid sender ID.";
-                return RedirectToAction("Details", new { id = jobId });
-            }
 
             var message = new Message
             {
@@ -99,8 +82,7 @@ namespace JBDH.Controllers
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "Job sent to your friend's inbox!";
-            return RedirectToAction("Details", new { id = jobId });
+            return this.SetSuccessAndRedirect("Job sent to your friend's inbox!", "Details", new { id = jobId });
         }
     }
 }

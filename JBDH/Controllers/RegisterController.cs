@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using JBDH.Models.Core;
 using JBDH.Models.ViewModels;
 using JBDH.Services.UserManagement;
@@ -7,9 +6,8 @@ using JBDH.Services.Configuration;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Notifications;
 using JBDH.Services.Organisation;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -70,9 +68,10 @@ public class RegisterController : Controller
         var result = await _userRegistrationService.RegisterUserAsync(model, HttpContext, Url);
         if (!result.Success)
         {
-            ViewData["ErrorMessage"] = result.ErrorMessage;
+            this.SetErrorMessage(result.ErrorMessage ?? "Could not register user.");
             return View(model);
         }
+        this.SetSuccessMessage("Registration successful! Please check your email.");
         ViewData["Email"] = model.Email;
         return View("CheckYourEmail");
     }
@@ -90,23 +89,14 @@ public class RegisterController : Controller
     public async Task<IActionResult> RegisterOrganization(string name)
     {
         var managerUsername = User.Identity?.Name;
-        var managerEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
         if (string.IsNullOrEmpty(managerUsername))
-        {
-            ViewData["ErrorMessage"] = "You must be logged in to register an organisation.";
-            return View();
-        }
+            return this.ErrorPage("You must be logged in to register an organisation.");
 
         var result = await _registerOrganisationService.RegisterAsync(name, managerUsername);
-
         if (!result.Success)
-        {
-            ViewData["ErrorMessage"] = result.ErrorMessage;
-            return View();
-        }
+            return this.ErrorPage(result.ErrorMessage ?? "Could not register organisation.");
 
-        ViewData["SuccessMessage"] = "Organisation registered successfully!";
-        return RedirectToAction("Index", "Home");
+        return this.SetSuccessAndRedirect("Organisation registered successfully!", "Index", new { controller = "Home" });
     }
 
     [HttpGet]
@@ -114,11 +104,8 @@ public class RegisterController : Controller
     {
         var result = _userVerificationService.VerifyEmail(token);
         if (!result.Success)
-        {
-            ViewData["ErrorMessage"] = result.ErrorMessage;
-            return View("VerificationFailed");
-        }
-        return View("VerificationSuccess");
+            return this.ErrorPage(result.ErrorMessage ?? "Email verification failed.");
+        return this.SetSuccessAndRedirect("Email verified successfully!", "VerificationSuccess");
     }
 
     [HttpPost]
@@ -128,12 +115,13 @@ public class RegisterController : Controller
         var result = await _userVerificationService.ResendVerificationEmailAsync(email, Url, Request);
         if (!result.Success)
         {
-            ViewData["ErrorMessage"] = result.ErrorMessage;
+            this.SetErrorMessage(result.ErrorMessage ?? "Could not resend verification email.");
             ViewData["Email"] = email;
             return View("CheckYourEmail");
         }
+        this.SetSuccessMessage("Verification email resent successfully.");
         TempData["Email"] = email;
-        return RedirectToAction("CheckYourEmail");
+        return this.RedirectTo("CheckYourEmail");
     }
 
     public IActionResult CheckYourEmail()

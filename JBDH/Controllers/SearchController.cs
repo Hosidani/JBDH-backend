@@ -14,6 +14,7 @@ using JBDH.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog.Config;
+using JBDH.Helpers;
 using JBDH.Models.User;
 
 namespace JBDH.Controllers
@@ -68,12 +69,7 @@ namespace JBDH.Controllers
             if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location))
             {
                 LoggingConfigService.ReturnError("Both description and location are empty.");
-                return View("Error", new ErrorViewModel
-                {
-                    Title = "Missing Input",
-                    Message = "Please provide at least a description or a location.",
-                    ReturnUrl = Url.Action("Index", "Home")
-                });
+                return this.ErrorPage("Please provide at least a description or a location.");
             }
 
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -104,12 +100,12 @@ namespace JBDH.Controllers
             if (!int.TryParse(jobId, out int parsedJobId))
             {
                 LoggingConfigService.ReturnError($"Invalid job ID format: {jobId}");
-                return Content("Invalid job ID");
+                return this.ErrorPage("Invalid job ID");
             }
 
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user == null)
-                return Content("User not found");
+                return this.ErrorPage("User not found");
 
             var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
@@ -118,12 +114,7 @@ namespace JBDH.Controllers
             if (string.IsNullOrEmpty(aiResultString))
             {
                 LoggingConfigService.ReturnError("AI analysis returned an empty result.");
-                return View("Error", new ErrorViewModel
-                {
-                    Title = "AI Analysis Error",
-                    Message = "The AI analysis did not return any results.",
-                    ReturnUrl = Url.Action("SearchJob")
-                });
+                return this.ErrorPage("The AI analysis did not return any results.");
             }
 
             // Extract and parse
@@ -136,12 +127,7 @@ namespace JBDH.Controllers
             catch (Exception ex)
             {
                 LoggingConfigService.ReturnError($"Failed to parse job ad AI analysis result: {ex.Message}");
-                return View("Error", new ErrorViewModel
-                {
-                    Title = "Parsing Error",
-                    Message = "Could not parse the AI analysis result.",
-                    ReturnUrl = Url.Action("SearchJob")
-                });
+                return this.ErrorPage("Could not parse the AI analysis result.");
             }
 
             // --- Calculate CV Match Percent ---
@@ -197,12 +183,7 @@ namespace JBDH.Controllers
             if ((string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location)) || user == null || string.IsNullOrEmpty(user.CVPath))
             {
                 LoggingConfigService.ReturnError("Please provide at least a description or a location, and make sure your CV is uploaded.");
-                return View("Error", new ErrorViewModel
-                {
-                    Title = "Missing Input",
-                    Message = "Please provide at least a description or a location, and make sure your CV is uploaded and you are logged in.",
-                    ReturnUrl = Url.Action("Index", "Home")
-                });
+                return this.ErrorPage("Please provide at least a description or a location, and make sure your CV is uploaded and you are logged in.");
             }
 
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
