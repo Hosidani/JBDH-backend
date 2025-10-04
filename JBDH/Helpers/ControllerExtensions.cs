@@ -114,7 +114,7 @@ namespace JBDH.Helpers
             => controller.RedirectTo("Login", "Account");
 
         public static IActionResult RedirectToHome(this Controller controller)
-            => controller.RedirectTo("Index");
+            => controller.RedirectTo("Index", "Home");
 
         public static IActionResult RedirectToMyProfile(this Controller controller)
             => controller.RedirectTo("MyProfile");

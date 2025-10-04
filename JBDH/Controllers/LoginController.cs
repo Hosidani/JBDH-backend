@@ -8,7 +8,6 @@ using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
-
     public class LoginController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,6 +22,7 @@ namespace JBDH.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
+            LoggingConfigService.ReturnInfo("[LoginController] Logout GET called");
             await HttpContext.SignOutAsync("CookieAuth");
             HttpContext.Session.Clear();
             ViewData["Username"] = null;
@@ -30,14 +30,15 @@ namespace JBDH.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        [Route("Login")]
+        public async Task<IActionResult> Login(string email, string password)
         {
-            LoggingConfigService.ReturnInfo($"Login attempt: Username={username}");
-            var result = await _loginService.ValidateUserAsync(username, password);
+            LoggingConfigService.ReturnInfo($"[LoginController] Login POST called. Email={email}");
+            var result = await _loginService.ValidateUserAsync(email, password);
             if (result.IsSuccess)
             {
-                await _loginService.SignInUserAsync(username);
-                LoggingConfigService.ReturnInfo($"User {username} logged in successfully.");
+                await _loginService.SignInUserAsync(email);
+                LoggingConfigService.ReturnInfo($"User {email} logged in successfully.");
                 return this.RedirectToHome();
             }
             this.SetErrorMessage(result.ErrorMessage ?? "Unknown error.");
@@ -45,16 +46,17 @@ namespace JBDH.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult Login()
+    [HttpGet]
+    public IActionResult Index()
         {
-            // If the user is already authenticated, redirect them to the home page (or any page you choose)
+            LoggingConfigService.ReturnInfo($"[LoginController] Index GET called. Authenticated={User.Identity?.IsAuthenticated}");
             if (User.Identity?.IsAuthenticated == true)
             {
+                LoggingConfigService.ReturnInfo("[LoginController] Index GET: Redirecting to Home/Index");
                 return RedirectToAction("Index", "Home");
             }
-
-            return View(); // Render the login page
+            LoggingConfigService.ReturnInfo("[LoginController] Index GET: Rendering Login view");
+            return View("Login"); // Render the login page
         }
 
         [HttpGet]

@@ -139,7 +139,22 @@ namespace JBDH.Services.UserManagement
             {
                 try
                 {
-                    model.CVAnalysisResult = JsonSerializer.Deserialize<CVAnalysisResult>(userAIResponse.ResponseText);
+                    // Remove markdown code fences if present
+                    var cleanedJson = userAIResponse.ResponseText.Trim();
+                    if (cleanedJson.StartsWith("```"))
+                    {
+                        int firstNewline = cleanedJson.IndexOf('\n');
+                        if (firstNewline != -1)
+                        {
+                            cleanedJson = cleanedJson.Substring(firstNewline + 1);
+                        }
+                        if (cleanedJson.EndsWith("```"))
+                        {
+                            cleanedJson = cleanedJson.Substring(0, cleanedJson.Length - 3);
+                        }
+                        cleanedJson = cleanedJson.Trim();
+                    }
+                    model.CVAnalysisResult = JsonSerializer.Deserialize<CVAnalysisResult>(cleanedJson);
                 }
                 catch
                 {
