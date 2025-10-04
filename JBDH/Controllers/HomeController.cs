@@ -25,6 +25,7 @@ namespace JBDH.Controllers
             _environment = environment;
             _dataFlowService = dataFlowService;
             _rapportUserService = rapportUserService;
+            _aiRequestBuilderService = aiRequestBuilderService; // <-- Assign here
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -155,6 +156,21 @@ namespace JBDH.Controllers
 
             await _dataFlowService.AddCommentAsync(dataFlowId, userId.Value, comment);
             return this.RedirectToHome();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CompareCvToJobAd(string cvPath, string jobAdText)
+        {
+            var aiRequest = new JBDH.Models.AI.AIRequest
+            {
+                CommandId = 2,
+                CVPath = cvPath,
+                JobAdUrl = jobAdText // If your model uses JobAdUrl, assign the text here
+            };
+
+            var requestContent = await _aiRequestBuilderService.AIRequestBuilder(aiRequest);
+            dynamic resultObj = Newtonsoft.Json.JsonConvert.DeserializeObject(requestContent.ToString());
+            return View("~/Views/Result/View.cshtml", resultObj);
         }
     }
 }
