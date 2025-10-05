@@ -1,34 +1,5 @@
-@model JBDH.Models.ViewModels.CVJobComparisonAIResponseViewModel
+@model string
+@using Markdig
 
-<h2>AI Comparison Result</h2>
-<div class="alert alert-info">
-    <strong>Fit Summary:</strong> @Model.FitSummary <br />
-    <strong>Missing Requirements:</strong>
-    <ul>
-        @foreach (var req in Model.MissingRequirements)
-        {
-            <li>@req</li>
-        }
-    </ul>
-    <strong>Matching Skills:</strong>
-    <ul>
-        @foreach (var skill in Model.MatchingSkills)
-        {
-            <li>@skill</li>
-        }
-    </ul>
-    <strong>Relevant Experiences:</strong>
-    <ul>
-        @foreach (var exp in Model.RelevantExperiences)
-        {
-            <li>@exp</li>
-        }
-    </ul>
-    <strong>Education & Certifications:</strong>
-    <ul>
-        @foreach (var edu in Model.EducationAndCertifications)
-        {
-            <li>@edu</li>
-        }
-    </ul>
-</div>
+<h2>AI Raw Response</h2>
+@Html.Raw(Markdig.Markdown.ToHtml(Model ?? ""))

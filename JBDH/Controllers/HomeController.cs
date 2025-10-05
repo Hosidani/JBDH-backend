@@ -9,6 +9,7 @@ using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
 using JBDH.Models.AI;
 using JBDH.Services.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace JBDH.Controllers
 {
@@ -21,6 +22,8 @@ namespace JBDH.Controllers
         private readonly IAIRequestBuilderService _aiRequestBuilderService;
         private readonly AIConfig _aiConfig;
         private readonly IManageIOService _manageIOService;
+        private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        private readonly IAIApiClient _aiApiClient;
 
         public HomeController(
             ApplicationDbContext context,
@@ -29,7 +32,9 @@ namespace JBDH.Controllers
             IRapportUserService rapportUserService,
             IAIRequestBuilderService aiRequestBuilderService,
             IManageIOService manageIOService,
-            AIConfig aiConfig)
+            AIConfig aiConfig,
+            IJobAIAnalysisService jobAIAnalysisService,
+            IAIApiClient aiApiClient)
         {
             _context = context;
             _environment = environment;
@@ -38,6 +43,8 @@ namespace JBDH.Controllers
             _aiRequestBuilderService = aiRequestBuilderService;
             _manageIOService = manageIOService;
             _aiConfig = aiConfig;
+            _jobAIAnalysisService = jobAIAnalysisService;
+            _aiApiClient = aiApiClient;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -173,72 +180,34 @@ namespace JBDH.Controllers
         [HttpPost]
         public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
         {
-            string savedCvPath = null;
-            if (model.CvPath != null && model.CvPath.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-                Directory.CreateDirectory(uploadsFolder);
-                savedCvPath = Path.Combine(uploadsFolder, Path.GetFileName(model.CvPath.FileName));
-                using (var stream = new FileStream(savedCvPath, FileMode.Create))
-                {
-                    await model.CvPath.CopyToAsync(stream);
-                }
-            }
+            LoggingConfigService.ReturnInfo("Starting CV to Job Ad comparison process.");
 
-            var aiRequest = new JBDH.Models.AI.AIRequest
+            var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
+
+            var aiRequest = new AIRequest
             {
                 CommandId = 5,
                 CVPath = savedCvPath,
-                JobAdText = model.JobAdText
+                JobAdText = model.JobAdText,
+                User = null
             };
-            LoggingConfigService.ReturnInfo(aiRequest.CVPath ?? "No CV path provided.");
-            var requestContent = await _aiRequestBuilderService.AIRequestBuilder(aiRequest);
 
-            using (var httpClient = new HttpClient())
-            {
-                var apiUrl = _aiConfig.OpenAIUrl;
-                if (string.IsNullOrEmpty(_aiConfig.OpenAIKey))
-                    throw new InvalidOperationException("OpenAI API key is not configured.");
+            var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
 
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_aiConfig.OpenAIKey}");
+            // Store the response string in TempData
+            TempData["AIResult"] = aiResult.Response;
+            LoggingConfigService.ReturnInfo(TempData["AIResult"] as string);
 
-                var response = await httpClient.PostAsync(apiUrl, requestContent);
-
-                if (response == null)
-                    throw new Exception("HTTP response is null.");
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (responseContent == null)
-                    throw new Exception("AI response content is null.");
-
-                var cleanJson = _manageIOService.ExtractInnerJsonFromJobAIResponse(responseContent);
-                if (cleanJson == null)
-                    throw new Exception("Extracted JSON is null.");
-
-                LoggingConfigService.ReturnInfo($"AI Clean Response: {cleanJson}");
-
-                var aiResponse = new AIResponse
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    ResponseText = cleanJson,
-                    CreatedAt = DateTime.Now
-                };
-
-                TempData["ResultJson"] = cleanJson;
-                return RedirectToAction("Result");
-            }
+            // Redirect to GET Result
+            return RedirectToAction("Result");
         }
 
         [HttpGet]
         public IActionResult Result()
         {
-            var resultJson = TempData["ResultJson"] as string;
-            if (string.IsNullOrEmpty(resultJson))
-                return this.ErrorPage("No result found.");
-
-            // Deserialize to your view model, not AIResponse
-            var comparisonResult = Newtonsoft.Json.JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(resultJson);
-            return View("~/Views/Result/View.cshtml", comparisonResult);
+            LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
+            var aiResponse = TempData["AIResult"] as string ?? "No result available.";
+            return View("~/Views/Result/View.cshtml", aiResponse);
         }
     }
 }

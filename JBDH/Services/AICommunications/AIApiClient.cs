@@ -29,10 +29,18 @@ namespace JBDH.Services.AICommunications
                 LoggingConfigService.ReturnError("Request is null");
                 return AIResult.ErrorResult("Request is null");
             }
-            if (request.User == null && request.CommandId != 4)
+            if (request.User == null)
             {
-                LoggingConfigService.ReturnError("User is null");
-                return AIResult.ErrorResult("User is null");
+                if (request.CommandId == 4 || request.CommandId == 5)
+                {
+                    LoggingConfigService.ReturnInfo("User is null, but CommandId is 4 or 5, proceeding without user context."); 
+                }
+                else
+                {
+                    LoggingConfigService.ReturnError("User is null");
+                    return AIResult.ErrorResult("User is null");
+                }
+                
             }
             if (request.CommandId < 0)
             {
