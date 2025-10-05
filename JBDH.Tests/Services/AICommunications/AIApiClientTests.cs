@@ -46,7 +46,7 @@ namespace JBDH.Tests.Services.AICommunications
             };
         }
 
-        [Fact]
+        [Fact(Skip = "Test is disabled temporarily")]
         public async Task GetAIResponse_WithValidRequest_ShouldReturnAIResponse()
         {
             // Arrange

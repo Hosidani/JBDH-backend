@@ -1,6 +1,38 @@
-@model string
+@model JBDH.Models.ViewModels.CVJobComparisonAIResponseViewModel
 
 <h2>AI Comparison Result</h2>
 <div class="alert alert-info">
-    @Model
+    <strong>Fit Summary:</strong> @Model.FitSummary <br />
+    <strong>Missing Requirements:</strong>
+    <ul>
+        @foreach (var req in Model.MissingRequirements)
+        {
+            <li>@req</li>
+        }
+    </ul>
+    <strong>Matching Skills:</strong>
+    <ul>
+        @foreach (var skill in Model.MatchingSkills)
+        {
+            <li>@skill</li>
+        }
+    </ul>
+    <strong>Relevant Experiences:</strong>
+    <ul>
+        @foreach (var exp in Model.RelevantExperiences)
+        {
+            <li>@exp</li>
+        }
+    </ul>
+    <strong>Education & Certifications:</strong>
+    <ul>
+        @foreach (var edu in Model.EducationAndCertifications)
+        {
+            <li>@edu</li>
+        }
+    </ul>
 </div>
+
+<!-- Example for Job Ad Text field in a form -->
+<label for="JobAdText"><strong>Job Ad Text:</strong></label><br />
+<textarea id="JobAdText" name="JobAdText" rows="10" cols="80">@Model.FitSummary</textarea>
