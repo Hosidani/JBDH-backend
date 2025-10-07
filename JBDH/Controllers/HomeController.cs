@@ -5,6 +5,11 @@ using JBDH.Services.DataFlow;
 using JBDH.Services.Reporting;
 using JBDH.Models.Core;
 using JBDH.Helpers;
+using JBDH.Services.AICommunications;
+using JBDH.Services.Configuration;
+using JBDH.Models.AI;
+using JBDH.Services.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace JBDH.Controllers
 {
@@ -14,18 +19,32 @@ namespace JBDH.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly DataFlowService _dataFlowService;
         private readonly IRapportUserService _rapportUserService;
+        private readonly IAIRequestBuilderService _aiRequestBuilderService;
+        private readonly AIConfig _aiConfig;
+        private readonly IManageIOService _manageIOService;
+        private readonly IJobAIAnalysisService _jobAIAnalysisService;
+        private readonly IAIApiClient _aiApiClient;
 
         public HomeController(
             ApplicationDbContext context,
             IWebHostEnvironment environment,
             DataFlowService dataFlowService,
-            IRapportUserService rapportUserService)
+            IRapportUserService rapportUserService,
+            IAIRequestBuilderService aiRequestBuilderService,
+            IManageIOService manageIOService,
+            AIConfig aiConfig,
+            IJobAIAnalysisService jobAIAnalysisService,
+            IAIApiClient aiApiClient)
         {
             _context = context;
             _environment = environment;
             _dataFlowService = dataFlowService;
             _rapportUserService = rapportUserService;
-            _aiRequestBuilderService = aiRequestBuilderService; // <-- Assign here
+            _aiRequestBuilderService = aiRequestBuilderService;
+            _manageIOService = manageIOService;
+            _aiConfig = aiConfig;
+            _jobAIAnalysisService = jobAIAnalysisService;
+            _aiApiClient = aiApiClient;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -159,18 +178,36 @@ namespace JBDH.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CompareCvToJobAd(string cvPath, string jobAdText)
+        public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
         {
-            var aiRequest = new JBDH.Models.AI.AIRequest
+            LoggingConfigService.ReturnInfo("Starting CV to Job Ad comparison process.");
+
+            var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
+
+            var aiRequest = new AIRequest
             {
-                CommandId = 2,
-                CVPath = cvPath,
-                JobAdUrl = jobAdText // If your model uses JobAdUrl, assign the text here
+                CommandId = 5,
+                CVPath = savedCvPath,
+                JobAdText = model.JobAdText,
+                User = null
             };
 
-            var requestContent = await _aiRequestBuilderService.AIRequestBuilder(aiRequest);
-            dynamic resultObj = Newtonsoft.Json.JsonConvert.DeserializeObject(requestContent.ToString());
-            return View("~/Views/Result/View.cshtml", resultObj);
+            var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
+
+            // Store the response string in TempData
+            TempData["AIResult"] = aiResult.Response;
+            LoggingConfigService.ReturnInfo(TempData["AIResult"] as string);
+
+            // Redirect to GET Result
+            return RedirectToAction("Result");
+        }
+
+        [HttpGet]
+        public IActionResult Result()
+        {
+            LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
+            var aiResponse = TempData["AIResult"] as string ?? "No result available.";
+            return View("~/Views/Result/View.cshtml", aiResponse);
         }
     }
 }

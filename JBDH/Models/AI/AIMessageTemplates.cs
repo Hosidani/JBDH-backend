@@ -56,7 +56,17 @@ namespace JBDH.Models.AI
             [4] = "Can you give me a proposal for courses that would help this user improve their skills? " +
                   "Return ONLY a valid JSON object with the following fields: " +
                   "\"Courses\" (a short list, maximum 10 courses, with titles and brief descriptions). " +
-                  "\n\nCV:\n{CVText}"
+                  "\n\nCV:\n{CVText}",
+            [5] = "You are given a job advertisement and a candidate's CV. " +
+                  "Compare the candidate's qualifications, skills, and experiences to the requirements in the job ad. " +
+                  "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. " +
+                  "Return ONLY a valid JSON object with the following fields: " +
+                  "\"FitSummary\" (brief summary of fit), " +
+                  "\"MissingRequirements\" (list of gaps or missing requirements), " +
+                  "\"MatchingSkills\" (list of skills from the CV that match the job ad), " +
+                  "\"RelevantExperiences\" (list of relevant experiences from the CV), " +
+                  "\"EducationAndCertifications\" (from the CV, relevant to the job ad). " +
+                  "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}"
         };
     }
 }

@@ -1,6 +1,5 @@
 @model string
+@using Markdig
 
-<h2>AI Comparison Result</h2>
-<div class="alert alert-info">
-    @Model
-</div>
+<h2>AI Raw Response</h2>
+@Html.Raw(Markdig.Markdown.ToHtml(Model ?? ""))

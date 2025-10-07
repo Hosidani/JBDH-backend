@@ -15,6 +15,7 @@ namespace JBDH.Services.AICommunications
         private readonly IUserPropertiesService _userPropertiesService;
         private readonly IAIRequestBuilderService _aiRequestBuilderService;
         private readonly IManageIOService _manageIOService;
+        private readonly IAIApiClient _aiApiClient;
         private static readonly AIConfig AIConfig = new AIConfig();
         private readonly ApplicationDbContext _context;
 
@@ -22,12 +23,14 @@ namespace JBDH.Services.AICommunications
             IUserPropertiesService userPropertiesService,
             IAIRequestBuilderService aIRequestBuilderService,
             ApplicationDbContext context,
-            IManageIOService manageIOService)
+            IManageIOService manageIOService,
+            IAIApiClient aiApiClient)
         {
             _userPropertiesService = userPropertiesService;
             _aiRequestBuilderService = aIRequestBuilderService;
             _context = context;
             _manageIOService = manageIOService;
+            _aiApiClient = aiApiClient;
         }
 
         public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId)
@@ -79,14 +82,26 @@ namespace JBDH.Services.AICommunications
                 var aiResponse = new JobAIResponse
                 {
                     JobId = jobId,
-                    ResponseText = cleanJson, // Save only the clean JSON!
+                    ResponseText = cleanJson,
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.JobAIResponses.Add(aiResponse);
                 await _context.SaveChangesAsync();
 
-                return cleanJson; // Return the clean JSON as well
+                return cleanJson; 
             }
+        }
+
+        public async Task<string> GetCvJobComparisonAsync(string jobAdText, string cvPath)
+        {
+            var request = new AIRequest
+            {
+                CommandId = 5,
+                CVPath = cvPath,
+                JobAdText = jobAdText
+            };
+            var aiResult = await _aiApiClient.GetAIResponse(request); 
+            return aiResult?.ToString() ?? string.Empty;
         }
     }
 }
