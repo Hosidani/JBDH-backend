@@ -2,10 +2,7 @@ using JBDH.Models.Kanban;
 using JBDH.Services.BoardDataService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -22,10 +19,12 @@ namespace JBDH.Controllers
         // GET: /Boards
         public async Task<IActionResult> Index()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized();
-            var userId = int.Parse(userIdClaim.Value);
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
 
             var boards = await _boardService.GetAllAsync(); // TODO: Filter by userId in service
             return View(boards);
@@ -34,10 +33,9 @@ namespace JBDH.Controllers
         // GET: /Boards/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            Console.WriteLine("DEBUG: BoardsController.Details called with id = " + id);
             var board = await _boardService.GetAsync(id);
             if (board == null)
-                return NotFound();
+                return this.ErrorPage("Board not found.");
             return View(board);
         }
 
@@ -52,32 +50,31 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Board board)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                    if (userIdClaim == null)
-                        return Unauthorized();
-                    var userId = int.Parse(userIdClaim.Value);
+                this.SetModelError(string.Empty, "Validation failed. Please check your input.");
+                return View(board);
+            }
 
-                    board.OwnerId = userId;
-                    board.CreatedAt = DateTime.UtcNow;
-                    board.UpdatedAt = DateTime.UtcNow;
-                    await _boardService.CreateAsync(board);
-                    TempData["Success"] = "Board created successfully!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    TempData["Error"] = "Error creating board: " + ex.Message;
-                }
-            }
-            else
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+
+            try
             {
-                TempData["Error"] = "Validation failed. Please check your input.";
+                board.OwnerId = authResult.Value.Value;
+                board.CreatedAt = DateTime.UtcNow;
+                board.UpdatedAt = DateTime.UtcNow;
+                await _boardService.CreateAsync(board);
+                return this.SetSuccessAndRedirect("Board created successfully!", nameof(Index));
             }
-            return View(board);
+            catch (Exception ex)
+            {
+                return this.ErrorPage("Error creating board: " + ex.Message);
+            }
         }
 
         // GET: /Boards/Edit/5
@@ -95,18 +92,25 @@ namespace JBDH.Controllers
         public async Task<IActionResult> Edit(int id, Board board)
         {
             if (id != board.Id)
-                return NotFound();
-            if (ModelState.IsValid)
-            {
-                // Set OwnerId from the logged-in user
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                board.OwnerId = userId;
+                return this.ErrorPage("Board ID mismatch.");
 
-                board.UpdatedAt = DateTime.UtcNow;
-                await _boardService.UpdateAsync(board);
-                return RedirectToAction(nameof(Index));
+            if (!ModelState.IsValid)
+            {
+                this.SetModelError(string.Empty, "Validation failed. Please check your input.");
+                return View(board);
             }
-            return View(board);
+
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+
+            board.OwnerId = authResult.Value.Value;
+            board.UpdatedAt = DateTime.UtcNow;
+            await _boardService.UpdateAsync(board);
+            return this.SetSuccessAndRedirect("Board updated successfully!", nameof(Index));
         }
 
         // GET: /Boards/Delete/5
@@ -124,7 +128,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _boardService.DeleteAsync(id);
-            return RedirectToAction(nameof(Index));
+            return this.SetSuccessAndRedirect("Board deleted successfully!", nameof(Index));
         }
     }
 }

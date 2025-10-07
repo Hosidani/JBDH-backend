@@ -115,7 +115,7 @@ builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
         options.Cookie.Name = "MyCookieName";
-        options.LoginPath = "/Login/Login";
+    options.LoginPath = "/Login";
         options.LogoutPath = "/Logout/Logout";
     });
 
@@ -127,7 +127,17 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        var env = builder.Environment;
+        if (env.IsDevelopment())
+        {
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        }
+        else
+        {
+            policy.WithOrigins("https://your-production-domain.com")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 
@@ -151,10 +161,6 @@ if (smtpSettings == null ||
 {
     throw new Exception("SMTP configuration is invalid. Please check your appsettings.json.");
 }
-
-// Usual stuff
-builder.Services.AddControllersWithViews();
-builder.Services.AddHostedService<UserBanBackgroundService>(); // Register the background service
 
 // Build the application
 var app = builder.Build();
@@ -215,6 +221,7 @@ lifetime.ApplicationStopping.Register(() =>
         LoggingConfigService.ReturnError($"Error during application shutdown: {ex.Message}");
     }
 });
+
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {

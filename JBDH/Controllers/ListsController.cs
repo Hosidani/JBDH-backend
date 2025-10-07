@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Models.Kanban;
 using JBDH.Services.ListService;
-using System.Threading.Tasks;
+using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
@@ -27,41 +27,20 @@ namespace JBDH.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(KanbanList list)
         {
-            Console.WriteLine("--- ListsController.Create POST ---");
-            Console.WriteLine("DEBUG 1: BoardId from submitted form is: " + list.BoardId);
-
-            if (ModelState.IsValid)
+            return await this.ValidateModelOrReturnViewAsync(list, "Validation failed. Please check your input.", async () =>
             {
-                Console.WriteLine("DEBUG 2: ModelState is VALID.");
                 await _listService.CreateAsync(list);
-
-                Console.WriteLine("DEBUG 3: BoardId after saving is: " + list.BoardId);
-                var redirectId = list.BoardId;
-
-                Console.WriteLine("DEBUG 4: Redirecting to Boards/Details/" + redirectId);
-                return RedirectToAction("Details", "Boards", new { id = redirectId });
-            }
-            else
-            {
-                Console.WriteLine("DEBUG 5: ModelState is INVALID.");
-                foreach (var key in ModelState.Keys)
-                {
-                    foreach (var error in ModelState[key].Errors)
-                    {
-                        Console.WriteLine($"ModelState error for '{key}': {error.ErrorMessage}");
-                    }
-                }
-                return View(list);
-            }
+                return this.SetSuccessAndRedirect("List created successfully!", "Details", new { controller = "Boards", id = list.BoardId });
+            });
         }
 
         // GET: /Lists/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var list = await _listService.GetAsync(id);
-            if (list == null)
-                return NotFound();
-            return View(list);
+            return await this.GetOrError(
+                () => _listService.GetAsync(id),
+                "List not found.",
+                list => View(list));
         }
 
         // POST: /Lists/Edit/5
@@ -71,17 +50,17 @@ namespace JBDH.Controllers
         {
             var updatedList = await _listService.EditAsync(id, list);
             if (updatedList == null)
-                return NotFound();
-            return RedirectToAction("Details", "Boards", new { id = updatedList!.BoardId });
+                return this.ErrorPage("List not found.");
+            return this.SetSuccessAndRedirect("List updated successfully!", "Details", new { controller = "Boards", id = updatedList.BoardId });
         }
 
         // GET: /Lists/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var list = await _listService.GetAsync(id);
-            if (list == null)
-                return NotFound();
-            return View(list);
+            return await this.GetOrError(
+                () => _listService.GetAsync(id),
+                "List not found.",
+                list => View(list));
         }
 
         // POST: /Lists/Delete/5
@@ -90,7 +69,7 @@ namespace JBDH.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _listService.DeleteAsync(id);
-            return RedirectToAction("Index", "Boards");
+            return this.SetSuccessAndRedirect("List deleted successfully!", "Index", new { controller = "Boards" });
         }
     }
 }

@@ -75,6 +75,19 @@
     <div class="alert alert-success">@TempData["Message"]</div>
 }
 
+<h3>Compare CV to Job Ad</h3>
+<form asp-action="CompareCvToJobAd" asp-controller="Home" method="post" enctype="multipart/form-data" class="mb-4">
+    <div class="form-group mb-2">
+        <label for="jobAdText">Job Ad Text:</label>
+        <textarea name="jobAdText" id="jobAdText" class="form-control" placeholder="Paste job ad text here" required rows="8"></textarea>
+    </div>
+    <div class="form-group mb-2">
+        <label for="cvPath">CV File:</label>
+        <input type="file" name="cvPath" id="cvPath" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-success">Compare</button>
+</form>
+
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>

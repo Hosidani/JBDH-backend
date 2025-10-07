@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using JBDH.Services.AICommunications;
 
 public class HomeControllerTests
 {
@@ -25,6 +26,7 @@ public class HomeControllerTests
 
         var mockEnv = new Mock<IWebHostEnvironment>();
         var mockRapportUserService = new Mock<IRapportUserService>();
+        var mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
 
         var fakeDataFlowService = new FakeDataFlowService(context);
 
@@ -32,7 +34,8 @@ public class HomeControllerTests
             context,
             mockEnv.Object,
             fakeDataFlowService,
-            mockRapportUserService.Object
+            mockRapportUserService.Object,
+            mockAIRequestBuilderService.Object
         );
 
         // Set up a fake user
@@ -62,6 +65,26 @@ public class HomeControllerTests
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.IsType<ListDataFlowViewModel>(viewResult.Model);
+    }
+
+    [Fact]
+    public void HomeController_Constructor_ShouldInitialize()
+    {
+        var mockContext = new Mock<ApplicationDbContext>();
+        var mockEnv = new Mock<IWebHostEnvironment>();
+        var mockDataFlowService = new Mock<DataFlowService>();
+        var mockRapportUserService = new Mock<IRapportUserService>();
+        var mockAIRequestBuilderService = new Mock<IAIRequestBuilderService>();
+
+        var controller = new HomeController(
+            mockContext.Object,
+            mockEnv.Object,
+            mockDataFlowService.Object,
+            mockRapportUserService.Object,
+            mockAIRequestBuilderService.Object
+        );
+
+        Assert.NotNull(controller);
     }
 }
 
