@@ -23,6 +23,11 @@ namespace JBDH.Services.AICommunications
                 case 0:
                     LoggingConfigService.ReturnInfo("CommandId is 0, processing CV.");
                     var cvText0 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    if (string.IsNullOrWhiteSpace(cvText0))
+                    {
+                        var err = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting analysis.\"}";
+                        return new StringContent(err, System.Text.Encoding.UTF8, "application/json");
+                    }
                     userMessage = AIMessageTemplates.UserMessageTemplates[0].Replace("{CVText}", cvText0);
                     return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
 
@@ -36,6 +41,11 @@ namespace JBDH.Services.AICommunications
                     LoggingConfigService.ReturnInfo("CommandId is 2, processing job ad and CV.");
                     var jobAdText2 = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
                     var cvText2 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    if (string.IsNullOrWhiteSpace(cvText2))
+                    {
+                        var err2 = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting analysis.\"}";
+                        return new StringContent(err2, System.Text.Encoding.UTF8, "application/json");
+                    }
                     userMessage = AIMessageTemplates.UserMessageTemplates[2]
                         .Replace("{JobAdText}", jobAdText2)
                         .Replace("{CVText}", cvText2);
@@ -54,6 +64,11 @@ namespace JBDH.Services.AICommunications
                 case 4:
                     LoggingConfigService.ReturnInfo("CommandId is 4, proposing courses for user.");
                     var cvText4 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    if (string.IsNullOrWhiteSpace(cvText4))
+                    {
+                        var err4 = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting course proposals.\"}";
+                        return new StringContent(err4, System.Text.Encoding.UTF8, "application/json");
+                    }
                     userMessage = AIMessageTemplates.UserMessageTemplates[4]
                         .Replace("{CVText}", cvText4);
                     return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
@@ -62,6 +77,11 @@ namespace JBDH.Services.AICommunications
                     LoggingConfigService.ReturnInfo("CommandId is 5, processing job ad and CV.");
                     LoggingConfigService.ReturnInfo(aiRequest.CVPath ?? "No CV path provided.");
                     var cvText3 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    if (string.IsNullOrWhiteSpace(cvText3))
+                    {
+                        var err3 = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting analysis.\"}";
+                        return new StringContent(err3, System.Text.Encoding.UTF8, "application/json");
+                    }
                     userMessage = AIMessageTemplates.UserMessageTemplates[5]
                         .Replace("{JobAdText}", aiRequest.JobAdText ?? "")
                         .Replace("{CVText}", cvText3 ?? "");
