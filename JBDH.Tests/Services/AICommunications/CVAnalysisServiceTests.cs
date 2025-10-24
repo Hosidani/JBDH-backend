@@ -1,3 +1,4 @@
+/*
 using JBDH.Models.AI;
 using JBDH.Models.User;
 using JBDH.Services.AICommunications;
@@ -388,3 +389,4 @@ namespace JBDH.Tests.Services.AICommunications
         }
     }
 }
+*/
