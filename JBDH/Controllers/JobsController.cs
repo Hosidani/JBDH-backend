@@ -2,6 +2,7 @@ using JBDH.Models.ViewModels;
 using JBDH.Services.JobManagement;
 using JBDH.Models.Core;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using JBDH.Models.Messaging;
@@ -11,6 +12,7 @@ using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
+    [IncludeInApi]
     public class JobsController : Controller
     {
         private readonly ApplicationDbContext _context;

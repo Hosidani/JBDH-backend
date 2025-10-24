@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using JBDH.Models.ViewModels;
 using JBDH.Services.DataFlow;
@@ -13,6 +14,7 @@ using Newtonsoft.Json.Linq;
 
 namespace JBDH.Controllers
 {
+    [IncludeInApi]
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -2,11 +2,13 @@ using JBDH.Services.JobManagement;
 using JBDH.Services.Configuration;
 using JBDH.Models.Core;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
+    [IncludeInApi]
     public class JobApplicationController : Controller
     {
         private readonly ApplicationDbContext _context;
