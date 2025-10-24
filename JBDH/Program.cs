@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
 using MySql.EntityFrameworkCore.Extensions;
@@ -69,6 +71,60 @@ await Task.Run(async () =>
 
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
+// Swagger / OpenAPI (only register in Development)
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        // Include ApiDescriptions only if they have at least one non-HTML response format,
+        // or if the action has a custom [IncludeInApi] attribute (optional).
+        c.DocInclusionPredicate((docName, apiDesc) =>
+        {
+
+            // Skip endpoints explicitly ignored
+            var ignore = apiDesc.ActionDescriptor.EndpointMetadata
+                        .OfType<Microsoft.AspNetCore.Mvc.ApiExplorerSettingsAttribute>()
+                        .Any(a => a.IgnoreApi);
+            if (ignore) return false;
+
+            // Helper: check endpoint metadata, action attributes, and controller type for IncludeInApi
+            bool HasIncludeInApi()
+            {
+                // Endpoint metadata (works for many cases)
+                if (apiDesc.ActionDescriptor.EndpointMetadata
+                    .OfType<JBDH.Swagger.IncludeInApiAttribute>().Any())
+                    return true;
+
+                // Try to inspect the action/controller via ControllerActionDescriptor
+                if (apiDesc.ActionDescriptor is ControllerActionDescriptor cad)
+                {
+                    // Action-level attribute
+                    if (cad.MethodInfo.GetCustomAttributes(typeof(JBDH.Swagger.IncludeInApiAttribute), true).Any())
+                        return true;
+
+                    // Controller-level attribute
+                    if (cad.ControllerTypeInfo.GetCustomAttributes(typeof(JBDH.Swagger.IncludeInApiAttribute), true).Any())
+                        return true;
+                }
+
+                return false;
+            }
+
+            if (HasIncludeInApi()) return true;
+
+            // Otherwise include only if any supported response format is NOT text/html
+            var produces = apiDesc.SupportedResponseTypes;
+            if (produces == null || produces.Count == 0) return false;
+            return produces.Any(rt => rt.ApiResponseFormats.Any(f => !(f.MediaType?.Contains("html", System.StringComparison.OrdinalIgnoreCase) ?? false)));
+        });
+
+        // Optional: Add an operation filter to remove any remaining operations that only produce HTML
+        c.OperationFilter<JBDH.Swagger.HideHtmlOnlyOperationsFilter>();
+        // Document filter: add paths for controllers/actions marked with [IncludeInApi] when ApiExplorer didn't produce them
+        c.DocumentFilter<JBDH.Swagger.IncludeInApiDocumentFilter>();
+    });
+}
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
@@ -243,6 +299,16 @@ app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors(); // This should come after UseRouting() and before endpoints
 
+// Enable Swagger middleware only in Development
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "JBDH API V1");
+        options.RoutePrefix = "swagger"; // Serve at /swagger
+    });
+}
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route pattern

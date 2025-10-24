@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Models.Kanban;
 using JBDH.Services.BoardDataService;
 using JBDH.Services.ListService;
@@ -8,6 +9,7 @@ using JBDH.Helpers;
 namespace JBDH.Controllers
 {
     [Authorize]
+    [IncludeInApi]
     public class CardsController : Controller
     {
         private readonly ICardService _cardService;

@@ -1,6 +1,7 @@
 using JBDH.Models.Core;
 using JBDH.Models.ViewModels;
 using JBDH.Services.Authentication;
+using JBDH.Swagger;
 using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
@@ -29,9 +30,10 @@ namespace JBDH.Controllers
             return this.RedirectToHome();
         }
 
-        [HttpPost]
-        [Route("Login")]
-        public async Task<IActionResult> Login(string email, string password)
+    [HttpPost]
+    [Route("Login")]
+    [IncludeInApi]
+    public async Task<IActionResult> Login(string email, string password)
         {
             LoggingConfigService.ReturnInfo($"[LoginController] Login POST called. Email={email}");
             var result = await _loginService.ValidateUserAsync(email, password);

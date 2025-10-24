@@ -9,11 +9,13 @@ using JBDH.Services.Configuration;
 using JBDH.Services.Workflows;
 using JBDH.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Helpers;
 using JBDH.Models.User;
 
 namespace JBDH.Controllers
 {
+    [IncludeInApi]
     public class SearchController : Controller
     {
         private readonly IUserPropertiesService _userPropertiesService;
