@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Models.Core;
 using JBDH.Models.ViewModels;
 using JBDH.Services.UserManagement;
@@ -12,7 +13,8 @@ using JBDH.Helpers;
 namespace JBDH.Controllers
 {
 
-public class RegisterController : Controller
+    [IncludeInApi]
+    public class RegisterController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<RegisterController> _logger;

@@ -2,11 +2,13 @@ using JBDH.Models.Kanban;
 using JBDH.Services.BoardDataService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
     [Authorize]
+    [IncludeInApi]
     public class BoardsController : Controller
     {
         private readonly IBoardService _boardService;

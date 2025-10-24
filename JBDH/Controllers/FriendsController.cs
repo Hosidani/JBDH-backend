@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Services.UserManagement;
 using JBDH.Services.Friendship;
 using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
+    [IncludeInApi]
     public class FriendsController : Controller
     {
         private readonly IUserPropertiesService _IUserPropertiesService;

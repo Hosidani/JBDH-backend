@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Services.Organisation;
 using JBDH.Models.Core;
 using JBDH.Helpers;
@@ -7,6 +8,7 @@ using JBDH.Helpers;
 namespace JBDH.Controllers
 {
     [Authorize(Roles = "Manager")] // Restrict access to users with the "Manager" role
+    [IncludeInApi]
     public class OrganisationController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using JBDH.Services.Messaging;
 using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
+    [IncludeInApi]
     public class MessagesController : Controller
     {
         private readonly IMessageService _messageService;

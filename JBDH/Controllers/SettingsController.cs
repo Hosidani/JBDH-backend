@@ -4,6 +4,7 @@ using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using Microsoft.AspNetCore.Authentication;
 using JBDH.Models.ViewModels;
 using JBDH.Helpers;
@@ -11,6 +12,7 @@ using JBDH.Helpers;
 namespace JBDH.Controllers
 {
     [Authorize]
+    [IncludeInApi]
     public class SettingsController : Controller
     {
         private readonly IUserPropertiesService _userPropertiesService; 

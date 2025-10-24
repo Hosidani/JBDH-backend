@@ -3,6 +3,7 @@ using JBDH.Services.AICommunications;
 using JBDH.Services.Friendship;
 using JBDH.Models.Core;
 using Microsoft.AspNetCore.Mvc;
+using JBDH.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Models.Job;
@@ -11,6 +12,7 @@ using JBDH.Helpers;
 namespace JBDH.Controllers
 {
     [Authorize]
+    [IncludeInApi]
     public class ProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
