@@ -181,6 +181,16 @@ builder.Services.AddAuthorization();
 // Add CORS
 builder.Services.AddCors(options =>
 {
+    // Policy for local frontend dev (Vite default port 5173)
+    options.AddPolicy("AllowLocalFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+
+    // Default policy used elsewhere
     options.AddDefaultPolicy(policy =>
     {
         var env = builder.Environment;
@@ -297,7 +307,15 @@ app.UseSession();
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();
-app.UseCors(); // This should come after UseRouting() and before endpoints
+// Apply CORS: use the local frontend policy in Development so Vite (http://localhost:5173) can call the API
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowLocalFrontend");
+}
+else
+{
+    app.UseCors();
+}
 
 // Enable Swagger middleware only in Development
 if (app.Environment.IsDevelopment())
