@@ -6,6 +6,9 @@ obj/
 !JBDH/appsettings.json
 !JBDH/appsettings.Development.json
 
+# Upload files - don't track user uploads
+wwwroot/uploads/
+
 # Coverage reports
 coveragereport/
 coverage.*
