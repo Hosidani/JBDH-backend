@@ -9,6 +9,11 @@ using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
+        public class LoginRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
     public class LoginController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -33,19 +38,18 @@ namespace JBDH.Controllers
     [HttpPost]
     [Route("Login")]
     [IncludeInApi]
-    public async Task<IActionResult> Login(string email, string password)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            LoggingConfigService.ReturnInfo($"[LoginController] Login POST called. Email={email}");
-            var result = await _loginService.ValidateUserAsync(email, password);
+            LoggingConfigService.ReturnInfo($"[LoginController] Login POST called. Email={request?.Email}");
+            var result = await _loginService.ValidateUserAsync(request?.Email, request?.Password);
             if (result.IsSuccess)
             {
-                await _loginService.SignInUserAsync(email);
-                LoggingConfigService.ReturnInfo($"User {email} logged in successfully.");
-                return this.RedirectToHome();
+                await _loginService.SignInUserAsync(request?.Email);
+                LoggingConfigService.ReturnInfo($"User {request?.Email} logged in successfully.");
+                return Ok(new { message = "Login successful" });
             }
-            this.SetErrorMessage(result.ErrorMessage ?? "Unknown error.");
             LoggingConfigService.ReturnError(result.ErrorMessage ?? "Unknown error.");
-            return View();
+            return Unauthorized(new { error = result.ErrorMessage ?? "Unknown error." });
         }
 
     [HttpGet]

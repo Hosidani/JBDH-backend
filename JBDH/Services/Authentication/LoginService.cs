@@ -1,3 +1,4 @@
+using JBDH.Services.Configuration;
 using JBDH.Models.User;
 using JBDH.Models.Core;
 using BCrypt.Net;
@@ -26,15 +27,20 @@ namespace JBDH.Services.Authentication
         // Validate user credentials
         public async Task<LoginResult> ValidateUserAsync(string email, string password)
         {
+            LoggingConfigService.ReturnInfo("TEST LOG FROM LOGIN SERVICE");
             var result = new LoginResult();
+            LoggingConfigService.ReturnInfo($"[DEBUG] email received: '{email}', length: {email?.Length}, hex: {string.Join(" ", System.Text.Encoding.UTF8.GetBytes(email ?? "").Select(b => b.ToString("X2")))}");
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
+                LoggingConfigService.ReturnInfo("[DEBUG] user is null: true");
                 result.UserExists = false;
                 result.ErrorMessage = "Invalid email or password.";
                 return result;
             }
+            LoggingConfigService.ReturnInfo("[DEBUG] user is null: false");
+
             result.UserExists = true;
 
             if (user.IsBanned)
@@ -44,7 +50,10 @@ namespace JBDH.Services.Authentication
                 return result;
             }
 
-            result.PasswordCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            LoggingConfigService.ReturnInfo($"[DEBUG] About to verify password for user: {user.Email}, hash: {user.PasswordHash}, password: '{password}'");
+            bool passwordCheck = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            LoggingConfigService.ReturnInfo($"[DEBUG] Password verify for user {user.Email}: {passwordCheck}, password='{password}', hash='{user.PasswordHash}'");
+            result.PasswordCorrect = passwordCheck;
             result.IsSuccess = result.PasswordCorrect;
 
             if (!result.IsSuccess)
@@ -59,6 +68,7 @@ namespace JBDH.Services.Authentication
         public async Task SignInUserAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            LoggingConfigService.ReturnInfo($"[DEBUG] user is null: {user == null}");
             if (user == null || user.IsBanned)
                 return;
             var claims = new List<Claim>
