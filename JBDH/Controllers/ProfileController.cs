@@ -1,3 +1,4 @@
+using JBDH.Helpers;
 using JBDH.Services.UserManagement;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Friendship;
@@ -7,8 +8,8 @@ using JBDH.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Models.Job;
-using JBDH.Helpers;
 using Microsoft.AspNetCore.Cors;
+using JBDH.Services.Configuration;
 
 namespace JBDH.Controllers
 {
@@ -195,6 +196,7 @@ namespace JBDH.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMyProfile()
         {
+            LoggingConfigService.ReturnInfo("[ProfileController] Entered GetMyProfile endpoint.");
             var authResult = this.EnsureAuthenticatedUserOrRedirect();
             if (authResult.ErrorResult != null)
                 return Unauthorized();
