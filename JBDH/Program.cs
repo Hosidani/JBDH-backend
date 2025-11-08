@@ -28,7 +28,14 @@ using MySql.EntityFrameworkCore.Extensions;
 using JBDH.Services.BoardDataService;
 using JBDH.Services.ListService;
 
+// Ensure logging is configured for the entire application
+JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Log the connection string for debugging
+var debugConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"[DEBUG] Using connection string: {debugConnectionString}");
 
 // Get connection string ONCE at the top
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -83,7 +90,6 @@ if (builder.Environment.IsDevelopment())
         // or if the action has a custom [IncludeInApi] attribute (optional).
         c.DocInclusionPredicate((docName, apiDesc) =>
         {
-
             // Skip endpoints explicitly ignored
             var ignore = apiDesc.ActionDescriptor.EndpointMetadata
                         .OfType<Microsoft.AspNetCore.Mvc.ApiExplorerSettingsAttribute>()
