@@ -15,6 +15,8 @@ using Newtonsoft.Json.Linq;
 namespace JBDH.Controllers
 {
     [IncludeInApi]
+    [ApiController]
+    [Route("api/[controller]")]
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -50,52 +52,60 @@ namespace JBDH.Controllers
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             if (this.IsAuthenticated())
             {
                 var authResult = this.EnsureAuthenticatedUserOrRedirect();
                 if (authResult.ErrorResult != null)
-                    return authResult.ErrorResult;
+                    // For API clients, return 401 so frontend can handle redirect/login
+                    return Unauthorized();
 
-                var userId = authResult.Value;
-                var userExists = await this.UserExistsAsync(_context, userId.Value);
+                if (!authResult.Value.HasValue)
+                    return Unauthorized();
+
+                var userId = authResult.Value.Value;
+                var userExists = await this.UserExistsAsync(_context, userId);
                 if (!userExists)
                 {
-                    return await this.SignOutAndRedirectToHomeAsync();
+                    await this.SignOutAndRedirectToHomeAsync();
+                    return Unauthorized();
                 }
             }
 
             var dataFlows = _dataFlowService.GetAllRecursive();
             var listDataFlowViewModel = new ListDataFlowViewModel { DataFlows = dataFlows };
-            return View(listDataFlowViewModel);
+            return Ok(listDataFlowViewModel);
         }
 
         [Authorize]
-        [HttpGet]
+        [HttpDelete("DeleteDataFlow/{id}")]
         public IActionResult DeleteDataFlow(int id)
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
             if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
+                return Unauthorized();
 
             this.LogAction($"Deleting data flow for user ID: {authResult.Value}");
             _dataFlowService.DeleteDataFlow(id);
-            return this.RedirectToHome();
+            return Ok(new { success = true });
         }
 
+        [HttpGet("CreateFlow")]
         public IActionResult CreateFlow()
         {
-            return View();
+            // Frontend will render the create form; return a minimal payload
+            return Ok(new { message = "ok" });
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost("CreateFlow")]
         public async Task<IActionResult> CreateFlow(DataFlowViewModel model)
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
             if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
+                return Unauthorized();
 
             var userId = authResult.Value;
             this.LogAction($"Creating new data flow with title: {model.Content}");
@@ -103,44 +113,53 @@ namespace JBDH.Controllers
             if (!ModelState.IsValid)
             {
                 this.SetModelInvalidError("Model state is invalid.");
-                return View(model);
+                return BadRequest(ModelState);
             }
             if (userId.HasValue && userId.Value > 0)
             {
                 if (string.IsNullOrEmpty(model.Content))
                 {
                     this.SetEmptyFieldError("Content");
-                    return View(model);
+                    return BadRequest(new { error = "Content cannot be empty." });
                 }
                 await _dataFlowService.CreateAsync(model, userId.Value);
             }
-            return this.RedirectToHome();
+            return Ok(new { success = true });
         }
 
+        [HttpGet("UserPosts/{userId}")]
         public IActionResult UserPosts(int userId)
         {
             var posts = _dataFlowService.GetByUserId(userId);
-            return View(posts);
+            return Ok(posts);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet("ErrorPage")]
         public IActionResult ErrorPage()
         {
-            return this.ErrorPage("An unexpected error occurred. Please try again later.");
+            var message = "An unexpected error occurred. Please try again later.";
+            this.SetErrorMessage(message);
+            this.LogAction($"Error page: {message}");
+            return Problem(detail: message);
         }
 
-        [HttpGet]
+        [HttpGet("Settings")]
         public IActionResult Settings()
         {
-            return View("~/Views/Settings/Settings.cshtml");
+            // Return minimal settings payload; frontend should render settings UI
+            return Ok(new { message = "settings" });
         }
 
-        [HttpPost]
+        [HttpPost("ReportDataFlow")]
         public async Task<IActionResult> ReportDataFlow(int reportedUserId, int dataFlowId, string dataFlowText, string reason)
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
             if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
+                return Unauthorized();
+
+            if (!authResult.Value.HasValue)
+                return Unauthorized();
 
             var reporterUserId = authResult.Value.Value;
             var reporterExists = await this.UserExistsAsync(_context, reporterUserId);
@@ -148,41 +167,48 @@ namespace JBDH.Controllers
             if (!reporterExists || !reportedExists)
             {
                 this.LogAction($"Reporter or reported user does not exist. Reporter ID: {reporterUserId}, Reported User ID: {reportedUserId}");
-                return this.SetSuccessAndRedirect("The post has been reported.", "Index");
+                return Ok(new { success = true, message = "The post has been reported." });
             }
 
             var result = await _rapportUserService.TryReportUserAsync(reporterUserId, reportedUserId, reason, dataFlowId, dataFlowText);
             if (!result.Success)
             {
-                return this.SetErrorAndRedirect(result.ErrorMessage ?? "An error occurred while reporting the post.", "Index");
+                return BadRequest(new { success = false, error = result.ErrorMessage ?? "An error occurred while reporting the post." });
             }
 
-            return this.SetSuccessAndRedirect("The post has been reported.", "Index");
+            return Ok(new { success = true, message = "The post has been reported." });
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost("CommentOnDataFlow")]
         public async Task<IActionResult> CommentOnDataFlow(int dataFlowId, string comment)
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect();
             if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
+                return Unauthorized();
 
-            var userId = authResult.Value;
+            if (!authResult.Value.HasValue)
+                return Unauthorized();
+
+            var userId = authResult.Value.Value;
             if (string.IsNullOrWhiteSpace(comment))
             {
                 this.SetEmptyFieldError("Comment");
-                return this.RedirectToHome();
+                return BadRequest(new { error = "Comment cannot be empty." });
             }
 
-            await _dataFlowService.AddCommentAsync(dataFlowId, userId.Value, comment);
-            return this.RedirectToHome();
+            await _dataFlowService.AddCommentAsync(dataFlowId, userId, comment);
+            return Ok(new { success = true });
         }
 
-        [HttpPost]
+        [HttpPost("CompareCvToJobAd")]
         public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
         {
             LoggingConfigService.ReturnInfo("Starting CV to Job Ad comparison process.");
+            if (model?.CvPath == null)
+            {
+                return BadRequest(new { error = "CV file is required." });
+            }
 
             var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
 
@@ -196,20 +222,19 @@ namespace JBDH.Controllers
 
             var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
 
-            // Store the response string in TempData
-            TempData["AIResult"] = aiResult.Response;
-            LoggingConfigService.ReturnInfo(TempData["AIResult"] as string);
+            var aiResp = aiResult.Response ?? string.Empty;
+            LoggingConfigService.ReturnInfo(aiResp);
 
-            // Redirect to GET Result
-            return RedirectToAction("Result");
+            // Return AI response directly for API clients
+            return Ok(new { aiResponse = aiResult.Response });
         }
 
-        [HttpGet]
+        [HttpGet("Result")]
         public IActionResult Result()
         {
             LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
             var aiResponse = TempData["AIResult"] as string ?? "No result available.";
-            return View("~/Views/Result/View.cshtml", aiResponse);
+            return Ok(new { aiResponse });
         }
     }
 }

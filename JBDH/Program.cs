@@ -53,19 +53,21 @@ if (builder.Environment.IsDevelopment())
     }
 }
 
-// Run PlatsbankenApi.Main asynchronously before starting the web application
-await Task.Run(async () =>
+// Run PlatsbankenApi.Main asynchronously in background (non-blocking)
+_ = Task.Run(async () =>
 {
     try
     {
         LoggingConfigService.ConfigLogging(); // Configure logging first
+        LoggingConfigService.ReturnInfo("Starting background job data fetch...");
         var jobData = await JobStreamService.RunJobStreamAsync(args);
         DatabaseHandlerService.databaseHandler(jobData);
+        LoggingConfigService.ReturnInfo("Background job data fetch completed.");
     }
     catch (Exception ex)
     {
-        LoggingConfigService.ReturnError($"Startup error: {ex.Message}");
-        throw; // Optional: rethrow if you want the app to fail on critical startup errors
+        LoggingConfigService.ReturnError($"Background startup error: {ex.Message}");
+        // Don't rethrow - let the app continue even if job fetching fails
     }
 });
 
@@ -171,8 +173,18 @@ builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
         options.Cookie.Name = "MyCookieName";
-    options.LoginPath = "/Login";
+        options.LoginPath = "/Login";
         options.LogoutPath = "/Logout/Logout";
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
     });
 
 // Add authorization
@@ -181,19 +193,12 @@ builder.Services.AddAuthorization();
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowLocalFrontend", policy =>
     {
-        var env = builder.Environment;
-        if (env.IsDevelopment())
-        {
-            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-        }
-        else
-        {
-            policy.WithOrigins("https://your-production-domain.com")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        }
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -297,7 +302,15 @@ app.UseSession();
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();
-app.UseCors(); // This should come after UseRouting() and before endpoints
+// Apply CORS: use the local frontend policy in Development so Vite (http://localhost:5173) can call the API
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowLocalFrontend");
+}
+else
+{
+    app.UseCors();
+}
 
 // Enable Swagger middleware only in Development
 if (app.Environment.IsDevelopment())
