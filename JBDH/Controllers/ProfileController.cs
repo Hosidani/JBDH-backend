@@ -8,11 +8,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using JBDH.Models.Job;
 using JBDH.Helpers;
+using Microsoft.AspNetCore.Cors;
 
 namespace JBDH.Controllers
 {
     [Authorize]
     [IncludeInApi]
+    [ApiController]
+    [Route("api/[controller]")]
+    [EnableCors("AllowLocalFrontend")]
     public class ProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -35,8 +39,8 @@ namespace JBDH.Controllers
             _userAIResponseService = userAIResponseService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Profile(int userId)
+    [HttpGet("profile/{userId:int}")]
+    public async Task<IActionResult> Profile(int userId)
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect();
             if (authResult.ErrorResult != null)
@@ -61,15 +65,15 @@ namespace JBDH.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> MyProfile()
+    [HttpGet("profile/me")]
+    public async Task<IActionResult> MyProfile()
         {
             var authResult = this.EnsureAuthenticatedUserOrRedirect();
             if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
+                return Unauthorized();
 
             if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
+                return BadRequest("Authenticated user ID is missing.");
 
             var model = await _profileService.GetMyProfileViewModelAsync(authResult.Value.Value);
             var latestProposal = await _context.AIUserCourseProposals
@@ -79,8 +83,8 @@ namespace JBDH.Controllers
 
             if (latestProposal != null)
                 model.CourseProposals = latestProposal;
-            // If CourseProposals is not nullable, this prevents null assignment.
-            return View("MyProfile", model);
+
+            return Ok(model); // <-- Return JSON, not a View
         }
 
         [HttpPost]
@@ -186,6 +190,28 @@ namespace JBDH.Controllers
             await _context.SaveChangesAsync();
 
             return this.SetSuccessAndRedirect("User deleted successfully.", "Index", new { controller = "Home" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return Unauthorized();
+
+            if (!authResult.Value.HasValue)
+                return BadRequest("Authenticated user ID is missing.");
+
+            var model = await _profileService.GetMyProfileViewModelAsync(authResult.Value.Value);
+            var latestProposal = await _context.AIUserCourseProposals
+                .Where(p => p.UserId == authResult.Value.Value)
+                .OrderByDescending(p => p.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (latestProposal != null)
+                model.CourseProposals = latestProposal;
+
+            return Ok(model); // Return JSON
         }
     }
 }
