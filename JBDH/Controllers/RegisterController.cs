@@ -64,18 +64,20 @@ namespace JBDH.Controllers
     }
 
     [HttpPost]
-    public async Task<IActionResult> RegisterUser(RegisterUserViewModel model)
+    public async Task<IActionResult> RegisterUser([FromForm] RegisterUserViewModel model)
     {
         LoggingConfigService.ReturnInfo("RegisterUser method called.");
-        var result = await _userRegistrationService.RegisterUserAsync(model, HttpContext, Url);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { error = "Invalid registration data.", details = ModelState });
+        }
+    var result = await _userRegistrationService.RegisterUserAsync(model, HttpContext, Url);
         if (!result.Success)
         {
-            this.SetErrorMessage(result.ErrorMessage ?? "Could not register user.");
-            return View(model);
+            // Return the actual error message from the service for easier debugging
+            return Conflict(new { error = result.ErrorMessage });
         }
-        this.SetSuccessMessage("Registration successful! Please check your email.");
-        ViewData["Email"] = model.Email;
-        return View("CheckYourEmail");
+        return Ok(new { message = "Registration successful! Please check your email." });
     }
 
 

@@ -173,8 +173,18 @@ builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
         options.Cookie.Name = "MyCookieName";
-    options.LoginPath = "/Login";
+        options.LoginPath = "/Login";
         options.LogoutPath = "/Logout/Logout";
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
     });
 
 // Add authorization
@@ -183,29 +193,12 @@ builder.Services.AddAuthorization();
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    // Policy for local frontend dev (Vite default port 5173)
     options.AddPolicy("AllowLocalFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
-    });
-
-    // Default policy used elsewhere
-    options.AddDefaultPolicy(policy =>
-    {
-        var env = builder.Environment;
-        if (env.IsDevelopment())
-        {
-            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-        }
-        else
-        {
-            policy.WithOrigins("https://your-production-domain.com")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        }
     });
 });
 
