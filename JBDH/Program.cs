@@ -232,6 +232,23 @@ if (smtpSettings == null ||
 // Build the application
 var app = builder.Build();
 
+// Add request logging middleware for production debugging
+app.Use(async (context, next) =>
+{
+    try
+    {
+        LoggingConfigService.ReturnInfo($"Request: {context.Request.Method} {context.Request.Path}");
+        await next();
+        LoggingConfigService.ReturnInfo($"Response: {context.Response.StatusCode}");
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Request failed: {ex.Message}");
+        LoggingConfigService.ReturnError($"Stack trace: {ex.StackTrace}");
+        throw;
+    }
+});
+
 // Ensure database is created on startup (development only)
 if (app.Environment.IsDevelopment())
 {
@@ -328,6 +345,14 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger"; // Serve at /swagger
     });
 }
+
+// Add health check endpoint (before MapControllerRoute)
+app.MapGet("/health", () => new { 
+    status = "healthy", 
+    timestamp = DateTime.UtcNow,
+    environment = app.Environment.EnvironmentName 
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route pattern
