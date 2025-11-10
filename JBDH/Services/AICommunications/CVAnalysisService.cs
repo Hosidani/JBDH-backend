@@ -32,15 +32,17 @@ namespace JBDH.Services.AICommunications
             var aiResult = await _aiApiClient.GetAIResponse(request);
             var aiResponseText = aiResult.Response;
             LoggingConfigService.ReturnInfo($"Raw AI response: {aiResponseText}");
+            // Always clean the AI response before saving
+            var cleanedResponse = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText);
+            LoggingConfigService.ReturnInfo($"Cleaned AI response (before deserialization): {cleanedResponse}");
             CVAnalysisResult? analysisResult = null;
             try
             {
-                if (!string.IsNullOrWhiteSpace(aiResponseText))
+                if (!string.IsNullOrWhiteSpace(cleanedResponse))
                 {
-                    var extractedJson = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText);
-                    if (!string.IsNullOrWhiteSpace(extractedJson) && extractedJson.TrimStart().StartsWith("{"))
+                    if (cleanedResponse.TrimStart().StartsWith("{"))
                     {
-                        analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(extractedJson);
+                        analysisResult = JsonConvert.DeserializeObject<CVAnalysisResult>(cleanedResponse);
                     }
                     else
                     {
@@ -74,7 +76,7 @@ namespace JBDH.Services.AICommunications
 
             UserAIResponse useraiResponse = new UserAIResponse
             {
-                ResponseText = aiResponseText,
+                ResponseText = cleanedResponse,
                 CreatedAt = DateTime.UtcNow,
                 UserId = user.Id,
                 User = user
