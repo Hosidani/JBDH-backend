@@ -1,3 +1,4 @@
+
 using UglyToad.PdfPig;
 using System.Text;
 using HtmlAgilityPack;
@@ -9,6 +10,19 @@ namespace JBDH.Services.Helpers
 {
     public class ManageIOService : IManageIOService
     {
+        /// <summary>
+        /// Converts any object to a camelCase JSON object (for frontend compatibility).
+        /// </summary>
+        public object? ToCamelCaseObject(object? obj)
+        {
+            if (obj == null) return null;
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new Newtonsoft.Json.JsonSerializerSettings
+            {
+                ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+                Formatting = Newtonsoft.Json.Formatting.None
+            });
+            return Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+        }
         public async Task<string> ExtractTextFromWebPage(string url)
         {
             using var playwright = await Playwright.CreateAsync();
