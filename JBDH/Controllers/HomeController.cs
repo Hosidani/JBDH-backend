@@ -225,8 +225,16 @@ namespace JBDH.Controllers
             var aiResp = aiResult.Response ?? string.Empty;
             LoggingConfigService.ReturnInfo(aiResp);
 
-            // Return AI response directly for API clients
-            return Ok(new { aiResponse = aiResult.Response });
+            object? parsed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(aiResp))
+                    parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResp);
+            }
+            catch { /* ignore parse errors, return null */ }
+
+            // Return both raw and parsed AI response
+            return Ok(new { aiResponse = aiResp, analysis = parsed });
         }
 
         [HttpGet("Result")]
@@ -234,7 +242,14 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
             var aiResponse = TempData["AIResult"] as string ?? "No result available.";
-            return Ok(new { aiResponse });
+            object? parsed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(aiResponse) && aiResponse != "No result available.")
+                    parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResponse);
+            }
+            catch { /* ignore parse errors, return null */ }
+            return Ok(new { aiResponse, analysis = parsed });
         }
     }
 }
