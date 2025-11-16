@@ -87,6 +87,18 @@ namespace JBDH.Services.AICommunications
                         .Replace("{CVText}", cvText3 ?? "");
                     return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
 
+                case 6:
+                    LoggingConfigService.ReturnInfo("CommandId is 6, extracting job requirements and importance.");
+                    var jobAdText6 = aiRequest.JobAdText ?? "";
+                    if (string.IsNullOrWhiteSpace(jobAdText6))
+                    {
+                        var err6 = "{\"error\":\"No job ad text found to analyse. Please provide job ad text.\"}";
+                        return new StringContent(err6, System.Text.Encoding.UTF8, "application/json");
+                    }
+                    userMessage = AIMessageTemplates.UserMessageTemplates[6]
+                        .Replace("{JobAdText}", jobAdText6);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+
                 default:
                     return null;
             }

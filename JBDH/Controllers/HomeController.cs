@@ -11,6 +11,7 @@ using JBDH.Services.Configuration;
 using JBDH.Models.AI;
 using JBDH.Services.Helpers;
 using Newtonsoft.Json.Linq;
+using JBDH.Models.User;
 
 namespace JBDH.Controllers
 {
@@ -28,6 +29,7 @@ namespace JBDH.Controllers
         private readonly IManageIOService _manageIOService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly IAIApiClient _aiApiClient;
+        private readonly ITextChunkingService _textChunkingService;
 
         public HomeController(
             ApplicationDbContext context,
@@ -38,7 +40,8 @@ namespace JBDH.Controllers
             IManageIOService manageIOService,
             AIConfig aiConfig,
             IJobAIAnalysisService jobAIAnalysisService,
-            IAIApiClient aiApiClient)
+            IAIApiClient aiApiClient,
+            ITextChunkingService textChunkingService)
         {
             _context = context;
             _environment = environment;
@@ -49,6 +52,7 @@ namespace JBDH.Controllers
             _aiConfig = aiConfig;
             _jobAIAnalysisService = jobAIAnalysisService;
             _aiApiClient = aiApiClient;
+            _textChunkingService = textChunkingService;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -235,6 +239,230 @@ namespace JBDH.Controllers
             LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
             var aiResponse = TempData["AIResult"] as string ?? "No result available.";
             return Ok(new { aiResponse });
+        }
+
+        [HttpPost("AnalyzeJobEmbeddings")]
+        public async Task<IActionResult> AnalyzeJobEmbeddings(CompareCvToJobAdViewModel model)
+        {
+            LoggingConfigService.ReturnInfo("Starting job embeddings analysis.");
+            
+            // Debug logging
+            LoggingConfigService.ReturnInfo($"Model received - CvPath is null: {model?.CvPath == null}");
+            LoggingConfigService.ReturnInfo($"JobAdText length: {model?.JobAdText?.Length ?? 0}");
+            
+            if (model?.CvPath == null)
+            {
+                return BadRequest(new { error = "CV file is required." });
+            }
+            
+            if (string.IsNullOrWhiteSpace(model.JobAdText))
+            {
+                return BadRequest(new { error = "Job ad text is required." });
+            }
+
+            // Save CV file
+            var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
+            
+            this.LogAction($"Analyzing job embeddings for CV: {savedCvPath}");
+
+            // Chunk the job ad text
+            var jobAdChunks = _textChunkingService.ChunkJobAd(model.JobAdText);
+            LoggingConfigService.ReturnInfo($"Job ad chunked into {jobAdChunks.Count} pieces.");
+
+            // Extract CV text for comparison
+            var cvText = await _manageIOService.ExtractTextFromPdf(savedCvPath ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(cvText))
+            {
+                return BadRequest(new { error = "Could not extract text from CV file." });
+            }
+
+            // Extract requirements from each chunk using AI
+            var allRequirements = new List<object>();
+            for (int i = 0; i < jobAdChunks.Count; i++)
+            {
+                var chunk = jobAdChunks[i];
+                LoggingConfigService.ReturnInfo($"Processing chunk {i + 1}/{jobAdChunks.Count}");
+
+                var aiRequest = new AIRequest
+                {
+                    CommandId = 6,
+                    JobAdText = chunk,
+                    User = new User {
+                        Id = 1,
+                        Email = "test@example.com",
+                        PasswordHash = "dummy",
+                        Location = "Stockholm"
+                    }
+                };
+
+                var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
+                if (aiResult.Success && !string.IsNullOrWhiteSpace(aiResult.Response))
+                {
+                    try
+                    {
+                        // Parse the JSON response to extract requirements as a strongly typed list
+                        var chunkRequirements = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Requirement>>(aiResult.Response ?? string.Empty);
+                        if (chunkRequirements != null)
+                        {
+                            allRequirements.Add(new { 
+                                chunkIndex = i, 
+                                chunkText = chunk.Substring(0, Math.Min(100, chunk.Length)) + "...",
+                                requirements = chunkRequirements 
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingConfigService.ReturnError($"Failed to parse requirements from chunk {i}: {ex.Message}");
+                    }
+                }
+            }
+
+            // TODO: Add embedding analysis logic here
+            // TODO: Add requirement extraction logic here
+            // TODO: Add scoring logic here
+
+            return Ok(new { 
+                success = true, 
+                message = "Job embeddings analysis completed.", 
+                cvPath = savedCvPath, 
+                jobAdChunksCount = jobAdChunks.Count,
+                cvTextLength = cvText.Length,
+                extractedRequirements = allRequirements,
+                totalRequirementsFound = allRequirements.Count
+            });
+        }
+
+        [HttpPost("AnalyzeJobEmbeddingsAlt")]
+        public async Task<IActionResult> AnalyzeJobEmbeddingsAlt([FromForm] IFormFile CvPath, [FromForm] string JobAdText)
+        {
+            LoggingConfigService.ReturnInfo("Starting job embeddings analysis (Alternative method).");
+            
+            // Debug logging
+            LoggingConfigService.ReturnInfo($"File received - is null: {CvPath == null}");
+            LoggingConfigService.ReturnInfo($"File name: {CvPath?.FileName ?? "null"}");
+            LoggingConfigService.ReturnInfo($"JobAdText length: {JobAdText?.Length ?? 0}");
+            
+            if (CvPath == null)
+            {
+                return BadRequest(new { error = "CV file is required." });
+            }
+            
+            if (string.IsNullOrWhiteSpace(JobAdText))
+            {
+                return BadRequest(new { error = "Job ad text is required." });
+            }
+
+            // Save CV file
+            var savedCvPath = await FileHelper.SaveUploadedFileAsync(CvPath, _environment.WebRootPath);
+            
+            this.LogAction($"Analyzing job embeddings for CV: {savedCvPath}");
+
+            return Ok(new { 
+                success = true, 
+                message = "Alternative method works!", 
+                cvPath = savedCvPath, 
+                fileName = CvPath.FileName,
+                jobAdTextLength = JobAdText.Length
+            });
+        }
+
+        [HttpGet("TestJobAdExtraction")]
+        public async Task<IActionResult> TestJobAdExtraction()
+        {
+            // Hårdkodad jobbannons
+            string jobAdText = """
+Hybridroll för senior utvecklare som vill kombinera tekniskt arbete med ledaransvar.
+
+Huvudansvarsområden:
+- Skriva ren och underhållbar kod (70-80% av tiden)
+- Fungera som Scrum Master och delta i projektplanering
+- Vägleda teamet och koordinera över avdelningsgränser
+- Delta i code reviews och systemutveckling
+
+Teknisk stack: TypeScript/JavaScript, NodeJS, VueJS, MongoDB, AWS, SQL, Grafana
+
+Vi tror du har erfarenhet av
+- Minst 5 års erfarenhet av den tekniska stacken
+- Erfarenhet av Agile/Scrum, helst som Scrum Master
+- Intresse för ledarskap och projektplanering
+- Flytande engelska och arbetstillstånd i Sverige
+
+Extra meriterande
+
+- Umbraco, Episerver / Optimizely
+- Bra koll på Devops-relaterade verktyg och processer, Nginx, Docker, CI-lösningar osv.
+- Wordpress
+
+Om företaget
+- Etablerat fintech-bolag (10+ år)
+- Hjälper användare jämföra lån och hypotekslån gratis
+- Samarbetar med 40+ svenska banker
+- Platt hierarki med 12 personer i tech-teamet
+- Hybridarbete med kontor i Stockholm city
+""";
+            // Hårdkodad CV-path
+            string cvPath = @"C:\\Users\\yazda\\Desktop\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf";
+
+            // Chunka jobbannonsen
+            var jobAdChunks = _textChunkingService.ChunkJobAd(jobAdText);
+            LoggingConfigService.ReturnInfo($"Job ad chunked into {jobAdChunks.Count} pieces.");
+
+            // Extrahera krav från varje chunk
+            var allRequirements = new List<object>();
+            var aiRawResponses = new List<string>();
+            for (int i = 0; i < jobAdChunks.Count; i++)
+            {
+                var chunk = jobAdChunks[i];
+                LoggingConfigService.ReturnInfo($"Processing chunk {i + 1}/{jobAdChunks.Count}");
+                LoggingConfigService.ReturnInfo($"Chunk text: {chunk.Substring(0, Math.Min(100, chunk.Length))}...");
+
+                var aiRequest = new AIRequest
+                {
+                    CommandId = 6,
+                    JobAdText = chunk,
+                    User = new User {
+                        Id = 1,
+                        Email = "test@example.com",
+                        PasswordHash = "dummy",
+                        Location = "Stockholm"
+                    }
+                };
+
+                var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
+                LoggingConfigService.ReturnInfo($"AI success: {aiResult.Success}, AI raw response: {aiResult.Response}");
+                aiRawResponses.Add(aiResult.Response ?? "<null>");
+                if (aiResult.Success && !string.IsNullOrWhiteSpace(aiResult.Response))
+                {
+                    try
+                    {
+                        var chunkRequirements = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResult.Response ?? string.Empty);
+                        if (chunkRequirements != null)
+                        {
+                            allRequirements.Add(new {
+                                chunkIndex = i,
+                                chunkText = chunk.Substring(0, Math.Min(100, chunk.Length)) + "...",
+                                requirements = chunkRequirements
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingConfigService.ReturnError($"Failed to parse requirements from chunk {i}: {ex.Message}");
+                    }
+                }
+            }
+
+            // Extrahera CV-text (valfritt, men visar att det funkar)
+            var cvText = await _manageIOService.ExtractTextFromPdf(cvPath);
+            LoggingConfigService.ReturnInfo($"CV text length: {cvText?.Length ?? 0}");
+
+            return Ok(new {
+                jobAdChunksCount = jobAdChunks.Count,
+                aiRawResponses = aiRawResponses,
+                extractedRequirements = allRequirements,
+                cvTextLength = cvText?.Length ?? 0
+            });
         }
     }
 }

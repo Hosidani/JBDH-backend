@@ -66,7 +66,18 @@ namespace JBDH.Models.AI
                   "\"MatchingSkills\" (list of skills from the CV that match the job ad), " +
                   "\"RelevantExperiences\" (list of relevant experiences from the CV), " +
                   "\"EducationAndCertifications\" (from the CV, relevant to the job ad). " +
-                  "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}"
+                  "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}",
+
+            [6] = "Uppgift: Extrahera huvudkrav och önskade kvalifikationer från följande jobbannons. För varje krav, returnera: " +
+                  "- name (kort text) " +
+                  "- category (ex: skill, experience, degree, certification, language) " +
+                  "- importance (1-5, där 5 = must-have / avgörande, 1 = nice-to-have) " +
+                  "Returnera SÅ ENKEL JSON-LISTA som möjligt, t.ex: " +
+                  "[{\"name\":\"Python\",\"category\":\"skill\",\"importance\":5},{\"name\":\"SQL\",\"category\":\"skill\",\"importance\":4}] " +
+                  "Job ad: " +
+                  "---BEGIN--- " +
+                  "{JobAdText} " +
+                  "---END---"
         };
     }
 }

@@ -53,19 +53,21 @@ if (builder.Environment.IsDevelopment())
     }
 }
 
-// Run PlatsbankenApi.Main asynchronously before starting the web application
-await Task.Run(async () =>
+// Run PlatsbankenApi.Main asynchronously in background (non-blocking)
+_ = Task.Run(async () =>
 {
     try
     {
         LoggingConfigService.ConfigLogging(); // Configure logging first
+        LoggingConfigService.ReturnInfo("Starting background job data fetch...");
         var jobData = await JobStreamService.RunJobStreamAsync(args);
         DatabaseHandlerService.databaseHandler(jobData);
+        LoggingConfigService.ReturnInfo("Background job data fetch completed.");
     }
     catch (Exception ex)
     {
-        LoggingConfigService.ReturnError($"Startup error: {ex.Message}");
-        throw; // Optional: rethrow if you want the app to fail on critical startup errors
+        LoggingConfigService.ReturnError($"Background startup error: {ex.Message}");
+        // Don't rethrow - let the app continue even if job fetching fails
     }
 });
 
@@ -149,6 +151,7 @@ builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<DataFlowService>(); 
 builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
+builder.Services.AddScoped<ITextChunkingService, TextChunkingService>();
 builder.Services.AddScoped<ISearchWorkflowService, SearchWorkflowService>();
 builder.Services.AddScoped<IBoardDataService, BoardDataService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
