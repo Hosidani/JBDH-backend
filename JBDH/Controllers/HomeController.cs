@@ -372,6 +372,15 @@ namespace JBDH.Controllers
         {
             // Hårdkodad jobbannons
             string jobAdText = """
+
+Senior utvecklare med ledaransvar till etablerat fintech-bolag i Stockholm. 
+
+Jag söker en erfaren ingenjör med erfarenhet som scrum master/projektledare, eller någon som är senior utvecklare och ivrig att ta steget in i en roll där du har praktisk erfarenhet av koden, men också kan ta ett steg mot ledarskap, projektplanering, färdplan och strategi!
+
+Företaget är ett väletablerat produktföretag vars plattform är en användarfokuserad, datadriven motor som hjälper människor att fatta mer välgrundade ekonomiska beslut och låter dem hitta, jämföra och säkra de bästa erbjudandena på lån, bolån, räntor och andra finansiella tjänster, enklare än någonsin tidigare!
+
+I slutändan är deras produkt att hjälpa människor att spara pengar, helt kostnadsfritt! De har funnits i över 10 år, samarbetar med över 40 av Sveriges största banker och finansföretag, är konsekvent lönsamma, men behåller en känsla av ett litet till medelstort företag, och har mycket spännande utveckling på gång.
+
 Hybridroll för senior utvecklare som vill kombinera tekniskt arbete med ledaransvar.
 
 Huvudansvarsområden:
@@ -436,7 +445,8 @@ Om företaget
                 {
                     try
                     {
-                        var chunkRequirements = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResult.Response ?? string.Empty);
+                        // Parse the JSON response to extract requirements as a strongly typed list
+                        var chunkRequirements = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Requirement>>(aiResult.Response ?? string.Empty);
                         if (chunkRequirements != null)
                         {
                             allRequirements.Add(new {
