@@ -321,22 +321,14 @@ else
     app.UseHsts();
 }
 
+
 app.UseRouting();
+app.UseCors("AllowLocalFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 app.UseStaticFiles();
-
 app.UseHttpsRedirection();
-// Apply CORS: use the local frontend policy in Development so Vite (http://localhost:5173) can call the API
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("AllowLocalFrontend");
-}
-else
-{
-    app.UseCors();
-}
 
 // Enable Swagger middleware only in Development
 if (app.Environment.IsDevelopment())
