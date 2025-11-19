@@ -28,8 +28,10 @@ namespace JBDH.Controllers
         private readonly IManageIOService _manageIOService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly IAIApiClient _aiApiClient;
+        private readonly ILogger<HomeController> _logger;
 
         public HomeController(
+            ILogger<HomeController> logger,
             ApplicationDbContext context,
             IWebHostEnvironment environment,
             DataFlowService dataFlowService,
@@ -40,6 +42,7 @@ namespace JBDH.Controllers
             IJobAIAnalysisService jobAIAnalysisService,
             IAIApiClient aiApiClient)
         {
+            _logger = logger;
             _context = context;
             _environment = environment;
             _dataFlowService = dataFlowService;
@@ -204,9 +207,11 @@ namespace JBDH.Controllers
         [HttpPost("CompareCvToJobAd")]
         public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
         {
+            _logger.LogInformation("[TEST] CompareCvToJobAd anropad! Modell: {@Model}", model);
             LoggingConfigService.ReturnInfo("Starting CV to Job Ad comparison process.");
             if (model?.CvPath == null)
             {
+                _logger.LogWarning("[TEST] Ingen CV bifogad i CompareCvToJobAd!");
                 return BadRequest(new { error = "CV file is required." });
             }
 
@@ -223,10 +228,19 @@ namespace JBDH.Controllers
             var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
 
             var aiResp = aiResult.Response ?? string.Empty;
+            _logger.LogInformation("[TEST] AI-respons: {AIResp}", aiResp);
             LoggingConfigService.ReturnInfo(aiResp);
 
-            // Return AI response directly for API clients
-            return Ok(new { aiResponse = aiResult.Response });
+            object? parsed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(aiResp))
+                    parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResp);
+            }
+            catch { /* ignore parse errors, return null */ }
+
+            // Return both raw and parsed AI response
+            return Ok(new { aiResponse = aiResp, analysis = parsed });
         }
 
         [HttpGet("Result")]
@@ -234,7 +248,14 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
             var aiResponse = TempData["AIResult"] as string ?? "No result available.";
-            return Ok(new { aiResponse });
+            object? parsed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(aiResponse) && aiResponse != "No result available.")
+                    parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResponse);
+            }
+            catch { /* ignore parse errors, return null */ }
+            return Ok(new { aiResponse, analysis = parsed });
         }
     }
 }
