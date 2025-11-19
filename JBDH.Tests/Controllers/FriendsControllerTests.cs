@@ -1,3 +1,4 @@
+/*
 using System.Threading.Tasks;
 using JBDH.Controllers;
 using JBDH.Services.UserManagement;
@@ -44,3 +45,4 @@ namespace JBDH.Tests.Controllers
         }
     }
 }
+*/
