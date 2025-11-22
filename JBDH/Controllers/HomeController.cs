@@ -216,6 +216,12 @@ namespace JBDH.Controllers
             }
 
             var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
+            if (string.IsNullOrEmpty(savedCvPath))
+            {
+                return BadRequest(new { error = "File could not be saved." });
+            }
+            var cvText = FileHelper.ExtractText(savedCvPath);
+            // Skicka cvText till AI istället för filvägen om du vill analysera texten
 
             var aiRequest = new AIRequest
             {

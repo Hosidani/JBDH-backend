@@ -22,7 +22,7 @@ namespace JBDH.Services.AICommunications
             {
                 case 0:
                     LoggingConfigService.ReturnInfo("CommandId is 0, processing CV.");
-                    var cvText0 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    var cvText0 = await _manageIOService.ExtractTextFromFile(aiRequest.CVPath ?? "");
                     if (string.IsNullOrWhiteSpace(cvText0))
                     {
                         var err = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting analysis.\"}";
@@ -40,7 +40,7 @@ namespace JBDH.Services.AICommunications
                 case 2:
                     LoggingConfigService.ReturnInfo("CommandId is 2, processing job ad and CV.");
                     var jobAdText2 = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
-                    var cvText2 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    var cvText2 = await _manageIOService.ExtractTextFromFile(aiRequest.CVPath ?? "");
                     if (string.IsNullOrWhiteSpace(cvText2))
                     {
                         var err2 = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting analysis.\"}";
@@ -63,7 +63,7 @@ namespace JBDH.Services.AICommunications
 
                 case 4:
                     LoggingConfigService.ReturnInfo("CommandId is 4, proposing courses for user.");
-                    var cvText4 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    var cvText4 = await _manageIOService.ExtractTextFromFile(aiRequest.CVPath ?? "");
                     if (string.IsNullOrWhiteSpace(cvText4))
                     {
                         var err4 = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting course proposals.\"}";
@@ -76,7 +76,7 @@ namespace JBDH.Services.AICommunications
                 case 5:
                     LoggingConfigService.ReturnInfo("CommandId is 5, processing job ad and CV.");
                     LoggingConfigService.ReturnInfo(aiRequest.CVPath ?? "No CV path provided.");
-                    var cvText3 = await _manageIOService.ExtractTextFromPdf(aiRequest.CVPath ?? "");
+                    var cvText3 = await _manageIOService.ExtractTextFromFile(aiRequest.CVPath ?? "");
                     if (string.IsNullOrWhiteSpace(cvText3))
                     {
                         var err3 = "{\"error\":\"No CV text found to analyse. Please upload a CV before requesting analysis.\"}";
