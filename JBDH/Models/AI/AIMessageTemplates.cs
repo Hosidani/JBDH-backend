@@ -57,15 +57,28 @@ namespace JBDH.Models.AI
                   "Return ONLY a valid JSON object with the following fields: " +
                   "\"Courses\" (a short list, maximum 10 courses, with titles and brief descriptions). " +
                   "\n\nCV:\n{CVText}",
-            [5] = "You are given a job advertisement and a candidate's CV. " +
-                  "Compare the candidate's qualifications, skills, and experiences to the requirements in the job ad. " +
-                  "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. " +
-                  "Return ONLY a valid JSON object with the following fields: " +
-                  "\"FitSummary\" (brief summary of fit), " +
-                  "\"MissingRequirements\" (list of gaps or missing requirements), " +
-                  "\"MatchingSkills\" (list of skills from the CV that match the job ad), " +
-                  "\"RelevantExperiences\" (list of relevant experiences from the CV), " +
-                  "\"EducationAndCertifications\" (from the CV, relevant to the job ad). " +
+            [5] = "Analyze the CV against this job advertisement and provide structured feedback. " +
+                  "Return ONLY a valid JSON object with this structure: " +
+                  "{" +
+                  "  \"matchScore\": 0-100," +
+                  "  \"fitAssessment\": {" +
+                  "    \"overall\": string," +
+                  "    \"strengths\": [string]," +
+                  "    \"concerns\": [string]" +
+                  "  }," +
+                  "  \"detailedAnalysis\": {" +
+                  "    \"technicalSkills\": {\"matchLevel\": \"high|medium|low\", \"matches\": [string], \"gaps\": [string]}," +
+                  "    \"experience\": {\"matchLevel\": \"high|medium|low\", \"matches\": [string], \"gaps\": [string]}," +
+                  "    \"education\": {\"matchLevel\": \"high|medium|low\", \"details\": [string]}," +
+                  "    \"softSkills\": {\"matchLevel\": \"high|medium|low\", \"evidence\": [string]}" +
+                  "  }," +
+                  "  \"actionableRecommendations\": {" +
+                  "    \"cvImprovements\": [string]," +
+                  "    \"skillDevelopment\": [string]," +
+                  "    \"interviewPreparation\": [string]" +
+                  "  }," +
+                  "  \"nextSteps\": [string]" +
+                  "}" +
                   "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}"
         };
     }
