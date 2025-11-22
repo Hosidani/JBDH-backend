@@ -18,28 +18,28 @@ namespace JBDH.Tests.Services.Helpers
         [Fact]
         public async Task ExtractTextFromPdf_WithNonExistentFile_ShouldReturnErrorMessage()
         {
-            var result = await _service.ExtractTextFromPdf("non_existent_file.pdf");
+            var result = await _service.ExtractTextFromFile("non_existent_file.pdf");
             Assert.Equal("CV file not found.", result);
         }
 
         [Fact]
         public async Task ExtractTextFromPdf_WithNullPath_ShouldReturnErrorMessage()
         {
-            var result = await _service.ExtractTextFromPdf(null!);
+            var result = await _service.ExtractTextFromFile(null!);
             Assert.Equal("CV file not found.", result);
         }
 
         [Fact]
         public async Task ExtractTextFromPdf_WithEmptyPath_ShouldReturnErrorMessage()
         {
-            var result = await _service.ExtractTextFromPdf("");
+            var result = await _service.ExtractTextFromFile("");
             Assert.Equal("CV file not found.", result);
         }
 
         [Fact]
         public async Task ExtractTextFromPdf_WithWhitespacePath_ShouldReturnErrorMessage()
         {
-            var result = await _service.ExtractTextFromPdf("   ");
+            var result = await _service.ExtractTextFromFile("   ");
             Assert.Equal("CV file not found.", result);
         }
 

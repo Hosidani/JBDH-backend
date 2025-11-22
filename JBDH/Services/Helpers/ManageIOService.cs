@@ -1,4 +1,3 @@
-
 using UglyToad.PdfPig;
 using System.Text;
 using HtmlAgilityPack;
@@ -37,23 +36,6 @@ namespace JBDH.Services.Helpers
             string text = !string.IsNullOrWhiteSpace(content) ? content : "No content found.";
             return text;
         }
-        public Task<string> ExtractTextFromPdf(string pdfFilePath)
-        {
-            if (!File.Exists(pdfFilePath))
-            {
-                LoggingConfigService.ReturnError($"PDF file not found: {pdfFilePath}");
-                return Task.FromResult("CV file not found.");
-            }
-            var sb = new StringBuilder();
-            using (var document = PdfDocument.Open(pdfFilePath))
-            {
-                foreach (var page in document.GetPages())
-                {
-                    sb.AppendLine(page.Text);
-                }
-            }
-            return Task.FromResult(sb.ToString());
-        }
 
         public string ExtractJsonFromCodeBlock(string aiResponseText)
         {
@@ -80,7 +62,9 @@ namespace JBDH.Services.Helpers
             // Try to parse as an outer OpenAI response
             try
             {
-                dynamic outer = JsonConvert.DeserializeObject(aiResultString);
+                dynamic? outer = JsonConvert.DeserializeObject(aiResultString);
+                if (outer == null) return string.Empty;
+
                 var choices = outer?.choices;
                 if (choices != null)
                 {
@@ -102,6 +86,25 @@ namespace JBDH.Services.Helpers
 
             // If not an OpenAI response, assume it's already clean JSON
             return aiResultString.Trim();
+        }
+
+        public Task<string> ExtractTextFromFile(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                LoggingConfigService.ReturnError($"File not found: {filePath}");
+                return Task.FromResult("File not found.");
+            }
+            try
+            {
+                var text = FileHelper.ExtractText(filePath);
+                return Task.FromResult(text);
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Error extracting text: {ex.Message}");
+                return Task.FromResult("");
+            }
         }
     }
 }
