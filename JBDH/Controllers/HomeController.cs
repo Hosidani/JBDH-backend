@@ -207,11 +207,10 @@ namespace JBDH.Controllers
         [HttpPost("CompareCvToJobAd")]
         public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
         {
-            _logger.LogInformation("[TEST] CompareCvToJobAd anropad! Modell: {@Model}", model);
-            LoggingConfigService.ReturnInfo("Starting CV to Job Ad comparison process.");
+            _logger.LogInformation("CompareCvToJobAd called. Model: {@Model}", model);
             if (model?.CvPath == null)
             {
-                _logger.LogWarning("[TEST] Ingen CV bifogad i CompareCvToJobAd!");
+                _logger.LogWarning("No CV file uploaded.");
                 return BadRequest(new { error = "CV file is required." });
             }
 
@@ -220,8 +219,24 @@ namespace JBDH.Controllers
             {
                 return BadRequest(new { error = "File could not be saved." });
             }
-            var cvText = FileHelper.ExtractText(savedCvPath);
-            // Skicka cvText till AI istället för filvägen om du vill analysera texten
+
+            string cvText;
+            try
+            {
+                cvText = FileHelper.ExtractText(savedCvPath);
+                _logger.LogInformation("Extracted CV text length: {Length}", cvText?.Length ?? 0);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception during CV text extraction.");
+                return BadRequest(new { error = "CV text extraction error: " + ex.Message });
+            }
+
+            if (string.IsNullOrWhiteSpace(cvText))
+            {
+                _logger.LogWarning("CV text is empty or null.");
+                return BadRequest(new { error = "CV text extraction failed or is empty." });
+            }
 
             var aiRequest = new AIRequest
             {
@@ -232,10 +247,8 @@ namespace JBDH.Controllers
             };
 
             var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
-
             var aiResp = aiResult.Response ?? string.Empty;
-            _logger.LogInformation("[TEST] AI-respons: {AIResp}", aiResp);
-            LoggingConfigService.ReturnInfo(aiResp);
+            _logger.LogInformation("AI response: {AIResp}", aiResp);
 
             object? parsed = null;
             try
@@ -243,9 +256,8 @@ namespace JBDH.Controllers
                 if (!string.IsNullOrWhiteSpace(aiResp))
                     parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResp);
             }
-            catch { /* ignore parse errors, return null */ }
+            catch { }
 
-            // Return both raw and parsed AI response
             return Ok(new { aiResponse = aiResp, analysis = parsed });
         }
 

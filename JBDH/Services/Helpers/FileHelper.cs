@@ -27,31 +27,65 @@ namespace JBDH.Services.Helpers
 
         public static string ExtractText(string filePath)
         {
-            var ext = Path.GetExtension(filePath).ToLowerInvariant();
-            if (ext == ".docx")
+            try
             {
-                using (var doc = DocX.Load(filePath))
+                var ext = Path.GetExtension(filePath).ToLowerInvariant();
+                var fileInfo = new FileInfo(filePath);
+                JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"ExtractText: Path={filePath}, Exists={fileInfo.Exists}, Length={fileInfo.Length}, Extension={fileInfo.Extension}");
+
+                if (ext == ".docx")
                 {
-                    return doc.Text;
-                }
-            }
-            else if (ext == ".pdf")
-            {
-                // Enkel PDF-text-extraktion, byt till ditt nuvarande PDF-bibliotek om du har ett
-                using (var pdf = PdfReader.Open(filePath, PdfDocumentOpenMode.Import))
-                {
-                    var text = new StringBuilder();
-                    foreach (var page in pdf.Pages)
+                    try
                     {
-                        var content = ContentReader.ReadContent(page);
-                        text.Append(ExtractTextFromContent(content));
+                        using (var doc = DocX.Load(filePath))
+                        {
+                            var text = doc.Text;
+                            JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"Extracted DOCX text length: {text.Length}");
+                            return text;
+                        }
                     }
-                    return text.ToString();
+                    catch (Exception ex)
+                    {
+                        JBDH.Services.Configuration.LoggingConfigService.ReturnError($"DOCX extraction error: {ex.Message}");
+                        throw;
+                    }
+                }
+                else if (ext == ".pdf")
+                {
+                    try
+                    {
+                        var sb = new StringBuilder();
+                        using (var pdf = UglyToad.PdfPig.PdfDocument.Open(filePath))
+                        {
+                            int pageNum = 1;
+                            foreach (var page in pdf.GetPages())
+                            {
+                                var pageText = page.Text;
+                                JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"PDFPig page {pageNum}: {pageText?.Substring(0, Math.Min(100, pageText.Length))}");
+                                sb.AppendLine(pageText);
+                                pageNum++;
+                            }
+                        }
+                        var result = sb.ToString();
+                        JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"Extracted PDFPig text length: {result.Length}");
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        JBDH.Services.Configuration.LoggingConfigService.ReturnError($"PDFPig extraction error: {ex.Message}");
+                        throw;
+                    }
+                }
+                else
+                {
+                    JBDH.Services.Configuration.LoggingConfigService.ReturnError($"Unsupported file extension: {ext}");
+                    throw new NotSupportedException("Endast PDF och DOCX stöds.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                throw new NotSupportedException("Endast PDF och DOCX stöds.");
+                JBDH.Services.Configuration.LoggingConfigService.ReturnError($"ExtractText general error: {ex.Message}");
+                return string.Empty;
             }
         }
 
