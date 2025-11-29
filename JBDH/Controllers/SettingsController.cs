@@ -11,153 +11,192 @@ using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
-    [Authorize]
-    [IncludeInApi]
-    public class SettingsController : Controller
-    {
-        private readonly IUserPropertiesService _userPropertiesService; 
-        private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _environment;
-        
-        private readonly IAIApiClient _aIApiClient;
-        private readonly IUserRoleService _userRoleService;
-
-        public SettingsController(
-            IUserPropertiesService userService,
-            ApplicationDbContext context,
-            IWebHostEnvironment environment,
-            IAIApiClient aIApiClient,
-            IUserRoleService userRoleService
-        )
+        [Authorize]
+        [IncludeInApi]
+        public class SettingsController : Controller
         {
-            _context = context;
-            _environment = environment;
-            _aIApiClient = aIApiClient;
-            _userPropertiesService = userService;
-            _userRoleService = userRoleService;
-        }
+            private readonly IUserPropertiesService _userPropertiesService;
+            private readonly ApplicationDbContext _context;
+            private readonly IWebHostEnvironment _environment;
+            private readonly IAIApiClient _aIApiClient;
+            private readonly IUserRoleService _userRoleService;
 
-        [HttpPost]
-        public async Task<IActionResult> ChangeCV(IFormFile cvFile)
-        {
-            LoggingConfigService.ReturnInfo("ChangeCV method called with file: " + (cvFile?.FileName ?? "No file uploaded"));
-            var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null)
-                return this.ErrorPage("User not found.");
-
-            if (cvFile == null)
-                return this.ErrorPage("No file uploaded.");
-
-            var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(cvFile, user.Id);
-            if (result.Success)
-                return this.SetSuccessAndRedirect("CV updated successfully!", "Settings", new { controller = "Home" });
-            else
-                return this.SetErrorAndRedirect(result.ErrorMessage ?? "Failed to update CV.", "Settings", new { controller = "Home" });
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> ToggleOpenForHire(bool openForHiring)
-        {
-            var success = await _userPropertiesService.UpdateOpenForHiringAsync(openForHiring);
-            if (success)
-                return this.SetSuccessAndRedirect("Open for hiring status updated successfully!", "Settings", new { controller = "Home" });
-            else
-                return this.SetErrorAndRedirect("Failed to update status.", "Settings", new { controller = "Home" });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateEmail(string newEmail)
-        {
-            try
+            public SettingsController(
+                IUserPropertiesService userService,
+                ApplicationDbContext context,
+                IWebHostEnvironment environment,
+                IAIApiClient aIApiClient,
+                IUserRoleService userRoleService
+            )
             {
-                var success = await _userPropertiesService.UpdateEmailAsync(newEmail);
-                if (success)
-                    return this.SetSuccessAndRedirect("Email updated successfully!", "SuccessPage");
-                else
-                    return this.ErrorPage("Email update failed.");
+                _context = context;
+                _environment = environment;
+                _aIApiClient = aIApiClient;
+                _userPropertiesService = userService;
+                _userRoleService = userRoleService;
             }
-            catch (ArgumentException ex)
+
+            [HttpPost]
+            public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileRequest request)
             {
-                return this.ErrorPage(ex.Message);
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return this.ErrorPage("User not found.");
+
+                // CV
+                if (request.CvFile != null)
+                {
+                    var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(request.CvFile, user.Id);
+                    if (!result.Success)
+                        return this.SetErrorAndRedirect(result.ErrorMessage ?? "Failed to update CV.", "Settings", new { controller = "Home" });
+                }
+
+                // Email
+                if (!string.IsNullOrWhiteSpace(request.NewEmail))
+                {
+                    var success = await _userPropertiesService.UpdateEmailAsync(request.NewEmail);
+                    if (!success)
+                        return this.ErrorPage("Email update failed.");
+                }
+
+                // Searchable hanteras nedan i user-modifieringslogik
+
+                // Roles
+                if (request.SelectedRoles != null)
+                {
+                    var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (!int.TryParse(userIdString, out var userId))
+                        return this.ErrorPage("Invalid user ID.");
+                    var success = await _userRoleService.UpdateUserRolesAsync(userId, request.SelectedRoles);
+                    if (!success)
+                        return this.SetErrorAndRedirect("Failed to update roles.", "Settings");
+                }
+
+                // Modifiera alla fält i User
+                bool userModified = false;
+                if (!string.IsNullOrWhiteSpace(request.Name))
+                {
+                    user.Name = request.Name;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.DesiredEmploymentType))
+                {
+                    user.DesiredEmploymentType = request.DesiredEmploymentType;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.DesiredWorkMode))
+                {
+                    user.DesiredWorkMode = request.DesiredWorkMode;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+                {
+                    user.PhoneNumber = request.PhoneNumber;
+                    userModified = true;
+                }
+                if (request.TravelAvailability.HasValue)
+                {
+                    user.TravelAvailability = request.TravelAvailability.Value;
+                    userModified = true;
+                }
+                if (request.AvailableFrom.HasValue)
+                {
+                    user.AvailableFrom = request.AvailableFrom.Value;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.DesiredCity))
+                {
+                    user.DesiredCity = request.DesiredCity;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.Competencies))
+                {
+                    user.Competencies = request.Competencies;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.Location))
+                {
+                    user.Location = request.Location;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.AboutMe))
+                {
+                    user.AboutMe = request.AboutMe;
+                    userModified = true;
+                }
+                if (request.Searchable.HasValue)
+                {
+                    user.Searchable = request.Searchable.Value;
+                    userModified = true;
+                }
+                if (request.DeveloperMode.HasValue)
+                {
+                    user.DeveloperMode = request.DeveloperMode.Value;
+                    userModified = true;
+                }
+                if (!string.IsNullOrWhiteSpace(request.WorkPlace))
+                {
+                    user.WorkPlace = request.WorkPlace;
+                    userModified = true;
+                }
+                // Email
+                if (!string.IsNullOrWhiteSpace(request.NewEmail))
+                {
+                    var success = await _userPropertiesService.UpdateEmailAsync(request.NewEmail);
+                    if (!success)
+                        return this.ErrorPage("Email update failed.");
+                }
+                // Password
+                if (!string.IsNullOrWhiteSpace(request.NewPassword))
+                {
+                    // Hasha lösenordet (exempel med SHA256, byt till bättre om du har Identity)
+                    using (var sha = System.Security.Cryptography.SHA256.Create())
+                    {
+                        var bytes = System.Text.Encoding.UTF8.GetBytes(request.NewPassword);
+                        var hash = sha.ComputeHash(bytes);
+                        user.PasswordHash = BitConverter.ToString(hash).Replace("-", "").ToLower();
+                        userModified = true;
+                    }
+                }
+                if (userModified)
+                {
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Delete user
+                if (request.DeleteUser.HasValue && request.DeleteUser.Value)
+                {
+                    _context.Users.Remove(user);
+                    await _context.SaveChangesAsync();
+                    await HttpContext.SignOutAsync("CookieAuth");
+                    return this.SetSuccessAndRedirect("Your account has been deleted.", "Index", new { controller = "Home" });
+                }
+
+                return this.SetSuccessAndRedirect("Profile updated successfully!", "Settings", new { controller = "Home" });
             }
-            catch (Exception ex)
+
+            public class UpdateProfileRequest
             {
-                return this.ErrorPage("An error occurred: " + ex.Message);
+                public IFormFile? CvFile { get; set; }
+                public string? Name { get; set; }
+                public string? NewEmail { get; set; }
+                public string? NewPassword { get; set; }
+                // public bool? OpenForHiring { get; set; } // tas bort, ersätts av Searchable
+                public List<string>? SelectedRoles { get; set; }
+                public bool? DeleteUser { get; set; }
+                public string? DesiredEmploymentType { get; set; }
+                public string? DesiredWorkMode { get; set; }
+                public string? PhoneNumber { get; set; }
+                public bool? TravelAvailability { get; set; }
+                public DateTime? AvailableFrom { get; set; }
+                public string? DesiredCity { get; set; }
+                public string? Competencies { get; set; }
+                public string? Location { get; set; }
+                public string? AboutMe { get; set; }
+                public bool? Searchable { get; set; }
+                public bool? DeveloperMode { get; set; }
+                public string? WorkPlace { get; set; }
             }
         }
-
-        public IActionResult SuccessPage()
-        {
-            return View();  // Return the SuccessPage view
-        }
-
-        [HttpGet]
-        public IActionResult Settings()
-        {
-        var model = new ManageRolesViewModel
-        {
-            AvailableRoles = new List<string> { "Manager", "Recruiter" },
-            SelectedRoles = new List<string>()
-        };
-        return View(model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ManageRoles()
-        {
-            var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null)
-                return RedirectToAction("Settings");
-
-            var model = new ManageRolesViewModel
-            {
-                UserId = user.Id,
-                // Only show roles that can be changed (not "User")
-                SelectedRoles = user.Roles
-                    .Where(r => r.Role != "User")
-                    .Select(r => r.Role)
-                    .ToList()
-            };
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ManageRoles(ManageRolesViewModel model)
-        {
-            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdString, out var userId))
-                return this.ErrorPage("Invalid user ID.");
-
-            var success = await _userRoleService.UpdateUserRolesAsync(userId, model.SelectedRoles);
-            if (success)
-                return this.SetSuccessAndRedirect("Roles updated successfully!", "Settings");
-            else
-                return this.SetErrorAndRedirect("Failed to update roles.", "Settings");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser()
-        {
-            var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null)
-                return this.ErrorPage("User not found.");
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            await HttpContext.SignOutAsync("CookieAuth");
-            return this.SetSuccessAndRedirect("Your account has been deleted.", "Index", new { controller = "Home" });
-        }
-
-        private async Task<bool> DeleteUserByIdAsync(int userId)
-        {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-                return false;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-    }
 }

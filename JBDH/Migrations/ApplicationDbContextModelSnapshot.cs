@@ -484,9 +484,24 @@ namespace JBDH.Migrations
                     b.Property<string>("AboutMe")
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime?>("AvailableFrom")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("CVPath")
                         .HasMaxLength(2083)
                         .HasColumnType("varchar(2083)");
+
+                    b.Property<string>("Competencies")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DesiredCity")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DesiredEmploymentType")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DesiredWorkMode")
+                        .HasColumnType("longtext");
 
                     b.Property<bool?>("DeveloperMode")
                         .ValueGeneratedOnAdd()
@@ -505,10 +520,8 @@ namespace JBDH.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<bool?>("Open")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false);
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("OwnerId")
                         .HasColumnType("int");
@@ -517,10 +530,24 @@ namespace JBDH.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(13)
                         .HasColumnType("varchar(13)");
+
+                    b.Property<bool?>("Searchable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("TravelAvailability")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("WorkPlace")
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
