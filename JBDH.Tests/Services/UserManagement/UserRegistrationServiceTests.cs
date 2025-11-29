@@ -82,7 +82,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.NotNull(user);
             Assert.Equal(model.Email, user.Email);
             Assert.Equal(model.Location, user.Location);
-            Assert.Equal(model.Open, user.Open);
+            Assert.Equal(model.Searchable, user.Searchable);
             Assert.False(user.DeveloperMode);
             Assert.True(BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash));
         }
@@ -410,7 +410,7 @@ namespace JBDH.Tests.Services.UserManagement
             Assert.True(result.Success);
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             Assert.NotNull(user);
-            Assert.False(user.Open);
+            Assert.False(user.Searchable);
         }
 
         public void Dispose()

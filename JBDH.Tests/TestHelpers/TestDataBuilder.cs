@@ -31,7 +31,7 @@ namespace JBDH.Tests.TestHelpers
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("TestPassword123!"),
                 Location = location,
-                Open = true,
+                Searchable = true,
                 DeveloperMode = false
             };
         }
@@ -42,7 +42,7 @@ namespace JBDH.Tests.TestHelpers
         {
             var user = CreateTestUser(email);
             user.Id = id;
-            user.Open = true;
+            user.Searchable = true;
             return user;
         }
     }
