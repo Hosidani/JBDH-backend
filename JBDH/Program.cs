@@ -352,5 +352,21 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route pattern
 
+// ---- APPLY EF MIGRATIONS ON STARTUP (ALL ENVIRONMENTS) ----
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+        LoggingConfigService.ReturnInfo("EF Migrations applied successfully on startup.");
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"EF Migration failed: {ex.Message}");
+        throw;
+    }
+}
+
 // Start the application
 app.Run();
