@@ -42,6 +42,17 @@ jobs:
       - name: Build with dotnet
         run: dotnet build --configuration Release --no-restore
 
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+        working-directory: ./JBDH
+
+      - name: Run EF Core migrations on Azure DB
+        run: dotnet tool run dotnet-ef database update --context ApplicationDbContext --no-build --environment Production
+        working-directory: ./JBDH
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+
       - name: dotnet publish
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp" --no-build
 
@@ -79,11 +90,3 @@ jobs:
           slot-name: 'Production'
           package: .
 
-      - name: Restore dotnet tools
-        run: dotnet tool restore
-
-      - name: Run EF Core migrations on Azure DB
-        run: dotnet tool run dotnet-ef database update --context ApplicationDbContext --no-build --environment Production
-        env:
-          ASPNETCORE_ENVIRONMENT: Production
-          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
