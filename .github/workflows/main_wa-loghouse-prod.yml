@@ -51,7 +51,7 @@ jobs:
         working-directory: ./JBDH
 
       - name: Run EF Core migrations on Azure DB
-        run: dotnet tool run dotnet-ef database update --context ApplicationDbContext --environment Production
+        run: dotnet tool run dotnet-ef database update --context ApplicationDbContext
         working-directory: ./JBDH
         env:
           ASPNETCORE_ENVIRONMENT: Production
