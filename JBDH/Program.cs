@@ -216,9 +216,15 @@ builder.Services.AddDistributedMemoryCache();
 
 // Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseMySQL(connectionString)
-           .EnableSensitiveDataLogging()
-           .LogTo(Console.WriteLine, LogLevel.Information));
+           .LogTo(Console.WriteLine, LogLevel.Information);
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+}
+);
 
 // Register SMTP config
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
