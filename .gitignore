@@ -15,3 +15,4 @@ coverage.*
 TestResults/
 *.lcov
 *.cobertura.xml
+!.config/dotnet-tools.json
