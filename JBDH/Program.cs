@@ -191,6 +191,9 @@ builder.Services.AddAuthentication("CookieAuth")
             context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
         };
+        // Enable cross-origin cookies for production/Azure
+        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+        options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     });
 
 // Add authorization
