@@ -81,9 +81,11 @@ jobs:
 
       - name: Restore dotnet tools
         run: dotnet tool restore
+        working-directory: ./JBDH
 
       - name: Run EF Core migrations on Azure DB
         run: dotnet tool run dotnet-ef database update --context ApplicationDbContext --no-build --environment Production
+        working-directory: ./JBDH
         env:
           ASPNETCORE_ENVIRONMENT: Production
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
