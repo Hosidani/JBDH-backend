@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JBDH.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251129215457_UpdateUserWorkPlace2")]
-    partial class UpdateUserWorkPlace2
+    [Migration("20251129235010_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
