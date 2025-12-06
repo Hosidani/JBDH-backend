@@ -8,5 +8,6 @@ namespace JBDH.Services.AICommunications
     {
         Task SaveUserAIResponseAsync(UserAIResponse aiResponse, User user);
         Task<UserAIResponse?> GetLatestUserAIResponseAsync(int userId);
+        Task<List<UserAIResponse>> GetAllUserAIResponsesAsync(int userId);
     }
 }

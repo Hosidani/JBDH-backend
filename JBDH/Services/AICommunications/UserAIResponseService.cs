@@ -8,33 +8,41 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Services.AICommunications
 {
-    public class UserAIResponseService : IUserAIResponseService
-    {
-        private readonly ApplicationDbContext _context;
-
-        public UserAIResponseService(ApplicationDbContext context)
+        public class UserAIResponseService : IUserAIResponseService
         {
-            _context = context;
-        }
+            private readonly ApplicationDbContext _context;
 
-        public async Task<UserAIResponse?> GetLatestUserAIResponseAsync(int userId)
-        {
-            return await _context.UserAIResponses
-                .Where(r => r.UserId == userId)
-                .OrderByDescending(r => r.CreatedAt)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task SaveUserAIResponseAsync(UserAIResponse aiResponse, User user)
-        {
-            if (aiResponse == null || user == null)
+            public UserAIResponseService(ApplicationDbContext context)
             {
-                LoggingConfigService.ReturnError("AIResponse or User is null");
-                return;
+                _context = context;
             }
-            _context.UserAIResponses.Add(aiResponse);
-            await _context.SaveChangesAsync();
-            LoggingConfigService.ReturnInfo($"AIResponse saved for user ID {user.Id}");
+
+            public async Task<List<UserAIResponse>> GetAllUserAIResponsesAsync(int userId)
+            {
+                return await _context.UserAIResponses
+                    .Where(r => r.UserId == userId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
+
+            public async Task<UserAIResponse?> GetLatestUserAIResponseAsync(int userId)
+            {
+                return await _context.UserAIResponses
+                    .Where(r => r.UserId == userId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .FirstOrDefaultAsync();
+            }
+
+            public async Task SaveUserAIResponseAsync(UserAIResponse aiResponse, User user)
+            {
+                if (aiResponse == null || user == null)
+                {
+                    LoggingConfigService.ReturnError("AIResponse or User is null");
+                    return;
+                }
+                _context.UserAIResponses.Add(aiResponse);
+                await _context.SaveChangesAsync();
+                LoggingConfigService.ReturnInfo($"AIResponse saved for user ID {user.Id}");
+            }
         }
-    }
 }
