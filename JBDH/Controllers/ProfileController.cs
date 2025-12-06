@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Models.Job;
 using Microsoft.AspNetCore.Cors;
 using JBDH.Services.Configuration;
+using JBDH.Models.DTOs;
+
 
 namespace JBDH.Controllers
 {
@@ -49,6 +51,7 @@ namespace JBDH.Controllers
         [HttpPost("AnalyzeCV")]
         public async Task<IActionResult> AnalyzeCV([FromForm] IFormFile cvFile)
         {
+            LoggingConfigService.ReturnInfo("AnalyzeCV endpoint called.");
             var authResult = this.EnsureAuthenticatedUserOrRedirect();
             if (authResult.ErrorResult != null)
                 return Unauthorized();
@@ -66,6 +69,169 @@ namespace JBDH.Controllers
             return Ok(new { success = true, message = "CV uploaded and analysis started." });
         }
 
+        
+        [HttpGet("getprofile/{userId:int}")]
+        public async Task<IActionResult> GetProfile(int userId)
+            {
+                var authResult = this.EnsureAuthenticatedUserOrRedirect();
+                if (authResult.ErrorResult != null)
+                    return authResult.ErrorResult;
+
+                if (authResult.Value.HasValue && authResult.Value.Value == userId)
+                    return this.RedirectToMyProfile();
+
+                if (!authResult.Value.HasValue)
+                    return this.ErrorPage("Authenticated user ID is missing.");
+
+                try
+                {
+                    var viewModel = await _profileService.GetProfileViewModelAsync(authResult.Value.Value, userId);
+                    var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
+                    ViewBag.CurrentUser = currentUser;
+                    return View(viewModel);
+                }
+                catch (Exception ex)
+                {
+                    return this.ErrorPage(ex.Message);
+                }
+            }
+            
+        [HttpGet("getmyprofile")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            var aiResponses = await _userAIResponseService.GetAllUserAIResponsesAsync(user.Id);
+            var aiResponseDtos = aiResponses.Select(r => new JBDH.Models.DTOs.UserAIResponseDto
+            {
+                Id = r.Id,
+                UserId = r.UserId,
+                ResponseText = r.ResponseText,
+                CreatedAt = r.CreatedAt,
+                Analysis = r.AnalysisResult
+            }).ToList();
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                PasswordHash = user.PasswordHash,
+                Email = user.Email,
+                Location = user.Location,
+                Name = user.Name,
+                DesiredEmploymentType = user.DesiredEmploymentType,
+                DesiredWorkMode = user.DesiredWorkMode,
+                PhoneNumber = user.PhoneNumber,
+                TravelAvailability = user.TravelAvailability,
+                AvailableFrom = user.AvailableFrom,
+                DesiredCity = user.DesiredCity,
+                WorkPlace = user.WorkPlace,
+                Competencies = user.Competencies,
+                CVPath = user.CVPath,
+                DeveloperMode = user.DeveloperMode,
+                Searchable = user.Searchable,
+                IsBanned = user.IsBanned,
+                //SelectedRoles = user.Roles?.Select(r => r.RoleName).ToList(),
+                SentFriendRequests = user.SentFriendRequests?.ToList(),
+                ReceivedFriendRequests = user.ReceivedFriendRequests?.ToList(),
+                JobApplications = user.JobApplications?.ToList(),
+                DataFlows = user.DataFlows?.ToList(),
+                AIResponses = aiResponseDtos,
+                Roles = user.Roles?.ToList(),
+                ManagedOrganisations = user.ManagedOrganisations?.ToList(),
+                OwnedUsers = user.OwnedUsers?.Select(u => new UserDto { Id = u.Id, Name = u.Name }).ToList(),
+                Owner = user.Owner != null ? new UserDto { Id = user.Owner.Id, Name = user.Owner.Name } : null,
+                OwnerId = user.OwnerId,
+                AboutMe = user.AboutMe
+            };
+            return Ok(userDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendFriendRequest(int addresseeId)
+        {
+            var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
+            if (authResult.ErrorResult != null)
+                return authResult.ErrorResult;
+
+            var parseResult = this.ValidateAndHandleParseError(addresseeId.ToString(), "Invalid addressee ID.");
+            if (parseResult.ErrorResult != null)
+                return parseResult.ErrorResult;
+
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+            if (!parseResult.Value.HasValue)
+                return this.ErrorPage("Parsed addressee ID is missing.");
+
+            var result = await _friendService.SendFriendRequestAsync(authResult.Value.Value, parseResult.Value.Value);
+            if (result.Success)
+            {
+                return this.SetSuccessAndRedirect("Friend request sent!", "Profile", new { userId = addresseeId });
+            }
+            else
+            {
+                return this.ErrorPage(result.ErrorMessage ?? "Could not send friend request.");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
+        {
+            await _friendService.AcceptFriendRequestAsync(friendshipId);
+            return this.SetSuccessAndRedirect("Friend request accepted!", "MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
+        {
+            await _friendService.DeclineFriendRequestAsync(friendshipId);
+            return this.SetSuccessAndRedirect("Friend request declined.", "MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateJobApplicationNotes(int applicationId, string notes)
+        {
+            var app = await _context.Set<JobApplication>().FindAsync(applicationId);
+            if (app == null)
+                return this.ErrorPage("Job application not found.");
+
+            app.Notes = notes;
+            await _context.SaveChangesAsync();
+            return this.SetSuccessAndRedirect("Notes updated!", "MyProfile");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeveloperToolDeleteUserFromSystem(int userId)
+        {
+            var authResult = this.EnsureAuthenticatedUserOrRedirect();
+            if (authResult.ErrorResult != null)
+                return Unauthorized();
+
+            if (!authResult.Value.HasValue)
+                return this.ErrorPage("Authenticated user ID is missing.");
+
+            var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
+            if (currentUser == null || currentUser.DeveloperMode != true)
+                return this.ForbidWithMessage("You do not have permission to perform this action.");
+
+            if (currentUser.Id == userId)
+                return this.BadRequestMessage("You cannot delete yourself from this action.");
+
+            var userToDelete = await _context.Users.FindAsync(userId);
+            if (userToDelete == null)
+                return this.ErrorPage("User not found.");
+
+            _context.Users.Remove(userToDelete);
+            await _context.SaveChangesAsync();
+
+            return this.SetSuccessAndRedirect("User deleted successfully.", "Index", new { controller = "Home" });
+        }
+        
         [HttpGet("LatestAIUserResponse")]
         public async Task<IActionResult> LatestAIUserResponse()
         {
@@ -111,283 +277,6 @@ namespace JBDH.Controllers
                 ResponseText = raw,
                 CreatedAt = aiUserResponse.CreatedAt,
                 Analysis = analysisObj
-            };
-            return Ok(dto);
-        }
-
-    [HttpGet("profile/{userId:int}")]
-    public async Task<IActionResult> Profile(int userId)
-        {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect();
-            if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
-
-            if (authResult.Value.HasValue && authResult.Value.Value == userId)
-                return this.RedirectToMyProfile();
-
-            if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
-
-            try
-            {
-                var viewModel = await _profileService.GetProfileViewModelAsync(authResult.Value.Value, userId);
-                var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
-                ViewBag.CurrentUser = currentUser;
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                return this.ErrorPage(ex.Message);
-            }
-        }
-
-    [HttpGet("profile/me")]
-    public async Task<IActionResult> MyProfile()
-        {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect();
-            if (authResult.ErrorResult != null)
-                return Unauthorized();
-
-            if (!authResult.Value.HasValue)
-                return BadRequest("Authenticated user ID is missing.");
-
-            var model = await _profileService.GetMyProfileViewModelAsync(authResult.Value.Value);
-            var latestProposal = await _context.AIUserCourseProposals
-                .Where(p => p.UserId == authResult.Value.Value)
-                .OrderByDescending(p => p.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            // Map to DTO and parse AI fields
-
-
-            object? cvAnalysis = null;
-            var cvRaw = model.UserAIResponse?.ResponseText;
-            if (!string.IsNullOrWhiteSpace(cvRaw))
-            {
-                try
-                {
-                    // Log the raw JSON for debugging
-                    JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"[ProfileController] Raw CVAnalysis JSON: {cvRaw}");
-                    var parsed = Newtonsoft.Json.JsonConvert.DeserializeObject<JBDH.Models.User.CVAnalysisResult>(cvRaw);
-                    // Log the parsed object for debugging
-                    JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"[ProfileController] Parsed CVAnalysisResult: {Newtonsoft.Json.JsonConvert.SerializeObject(parsed)}");
-                    cvAnalysis = _manageIOService.ToCamelCaseObject(parsed);
-                }
-                catch (Exception ex)
-                {
-                    JBDH.Services.Configuration.LoggingConfigService.ReturnError($"[ProfileController] Failed to parse CVAnalysisResult: {ex.Message}");
-                    cvAnalysis = null;
-                }
-            }
-
-            object? courseProposals = null;
-            var courseRaw = latestProposal?.ProposalJson;
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(courseRaw))
-                {
-                    var parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(courseRaw);
-                    courseProposals = _manageIOService.ToCamelCaseObject(parsed);
-                }
-            }
-            catch { }
-
-            var dto = new JBDH.Models.DTOs.ProfileDto
-            {
-                User = new JBDH.Models.DTOs.UserDto
-                {
-                    Id = model.User.Id,
-                    Name = model.User.Email, // Or use a real name property if available
-                    Email = model.User.Email,
-                    AboutMe = model.User.AboutMe
-                    // Add other user fields as needed
-                },
-                IsFriend = model.IsFriend,
-                Friends = model.Friends.Select(f => new JBDH.Models.DTOs.FriendDto { Id = f.Id, UserName = f.Email }).ToList(),
-                PendingFriendRequests = model.PendingFriendRequests.Select(fr => new JBDH.Models.DTOs.FriendRequestDto { Id = fr.Id, RequesterName = fr.Requester?.Email }).ToList(),
-                JobApplications = model.JobApplications.Select(j => new JBDH.Models.DTOs.JobApplicationDto {
-                    ApplicationId = j.ApplicationId,
-                    JobId = j.JobId,
-                    JobTitle = j.JobTitle,
-                    JobUrl = j.JobUrl,
-                    JobDescription = j.JobDescription,
-                    Notes = j.Notes,
-                    AppliedAt = j.AppliedAt
-                }).ToList(),
-                CVAnalysisJson = cvRaw,
-                CVAnalysis = cvAnalysis,
-                CourseProposalsJson = courseRaw,
-                CourseProposals = courseProposals
-            };
-            return Ok(dto);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SendFriendRequest(int addresseeId)
-        {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
-            if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
-
-            var parseResult = this.ValidateAndHandleParseError(addresseeId.ToString(), "Invalid addressee ID.");
-            if (parseResult.ErrorResult != null)
-                return parseResult.ErrorResult;
-
-            if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
-            if (!parseResult.Value.HasValue)
-                return this.ErrorPage("Parsed addressee ID is missing.");
-
-            var result = await _friendService.SendFriendRequestAsync(authResult.Value.Value, parseResult.Value.Value);
-            if (result.Success)
-            {
-                return this.SetSuccessAndRedirect("Friend request sent!", "Profile", new { userId = addresseeId });
-            }
-            else
-            {
-                return this.ErrorPage(result.ErrorMessage ?? "Could not send friend request.");
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateAboutMe(string aboutMe)
-        {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect();
-            if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
-
-            if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
-
-            var user = await _context.Users.FindAsync(authResult.Value.Value);
-            if (user == null)
-                return this.ErrorPage("User not found.");
-
-            user.AboutMe = aboutMe;
-            await _context.SaveChangesAsync();
-
-            return this.SetSuccessAndRedirect("About Me updated!", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
-        {
-            await _friendService.AcceptFriendRequestAsync(friendshipId);
-            return this.SetSuccessAndRedirect("Friend request accepted!", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
-        {
-            await _friendService.DeclineFriendRequestAsync(friendshipId);
-            return this.SetSuccessAndRedirect("Friend request declined.", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateJobApplicationNotes(int applicationId, string notes)
-        {
-            var app = await _context.Set<JobApplication>().FindAsync(applicationId);
-            if (app == null)
-                return this.ErrorPage("Job application not found.");
-
-            app.Notes = notes;
-            await _context.SaveChangesAsync();
-            return this.SetSuccessAndRedirect("Notes updated!", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUserFromProfile(int userId)
-        {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect();
-            if (authResult.ErrorResult != null)
-                return Unauthorized();
-
-            if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
-
-            var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
-            if (currentUser == null || currentUser.DeveloperMode != true)
-                return this.ForbidWithMessage("You do not have permission to perform this action.");
-
-            if (currentUser.Id == userId)
-                return this.BadRequestMessage("You cannot delete yourself from this action.");
-
-            var userToDelete = await _context.Users.FindAsync(userId);
-            if (userToDelete == null)
-                return this.ErrorPage("User not found.");
-
-            _context.Users.Remove(userToDelete);
-            await _context.SaveChangesAsync();
-
-            return this.SetSuccessAndRedirect("User deleted successfully.", "Index", new { controller = "Home" });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetMyProfile()
-        {
-            LoggingConfigService.ReturnInfo("[ProfileController] Entered GetMyProfile endpoint.");
-            var authResult = this.EnsureAuthenticatedUserOrRedirect();
-            if (authResult.ErrorResult != null)
-                return Unauthorized();
-
-            if (!authResult.Value.HasValue)
-                return BadRequest("Authenticated user ID is missing.");
-
-            var model = await _profileService.GetMyProfileViewModelAsync(authResult.Value.Value);
-            var latestProposal = await _context.AIUserCourseProposals
-                .Where(p => p.UserId == authResult.Value.Value)
-                .OrderByDescending(p => p.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            object? cvAnalysis = null;
-            var cvRaw = model.UserAIResponse?.ResponseText;
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(cvRaw))
-                    cvAnalysis = Newtonsoft.Json.JsonConvert.DeserializeObject(cvRaw);
-            }
-            catch { }
-
-            object? courseProposals = null;
-            var courseRaw = latestProposal?.ProposalJson;
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(courseRaw))
-                    courseProposals = Newtonsoft.Json.JsonConvert.DeserializeObject(courseRaw);
-            }
-            catch { }
-
-            var dto = new JBDH.Models.DTOs.ProfileDto
-            {
-                User = new JBDH.Models.DTOs.UserDto
-                {
-                    Id = model.User.Id,
-                    Name = model.User.Email, // Or use a real name property if available
-                    Email = model.User.Email,
-                    AboutMe = model.User.AboutMe
-                    // Add other user fields as needed
-                },
-                IsFriend = model.IsFriend,
-                Friends = model.Friends.Select(f => new JBDH.Models.DTOs.FriendDto { Id = f.Id, UserName = f.Email }).ToList(),
-                PendingFriendRequests = model.PendingFriendRequests.Select(fr => new JBDH.Models.DTOs.FriendRequestDto { Id = fr.Id, RequesterName = fr.Requester?.Email }).ToList(),
-                JobApplications = model.JobApplications.Select(j => new JBDH.Models.DTOs.JobApplicationDto {
-                    ApplicationId = j.ApplicationId,
-                    JobId = j.JobId,
-                    JobTitle = j.JobTitle,
-                    JobUrl = j.JobUrl,
-                    JobDescription = j.JobDescription,
-                    Notes = j.Notes,
-                    AppliedAt = j.AppliedAt
-                }).ToList(),
-                CVAnalysisJson = cvRaw,
-                CVAnalysis = cvAnalysis,
-                CourseProposalsJson = courseRaw,
-                CourseProposals = courseProposals
             };
             return Ok(dto);
         }

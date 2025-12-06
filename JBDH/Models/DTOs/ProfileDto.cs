@@ -1,5 +1,11 @@
 using System;
 using System.Collections.Generic;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
+using JBDH.Models.Job;
+using JBDH.Models.Dataflow;
+using JBDH.Models.AI;
+using JBDH.Models.User;
+using JBDH.Models.Organisation;
 
 namespace JBDH.Models.DTOs
 {
@@ -19,10 +25,39 @@ namespace JBDH.Models.DTOs
     public class UserDto
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
+        public string? Password { get; set; }
+        public string? PasswordHash { get; set; }
         public string? Email { get; set; }
+        public string? Location { get; set; }
+        public string? Name { get; set; }
+        public string? DesiredEmploymentType { get; set; }
+        public string? DesiredWorkMode { get; set; }
+        public string? PhoneNumber { get; set; }
+        public bool TravelAvailability { get; set; }
+        public DateTime? AvailableFrom { get; set; }
+        public string? DesiredCity { get; set; }
+        public string? WorkPlace { get; set; }
+        public string? Competencies { get; set; }
+        public string? CVPath { get; set; }
+        public bool? DeveloperMode { get; set; }
+        public bool? Searchable { get; set; }
+        public bool IsBanned { get; set; }
+        public List<string>? SelectedRoles { get; set; }
+        public List<FriendshipModel>? SentFriendRequests { get; set; }
+        public List<FriendshipModel>? ReceivedFriendRequests { get; set; }
+        public List<JobApplication>? JobApplications { get; set; }
+        public List<DataFlow>? DataFlows { get; set; }
+        [Newtonsoft.Json.JsonIgnore]
+        public List<UserAIResponseDto>? AIResponses { get; set; }
+        public List<UserRoleAssignment>? Roles { get; set; }
+        public List<Organisation.Organisation>? ManagedOrganisations { get; set; }
+        public List<UserDto>? OwnedUsers { get; set; }
+        [Newtonsoft.Json.JsonIgnore]
+        public UserDto? Owner { get; set; }
+        public int? OwnerId { get; set; }
         public string? AboutMe { get; set; }
-        // Add other user fields as needed
+
+        
     }
 
     public class FriendDto
