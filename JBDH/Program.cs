@@ -42,23 +42,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
 
-// Create the database if it doesn't exist (development only)
-if (builder.Environment.IsDevelopment())
-{
-    var builderWithoutDb = new MySqlConnectionStringBuilder(connectionString)
-    {
-        Database = "" // Remove the database part
-    };
-    using (var connection = new MySqlConnection(builderWithoutDb.ConnectionString))
-    {
-        connection.Open();
-        using (var cmd = connection.CreateCommand())
-        {
-            cmd.CommandText = "CREATE DATABASE IF NOT EXISTS testing_purposes;";
-            cmd.ExecuteNonQuery();
-        }
-    }
-}
 
 // Run PlatsbankenApi.Main asynchronously in background (non-blocking)
 _ = Task.Run(async () =>
@@ -252,15 +235,6 @@ app.Use(async (context, next) =>
     }
 });
 
-// Ensure database is created on startup (development only)
-if (app.Environment.IsDevelopment())
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.EnsureCreated();
-    }
-}
 
 // Access IHostApplicationLifetime to hook into shutdown events
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
@@ -290,17 +264,16 @@ lifetime.ApplicationStopping.Register(() =>
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Drop the database (development only)
-            if (app.Environment.IsDevelopment())
-            {
-                dbContext.Database.EnsureDeleted();
-            }
+            // if (app.Environment.IsDevelopment())
+            // {
+            //     dbContext.Database.EnsureDeleted();
+            // }
 
             // Call your database flushing service
-            FlushDatabaseService.FlushDatabase();
-            DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
-            JobStreamService.DeleteTimestampFile(); // Delete the timestamp file
-            
-            LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
+            // FlushDatabaseService.FlushDatabase();
+            // DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            // JobStreamService.DeleteTimestampFile(); // Delete the timestamp file
+            // LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
         }
     }
     catch (Exception ex)
