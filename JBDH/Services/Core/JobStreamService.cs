@@ -35,6 +35,7 @@ namespace JBDH.Services.Core
             try
             {
                 using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(10); // Increase timeout for large downloads
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
@@ -54,6 +55,7 @@ namespace JBDH.Services.Core
             try
             {
                 using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(10); // Increase timeout for large downloads
 
                 string fullUrl = url;
                 if (!string.IsNullOrEmpty(date))

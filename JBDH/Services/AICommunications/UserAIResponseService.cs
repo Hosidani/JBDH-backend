@@ -5,16 +5,23 @@ using JBDH.Models.AI;
 using JBDH.Models.Core;
 using JBDH.Services.Configuration;
 using Microsoft.EntityFrameworkCore;
+using JBDH.Models.DTOs;
+using JBDH.Services.Helpers;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace JBDH.Services.AICommunications
 {
         public class UserAIResponseService : IUserAIResponseService
         {
             private readonly ApplicationDbContext _context;
+        private readonly IManageIOService _manageIOService;
 
-            public UserAIResponseService(ApplicationDbContext context)
+            public UserAIResponseService(ApplicationDbContext context, IManageIOService manageIOService)
             {
                 _context = context;
+                _manageIOService = manageIOService;
             }
 
             public async Task<List<UserAIResponse>> GetAllUserAIResponsesAsync(int userId)
@@ -44,5 +51,45 @@ namespace JBDH.Services.AICommunications
                 await _context.SaveChangesAsync();
                 LoggingConfigService.ReturnInfo($"AIResponse saved for user ID {user.Id}");
             }
+
+        public async Task<List<UserAIResponseDto>> GetAllUserAIResponseDtosAsync(int userId)
+        {
+            var responses = await GetAllUserAIResponsesAsync(userId);
+            var dtos = new List<UserAIResponseDto>();
+            foreach (var r in responses)
+            {
+                JBDH.Models.User.CVAnalysisResult? analysisObj = null;
+                var raw = r.ResponseText ?? string.Empty;
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(raw))
+                    {
+                        var cleaned = _manageIOService.ExtractJsonFromCodeBlock(raw);
+                        string? jsonToParse = cleaned;
+                        if (!string.IsNullOrEmpty(jsonToParse) && ((jsonToParse.StartsWith("\"") && jsonToParse.EndsWith("\"")) || jsonToParse.Contains("\\n") || jsonToParse.Contains("\\\"")))
+                        {
+                            jsonToParse = JsonConvert.DeserializeObject<string>(jsonToParse) ?? string.Empty;
+                        }
+                        if (!string.IsNullOrEmpty(jsonToParse))
+                        {
+                            analysisObj = JsonConvert.DeserializeObject<JBDH.Models.User.CVAnalysisResult>(jsonToParse ?? string.Empty);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Optionally log error
+                }
+                dtos.Add(new UserAIResponseDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    ResponseText = raw,
+                    CreatedAt = r.CreatedAt,
+                    Analysis = analysisObj
+                });
+            }
+            return dtos;
         }
+    }
 }
