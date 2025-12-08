@@ -174,6 +174,9 @@ builder.Services.AddAuthentication("CookieAuth")
             context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
         };
+        // Enable cross-origin cookies for production/Azure
+        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+        options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     });
 
 // Add authorization
@@ -199,9 +202,15 @@ builder.Services.AddDistributedMemoryCache();
 
 // Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseMySQL(connectionString)
-           .EnableSensitiveDataLogging()
-           .LogTo(Console.WriteLine, LogLevel.Information));
+           .LogTo(Console.WriteLine, LogLevel.Information);
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+}
+);
 
 // Register SMTP config
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));

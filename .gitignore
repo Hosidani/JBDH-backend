@@ -5,6 +5,7 @@ obj/
 *.json
 !JBDH/appsettings.json
 !JBDH/appsettings.Development.json
+!.config/dotnet-tools.json
 
 # Upload files - don't track user uploads
 wwwroot/uploads/
@@ -15,3 +16,4 @@ coverage.*
 TestResults/
 *.lcov
 *.cobertura.xml
+!.config/dotnet-tools.json

@@ -26,7 +26,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'  # Changed from 9.x to match your project
+          dotnet-version: '9.0.x'  # Match project TargetFramework
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -42,14 +42,29 @@ jobs:
       - name: Build with dotnet
         run: dotnet build --configuration Release --no-restore
 
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+        working-directory: ./JBDH
+
+      - name: Build JBDH project
+        run: dotnet build --configuration Release
+        working-directory: ./JBDH
+
+      - name: Run EF Core migrations on Azure DB
+        run: dotnet tool run dotnet-ef database update --context ApplicationDbContext
+        working-directory: ./JBDH
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp" --no-build
+        run: dotnet publish -c Release -o ./publish/myapp --no-build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ./publish/myapp
 
   deploy:
     runs-on: windows-latest
@@ -78,3 +93,4 @@ jobs:
           app-name: 'wa-loghouse-prod'
           slot-name: 'Production'
           package: .
+
