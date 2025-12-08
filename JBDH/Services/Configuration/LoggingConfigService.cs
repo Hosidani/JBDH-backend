@@ -11,21 +11,29 @@ namespace JBDH.Services.Configuration
             public static void ConfigLogging()
             {
                 var config = new NLog.Config.LoggingConfiguration();
-    
+
+                // Console target (shows in terminal and Azure Log Stream)
                 var logConsole = new NLog.Targets.ConsoleTarget
                 {
                     Name = "logConsole",
                     Layout = "${longdate} ${level:uppercase=true} ${message}"
                 };
 
-                // Add the target to the configuration
+                // File target (shows in Azure LogFiles blade)
+                var logFile = new NLog.Targets.FileTarget
+                {
+                    Name = "logFile",
+                    FileName = "D:/home/LogFiles/app.log", // Azure App Service log path
+                    Layout = "${longdate} ${level:uppercase=true} ${message}"
+                };
+
                 config.AddTarget("logConsole", logConsole);
+                config.AddTarget("logFile", logFile);
 
-                // Define a logging rule for all levels
-                var rule = new NLog.Config.LoggingRule("*", NLog.LogLevel.Trace, logConsole);
-                config.LoggingRules.Add(rule);
+                // Log everything to both targets
+                config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logConsole);
+                config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logFile);
 
-                // Apply the configuration
                 NLog.LogManager.Configuration = config;
             }
     
