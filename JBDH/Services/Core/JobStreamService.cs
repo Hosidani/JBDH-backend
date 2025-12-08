@@ -15,7 +15,7 @@ namespace JBDH.Services.Core
         private const string DbTableName = "testing_purposes";
         private const string DbFileName = "testing_purposes.db";
         private const string TimestampFile = "timestamp.txt";
-        private const string JsonFile = @"D:\home\data\jobs.json";
+        private const string JsonFile = @"D:\home\site\data\jobs.json";
 
         private const string BaseUrl = "https://jobstream.api.jobtechdev.se";
         private const string StreamUrl = $"{BaseUrl}/stream";
@@ -112,12 +112,18 @@ namespace JBDH.Services.Core
             {
                 var jsonData = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
                 var fullPath = Path.GetFullPath(JsonFile);
+                var dir = Path.GetDirectoryName(fullPath);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                    LoggingConfigService.ReturnInfo($"Created directory: {dir}");
+                }
                 File.WriteAllText(fullPath, jsonData);
                 LoggingConfigService.ReturnInfo($"Saving data to {fullPath}...");
             }
             catch (Exception e)
             {
-                LoggingConfigService.ReturnError($"Error saving JSON file: {e.Message}");
+                LoggingConfigService.ReturnError($"Error saving JSON file: {e.Message}\n{e.StackTrace}");
             }
         }
         public static void DeleteTimestampFile()
