@@ -15,7 +15,7 @@ namespace JBDH.Services.Core
         private const string DbTableName = "testing_purposes";
         private const string DbFileName = "testing_purposes.db";
         private const string TimestampFile = "timestamp.txt";
-        private const string JsonFile = "jobs.json";
+        private const string JsonFile = @"D:\home\data\jobs.json";
 
         private const string BaseUrl = "https://jobstream.api.jobtechdev.se";
         private const string StreamUrl = $"{BaseUrl}/stream";
@@ -111,8 +111,9 @@ namespace JBDH.Services.Core
             try
             {
                 var jsonData = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(JsonFile, jsonData);
-                LoggingConfigService.ReturnInfo($"Saving data to {JsonFile}...");
+                var fullPath = Path.GetFullPath(JsonFile);
+                File.WriteAllText(fullPath, jsonData);
+                LoggingConfigService.ReturnInfo($"Saving data to {fullPath}...");
             }
             catch (Exception e)
             {
