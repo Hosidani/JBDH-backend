@@ -66,7 +66,9 @@ namespace JBDH.Controllers
             if (!result.Success)
                 return BadRequest(result.ErrorMessage ?? "Failed to upload or analyze CV.");
 
-            return Ok(new { success = true, message = "CV uploaded and analysis started." });
+            // Hämta och returnera alla AI-respons för användaren som DTOs
+            var aiResponseDtos = await _userAIResponseService.GetAllUserAIResponseDtosAsync(authResult.Value.Value);
+            return Ok(new { success = true, message = "CV uploaded and analysis completed.", aiResponses = aiResponseDtos });
         }
 
         
@@ -103,15 +105,7 @@ namespace JBDH.Controllers
             if (user == null)
                 return Unauthorized();
 
-            var aiResponses = await _userAIResponseService.GetAllUserAIResponsesAsync(user.Id);
-            var aiResponseDtos = aiResponses.Select(r => new JBDH.Models.DTOs.UserAIResponseDto
-            {
-                Id = r.Id,
-                UserId = r.UserId,
-                ResponseText = r.ResponseText,
-                CreatedAt = r.CreatedAt,
-                Analysis = r.AnalysisResult
-            }).ToList();
+            var aiResponseDtos = await _userAIResponseService.GetAllUserAIResponseDtosAsync(user.Id);
 
             var userDto = new UserDto
             {
