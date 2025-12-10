@@ -81,7 +81,7 @@ namespace JBDH.Services.Core
 
         public static void databaseHandler(List<Dictionary<string, object>> jobData)
         {
-            var connectionString = Settings.ConnectionString;
+            var connectionString = DbConfig.DB_CONFIG;
             var databaseExists = false;
             using (var connection = new MySqlConnection(connectionString))
             {
@@ -103,10 +103,10 @@ namespace JBDH.Services.Core
                     LoggingConfigService.ReturnInfo("Database 'testing_purposes' created.");
                 }
             }
-            using (var connection = Settings.OpenConnection())
+            //using (var connection = Settings.OpenConnection())
             {
                 LoggingConfigService.ReturnInfo("Setting up database tables and running ETL pipeline...");
-                EnsureTablesExist(connection);
+                //EnsureTablesExist(connection);
                 EtlPipeline.RunEtlPipeline(jobData);
                 LoggingConfigService.ReturnInfo("Database handler setup completed.");
             }
