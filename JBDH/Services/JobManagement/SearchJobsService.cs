@@ -16,11 +16,13 @@ namespace JBDH.Services.JobManagement
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly InternalSortingService _sorting;
 
-        public SearchJobsService(ApplicationDbContext context, IWebHostEnvironment environment)
+        public SearchJobsService(ApplicationDbContext context, IWebHostEnvironment environment, InternalSortingService sorting)
         {
             _context = context;
             _environment = environment;
+            _sorting = sorting;
         }
 
         public Task<List<JobSearchResultViewModel>> SearchJobsAsync(string description, string location)
@@ -28,7 +30,7 @@ namespace JBDH.Services.JobManagement
             LoggingConfigService.ReturnInfo("SearchJobs Service called");
             try
             {
-                var jobDictionaries = InternalSortingService.InternalSortingFunction(description, location);
+                var jobDictionaries = _sorting.InternalSortingFunction(description, location);
                 LoggingConfigService.ReturnInfo($"SearchJobs method called with description: {description} and location: {location}");
                 LoggingConfigService.ReturnInfo($"Results count: {jobDictionaries.Count}");
 
