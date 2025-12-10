@@ -155,6 +155,7 @@ builder.Services.AddScoped<IMatchingAlgorithmCVJobService, MatchingAlgorithmCVJo
 builder.Services.AddScoped<IAIUserCourseProposalService, AIUserCourseProposalService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddTransient<DatabaseHandlerService>();
+builder.Services.AddScoped<InternalSortingService>();
 
 builder.Services.AddSession(options =>
 {

@@ -5,12 +5,18 @@ using JBDH.Models.Core;
 using MySql.Data.MySqlClient;
 
 namespace JBDH.Services.Core
-{ 
-    class InternalSortingService
+{
+    public class InternalSortingService
     {
-        private static readonly string ConnectionString = DbConfig.DB_CONFIG;
+        private readonly string _connectionString;
 
-        public static void CloseConnection(MySqlConnection conn, MySqlCommand cmd)
+        public InternalSortingService(Microsoft.Extensions.Configuration.IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        }
+
+        public void CloseConnection(MySqlConnection conn, MySqlCommand cmd)
         {
             LoggingConfigService.ReturnInfo("Closing connection...");
             cmd?.Dispose();
@@ -18,7 +24,7 @@ namespace JBDH.Services.Core
             LoggingConfigService.ReturnInfo("Connection closed.");
         }
     
-        public static List<Dictionary<string, object>> SortByPostedDate(string date)
+        public List<Dictionary<string, object>> SortByPostedDate(string date)
         {
             LoggingConfigService.ReturnInfo("Sorting by posted date...");
             string query = SqlQueries.SqlQuery(102) ?? "";
@@ -27,7 +33,7 @@ namespace JBDH.Services.Core
         }
         
         
-        public static List<Dictionary<string, object>> SearchByDescriptionAndLocation(string description, string location)
+        public List<Dictionary<string, object>> SearchByDescriptionAndLocation(string description, string location)
         {
             string query = SqlQueries.SqlQuery(106) ?? "";
             string descPattern = string.IsNullOrEmpty(description) ? "%" : $"%{description.ToLower()}%";
@@ -38,7 +44,7 @@ namespace JBDH.Services.Core
             });
         }
         
-        public static List<Dictionary<string, object>> SearchByDescription(string description)
+        public List<Dictionary<string, object>> SearchByDescription(string description)
         {
             string queryDesc = SqlQueries.SqlQuery(103) ?? ""; // Should search description
             string queryTitle = SqlQueries.SqlQuery(107) ?? ""; // Add this for title search
@@ -53,16 +59,16 @@ namespace JBDH.Services.Core
             return combined;
         }
     
-        public static List<Dictionary<string, object>> SearchByLocation(string location)
+        public List<Dictionary<string, object>> SearchByLocation(string location)
         {
             string query = SqlQueries.SqlQuery(104) ?? "";
             string searchPattern = location == "default" ? "%" : $"%{location.ToLower()}%";
             return ExecuteQuery(query, new MySqlParameter[] { new MySqlParameter("@loc", searchPattern) });
         }
 
-        public static List<Dictionary<string, object>> ExecuteQuery(string query, MySqlParameter[] parameters)
+        public List<Dictionary<string, object>> ExecuteQuery(string query, MySqlParameter[] parameters)
         {
-            using var conn = new MySqlConnection(ConnectionString);
+            using var conn = new MySqlConnection(_connectionString);
             conn.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = query;
@@ -97,7 +103,7 @@ namespace JBDH.Services.Core
             return results;
         }
     
-        public static List<Dictionary<string, object>> HierarchyResults(params List<Dictionary<string, object>>[] resultsSets)
+        public List<Dictionary<string, object>> HierarchyResults(params List<Dictionary<string, object>>[] resultsSets)
         {
             LoggingConfigService.ReturnInfo("Combining results...");
             var seen = new HashSet<object>();
@@ -117,7 +123,7 @@ namespace JBDH.Services.Core
             return combined;
         }
     
-        public static (string, string, string) GetInputFromUser(string description, string location, string date)
+        public (string, string, string) GetInputFromUser(string description, string location, string date)
         {
             return (
                 string.IsNullOrEmpty(description) ? "default" : description,
@@ -126,12 +132,12 @@ namespace JBDH.Services.Core
             );
         }
 
-        public static List<Dictionary<string, object>> GetJobs(string description, string location)
+        public List<Dictionary<string, object>> GetJobs(string description, string location)
         {
             var jobs = new List<Dictionary<string, object>>();
             try
             {
-                using var connection = new MySqlConnection(ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
                 connection.Open();
                 var query = "SELECT * FROM Jobs WHERE (@description = 'default' OR title LIKE @description) AND (@location = 'default' OR location LIKE @location)";
                 using var command = new MySqlCommand(query, connection);
@@ -156,11 +162,11 @@ namespace JBDH.Services.Core
             }
             return jobs;
         }
-        public static List<Dictionary<string, object>> InternalSortingFunction(string description, string location)
+        public List<Dictionary<string, object>> InternalSortingFunction(string description, string location)
         {
             return SearchJobs(description, location);
         }
-        public static List<Dictionary<string, object>> SearchJobs(string description, string location)
+        public List<Dictionary<string, object>> SearchJobs(string description, string location)
         {
             var whereClauses = new List<string>();
             var parameters = new List<MySqlParameter>();
