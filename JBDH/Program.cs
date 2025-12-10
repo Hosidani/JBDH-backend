@@ -30,6 +30,7 @@ using JBDH.Services.ListService;
 
 // Ensure logging is configured for the entire application
 JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
+LoggingConfigService.ReturnInfo("Testlogg: NLog är konfigurerad!");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -354,6 +355,9 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
+
+// Log test message to JSON (for debugging)
+JBDH.Services.Core.JobStreamService.SaveToJson(new List<Dictionary<string, object>> { new Dictionary<string, object> { { "test", "logg" } } });
 
 // Start the application
 app.Run();
