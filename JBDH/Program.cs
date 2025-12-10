@@ -44,27 +44,6 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
 
 
-// Run PlatsbankenApi.Main asynchronously in background (non-blocking)
-_ = Task.Run(async () =>
-{
-    try
-    {
-        LoggingConfigService.ConfigLogging(); // Configure logging first
-        LoggingConfigService.ReturnInfo("Starting background job data fetch...");
-        var jobData = await JobStreamService.RunJobStreamAsync(args);
-        using (var scope = builder.Services.BuildServiceProvider().CreateScope())
-        {
-            var dbHandler = scope.ServiceProvider.GetRequiredService<DatabaseHandlerService>();
-            dbHandler.DatabaseHandler(jobData);
-        }
-        LoggingConfigService.ReturnInfo("Background job data fetch completed.");
-    }
-    catch (Exception ex)
-    {
-        LoggingConfigService.ReturnError($"Background startup error: {ex.Message}");
-        // Don't rethrow - let the app continue even if job fetching fails
-    }
-});
 
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
@@ -121,6 +100,7 @@ if (builder.Environment.IsDevelopment())
         c.DocumentFilter<JBDH.Swagger.IncludeInApiDocumentFilter>();
     });
 }
+builder.Services.AddHostedService<JobLoaderWorker>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
