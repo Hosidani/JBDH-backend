@@ -12,8 +12,6 @@ namespace JBDH.Services.Core
 { 
     public class JobStreamService
     {
-        private const string DbTableName = "testing_purposes";
-        private const string DbFileName = "testing_purposes.db";
         private const string TimestampFile = "timestamp.txt";
         private const string JsonFile = @"D:\home\site\data\jobs.json";
 
@@ -113,17 +111,28 @@ namespace JBDH.Services.Core
                 var jsonData = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
                 var fullPath = Path.GetFullPath(JsonFile);
                 var dir = Path.GetDirectoryName(fullPath);
+                LoggingConfigService.ReturnInfo($"[SaveToJson] Försöker spara jobs.json. Path: {fullPath}");
                 if (!Directory.Exists(dir))
                 {
                     Directory.CreateDirectory(dir);
-                    LoggingConfigService.ReturnInfo($"Created directory: {dir}");
+                    LoggingConfigService.ReturnInfo($"[SaveToJson] Skapade mapp: {dir}");
                 }
+                LoggingConfigService.ReturnInfo($"[SaveToJson] Skriver data till filen...");
                 File.WriteAllText(fullPath, jsonData);
-                LoggingConfigService.ReturnInfo($"Saving data to {fullPath}...");
+                LoggingConfigService.ReturnInfo($"[SaveToJson] Klar! Sparade {data.Count} jobb till {fullPath}");
+                if (File.Exists(fullPath))
+                {
+                    var fileInfo = new FileInfo(fullPath);
+                    LoggingConfigService.ReturnInfo($"[SaveToJson] jobs.json finns. Storlek: {fileInfo.Length} bytes. Senast ändrad: {fileInfo.LastWriteTimeUtc} UTC");
+                }
+                else
+                {
+                    LoggingConfigService.ReturnError($"[SaveToJson] jobs.json kunde INTE hittas direkt efter skrivning!");
+                }
             }
             catch (Exception e)
             {
-                LoggingConfigService.ReturnError($"Error saving JSON file: {e.Message}\n{e.StackTrace}");
+                LoggingConfigService.ReturnError($"[SaveToJson] FEL vid sparande av jobs.json: {e.Message}\n{e.StackTrace}");
             }
         }
         public static void DeleteTimestampFile()
