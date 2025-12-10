@@ -336,9 +336,5 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
-
-// Log test message to JSON (for debugging)
-JBDH.Services.Core.JobStreamService.SaveToJson(new List<Dictionary<string, object>> { new Dictionary<string, object> { { "test", "logg" } } });
-
 // Start the application
 app.Run();
