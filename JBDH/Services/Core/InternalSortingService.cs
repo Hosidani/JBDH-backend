@@ -62,7 +62,7 @@ namespace JBDH.Services.Core
 
         public static List<Dictionary<string, object>> ExecuteQuery(string query, MySqlParameter[] parameters)
         {
-            using var conn = new MySqlConnection(Settings.SetupConnection());
+            using var conn = new MySqlConnection(ConnectionString);
             conn.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = query;

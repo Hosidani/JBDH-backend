@@ -8,8 +8,10 @@ public class BoardDataService : IBoardDataService
     public Board? GetBoardWithListsAndCards(int boardId)
     {
         Board? board = null;
-        using (var connection = Settings.OpenConnection())
+        // Use connection string directly (from DbConfig)
+        using (var connection = new MySqlConnection(DbConfig.DB_CONFIG))
         {
+            connection.Open();
             // Load the board
             var query = "SELECT * FROM Boards WHERE Id = @Id";
             using (var command = new MySqlCommand(query, connection))
