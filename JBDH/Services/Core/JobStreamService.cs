@@ -27,6 +27,39 @@ namespace JBDH.Services.Core
         /// </summary>
         /// <param name="url">The API endpoint to fetch job ads from.</param>
         /// <returns>A list of job ads as raw JSON objects.</returns>
+        
+        public static async Task DownloadFullJobSnapshotAsync(string filePath) 
+        {
+            LoggingConfigService.ReturnInfo($"Starting full job snapshot download to {filePath}...");
+            using var client = new HttpClient();
+            string url = SnapshotUrl;
+            var allJobs = new List<Dictionary<string, object>>();
+
+            while (!string.IsNullOrEmpty(url))
+            {
+                LoggingConfigService.ReturnInfo($"Fetching jobs from: {url}");
+                var response = await client.GetStringAsync(url);
+                using var doc = JsonDocument.Parse(response);
+
+                // Extract jobs from this page
+                var jobs = doc.RootElement.GetProperty("results").EnumerateArray();
+                int pageCount = 0;
+                foreach (var job in jobs)
+                {
+                    allJobs.Add(JsonSerializer.Deserialize<Dictionary<string, object>>(job.GetRawText())!);
+                    pageCount++;
+                }
+                LoggingConfigService.ReturnInfo($"Fetched {pageCount} jobs from current page. Total so far: {allJobs.Count}");
+
+                // Get next page cursor
+                url = doc.RootElement.TryGetProperty("next", out var nextEl) ? nextEl.GetString() ?? string.Empty : string.Empty;
+            }
+
+            // Save full list
+            await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(allJobs));
+            LoggingConfigService.ReturnInfo($"Full job snapshot saved to {filePath}. Total jobs: {allJobs.Count}");
+        }
+        
         public static async Task<List<Dictionary<string, object>>> FetchJobAdsAsync(string url)
         {
             LoggingConfigService.ReturnInfo($"Fetching job ads from URL: {url}");
@@ -163,8 +196,13 @@ namespace JBDH.Services.Core
             if (forceSnapshot || isFirstRun)
             {
                 var reason = forceSnapshot ? "jobs.json is missing or empty" : "First run detected";
-                LoggingConfigService.ReturnInfo($"{reason}. Fetching full dataset using Snapshot...");
-                jobAds = await FetchJobAdsAsync(SnapshotUrl);
+                LoggingConfigService.ReturnInfo($"{reason}. Downloading full snapshot...");
+
+                // Download full snapshot with pagination
+                await DownloadFullJobSnapshotAsync(JsonFile);
+
+                // Load the downloaded file into jobAds for ETL
+                jobAds = EtlPipeline.ExtractData(JsonFile);
             }
             else
             {
