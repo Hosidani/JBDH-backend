@@ -10,8 +10,6 @@ namespace JBDH.Services.Core
 {
     public class EtlPipeline
     {
-        private static readonly string ConnectionString = DbConfig.DB_CONFIG;
-
         public static DateTime? ParseDate(string dateStr)
         {
             if (string.IsNullOrEmpty(dateStr)) return null;
@@ -170,12 +168,12 @@ namespace JBDH.Services.Core
             return transformed;
         }
 
-        public static void LoadData(List<Dictionary<string, object>> rawJobs)
+        public static void LoadData(List<Dictionary<string, object>> rawJobs, string connectionString)
         {
             LoggingConfigService.ReturnInfo($"Loading {rawJobs.Count} jobs into database...");
             try
             {
-                using var connection = new MySqlConnection(ConnectionString);
+                using var connection = new MySqlConnection(connectionString);
                 connection.Open();
 
                 foreach (var job in rawJobs)
@@ -210,11 +208,11 @@ namespace JBDH.Services.Core
             }
         }
 
-        public static void RunEtlPipeline(List<Dictionary<string, object>> rawData)
+        public static void RunEtlPipeline(List<Dictionary<string, object>> rawData, string connectionString)
         {
             LoggingConfigService.ReturnInfo("Starting ETL pipeline...");
             var transformedData = TransformData(rawData);
-            LoadData(transformedData);
+            LoadData(transformedData, connectionString);
             LoggingConfigService.ReturnInfo("ETL pipeline completed.");
         }
     }

@@ -51,7 +51,11 @@ _ = Task.Run(async () =>
         LoggingConfigService.ConfigLogging(); // Configure logging first
         LoggingConfigService.ReturnInfo("Starting background job data fetch...");
         var jobData = await JobStreamService.RunJobStreamAsync(args);
-        DatabaseHandlerService.databaseHandler(jobData);
+        using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+        {
+            var dbHandler = scope.ServiceProvider.GetRequiredService<DatabaseHandlerService>();
+            dbHandler.DatabaseHandler(jobData);
+        }
         LoggingConfigService.ReturnInfo("Background job data fetch completed.");
     }
     catch (Exception ex)
@@ -149,6 +153,7 @@ builder.Services.AddScoped<JBDH.Services.Messaging.IMessageService, JBDH.Service
 builder.Services.AddScoped<IMatchingAlgorithmCVJobService, MatchingAlgorithmCVJobService>();
 builder.Services.AddScoped<IAIUserCourseProposalService, AIUserCourseProposalService>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddTransient<DatabaseHandlerService>();
 
 builder.Services.AddSession(options =>
 {
