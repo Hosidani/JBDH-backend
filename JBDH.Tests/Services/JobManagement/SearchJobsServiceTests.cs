@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+/*using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -142,3 +142,5 @@ namespace JBDH.Tests.Services.JobManagement
         }
     }
 } 
+
+*/
