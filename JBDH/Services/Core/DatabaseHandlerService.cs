@@ -6,13 +6,23 @@ using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 
+using Microsoft.Extensions.Configuration;
+// ...existing code...
+
 namespace JBDH.Services.Core
 {
-    class DatabaseHandlerService
+    public class DatabaseHandlerService
     {
+        private readonly string _connectionString;
+
+        public DatabaseHandlerService(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
+
         private const string JsonFile = "jobs.json";
 
-        private static void EnsureJsonFileExists(string filePath)
+        private void EnsureJsonFileExists(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -22,7 +32,7 @@ namespace JBDH.Services.Core
             // No need to log if the file already exists
         }
 
-        private static void EnsureTablesExist(MySqlConnection connection)
+        private void EnsureTablesExist(MySqlConnection connection)
         {
             try
             {
@@ -79,11 +89,10 @@ namespace JBDH.Services.Core
             }
         }
 
-        public static void databaseHandler(List<Dictionary<string, object>> jobData)
+        public void DatabaseHandler(List<Dictionary<string, object>> jobData)
         {
-            var connectionString = DbConfig.DB_CONFIG;
             var databaseExists = false;
-            using (var connection = new MySqlConnection(connectionString))
+            using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 var command = new MySqlCommand("SHOW DATABASES LIKE 'testing_purposes'", connection);
@@ -107,7 +116,7 @@ namespace JBDH.Services.Core
             {
                 LoggingConfigService.ReturnInfo("Setting up database tables and running ETL pipeline...");
                 //EnsureTablesExist(connection);
-                EtlPipeline.RunEtlPipeline(jobData);
+                EtlPipeline.RunEtlPipeline(jobData, _connectionString);
                 LoggingConfigService.ReturnInfo("Database handler setup completed.");
             }
         }
