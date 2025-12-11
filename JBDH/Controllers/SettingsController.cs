@@ -11,6 +11,8 @@ using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
+        [Route("api/Settings")]
+        [ApiController]
         [Authorize]
         [IncludeInApi]
         public class SettingsController : Controller
@@ -43,24 +45,40 @@ namespace JBDH.Controllers
                 if (user == null)
                     return Unauthorized();
 
-                // Map all fields from DTO to entity
-                user.PasswordHash = dto.PasswordHash ?? user.PasswordHash;
-                user.Name = dto.Name;
-                user.Email = dto.Email ?? user.Email;
-                user.Location = dto.Location ?? user.Location;
-                user.DesiredEmploymentType = dto.DesiredEmploymentType;
-                user.DesiredWorkMode = dto.DesiredWorkMode;
-                user.PhoneNumber = dto.PhoneNumber;
-                user.TravelAvailability = dto.TravelAvailability;
-                user.AvailableFrom = dto.AvailableFrom;
-                user.DesiredCity = dto.DesiredCity;
-                user.WorkPlace = dto.WorkPlace;
-                user.Competencies = dto.Competencies;
-                user.CVPath = dto.CVPath;
-                user.DeveloperMode = dto.DeveloperMode;
-                user.Searchable = dto.Searchable;
+                // Only update fields that are present and valid in the DTO
+                if (!string.IsNullOrWhiteSpace(dto.PasswordHash) && dto.PasswordHash != user.PasswordHash)
+                    user.PasswordHash = dto.PasswordHash;
+                if (!string.IsNullOrWhiteSpace(dto.Name))
+                    user.Name = dto.Name;
+                if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != user.Email)
+                    user.Email = dto.Email;
+                if (!string.IsNullOrWhiteSpace(dto.Location))
+                    user.Location = dto.Location;
+                if (!string.IsNullOrWhiteSpace(dto.DesiredEmploymentType))
+                    user.DesiredEmploymentType = dto.DesiredEmploymentType;
+                if (!string.IsNullOrWhiteSpace(dto.DesiredWorkMode))
+                    user.DesiredWorkMode = dto.DesiredWorkMode;
+                if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+                    user.PhoneNumber = dto.PhoneNumber;
+                if (dto.TravelAvailability.HasValue)
+                    user.TravelAvailability = dto.TravelAvailability.Value;
+                if (dto.AvailableFrom.HasValue)
+                    user.AvailableFrom = dto.AvailableFrom;
+                if (!string.IsNullOrWhiteSpace(dto.DesiredCity))
+                    user.DesiredCity = dto.DesiredCity;
+                if (!string.IsNullOrWhiteSpace(dto.WorkPlace))
+                    user.WorkPlace = dto.WorkPlace;
+                if (!string.IsNullOrWhiteSpace(dto.Competencies))
+                    user.Competencies = dto.Competencies;
+                if (!string.IsNullOrWhiteSpace(dto.CVPath))
+                    user.CVPath = dto.CVPath;
+                if (dto.DeveloperMode.HasValue)
+                    user.DeveloperMode = dto.DeveloperMode;
+                if (dto.Searchable.HasValue)
+                    user.Searchable = dto.Searchable;
                 user.IsBanned = dto.IsBanned;
-                user.AboutMe = dto.AboutMe;
+                if (!string.IsNullOrWhiteSpace(dto.AboutMe))
+                    user.AboutMe = dto.AboutMe;
                 // SelectedRoles, SentFriendRequests, ReceivedFriendRequests, JobApplications, DataFlows, AIResponses, Roles, ManagedOrganisations, OwnedUsers, Owner, OwnerId are not mapped here (handled elsewhere or not updatable directly)
 
                 _context.Users.Update(user);
