@@ -9,10 +9,12 @@ namespace JBDH.Services.Core
     public class JobLoaderWorker : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguration _configuration;
 
-        public JobLoaderWorker(IServiceProvider serviceProvider)
+        public JobLoaderWorker(IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
+            _configuration = configuration;
         }
 
         protected override async Task ExecuteAsync(CancellationToken token)
@@ -23,7 +25,10 @@ namespace JBDH.Services.Core
             {
                 LoggingConfigService.ConfigLogging();
                 LoggingConfigService.ReturnInfo("Starting background job data fetch...");
-                var jobData = await JobStreamService.RunJobStreamAsync(Array.Empty<string>());
+                
+                var jobStreamService = new JobStreamService(_configuration);
+                var jobData = await jobStreamService.RunJobStreamAsync(Array.Empty<string>());
+                
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dbHandler = scope.ServiceProvider.GetRequiredService<JBDH.Services.Core.DatabaseHandlerService>();

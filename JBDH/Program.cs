@@ -136,6 +136,7 @@ builder.Services.AddScoped<IAIUserCourseProposalService, AIUserCourseProposalSer
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddTransient<DatabaseHandlerService>();
 builder.Services.AddScoped<InternalSortingService>();
+builder.Services.AddSingleton<JobStreamService>();
 
 builder.Services.AddSession(options =>
 {
