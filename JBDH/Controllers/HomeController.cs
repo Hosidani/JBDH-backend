@@ -30,8 +30,10 @@ namespace JBDH.Controllers
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly IAIApiClient _aiApiClient;
         private readonly ITextChunkingService _textChunkingService;
+        private readonly ILogger<HomeController> _logger;
 
         public HomeController(
+            ILogger<HomeController> logger,
             ApplicationDbContext context,
             IWebHostEnvironment environment,
             DataFlowService dataFlowService,
@@ -43,6 +45,7 @@ namespace JBDH.Controllers
             IAIApiClient aiApiClient,
             ITextChunkingService textChunkingService)
         {
+            _logger = logger;
             _context = context;
             _environment = environment;
             _dataFlowService = dataFlowService;
@@ -208,13 +211,36 @@ namespace JBDH.Controllers
         [HttpPost("CompareCvToJobAd")]
         public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
         {
-            LoggingConfigService.ReturnInfo("Starting CV to Job Ad comparison process.");
+            _logger.LogInformation("CompareCvToJobAd called. Model: {@Model}", model);
             if (model?.CvPath == null)
             {
+                _logger.LogWarning("No CV file uploaded.");
                 return BadRequest(new { error = "CV file is required." });
             }
 
             var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
+            if (string.IsNullOrEmpty(savedCvPath))
+            {
+                return BadRequest(new { error = "File could not be saved." });
+            }
+
+            string cvText;
+            try
+            {
+                cvText = FileHelper.ExtractText(savedCvPath);
+                _logger.LogInformation("Extracted CV text length: {Length}", cvText?.Length ?? 0);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception during CV text extraction.");
+                return BadRequest(new { error = "CV text extraction error: " + ex.Message });
+            }
+
+            if (string.IsNullOrWhiteSpace(cvText))
+            {
+                _logger.LogWarning("CV text is empty or null.");
+                return BadRequest(new { error = "CV text extraction failed or is empty." });
+            }
 
             var aiRequest = new AIRequest
             {
@@ -225,12 +251,18 @@ namespace JBDH.Controllers
             };
 
             var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
-
             var aiResp = aiResult.Response ?? string.Empty;
-            LoggingConfigService.ReturnInfo(aiResp);
+            _logger.LogInformation("AI response: {AIResp}", aiResp);
 
-            // Return AI response directly for API clients
-            return Ok(new { aiResponse = aiResult.Response });
+            object? parsed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(aiResp))
+                    parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResp);
+            }
+            catch { }
+
+            return Ok(new { aiResponse = aiResp, analysis = parsed });
         }
 
         [HttpGet("Result")]
@@ -238,7 +270,14 @@ namespace JBDH.Controllers
         {
             LoggingConfigService.ReturnInfo("Accessing Result action in HomeController.");
             var aiResponse = TempData["AIResult"] as string ?? "No result available.";
-            return Ok(new { aiResponse });
+            object? parsed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(aiResponse) && aiResponse != "No result available.")
+                    parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(aiResponse);
+            }
+            catch { /* ignore parse errors, return null */ }
+            return Ok(new { aiResponse, analysis = parsed });
         }
 
         [HttpPost("AnalyzeJobEmbeddings")]

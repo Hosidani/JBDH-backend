@@ -86,7 +86,7 @@ namespace JBDH.Services.UserManagement
             var user = await GetCurrentUserAsync();
             if (user == null) return false;
 
-            user.Open = openForHiring; // Updated property casing
+            user.Searchable = openForHiring; // Updated property casing
             await _context.SaveChangesAsync();
             return true;
         }

@@ -28,48 +28,20 @@ using MySql.EntityFrameworkCore.Extensions;
 using JBDH.Services.BoardDataService;
 using JBDH.Services.ListService;
 
+// Ensure logging is configured for the entire application
+JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
+LoggingConfigService.ReturnInfo("Testlogg: NLog är konfigurerad!");
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Log the connection string for debugging
+var debugConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"[DEBUG] Using connection string: {debugConnectionString}");
 
 // Get connection string ONCE at the top
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
-
-// Create the database if it doesn't exist (development only)
-if (builder.Environment.IsDevelopment())
-{
-    var builderWithoutDb = new MySqlConnectionStringBuilder(connectionString)
-    {
-        Database = "" // Remove the database part
-    };
-    using (var connection = new MySqlConnection(builderWithoutDb.ConnectionString))
-    {
-        connection.Open();
-        using (var cmd = connection.CreateCommand())
-        {
-            cmd.CommandText = "CREATE DATABASE IF NOT EXISTS testing_purposes;";
-            cmd.ExecuteNonQuery();
-        }
-    }
-}
-
-// Run PlatsbankenApi.Main asynchronously in background (non-blocking)
-_ = Task.Run(async () =>
-{
-    try
-    {
-        LoggingConfigService.ConfigLogging(); // Configure logging first
-        LoggingConfigService.ReturnInfo("Starting background job data fetch...");
-        var jobData = await JobStreamService.RunJobStreamAsync(args);
-        DatabaseHandlerService.databaseHandler(jobData);
-        LoggingConfigService.ReturnInfo("Background job data fetch completed.");
-    }
-    catch (Exception ex)
-    {
-        LoggingConfigService.ReturnError($"Background startup error: {ex.Message}");
-        // Don't rethrow - let the app continue even if job fetching fails
-    }
-});
 
 // Add services to the container **before** calling builder.Build
 builder.Services.AddControllersWithViews();
@@ -83,7 +55,6 @@ if (builder.Environment.IsDevelopment())
         // or if the action has a custom [IncludeInApi] attribute (optional).
         c.DocInclusionPredicate((docName, apiDesc) =>
         {
-
             // Skip endpoints explicitly ignored
             var ignore = apiDesc.ActionDescriptor.EndpointMetadata
                         .OfType<Microsoft.AspNetCore.Mvc.ApiExplorerSettingsAttribute>()
@@ -127,6 +98,7 @@ if (builder.Environment.IsDevelopment())
         c.DocumentFilter<JBDH.Swagger.IncludeInApiDocumentFilter>();
     });
 }
+builder.Services.AddHostedService<JobLoaderWorker>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
@@ -161,6 +133,9 @@ builder.Services.AddScoped<JBDH.Services.Messaging.IMessageService, JBDH.Service
 builder.Services.AddScoped<IMatchingAlgorithmCVJobService, MatchingAlgorithmCVJobService>();
 builder.Services.AddScoped<IAIUserCourseProposalService, AIUserCourseProposalService>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddTransient<DatabaseHandlerService>();
+builder.Services.AddScoped<InternalSortingService>();
+builder.Services.AddSingleton<JobStreamService>();
 
 builder.Services.AddSession(options =>
 {
@@ -174,8 +149,21 @@ builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
         options.Cookie.Name = "MyCookieName";
-    options.LoginPath = "/Login";
+        options.LoginPath = "/Login";
         options.LogoutPath = "/Logout/Logout";
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+        // Enable cross-origin cookies for production/Azure
+        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+        options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     });
 
 // Add authorization
@@ -184,29 +172,15 @@ builder.Services.AddAuthorization();
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    // Policy for local frontend dev (Vite default port 5173)
     options.AddPolicy("AllowLocalFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-
-    // Default policy used elsewhere
-    options.AddDefaultPolicy(policy =>
-    {
-        var env = builder.Environment;
-        if (env.IsDevelopment())
-        {
-            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-        }
-        else
-        {
-            policy.WithOrigins("https://your-production-domain.com")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        }
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "https://victorious-bay-00a810703.3.azurestaticapps.net"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
@@ -215,9 +189,15 @@ builder.Services.AddDistributedMemoryCache();
 
 // Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseMySQL(connectionString)
-           .EnableSensitiveDataLogging()
-           .LogTo(Console.WriteLine, LogLevel.Information));
+           .LogTo(Console.WriteLine, LogLevel.Information);
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+}
+);
 
 // Register SMTP config
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
@@ -234,15 +214,23 @@ if (smtpSettings == null ||
 // Build the application
 var app = builder.Build();
 
-// Ensure database is created on startup (development only)
-if (app.Environment.IsDevelopment())
+// Add request logging middleware for production debugging
+app.Use(async (context, next) =>
 {
-    using (var scope = app.Services.CreateScope())
+    try
     {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.EnsureCreated();
+        LoggingConfigService.ReturnInfo($"Request: {context.Request.Method} {context.Request.Path}");
+        await next();
+        LoggingConfigService.ReturnInfo($"Response: {context.Response.StatusCode}");
     }
-}
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"Request failed: {ex.Message}");
+        LoggingConfigService.ReturnError($"Stack trace: {ex.StackTrace}");
+        throw;
+    }
+});
+
 
 // Access IHostApplicationLifetime to hook into shutdown events
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
@@ -272,17 +260,16 @@ lifetime.ApplicationStopping.Register(() =>
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Drop the database (development only)
-            if (app.Environment.IsDevelopment())
-            {
-                dbContext.Database.EnsureDeleted();
-            }
+            // if (app.Environment.IsDevelopment())
+            // {
+            //     dbContext.Database.EnsureDeleted();
+            // }
 
             // Call your database flushing service
-            FlushDatabaseService.FlushDatabase();
-            DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
-            JobStreamService.DeleteTimestampFile(); // Delete the timestamp file
-            
-            LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
+            // FlushDatabaseService.FlushDatabase();
+            // DeleteJsonFileService.DeleteJsonFile(); // Delete the JSON file
+            // JobStreamService.DeleteTimestampFile(); // Delete the timestamp file
+            // LoggingConfigService.ReturnInfo("Database flushed, json file deleted and application stopped.");
         }
     }
     catch (Exception ex)
@@ -303,22 +290,14 @@ else
     app.UseHsts();
 }
 
+
 app.UseRouting();
+app.UseCors("AllowLocalFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 app.UseStaticFiles();
-
 app.UseHttpsRedirection();
-// Apply CORS: use the local frontend policy in Development so Vite (http://localhost:5173) can call the API
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("AllowLocalFrontend");
-}
-else
-{
-    app.UseCors();
-}
 
 // Enable Swagger middleware only in Development
 if (app.Environment.IsDevelopment())
@@ -330,9 +309,32 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger"; // Serve at /swagger
     });
 }
+
+// Add health check endpoint (before MapControllerRoute)
+app.MapGet("/health", () => new { 
+    status = "healthy", 
+    timestamp = DateTime.UtcNow,
+    environment = app.Environment.EnvironmentName 
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"); // Default route pattern
 
+// ---- APPLY EF MIGRATIONS ON STARTUP (ALL ENVIRONMENTS) ----
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+        LoggingConfigService.ReturnInfo("EF Migrations applied successfully on startup.");
+    }
+    catch (Exception ex)
+    {
+        LoggingConfigService.ReturnError($"EF Migration failed: {ex.Message}");
+        throw;
+    }
+}
 // Start the application
 app.Run();

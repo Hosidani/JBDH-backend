@@ -78,7 +78,7 @@ namespace JBDH.Services.UserManagement
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
             Email = model.Email,
             Location = model.Location,
-            Open = model.Open,
+            Searchable = model.Open,
             DeveloperMode = false,
         };
         user.Roles.Add(new UserRoleAssignment { User = user, Role = "User" });

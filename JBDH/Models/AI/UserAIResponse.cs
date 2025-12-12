@@ -28,6 +28,7 @@ namespace JBDH.Models.AI
             }
         }
 
+        [JsonIgnore]
         public required JBDH.Models.User.User User { get; set; }
     }
 }

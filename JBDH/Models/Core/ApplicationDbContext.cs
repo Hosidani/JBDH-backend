@@ -85,7 +85,7 @@ namespace JBDH.Models.Core
                     .IsRequired(false) // Optional field
                     .HasDefaultValue(false); // Default value for boolean field
 
-                entity.Property(u => u.Open)
+                entity.Property(u => u.Searchable)
                     .IsRequired(false)
                     .HasDefaultValue(false); // Default value for boolean field
 

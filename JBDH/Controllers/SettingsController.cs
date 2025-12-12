@@ -6,158 +6,140 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JBDH.Swagger;
 using Microsoft.AspNetCore.Authentication;
-using JBDH.Models.ViewModels;
+using JBDH.Models.DTOs;
 using JBDH.Helpers;
 
 namespace JBDH.Controllers
 {
-    [Authorize]
-    [IncludeInApi]
-    public class SettingsController : Controller
-    {
-        private readonly IUserPropertiesService _userPropertiesService; 
-        private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _environment;
-        
-        private readonly IAIApiClient _aIApiClient;
-        private readonly IUserRoleService _userRoleService;
-
-        public SettingsController(
-            IUserPropertiesService userService,
-            ApplicationDbContext context,
-            IWebHostEnvironment environment,
-            IAIApiClient aIApiClient,
-            IUserRoleService userRoleService
-        )
+        [Route("api/Settings")]
+        [ApiController]
+        [Authorize]
+        [IncludeInApi]
+        public class SettingsController : Controller
         {
-            _context = context;
-            _environment = environment;
-            _aIApiClient = aIApiClient;
-            _userPropertiesService = userService;
-            _userRoleService = userRoleService;
-        }
+            private readonly IUserPropertiesService _userPropertiesService;
+            private readonly ApplicationDbContext _context;
+            private readonly IWebHostEnvironment _environment;
+            private readonly IAIApiClient _aIApiClient;
+            private readonly IUserRoleService _userRoleService;
 
-        [HttpPost]
-        public async Task<IActionResult> ChangeCV(IFormFile cvFile)
-        {
-            LoggingConfigService.ReturnInfo("ChangeCV method called with file: " + (cvFile?.FileName ?? "No file uploaded"));
-            var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null)
-                return this.ErrorPage("User not found.");
-
-            if (cvFile == null)
-                return this.ErrorPage("No file uploaded.");
-
-            var result = await _userPropertiesService.ChangeCVAndAnalyzeAsync(cvFile, user.Id);
-            if (result.Success)
-                return this.SetSuccessAndRedirect("CV updated successfully!", "Settings", new { controller = "Home" });
-            else
-                return this.SetErrorAndRedirect(result.ErrorMessage ?? "Failed to update CV.", "Settings", new { controller = "Home" });
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> ToggleOpenForHire(bool openForHiring)
-        {
-            var success = await _userPropertiesService.UpdateOpenForHiringAsync(openForHiring);
-            if (success)
-                return this.SetSuccessAndRedirect("Open for hiring status updated successfully!", "Settings", new { controller = "Home" });
-            else
-                return this.SetErrorAndRedirect("Failed to update status.", "Settings", new { controller = "Home" });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateEmail(string newEmail)
-        {
-            try
+            public SettingsController(
+                IUserPropertiesService userService,
+                ApplicationDbContext context,
+                IWebHostEnvironment environment,
+                IAIApiClient aIAApiClient,
+                IUserRoleService userRoleService
+            )
             {
-                var success = await _userPropertiesService.UpdateEmailAsync(newEmail);
-                if (success)
-                    return this.SetSuccessAndRedirect("Email updated successfully!", "SuccessPage");
-                else
-                    return this.ErrorPage("Email update failed.");
+                _context = context;
+                _environment = environment;
+                _aIApiClient = aIAApiClient;
+                _userPropertiesService = userService;
+                _userRoleService = userRoleService;
             }
-            catch (ArgumentException ex)
+
+            [HttpPut("updateusersettings")]
+            public async Task<IActionResult> UpdateUserSettings([FromBody] UserDto dto)
             {
-                return this.ErrorPage(ex.Message);
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                // Only update fields that are present and valid in the DTO
+                if (!string.IsNullOrWhiteSpace(dto.PasswordHash) && dto.PasswordHash != user.PasswordHash)
+                    user.PasswordHash = dto.PasswordHash;
+                if (!string.IsNullOrWhiteSpace(dto.Name))
+                    user.Name = dto.Name;
+                if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != user.Email)
+                    user.Email = dto.Email;
+                if (!string.IsNullOrWhiteSpace(dto.Location))
+                    user.Location = dto.Location;
+                if (dto.DesiredEmploymentTypes != null && dto.DesiredEmploymentTypes.Any())
+                    user.DesiredEmploymentTypes = dto.DesiredEmploymentTypes;
+                if (dto.DesiredWorkModes != null && dto.DesiredWorkModes.Any())
+                    user.DesiredWorkModes = dto.DesiredWorkModes;
+                if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+                    user.PhoneNumber = dto.PhoneNumber;
+                if (dto.TravelAvailability.HasValue)
+                    user.TravelAvailability = dto.TravelAvailability.Value;
+                if (dto.AvailableFrom.HasValue)
+                    user.AvailableFrom = dto.AvailableFrom;
+                if (!string.IsNullOrWhiteSpace(dto.DesiredCity))
+                    user.DesiredCity = dto.DesiredCity;
+                if (!string.IsNullOrWhiteSpace(dto.WorkPlace))
+                    user.WorkPlace = dto.WorkPlace;
+                if (!string.IsNullOrWhiteSpace(dto.Competencies))
+                    user.Competencies = dto.Competencies;
+                if (!string.IsNullOrWhiteSpace(dto.CVPath))
+                    user.CVPath = dto.CVPath;
+                if (dto.DeveloperMode.HasValue)
+                    user.DeveloperMode = dto.DeveloperMode;
+                if (dto.Searchable.HasValue)
+                    user.Searchable = dto.Searchable;
+                user.IsBanned = dto.IsBanned;
+                if (!string.IsNullOrWhiteSpace(dto.AboutMe))
+                    user.AboutMe = dto.AboutMe;
+                // SelectedRoles, SentFriendRequests, ReceivedFriendRequests, JobApplications, DataFlows, AIResponses, Roles, ManagedOrganisations, OwnedUsers, Owner, OwnerId are not mapped here (handled elsewhere or not updatable directly)
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                // Return updated DTO
+                var aiResponseDtos = user.AIResponses?.Select(r => new UserAIResponseDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    ResponseText = r.ResponseText ?? string.Empty,
+                    CreatedAt = r.CreatedAt,
+                    Analysis = r.AnalysisResult
+                }).ToList();
+
+                var updatedDto = new UserDto
+                {
+                    Id = user.Id,
+                    PasswordHash = user.PasswordHash,
+                    Email = user.Email,
+                    Location = user.Location,
+                    Name = user.Name,
+                    DesiredEmploymentTypes = user.DesiredEmploymentTypes,
+                    DesiredWorkModes = user.DesiredWorkModes,
+                    PhoneNumber = user.PhoneNumber,
+                    TravelAvailability = user.TravelAvailability,
+                    AvailableFrom = user.AvailableFrom,
+                    DesiredCity = user.DesiredCity,
+                    WorkPlace = user.WorkPlace,
+                    Competencies = user.Competencies,
+                    CVPath = user.CVPath,
+                    DeveloperMode = user.DeveloperMode,
+                    Searchable = user.Searchable,
+                    IsBanned = user.IsBanned,
+                    //SelectedRoles = user.Roles?.Select(r => r.RoleName).ToList(),
+                    SentFriendRequests = user.SentFriendRequests?.ToList(),
+                    ReceivedFriendRequests = user.ReceivedFriendRequests?.ToList(),
+                    JobApplications = user.JobApplications?.ToList(),
+                    DataFlows = user.DataFlows?.ToList(),
+                    AIResponses = aiResponseDtos,
+                    Roles = user.Roles?.ToList(),
+                    ManagedOrganisations = user.ManagedOrganisations?.ToList(),
+                    OwnedUsers = user.OwnedUsers?.Select(u => new UserDto { Id = u.Id, Name = u.Name }).ToList(),
+                    Owner = user.Owner != null ? new UserDto { Id = user.Owner.Id, Name = user.Owner.Name } : null,
+                    OwnerId = user.OwnerId,
+                    AboutMe = user.AboutMe
+                };
+                return Ok(updatedDto);
             }
-            catch (Exception ex)
+
+            [HttpDelete("deletemyuser")]
+            public async Task<IActionResult> DeleteMyUser()
             {
-                return this.ErrorPage("An error occurred: " + ex.Message);
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                await HttpContext.SignOutAsync("CookieAuth");
+                return this.SetSuccessAndRedirect("Your account has been deleted.", "Index", new { controller = "Home" });
             }
-        }
-
-        public IActionResult SuccessPage()
-        {
-            return View();  // Return the SuccessPage view
-        }
-
-        [HttpGet]
-        public IActionResult Settings()
-        {
-        var model = new ManageRolesViewModel
-        {
-            AvailableRoles = new List<string> { "Manager", "Recruiter" },
-            SelectedRoles = new List<string>()
-        };
-        return View(model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ManageRoles()
-        {
-            var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null)
-                return RedirectToAction("Settings");
-
-            var model = new ManageRolesViewModel
-            {
-                UserId = user.Id,
-                // Only show roles that can be changed (not "User")
-                SelectedRoles = user.Roles
-                    .Where(r => r.Role != "User")
-                    .Select(r => r.Role)
-                    .ToList()
-            };
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ManageRoles(ManageRolesViewModel model)
-        {
-            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdString, out var userId))
-                return this.ErrorPage("Invalid user ID.");
-
-            var success = await _userRoleService.UpdateUserRolesAsync(userId, model.SelectedRoles);
-            if (success)
-                return this.SetSuccessAndRedirect("Roles updated successfully!", "Settings");
-            else
-                return this.SetErrorAndRedirect("Failed to update roles.", "Settings");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser()
-        {
-            var user = await _userPropertiesService.GetCurrentUserAsync();
-            if (user == null)
-                return this.ErrorPage("User not found.");
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            await HttpContext.SignOutAsync("CookieAuth");
-            return this.SetSuccessAndRedirect("Your account has been deleted.", "Index", new { controller = "Home" });
-        }
-
-        private async Task<bool> DeleteUserByIdAsync(int userId)
-        {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-                return false;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
         }
     }
-}

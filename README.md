@@ -1,4 +1,4 @@
-# JBDH
+# JBDH 
 
 JBDH is a job search and job applications management web application built with ASP.NET Core MVC and Entity Framework Core. It allows users to search for jobs, view job details, apply or unapply for jobs, and receive AI-powered job analysis as well as CV analysis.
 
@@ -64,7 +64,7 @@ JBDH is a job search and job applications management web application built with 
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change. 
 
 ## License
 

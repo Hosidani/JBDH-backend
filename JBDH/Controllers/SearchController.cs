@@ -66,7 +66,7 @@ namespace JBDH.Controllers
             if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location))
             {
                 LoggingConfigService.ReturnError("Both description and location are empty.");
-                return this.ErrorPage("Please provide at least a description or a location.");
+                return BadRequest(new { error = "Please provide at least a description or a location." });
             }
 
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -76,17 +76,17 @@ namespace JBDH.Controllers
 
             var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
 
-            return View("SearchResultsJobs", results);
+            return Ok(results); // Return as JSON for React
         }
 
         public IActionResult SearchJob()
         {
-            return View();
+            return Ok(new { message = "SearchJob endpoint is available." });
         }
 
         public IActionResult Search()
         {
-            return View();
+            return Ok(new { message = "Search endpoint is available." });
         }
 
         [HttpPost]
@@ -97,12 +97,12 @@ namespace JBDH.Controllers
             if (!int.TryParse(jobId, out int parsedJobId))
             {
                 LoggingConfigService.ReturnError($"Invalid job ID format: {jobId}");
-                return this.ErrorPage("Invalid job ID");
+                return BadRequest(new { error = "Invalid job ID" });
             }
 
             var user = await _userPropertiesService.GetCurrentUserAsync();
             if (user == null)
-                return this.ErrorPage("User not found");
+                return NotFound(new { error = "User not found" });
 
             var aiResultString = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(jobAdUrl, parsedJobId);
 
@@ -111,7 +111,7 @@ namespace JBDH.Controllers
             if (string.IsNullOrEmpty(aiResultString))
             {
                 LoggingConfigService.ReturnError("AI analysis returned an empty result.");
-                return this.ErrorPage("The AI analysis did not return any results.");
+                return NotFound(new { error = "The AI analysis did not return any results." });
             }
 
             // Extract and parse
@@ -124,39 +124,24 @@ namespace JBDH.Controllers
             catch (Exception ex)
             {
                 LoggingConfigService.ReturnError($"Failed to parse job ad AI analysis result: {ex.Message}");
-                return this.ErrorPage("Could not parse the AI analysis result.");
+                return BadRequest(new { error = "Could not parse the AI analysis result." });
             }
 
             // --- Calculate CV Match Percent ---
             int matchPercent = 0;
             var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
-            if (userAIResponse == null)
-                Console.WriteLine("userAIResponse is null");
-            else if (string.IsNullOrEmpty(userAIResponse.ResponseText))
-                Console.WriteLine("userAIResponse.ResponseText is null or empty");
-            else if (jobAdModel == null)
-                Console.WriteLine("jobAdModel is null");
-            else
+            if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText) && jobAdModel != null)
             {
                 var cvAI = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
                 if (cvAI != null)
                     matchPercent = _matchingAlgorithmCVJobService.CalculateJobTitleMatchPercentage(jobAdModel, cvAI);
             }
-            var percentHtml = $"<span class='badge bg-info'>CV Match: {matchPercent}%</span>";
 
-            // --- Return for AJAX or normal partial ---
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                // Render the partial view as string
-                var analysisHtml = await this.RenderViewAsync("_JobAdAIResultPartial", jobAdModel, true);
-                return Json(new { percentHtml, analysisHtml });
-            }
-            else
-            {
-                // Fallback for non-AJAX
-                ViewBag.CVMatchPercent = matchPercent;
-                return PartialView("_JobAdAIResultPartial", jobAdModel);
-            }
+            // Return all relevant data as JSON
+            return Ok(new {
+                jobAdModel,
+                matchPercent
+            });
         }
 
         [HttpGet]
@@ -164,11 +149,10 @@ namespace JBDH.Controllers
         {
             if (string.IsNullOrWhiteSpace(keyword) && string.IsNullOrWhiteSpace(location))
             {
-                return View();
+                return BadRequest(new { error = "Please provide a keyword or location." });
             }
             var results = await _searchCandidateService.SearchCandidates(keyword, location);
-            ViewData["keyword"] = keyword;
-            return View("SearchResultsCandidates", results);
+            return Ok(new { keyword, results });
         }
 
         [HttpGet]
@@ -180,7 +164,7 @@ namespace JBDH.Controllers
             if ((string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location)) || user == null || string.IsNullOrEmpty(user.CVPath))
             {
                 LoggingConfigService.ReturnError("Please provide at least a description or a location, and make sure your CV is uploaded.");
-                return this.ErrorPage("Please provide at least a description or a location, and make sure your CV is uploaded and you are logged in.");
+                return BadRequest(new { error = "Please provide at least a description or a location, and make sure your CV is uploaded and you are logged in." });
             }
 
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -191,64 +175,44 @@ namespace JBDH.Controllers
             // Use workflow service for search and meta
             var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
             LoggingConfigService.ReturnInfo($"Search results count: {results.Count}");
-            /*
-                        if (results.Any() && results.First().Job != null)
-                        {
 
-                            var aiRequest = new AIRequest
-                            {
-                                CommandId = 3,
-                                JobAIResponse = await _jobAIAnalysisService.GetOrCreateAnalysisAsync(results.First().Job.WebpageUrl, results.First().Job.JobId),
-                                UserAIResponse = user.AIResponses.FirstOrDefault()?.ResponseText,
-                                User = user
-                            };
-                            LoggingConfigService.ReturnInfo($"AI Request built with CommandId: {aiRequest.CommandId}, JobAdUrl: {results.First().Job.WebpageUrl}, UserAIResponse: {user.AIResponses.FirstOrDefault()?.ResponseText}");
-                            string aiAnalysisResult = await _aIService.GetAIResponse(aiRequest);
-                            aiAnalysisResult = _manageIOService.ExtractJsonFromCodeBlock(aiAnalysisResult);
-                            // Parse JSON to ViewModel
-                            CVJobComparisonAIResponseViewModel? aiModel = null;
-                            try
-                            {
-                                aiModel = JsonConvert.DeserializeObject<CVJobComparisonAIResponseViewModel>(aiAnalysisResult);
-                            }
-                            catch
-                            {
-                                LoggingConfigService.ReturnError("Failed to parse AI analysis result to ViewModel.");
-                            }
-
-                            ViewData["AIAnalysisModel"] = aiModel;
-                        }
-                        else
-                        {
-                            ViewData["AIAnalysisModel"] = null;
-                        }
-                       */
             int matchPercent = 0;
+            CVAnalysisResult? cvAI = null;
+            JobAdAIResponseViewModel? jobAI = null;
+
             var userAIResponse = await _userAIResponseService.GetLatestUserAIResponseAsync(user.Id);
-            var jobAIResponse = await _jobAIResponseService.GetLatestJobAIResponseAsync(results.First().Job.JobId);
+            if (userAIResponse != null && !string.IsNullOrEmpty(userAIResponse.ResponseText))
+            {
+                cvAI = JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText);
+            }
 
-            var cvAI = userAIResponse != null ? JsonConvert.DeserializeObject<CVAnalysisResult>(userAIResponse.ResponseText) : null;
-            var jobAI = jobAIResponse != null ? JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(jobAIResponse.ResponseText) : null;
-
+            if (results != null && results.Count > 0 && results.First().Job != null)
+            {
+                var jobAIResponse = await _jobAIResponseService.GetLatestJobAIResponseAsync(results.First().Job.JobId);
+                if (jobAIResponse != null && !string.IsNullOrEmpty(jobAIResponse.ResponseText))
+                {
+                    jobAI = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(jobAIResponse.ResponseText);
+                }
+            }
 
             if (cvAI != null && jobAI != null)
                 matchPercent = _matchingAlgorithmCVJobService.CalculateJobTitleMatchPercentage(jobAI, cvAI);
 
-            ViewData["JobTitleMatchPercent"] = matchPercent;
-            // Return as plain text (or you can use ContentResult or Json)
-            //return Content($"{matchPercent}%", "text/plain");
-            // create a new ViewData dictionary to hold the data of matchningen mellan CV och job ad
-            return View("SearchResultsJobs", results);
+            // Return all relevant data as JSON
+            return Ok(new {
+                results,
+                matchPercent
+            });
         }
 
         [HttpGet]
         public async Task<IActionResult> SearchUsers(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return View(new List<User>());
+                return BadRequest(new List<User>());
 
             var users = await _userPropertiesService.SearchUsersAsync(query);
-            return View(users);
+            return Ok(users);
         }
     }
 }
