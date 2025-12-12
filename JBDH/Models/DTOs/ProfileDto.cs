@@ -30,10 +30,10 @@ namespace JBDH.Models.DTOs
         public string? Email { get; set; }
         public string? Location { get; set; }
         public string? Name { get; set; }
-        public string? DesiredEmploymentType { get; set; }
-        public string? DesiredWorkMode { get; set; }
+        public List<string>? DesiredEmploymentTypes { get; set; }
+        public List<string>? DesiredWorkModes { get; set; }
         public string? PhoneNumber { get; set; }
-        public bool TravelAvailability { get; set; }
+        public bool? TravelAvailability { get; set; }
         public DateTime? AvailableFrom { get; set; }
         public string? DesiredCity { get; set; }
         public string? WorkPlace { get; set; }
