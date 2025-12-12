@@ -54,10 +54,10 @@ namespace JBDH.Controllers
                     user.Email = dto.Email;
                 if (!string.IsNullOrWhiteSpace(dto.Location))
                     user.Location = dto.Location;
-                if (!string.IsNullOrWhiteSpace(dto.DesiredEmploymentType))
-                    user.DesiredEmploymentType = dto.DesiredEmploymentType;
-                if (!string.IsNullOrWhiteSpace(dto.DesiredWorkMode))
-                    user.DesiredWorkMode = dto.DesiredWorkMode;
+                if (dto.DesiredEmploymentTypes != null && dto.DesiredEmploymentTypes.Any())
+                    user.DesiredEmploymentTypes = dto.DesiredEmploymentTypes;
+                if (dto.DesiredWorkModes != null && dto.DesiredWorkModes.Any())
+                    user.DesiredWorkModes = dto.DesiredWorkModes;
                 if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
                     user.PhoneNumber = dto.PhoneNumber;
                 if (dto.TravelAvailability.HasValue)
@@ -89,7 +89,7 @@ namespace JBDH.Controllers
                 {
                     Id = r.Id,
                     UserId = r.UserId,
-                    ResponseText = r.ResponseText,
+                    ResponseText = r.ResponseText ?? string.Empty,
                     CreatedAt = r.CreatedAt,
                     Analysis = r.AnalysisResult
                 }).ToList();
@@ -101,8 +101,8 @@ namespace JBDH.Controllers
                     Email = user.Email,
                     Location = user.Location,
                     Name = user.Name,
-                    DesiredEmploymentType = user.DesiredEmploymentType,
-                    DesiredWorkMode = user.DesiredWorkMode,
+                    DesiredEmploymentTypes = user.DesiredEmploymentTypes,
+                    DesiredWorkModes = user.DesiredWorkModes,
                     PhoneNumber = user.PhoneNumber,
                     TravelAvailability = user.TravelAvailability,
                     AvailableFrom = user.AvailableFrom,

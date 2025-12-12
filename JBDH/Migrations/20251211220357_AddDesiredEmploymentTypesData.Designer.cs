@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JBDH.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251207181250_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251211220357_AddDesiredEmploymentTypesData")]
+    partial class AddDesiredEmploymentTypesData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -500,10 +500,10 @@ namespace JBDH.Migrations
                     b.Property<string>("DesiredCity")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DesiredEmploymentType")
+                    b.Property<string>("DesiredEmploymentTypesData")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DesiredWorkMode")
+                    b.Property<string>("DesiredWorkModesData")
                         .HasColumnType("longtext");
 
                     b.Property<bool?>("DeveloperMode")

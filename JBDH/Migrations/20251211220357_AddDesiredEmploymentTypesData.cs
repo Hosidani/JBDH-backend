@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace JBDH.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddDesiredEmploymentTypesData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -107,8 +107,8 @@ namespace JBDH.Migrations
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     Location = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true),
                     Name = table.Column<string>(type: "longtext", nullable: true),
-                    DesiredEmploymentType = table.Column<string>(type: "longtext", nullable: true),
-                    DesiredWorkMode = table.Column<string>(type: "longtext", nullable: true),
+                    DesiredEmploymentTypesData = table.Column<string>(type: "longtext", nullable: true),
+                    DesiredWorkModesData = table.Column<string>(type: "longtext", nullable: true),
                     PhoneNumber = table.Column<string>(type: "longtext", nullable: true),
                     TravelAvailability = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     AvailableFrom = table.Column<DateTime>(type: "datetime(6)", nullable: true),

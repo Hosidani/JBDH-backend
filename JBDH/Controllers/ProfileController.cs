@@ -114,8 +114,8 @@ namespace JBDH.Controllers
                 Email = user.Email,
                 Location = user.Location,
                 Name = user.Name,
-                DesiredEmploymentType = user.DesiredEmploymentType,
-                DesiredWorkMode = user.DesiredWorkMode,
+                DesiredEmploymentTypes = user.DesiredEmploymentTypes,
+                DesiredWorkModes = user.DesiredWorkModes,
                 PhoneNumber = user.PhoneNumber,
                 TravelAvailability = user.TravelAvailability,
                 AvailableFrom = user.AvailableFrom,
@@ -256,7 +256,8 @@ namespace JBDH.Controllers
                         jsonToParse = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(jsonToParse);
                         JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"[ProfileController] Unescaped AI JSON: {jsonToParse}");
                     }
-                    analysisObj = Newtonsoft.Json.JsonConvert.DeserializeObject<JBDH.Models.User.CVAnalysisResult>(jsonToParse);
+                    if (!string.IsNullOrEmpty(jsonToParse))
+                        analysisObj = Newtonsoft.Json.JsonConvert.DeserializeObject<JBDH.Models.User.CVAnalysisResult>(jsonToParse);
                     JBDH.Services.Configuration.LoggingConfigService.ReturnInfo($"[ProfileController] Parsed CVAnalysisResult: {Newtonsoft.Json.JsonConvert.SerializeObject(analysisObj)}");
                 }
             }

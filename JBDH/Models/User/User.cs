@@ -21,8 +21,40 @@ namespace JBDH.Models.User
         public required string Location { get; set; }
 
         public string? Name { get; set; }
-        public string? DesiredEmploymentType { get; set; } // Full-time/Part-time
-        public string? DesiredWorkMode { get; set; } // Remote/Hybrid/Onsite
+        // Backing field for EF Core storage
+        public string? DesiredEmploymentTypesData { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public List<string>? DesiredEmploymentTypes
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(DesiredEmploymentTypesData)) return null;
+                try { return System.Text.Json.JsonSerializer.Deserialize<List<string>>(DesiredEmploymentTypesData); }
+                catch { return null; }
+            }
+            set
+            {
+                DesiredEmploymentTypesData = value == null ? null : System.Text.Json.JsonSerializer.Serialize(value);
+            }
+        }
+        // Backing field for EF Core storage
+        public string? DesiredWorkModesData { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public List<string>? DesiredWorkModes
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(DesiredWorkModesData)) return null;
+                try { return System.Text.Json.JsonSerializer.Deserialize<List<string>>(DesiredWorkModesData); }
+                catch { return null; }
+            }
+            set
+            {
+                DesiredWorkModesData = value == null ? null : System.Text.Json.JsonSerializer.Serialize(value);
+            }
+        }
         public string? PhoneNumber { get; set; }
         public bool TravelAvailability { get; set; }
         public DateTime? AvailableFrom { get; set; }

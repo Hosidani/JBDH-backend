@@ -497,10 +497,10 @@ namespace JBDH.Migrations
                     b.Property<string>("DesiredCity")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DesiredEmploymentType")
+                    b.Property<string>("DesiredEmploymentTypesData")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DesiredWorkMode")
+                    b.Property<string>("DesiredWorkModesData")
                         .HasColumnType("longtext");
 
                     b.Property<bool?>("DeveloperMode")
