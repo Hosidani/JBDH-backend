@@ -30,6 +30,7 @@ namespace JBDH.Controllers
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly IAIApiClient _aiApiClient;
         private readonly ITextChunkingService _textChunkingService;
+        private readonly IEmbeddingService _embeddingService;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
@@ -43,7 +44,8 @@ namespace JBDH.Controllers
             AIConfig aiConfig,
             IJobAIAnalysisService jobAIAnalysisService,
             IAIApiClient aiApiClient,
-            ITextChunkingService textChunkingService)
+            ITextChunkingService textChunkingService,
+            IEmbeddingService embeddingService)
         {
             _logger = logger;
             _context = context;
@@ -56,6 +58,7 @@ namespace JBDH.Controllers
             _jobAIAnalysisService = jobAIAnalysisService;
             _aiApiClient = aiApiClient;
             _textChunkingService = textChunkingService;
+            _embeddingService = embeddingService;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -309,7 +312,7 @@ namespace JBDH.Controllers
             LoggingConfigService.ReturnInfo($"Job ad chunked into {jobAdChunks.Count} pieces.");
 
             // Extract CV text for comparison
-            var cvText = await _manageIOService.ExtractTextFromPdf(savedCvPath ?? string.Empty);
+            var cvText = await _manageIOService.ExtractTextFromFile(savedCvPath ?? string.Empty);
             if (string.IsNullOrWhiteSpace(cvText))
             {
                 return BadRequest(new { error = "Could not extract text from CV file." });
@@ -503,7 +506,7 @@ Om företaget
             }
 
             // Extrahera CV-text (valfritt, men visar att det funkar)
-            var cvText = await _manageIOService.ExtractTextFromPdf(cvPath);
+            var cvText = await _manageIOService.ExtractTextFromFile(cvPath);
             LoggingConfigService.ReturnInfo($"CV text length: {cvText?.Length ?? 0}");
 
             return Ok(new {
@@ -512,6 +515,64 @@ Om företaget
                 extractedRequirements = allRequirements,
                 cvTextLength = cvText?.Length ?? 0
             });
+        }
+
+        [HttpGet("TestEmbedding")]
+        public async Task<IActionResult> TestEmbedding([FromQuery] string text = "Senior developer with 5 years experience")
+        {
+            LoggingConfigService.ReturnInfo("Starting embedding test...");
+            
+            try
+            {
+                // Test 1: Single embedding
+                LoggingConfigService.ReturnInfo($"Generating embedding for: {text}");
+                var embedding = await _embeddingService.GetEmbeddingAsync(text);
+                
+                LoggingConfigService.ReturnInfo($"Successfully generated embedding with {embedding.Length} dimensions");
+
+                // Test 2: Batch embeddings
+                var testTexts = new List<string>
+                {
+                    "Python developer",
+                    "Senior backend engineer",
+                    "Full stack developer"
+                };
+
+                LoggingConfigService.ReturnInfo("Generating batch embeddings...");
+                var batchEmbeddings = await _embeddingService.GetEmbeddingsBatchAsync(testTexts);
+                LoggingConfigService.ReturnInfo($"Successfully generated {batchEmbeddings.Count} batch embeddings");
+
+                // Test 3: Similarity calculation
+                if (batchEmbeddings.Count >= 2)
+                {
+                    var similarity = _embeddingService.CalculateSimilarity(embedding, batchEmbeddings[0]);
+                    LoggingConfigService.ReturnInfo($"Similarity between embeddings: {similarity:F4}");
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Embedding test successful",
+                    singleEmbedding = new
+                    {
+                        text = text,
+                        dimensions = embedding.Length,
+                        sampleValues = embedding.Take(5).ToArray()
+                    },
+                    batchEmbeddings = new
+                    {
+                        count = batchEmbeddings.Count,
+                        texts = testTexts,
+                        dimensions = batchEmbeddings.Count > 0 ? batchEmbeddings[0].Length : 0
+                    },
+                    note = "Full embedding vectors are not returned for brevity. API working correctly!"
+                });
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Embedding test failed: {ex.Message}");
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }
