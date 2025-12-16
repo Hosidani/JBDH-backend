@@ -17,16 +17,22 @@ namespace JBDH.Services.Helpers
             _aiConfig = aiConfig;
             _logger = logger;
 
-            // Add authentication header
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _aiConfig.OpenAIKey);
+            // Configure authentication based on provider
+            ConfigureHttpClient();
+        }
+
+        private void ConfigureHttpClient()
+        {
+            // Gemini uses x-goog-api-key header
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("x-goog-api-key", _aiConfig.GeminiApiKey);
         }
 
         /// <summary>
-        /// Generate embedding vector for a given text using DeepSeek API
-        /// API Endpoint: https://api.deepseek.com/embeddings
+        /// Generate embedding vector for a given text using configured embedding provider
+        /// Supports OpenAI and Gemini with task types for RAG optimization
         /// </summary>
-        public async Task<float[]> GetEmbeddingAsync(string text)
+        public async Task<float[]> GetEmbeddingAsync(string text, string taskType = "RETRIEVAL_DOCUMENT")
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -36,64 +42,54 @@ namespace JBDH.Services.Helpers
 
             try
             {
-                _logger.LogInformation($"Requesting embedding for text length: {text.Length}");
-
-                // DeepSeek API request format
-                var request = new
-                {
-                    model = _aiConfig.EmbeddingModel, // "deepseek-embedding"
-                    input = text,
-                    encoding_format = "float"
-                };
-
-                _logger.LogInformation($"Sending request to: {_aiConfig.EmbeddingUrl}");
-
-                // Make API call
-                var response = await _httpClient.PostAsJsonAsync(
-                    _aiConfig.EmbeddingUrl,
-                    request
-                );
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError($"DeepSeek API error: {response.StatusCode} - {errorContent}");
-                    throw new Exception($"DeepSeek API returned {response.StatusCode}: {errorContent}");
-                }
-
-                // Parse response
-                var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation($"DeepSeek API response: {responseContent.Substring(0, Math.Min(200, responseContent.Length))}...");
-
-                var embeddingResponse = JsonConvert.DeserializeObject<DeepSeekEmbeddingResponse>(responseContent);
-
-                if (embeddingResponse?.Data == null || embeddingResponse.Data.Count == 0)
-                {
-                    _logger.LogError("No embedding data in response");
-                    throw new Exception("No embedding data received from API");
-                }
-
-                var embedding = embeddingResponse.Data[0].Embedding;
-                if (embedding == null)
-                {
-                    _logger.LogError("Embedding data is null");
-                    throw new Exception("Embedding data is null from API");
-                }
-                _logger.LogInformation($"Successfully generated embedding with {embedding.Length} dimensions");
-
-                return embedding;
+                _logger.LogInformation($"Requesting Gemini embedding for text length: {text.Length}");
+                return await GetGeminiEmbeddingAsync(text, taskType);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error generating embedding: {ex.Message}");
+                _logger.LogError($"Error generating embedding: {ex.Message}");
                 throw;
             }
         }
 
+        // OpenAI method removed - using only Gemini
+
+        private async Task<float[]> GetGeminiEmbeddingAsync(string text, string taskType)
+        {
+            // Gemini API request format with task type for RAG optimization
+            var request = new
+            {
+                model = "models/gemini-embedding-001",
+                content = new { parts = new[] { new { text = text } } },
+                taskType = taskType // RETRIEVAL_DOCUMENT or RETRIEVAL_QUERY
+            };
+
+            _logger.LogInformation($"Sending Gemini request with taskType: {taskType}");
+
+            var response = await _httpClient.PostAsJsonAsync(_aiConfig.EmbeddingUrl, request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Gemini API error: {response.StatusCode} - {errorContent}");
+                throw new Exception($"Gemini API returned {response.StatusCode}: {errorContent}");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var geminiResponse = JsonConvert.DeserializeObject<GeminiEmbeddingResponse>(responseContent);
+
+            if (geminiResponse?.Embedding?.Values == null)
+            {
+                throw new Exception("No embedding data in Gemini response");
+            }
+
+            return geminiResponse.Embedding.Values;
+        }
+
         /// <summary>
-        /// Generate embeddings for multiple texts in a single batch request (more efficient)
+        /// Generate embeddings for multiple texts using Gemini (processes sequentially for now)
         /// </summary>
-        public async Task<List<float[]>> GetEmbeddingsBatchAsync(List<string> texts)
+        public async Task<List<float[]>> GetEmbeddingsBatchAsync(List<string> texts, string taskType = "RETRIEVAL_DOCUMENT")
         {
             if (texts == null || texts.Count == 0)
             {
@@ -103,49 +99,17 @@ namespace JBDH.Services.Helpers
 
             try
             {
-                _logger.LogInformation($"Requesting batch embeddings for {texts.Count} texts");
+                _logger.LogInformation($"Requesting Gemini batch embeddings for {texts.Count} texts");
+                var embeddings = new List<float[]>();
 
-                // DeepSeek API supports array of inputs
-                var request = new
+                // Process each text individually since Gemini API doesn't support batch requests
+                foreach (var text in texts)
                 {
-                    model = _aiConfig.EmbeddingModel,
-                    input = texts,
-                    encoding_format = "float"
-                };
-
-                var response = await _httpClient.PostAsJsonAsync(
-                    _aiConfig.EmbeddingUrl,
-                    request
-                );
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError($"DeepSeek API batch error: {response.StatusCode} - {errorContent}");
-                    throw new Exception($"DeepSeek API returned {response.StatusCode}");
+                    var embedding = await GetGeminiEmbeddingAsync(text, taskType);
+                    embeddings.Add(embedding);
                 }
 
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var embeddingResponse = JsonConvert.DeserializeObject<DeepSeekEmbeddingResponse>(responseContent);
-
-                if (embeddingResponse?.Data == null)
-                {
-                    throw new Exception("No embedding data in batch response");
-                }
-
-                // Sort by index to maintain order and ensure non-null embeddings
-                var sortedEmbeddings = new List<float[]>();
-                foreach (var item in embeddingResponse.Data.OrderBy(e => e.Index))
-                {
-                    if (item.Embedding != null)
-                    {
-                        sortedEmbeddings.Add(item.Embedding);
-                    }
-                }
-
-                _logger.LogInformation($"Successfully generated {sortedEmbeddings.Count} embeddings");
-
-                return sortedEmbeddings;
+                return embeddings;
             }
             catch (Exception ex)
             {
@@ -212,9 +176,9 @@ namespace JBDH.Services.Helpers
     }
 
     /// <summary>
-    /// Response model from DeepSeek Embedding API
+    /// Response model from OpenAI Embedding API
     /// </summary>
-    public class DeepSeekEmbeddingResponse
+    public class OpenAIEmbeddingResponse
     {
         [JsonProperty("object")]
         public string? Object { get; set; }
@@ -248,5 +212,20 @@ namespace JBDH.Services.Helpers
 
         [JsonProperty("total_tokens")]
         public int TotalTokens { get; set; }
+    }
+
+    /// <summary>
+    /// Response model from Gemini Embedding API
+    /// </summary>
+    public class GeminiEmbeddingResponse
+    {
+        [JsonProperty("embedding")]
+        public GeminiEmbedding? Embedding { get; set; }
+    }
+
+    public class GeminiEmbedding
+    {
+        [JsonProperty("values")]
+        public float[]? Values { get; set; }
     }
 }

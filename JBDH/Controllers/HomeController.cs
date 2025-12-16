@@ -283,296 +283,162 @@ namespace JBDH.Controllers
             return Ok(new { aiResponse, analysis = parsed });
         }
 
-        [HttpPost("AnalyzeJobEmbeddings")]
-        public async Task<IActionResult> AnalyzeJobEmbeddings(CompareCvToJobAdViewModel model)
+        [HttpPost("CompareCvToJobAdV2")]
+        public async Task<IActionResult> CompareCvToJobAdV2(CompareCvToJobAdViewModel model)
         {
-            LoggingConfigService.ReturnInfo("Starting job embeddings analysis.");
-            
-            // Debug logging
-            LoggingConfigService.ReturnInfo($"Model received - CvPath is null: {model?.CvPath == null}");
-            LoggingConfigService.ReturnInfo($"JobAdText length: {model?.JobAdText?.Length ?? 0}");
-            
             if (model?.CvPath == null)
-            {
-                return BadRequest(new { error = "CV file is required." });
-            }
-            
+                return BadRequest("CV file is required");
+
             if (string.IsNullOrWhiteSpace(model.JobAdText))
-            {
-                return BadRequest(new { error = "Job ad text is required." });
-            }
+                return BadRequest("Job ad text is required");
 
-            // Save CV file
-            var savedCvPath = await FileHelper.SaveUploadedFileAsync(model.CvPath, _environment.WebRootPath);
-            
-            this.LogAction($"Analyzing job embeddings for CV: {savedCvPath}");
-
-            // Chunk the job ad text
-            var jobAdChunks = _textChunkingService.ChunkJobAd(model.JobAdText);
-            LoggingConfigService.ReturnInfo($"Job ad chunked into {jobAdChunks.Count} pieces.");
-
-            // Extract CV text for comparison
-            var cvText = await _manageIOService.ExtractTextFromFile(savedCvPath ?? string.Empty);
-            if (string.IsNullOrWhiteSpace(cvText))
-            {
-                return BadRequest(new { error = "Could not extract text from CV file." });
-            }
-
-            // Extract requirements from each chunk using AI
-            var allRequirements = new List<object>();
-            for (int i = 0; i < jobAdChunks.Count; i++)
-            {
-                var chunk = jobAdChunks[i];
-                LoggingConfigService.ReturnInfo($"Processing chunk {i + 1}/{jobAdChunks.Count}");
-
-                var aiRequest = new AIRequest
-                {
-                    CommandId = 6,
-                    JobAdText = chunk,
-                    User = new User {
-                        Id = 1,
-                        Email = "test@example.com",
-                        PasswordHash = "dummy",
-                        Location = "Stockholm"
-                    }
-                };
-
-                var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
-                if (aiResult.Success && !string.IsNullOrWhiteSpace(aiResult.Response))
-                {
-                    try
-                    {
-                        // Parse the JSON response to extract requirements as a strongly typed list
-                        var chunkRequirements = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Requirement>>(aiResult.Response ?? string.Empty);
-                        if (chunkRequirements != null)
-                        {
-                            allRequirements.Add(new { 
-                                chunkIndex = i, 
-                                chunkText = chunk.Substring(0, Math.Min(100, chunk.Length)) + "...",
-                                requirements = chunkRequirements 
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LoggingConfigService.ReturnError($"Failed to parse requirements from chunk {i}: {ex.Message}");
-                    }
-                }
-            }
-
-            // TODO: Add embedding analysis logic here
-            // TODO: Add requirement extraction logic here
-            // TODO: Add scoring logic here
-
-            return Ok(new { 
-                success = true, 
-                message = "Job embeddings analysis completed.", 
-                cvPath = savedCvPath, 
-                jobAdChunksCount = jobAdChunks.Count,
-                cvTextLength = cvText.Length,
-                extractedRequirements = allRequirements,
-                totalRequirementsFound = allRequirements.Count
-            });
-        }
-
-        [HttpPost("AnalyzeJobEmbeddingsAlt")]
-        public async Task<IActionResult> AnalyzeJobEmbeddingsAlt([FromForm] IFormFile CvPath, [FromForm] string JobAdText)
-        {
-            LoggingConfigService.ReturnInfo("Starting job embeddings analysis (Alternative method).");
-            
-            // Debug logging
-            LoggingConfigService.ReturnInfo($"File received - is null: {CvPath == null}");
-            LoggingConfigService.ReturnInfo($"File name: {CvPath?.FileName ?? "null"}");
-            LoggingConfigService.ReturnInfo($"JobAdText length: {JobAdText?.Length ?? 0}");
-            
-            if (CvPath == null)
-            {
-                return BadRequest(new { error = "CV file is required." });
-            }
-            
-            if (string.IsNullOrWhiteSpace(JobAdText))
-            {
-                return BadRequest(new { error = "Job ad text is required." });
-            }
-
-            // Save CV file
-            var savedCvPath = await FileHelper.SaveUploadedFileAsync(CvPath, _environment.WebRootPath);
-            
-            this.LogAction($"Analyzing job embeddings for CV: {savedCvPath}");
-
-            return Ok(new { 
-                success = true, 
-                message = "Alternative method works!", 
-                cvPath = savedCvPath, 
-                fileName = CvPath.FileName,
-                jobAdTextLength = JobAdText.Length
-            });
-        }
-
-        [HttpGet("TestJobAdExtraction")]
-        public async Task<IActionResult> TestJobAdExtraction()
-        {
-            // Hårdkodad jobbannons
-            string jobAdText = """
-
-Senior utvecklare med ledaransvar till etablerat fintech-bolag i Stockholm. 
-
-Jag söker en erfaren ingenjör med erfarenhet som scrum master/projektledare, eller någon som är senior utvecklare och ivrig att ta steget in i en roll där du har praktisk erfarenhet av koden, men också kan ta ett steg mot ledarskap, projektplanering, färdplan och strategi!
-
-Företaget är ett väletablerat produktföretag vars plattform är en användarfokuserad, datadriven motor som hjälper människor att fatta mer välgrundade ekonomiska beslut och låter dem hitta, jämföra och säkra de bästa erbjudandena på lån, bolån, räntor och andra finansiella tjänster, enklare än någonsin tidigare!
-
-I slutändan är deras produkt att hjälpa människor att spara pengar, helt kostnadsfritt! De har funnits i över 10 år, samarbetar med över 40 av Sveriges största banker och finansföretag, är konsekvent lönsamma, men behåller en känsla av ett litet till medelstort företag, och har mycket spännande utveckling på gång.
-
-Hybridroll för senior utvecklare som vill kombinera tekniskt arbete med ledaransvar.
-
-Huvudansvarsområden:
-- Skriva ren och underhållbar kod (70-80% av tiden)
-- Fungera som Scrum Master och delta i projektplanering
-- Vägleda teamet och koordinera över avdelningsgränser
-- Delta i code reviews och systemutveckling
-
-Teknisk stack: TypeScript/JavaScript, NodeJS, VueJS, MongoDB, AWS, SQL, Grafana
-
-Vi tror du har erfarenhet av
-- Minst 5 års erfarenhet av den tekniska stacken
-- Erfarenhet av Agile/Scrum, helst som Scrum Master
-- Intresse för ledarskap och projektplanering
-- Flytande engelska och arbetstillstånd i Sverige
-
-Extra meriterande
-
-- Umbraco, Episerver / Optimizely
-- Bra koll på Devops-relaterade verktyg och processer, Nginx, Docker, CI-lösningar osv.
-- Wordpress
-
-Om företaget
-- Etablerat fintech-bolag (10+ år)
-- Hjälper användare jämföra lån och hypotekslån gratis
-- Samarbetar med 40+ svenska banker
-- Platt hierarki med 12 personer i tech-teamet
-- Hybridarbete med kontor i Stockholm city
-""";
-            // Hårdkodad CV-path
-            string cvPath = @"C:\\Users\\yazda\\Desktop\\JBDH_V0.1\\JBDH\\wwwroot\\uploads\\Hossein_YazdaniPajouh_CV.pdf";
-
-            // Chunka jobbannonsen
-            var jobAdChunks = _textChunkingService.ChunkJobAd(jobAdText);
-            LoggingConfigService.ReturnInfo($"Job ad chunked into {jobAdChunks.Count} pieces.");
-
-            // Extrahera krav från varje chunk
-            var allRequirements = new List<object>();
-            var aiRawResponses = new List<string>();
-            for (int i = 0; i < jobAdChunks.Count; i++)
-            {
-                var chunk = jobAdChunks[i];
-                LoggingConfigService.ReturnInfo($"Processing chunk {i + 1}/{jobAdChunks.Count}");
-                LoggingConfigService.ReturnInfo($"Chunk text: {chunk.Substring(0, Math.Min(100, chunk.Length))}...");
-
-                var aiRequest = new AIRequest
-                {
-                    CommandId = 6,
-                    JobAdText = chunk,
-                    User = new User {
-                        Id = 1,
-                        Email = "test@example.com",
-                        PasswordHash = "dummy",
-                        Location = "Stockholm"
-                    }
-                };
-
-                var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
-                LoggingConfigService.ReturnInfo($"AI success: {aiResult.Success}, AI raw response: {aiResult.Response}");
-                aiRawResponses.Add(aiResult.Response ?? "<null>");
-                if (aiResult.Success && !string.IsNullOrWhiteSpace(aiResult.Response))
-                {
-                    try
-                    {
-                        // Parse the JSON response to extract requirements as a strongly typed list
-                        var chunkRequirements = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Requirement>>(aiResult.Response ?? string.Empty);
-                        if (chunkRequirements != null)
-                        {
-                            allRequirements.Add(new {
-                                chunkIndex = i,
-                                chunkText = chunk.Substring(0, Math.Min(100, chunk.Length)) + "...",
-                                requirements = chunkRequirements
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LoggingConfigService.ReturnError($"Failed to parse requirements from chunk {i}: {ex.Message}");
-                    }
-                }
-            }
-
-            // Extrahera CV-text (valfritt, men visar att det funkar)
-            var cvText = await _manageIOService.ExtractTextFromFile(cvPath);
-            LoggingConfigService.ReturnInfo($"CV text length: {cvText?.Length ?? 0}");
-
-            return Ok(new {
-                jobAdChunksCount = jobAdChunks.Count,
-                aiRawResponses = aiRawResponses,
-                extractedRequirements = allRequirements,
-                cvTextLength = cvText?.Length ?? 0
-            });
-        }
-
-        [HttpGet("TestEmbedding")]
-        public async Task<IActionResult> TestEmbedding([FromQuery] string text = "Senior developer with 5 years experience")
-        {
-            LoggingConfigService.ReturnInfo("Starting embedding test...");
-            
             try
             {
-                // Test 1: Single embedding
-                LoggingConfigService.ReturnInfo($"Generating embedding for: {text}");
-                var embedding = await _embeddingService.GetEmbeddingAsync(text);
-                
-                LoggingConfigService.ReturnInfo($"Successfully generated embedding with {embedding.Length} dimensions");
+                // 1. Extract CV text
+                var savedPath = await FileHelper.SaveUploadedFileAsync(
+                    model.CvPath,
+                    _environment.WebRootPath
+                );
 
-                // Test 2: Batch embeddings
-                var testTexts = new List<string>
+                var cvText = await _manageIOService.ExtractTextFromFile(savedPath ?? "");
+                if (string.IsNullOrWhiteSpace(cvText))
+                    return BadRequest("Could not extract CV text");
+
+                // 2. Chunk job ad (RAG)
+                var chunks = _textChunkingService.ChunkJobAd(model.JobAdText);
+
+                var requirements = new List<Requirement>();
+
+                foreach (var chunk in chunks)
                 {
-                    "Python developer",
-                    "Senior backend engineer",
-                    "Full stack developer"
-                };
+                    var aiRequest = new AIRequest
+                    {
+                        CommandId = 6, // requirement extraction
+                        JobAdText = chunk,
+                        User = new User
+                        {
+                            Id = 1,
+                            Email = "system@analysis",
+                            PasswordHash = "system",
+                            Location = "system"
+                        }
+                    };
 
-                LoggingConfigService.ReturnInfo("Generating batch embeddings...");
-                var batchEmbeddings = await _embeddingService.GetEmbeddingsBatchAsync(testTexts);
-                LoggingConfigService.ReturnInfo($"Successfully generated {batchEmbeddings.Count} batch embeddings");
+                    var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
+                    if (!aiResult.Success || string.IsNullOrWhiteSpace(aiResult.Response))
+                        continue;
 
-                // Test 3: Similarity calculation
-                if (batchEmbeddings.Count >= 2)
-                {
-                    var similarity = _embeddingService.CalculateSimilarity(embedding, batchEmbeddings[0]);
-                    LoggingConfigService.ReturnInfo($"Similarity between embeddings: {similarity:F4}");
+                    try
+                    {
+                        var extracted = Newtonsoft.Json.JsonConvert
+                            .DeserializeObject<List<Requirement>>(aiResult.Response);
+
+                        if (extracted != null)
+                            requirements.AddRange(extracted);
+                    }
+                    catch
+                    {
+                        // ignore malformed chunks
+                    }
                 }
+
+                if (requirements.Count == 0)
+                    return BadRequest("No requirements extracted");
+
+                // Deduplicate requirements before embedding
+                requirements = requirements
+                    .GroupBy(r => r.Name.Trim().ToLowerInvariant())
+                    .Select(g => g.First())
+                    .ToList();
+
+                // Filter only comparable categories
+                var comparableCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "skill", "experience", "language", "degree", "certification"
+                };
+                
+                requirements = requirements
+                    .Where(r => comparableCategories.Contains(r.Category?.Trim() ?? ""))
+                    .ToList();
+
+                if (requirements.Count == 0)
+                    return BadRequest("No comparable requirements found after filtering");
+
+                // 3. Generate embeddings
+                var cvVector = await _embeddingService.GetEmbeddingAsync(
+                    cvText,
+                    "RETRIEVAL_DOCUMENT"
+                );
+
+                var requirementTexts = requirements
+                    .Select(r => r.Name)
+                    .ToList();
+
+                var requirementVectors =
+                    await _embeddingService.GetEmbeddingsBatchAsync(requirementTexts);
+
+                // 4. Compare + weight
+                var results = new List<object>();
+                float weightedScoreSum = 0f;
+                float importanceSum = 0f;
+
+                for (int i = 0; i < requirements.Count; i++)
+                {
+                    var req = requirements[i];
+                    var similarity = _embeddingService.CalculateSimilarity(
+                        cvVector,
+                        requirementVectors[i]
+                    );
+
+                    // Add keyword-based baseline comparison
+                    var keywordScore = req.Name
+                        .Split(' ')
+                        .Count(word => cvText.Contains(word, StringComparison.OrdinalIgnoreCase))
+                        / (float)req.Name.Split(' ').Length;
+
+                    var weightedScore = similarity * req.Importance;
+
+                    weightedScoreSum += weightedScore;
+                    importanceSum += req.Importance;
+
+                    results.Add(new
+                    {
+                        requirement = req.Name,
+                        category = req.Category,
+                        importance = req.Importance,
+                        vectorSimilarity = (float)Math.Round(similarity, 4),
+                        keywordScore = (float)Math.Round(keywordScore, 4),
+                        weightedScore = (float)Math.Round(weightedScore, 4)
+                    });
+                }
+
+                var matchPercentage = importanceSum > 0
+                    ? (float)Math.Round((weightedScoreSum / importanceSum) * 100, 2)
+                    : 0f;
 
                 return Ok(new
                 {
-                    success = true,
-                    message = "Embedding test successful",
-                    singleEmbedding = new
-                    {
-                        text = text,
-                        dimensions = embedding.Length,
-                        sampleValues = embedding.Take(5).ToArray()
-                    },
-                    batchEmbeddings = new
-                    {
-                        count = batchEmbeddings.Count,
-                        texts = testTexts,
-                        dimensions = batchEmbeddings.Count > 0 ? batchEmbeddings[0].Length : 0
-                    },
-                    note = "Full embedding vectors are not returned for brevity. API working correctly!"
+                    matchPercentage,
+                    totalRequirements = requirements.Count,
+                    matches = results
+                        .OrderByDescending(r => (float)r.GetType()
+                            .GetProperty("weightedScore")!
+                            .GetValue(r)!)
+                        .ToList(),
+                    topGaps = results
+                        .OrderBy(r => (float)r.GetType()
+                            .GetProperty("weightedScore")!
+                            .GetValue(r)!)
+                        .Take(5)
+                        .ToList()
                 });
             }
             catch (Exception ex)
             {
-                LoggingConfigService.ReturnError($"Embedding test failed: {ex.Message}");
-                return BadRequest(new { error = ex.Message });
+                LoggingConfigService.ReturnError(ex.Message);
+                return BadRequest("Comparison failed");
             }
         }
+
     }
 }

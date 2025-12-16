@@ -1,13 +1,24 @@
+using System;
+
 namespace JBDH.Models.AI
 {
     public class AIConfig
     {
-        public string OpenAIKey { get; set; } = "sk-3c7fc5ab902a4832b4799b9f1d10fb0e";
-        public string OpenAIModel { get; set; } = "deepseek-chat";
-        public string OpenAIUrl { get; set; } = "https://api.deepseek.com/chat/completions";
+        // DeepSeek API Configuration (for chat/analysis)
+        public string DeepSeekApiKey { get; set; } = Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY") ?? "sk-c768a9b4f9a642f4bcad5063b0cf4b31";
+        public string DeepSeekModel { get; set; } = "deepseek-chat";
+        public string DeepSeekUrl { get; set; } = "https://api.deepseek.com/v1/chat/completions";
 
-        public string EmbeddingModel { get; set; } = "deepseek-embedding";
-        public string EmbeddingUrl { get; set; } = "https://api.deepseek.com/embeddings";
+        // Gemini API Configuration (for embeddings)
+        public string GeminiApiKey { get; set; } = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? "AIzaSyAaIt2fidGPsqQ8JgEZjHr36-1lMjxZpJM";
+        public string EmbeddingModel { get; set; } = "gemini-embedding-001";
+        public string EmbeddingUrl { get; set; } = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent";
+
+        // Legacy properties for backward compatibility  
+        public string OpenAIKey => DeepSeekApiKey; // For existing chat services
+        public string OpenAIModel => DeepSeekModel; // For existing chat services  
+        public string OpenAIUrl => DeepSeekUrl; // For existing chat services
+
         public string OpenAIOrgId { get; set; } = string.Empty;
         public string OpenAIUserId { get; set; } = string.Empty;
         public int MaxTokens { get; set; } = 1000;

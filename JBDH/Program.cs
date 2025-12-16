@@ -18,6 +18,7 @@ using JBDH.Models.AI;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -30,7 +31,7 @@ using JBDH.Services.ListService;
 
 // Ensure logging is configured for the entire application
 JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
-LoggingConfigService.ReturnInfo("Testlogg: NLog är konfigurerad!");
+JBDH.Services.Configuration.LoggingConfigService.ReturnInfo("Testlogg: NLog är konfigurerad!");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,7 +104,9 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
-builder.Services.AddSingleton<AIConfig>();
+builder.Services.Configure<AIConfig>(builder.Configuration.GetSection("AIConfig"));
+builder.Services.AddSingleton<AIConfig>(provider => 
+    provider.GetRequiredService<IOptions<AIConfig>>().Value);
 builder.Services.AddHttpClient<IAIApiClient, AIApiClient>();
 builder.Services.AddScoped<IManageIOService, ManageIOService>();
 builder.Services.AddScoped<IAIRequestBuilderService, AIRequestBuilderService>();
