@@ -29,6 +29,7 @@ namespace JBDH.Models.DTOs
         public string? PasswordHash { get; set; }
         public string? Email { get; set; }
         public string? Location { get; set; }
+        public string? Role { get; set; } 
         public string? Name { get; set; }
         public List<string>? DesiredEmploymentTypes { get; set; }
         public List<string>? DesiredWorkModes { get; set; }

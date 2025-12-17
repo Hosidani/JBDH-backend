@@ -30,7 +30,7 @@ namespace JBDH.Services.AICommunications
                 CVPath = cvPath
             };
             var aiResult = await _aiApiClient.GetAIResponse(request);
-            var aiResponseText = aiResult.Response;
+            var aiResponseText = aiResult.Response ?? string.Empty;
             LoggingConfigService.ReturnInfo($"Raw AI response: {aiResponseText}");
             // Always clean the AI response before saving
             var cleanedResponse = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText ?? string.Empty);

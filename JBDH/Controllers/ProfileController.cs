@@ -11,6 +11,10 @@ using JBDH.Models.Job;
 using Microsoft.AspNetCore.Cors;
 using JBDH.Services.Configuration;
 using JBDH.Models.DTOs;
+using JBDH.Models.Friendship;
+using JBDH.Models.Dataflow;
+using JBDH.Models.User;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
 
 namespace JBDH.Controllers
@@ -178,14 +182,15 @@ namespace JBDH.Controllers
                 DeveloperMode = user.DeveloperMode,
                 Searchable = user.Searchable,
                 IsBanned = user.IsBanned,
-                //SelectedRoles = user.Roles?.Select(r => r.RoleName).ToList(),
-                SentFriendRequests = user.SentFriendRequests?.ToList(),
-                ReceivedFriendRequests = user.ReceivedFriendRequests?.ToList(),
-                JobApplications = user.JobApplications?.ToList(),
-                DataFlows = user.DataFlows?.ToList(),
+                Role = user.Role, 
+                SelectedRoles = user.Roles?.Select(r => r.Role).ToList(), 
+                SentFriendRequests = new List<FriendshipModel>(), // Avoid circular references
+                ReceivedFriendRequests = new List<FriendshipModel>(), // Avoid circular references  
+                JobApplications = new List<JobApplication>(), // Avoid circular references
+                DataFlows = new List<DataFlow>(), // Avoid circular references
                 AIResponses = aiResponseDtos,
-                Roles = user.Roles?.ToList(),
-                ManagedOrganisations = user.ManagedOrganisations?.ToList(),
+                Roles = new List<UserRoleAssignment>(), // Remove circular references - use SelectedRoles instead
+                ManagedOrganisations = new List<JBDH.Models.Organisation.Organisation>(), // Avoid circular references
                 OwnedUsers = user.OwnedUsers?.Select(u => new UserDto { Id = u.Id, Name = u.Name }).ToList(),
                 Owner = user.Owner != null ? new UserDto { Id = user.Owner.Id, Name = user.Owner.Name } : null,
                 OwnerId = user.OwnerId,
