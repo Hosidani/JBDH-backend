@@ -77,7 +77,7 @@ namespace JBDH.Services.UserManagement
         {
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
             Email = model.Email,
-            Location = model.Location,
+            Location = model.Location ?? string.Empty,
             Searchable = model.Open,
             DeveloperMode = false,
         };

@@ -33,7 +33,7 @@ namespace JBDH.Services.AICommunications
             var aiResponseText = aiResult.Response;
             LoggingConfigService.ReturnInfo($"Raw AI response: {aiResponseText}");
             // Always clean the AI response before saving
-            var cleanedResponse = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText);
+            var cleanedResponse = _manageIOService.ExtractJsonFromCodeBlock(aiResponseText ?? string.Empty);
             LoggingConfigService.ReturnInfo($"Cleaned AI response (before deserialization): {cleanedResponse}");
             CVAnalysisResult? analysisResult = null;
             try
