@@ -31,6 +31,7 @@ namespace JBDH.Controllers
         private readonly IAIApiClient _aiApiClient;
         private readonly ITextChunkingService _textChunkingService;
         private readonly IEmbeddingService _embeddingService;
+        private readonly ICVAnalysisService _cvAnalysisService;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
@@ -45,7 +46,8 @@ namespace JBDH.Controllers
             IJobAIAnalysisService jobAIAnalysisService,
             IAIApiClient aiApiClient,
             ITextChunkingService textChunkingService,
-            IEmbeddingService embeddingService)
+            IEmbeddingService embeddingService,
+            ICVAnalysisService cvAnalysisService)
         {
             _logger = logger;
             _context = context;
@@ -59,6 +61,7 @@ namespace JBDH.Controllers
             _aiApiClient = aiApiClient;
             _textChunkingService = textChunkingService;
             _embeddingService = embeddingService;
+            _cvAnalysisService = cvAnalysisService;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -283,6 +286,8 @@ namespace JBDH.Controllers
             return Ok(new { aiResponse, analysis = parsed });
         }
 
+
+
         [HttpPost("CompareCvToJobAdV2")]
         public async Task<IActionResult> CompareCvToJobAdV2(CompareCvToJobAdViewModel model)
         {
@@ -304,133 +309,54 @@ namespace JBDH.Controllers
                 if (string.IsNullOrWhiteSpace(cvText))
                     return BadRequest("Could not extract CV text");
 
-                // 2. Chunk job ad (RAG)
-                var chunks = _textChunkingService.ChunkJobAd(model.JobAdText);
-
-                var requirements = new List<Requirement>();
-
-                foreach (var chunk in chunks)
+                // Extract CV profession and requirements using service
+                var cvExtractionResult = await _cvAnalysisService.ExtractCVProfessionAndRequirementsAsync(cvText);
+                if (cvExtractionResult == null)
                 {
-                    var aiRequest = new AIRequest
-                    {
-                        CommandId = 6, // requirement extraction
-                        JobAdText = chunk,
-                        User = new User
-                        {
-                            Id = 1,
-                            Email = "system@analysis",
-                            PasswordHash = "system",
-                            Location = "system"
-                        }
-                    };
-
-                    var aiResult = await _aiApiClient.GetAIResponse(aiRequest);
-                    if (!aiResult.Success || string.IsNullOrWhiteSpace(aiResult.Response))
-                        continue;
-
-                    try
-                    {
-                        var extracted = Newtonsoft.Json.JsonConvert
-                            .DeserializeObject<List<Requirement>>(aiResult.Response);
-
-                        if (extracted != null)
-                            requirements.AddRange(extracted);
-                    }
-                    catch
-                    {
-                        // ignore malformed chunks
-                    }
+                    _logger.LogWarning("CV extraction failed or returned null");
+                    return BadRequest("CV extraction failed");
                 }
 
-                if (requirements.Count == 0)
-                    return BadRequest("No requirements extracted");
+                var cvProfession = cvExtractionResult.Profession;
+                var cvRequirements = cvExtractionResult.Requirements;
 
-                // Deduplicate requirements before embedding
-                requirements = requirements
-                    .GroupBy(r => r.Name.Trim().ToLowerInvariant())
-                    .Select(g => g.First())
-                    .ToList();
-
-                // Filter only comparable categories
-                var comparableCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    "skill", "experience", "language", "degree", "certification"
-                };
+                // 2. Extract job requirements and profession using service
+                var (requirements, jobProfession) = await _jobAIAnalysisService.ExtractJobRequirementsAndProfessionAsync(model.JobAdText);
                 
-                requirements = requirements
-                    .Where(r => comparableCategories.Contains(r.Category?.Trim() ?? ""))
-                    .ToList();
-
                 if (requirements.Count == 0)
-                    return BadRequest("No comparable requirements found after filtering");
+                    return BadRequest("No comparable requirements found after processing");
 
-                // 3. Generate embeddings
-                var cvVector = await _embeddingService.GetEmbeddingAsync(
-                    cvText,
-                    "RETRIEVAL_DOCUMENT"
-                );
+                // 3. Compare skills using embedding service
+                var (matchPercentage, results) = await _embeddingService.CompareSkillsWithEmbeddingsAsync(cvRequirements, requirements);
 
-                var requirementTexts = requirements
-                    .Select(r => r.Name)
-                    .ToList();
+                // Calculate profession score with embeddings
+                _logger.LogInformation("Calculating profession score - CV: {CvMain}/{CvSub}/{CvSpecialty} vs Job: {JobMain}/{JobSub}/{JobSpecialty}", 
+                    cvProfession?.Main, cvProfession?.Sub, cvProfession?.Specialty, 
+                    jobProfession?.Main, jobProfession?.Sub, jobProfession?.Specialty);
+                
+                var professionScore = await _embeddingService.CalculateProfessionScoreWithEmbeddingsAsync(cvProfession, jobProfession);
+                var professionPercentage = (float)Math.Round(professionScore * 100, 2);
+                
+                _logger.LogInformation("Final profession score: {ProfessionScore} ({ProfessionPercentage}%)", 
+                    professionScore, professionPercentage);
 
-                var requirementVectors =
-                    await _embeddingService.GetEmbeddingsBatchAsync(requirementTexts);
-
-                // 4. Compare + weight
-                var results = new List<object>();
-                float weightedScoreSum = 0f;
-                float importanceSum = 0f;
-
-                for (int i = 0; i < requirements.Count; i++)
-                {
-                    var req = requirements[i];
-                    var similarity = _embeddingService.CalculateSimilarity(
-                        cvVector,
-                        requirementVectors[i]
-                    );
-
-                    // Add keyword-based baseline comparison
-                    var keywordScore = req.Name
-                        .Split(' ')
-                        .Count(word => cvText.Contains(word, StringComparison.OrdinalIgnoreCase))
-                        / (float)req.Name.Split(' ').Length;
-
-                    var weightedScore = similarity * req.Importance;
-
-                    weightedScoreSum += weightedScore;
-                    importanceSum += req.Importance;
-
-                    results.Add(new
-                    {
-                        requirement = req.Name,
-                        category = req.Category,
-                        importance = req.Importance,
-                        vectorSimilarity = (float)Math.Round(similarity, 4),
-                        keywordScore = (float)Math.Round(keywordScore, 4),
-                        weightedScore = (float)Math.Round(weightedScore, 4)
-                    });
-                }
-
-                var matchPercentage = importanceSum > 0
-                    ? (float)Math.Round((weightedScoreSum / importanceSum) * 100, 2)
-                    : 0f;
+                // Calculate total score using weighted combination (NOT multiplication!)
+                // Skills (30% weight) + Profession (70% weight) - profession is more important for job fit
+                var totalMatchScore = (matchPercentage / 100f * 0.3f) + (professionScore * 0.7f);
+                var totalMatchPercentage = (float)Math.Round(totalMatchScore * 100, 2);
+                
+                _logger.LogInformation("Total score calculation: Skills {SkillsPercent}% (30% weight) + Profession {ProfessionPercent}% (70% weight) = {TotalPercent}%", 
+                    matchPercentage, professionPercentage, totalMatchPercentage);
 
                 return Ok(new
                 {
-                    matchPercentage,
-                    totalRequirements = requirements.Count,
-                    matches = results
-                        .OrderByDescending(r => (float)r.GetType()
-                            .GetProperty("weightedScore")!
-                            .GetValue(r)!)
-                        .ToList(),
-                    topGaps = results
-                        .OrderBy(r => (float)r.GetType()
-                            .GetProperty("weightedScore")!
-                            .GetValue(r)!)
-                        .Take(5)
-                        .ToList()
+                    totalScore = totalMatchPercentage,
+                    skillsScore = matchPercentage,
+                    professionScore = professionPercentage,
+                    cvProfession,
+                    jobProfession,
+                    matches = results,
+                    totalRequirements = requirements.Count
                 });
             }
             catch (Exception ex)
