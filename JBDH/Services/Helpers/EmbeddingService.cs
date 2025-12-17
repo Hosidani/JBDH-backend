@@ -306,8 +306,8 @@ namespace JBDH.Services.Helpers
                 else
                 {
                     // Use embedding similarity AS IS - no arbitrary scaling!
-                    var cvMainVector = await GetEmbeddingAsync(cvProfession.Main, "RETRIEVAL_DOCUMENT");
-                    var jobMainVector = await GetEmbeddingAsync(jobProfession.Main, "RETRIEVAL_QUERY");
+                    var cvMainVector = await GetEmbeddingAsync(cvProfession.Main!, "RETRIEVAL_DOCUMENT");
+                    var jobMainVector = await GetEmbeddingAsync(jobProfession.Main!, "RETRIEVAL_QUERY");
                     mainScore = CalculateSimilarity(cvMainVector, jobMainVector);
                     
                     _logger.LogInformation("Main profession similarity: CV='{CvMain}' vs Job='{JobMain}' = {Similarity:F4} (AS IS)", 
@@ -324,8 +324,8 @@ namespace JBDH.Services.Helpers
                 }
                 else
                 {
-                    var cvSubVector = await GetEmbeddingAsync(cvProfession.Sub, "RETRIEVAL_DOCUMENT");
-                    var jobSubVector = await GetEmbeddingAsync(jobProfession.Sub, "RETRIEVAL_QUERY");
+                    var cvSubVector = await GetEmbeddingAsync(cvProfession.Sub!, "RETRIEVAL_DOCUMENT");
+                    var jobSubVector = await GetEmbeddingAsync(jobProfession.Sub!, "RETRIEVAL_QUERY");
                     subScore = CalculateSimilarity(cvSubVector, jobSubVector);
                     
                     _logger.LogInformation("Sub profession similarity: CV='{CvSub}' vs Job='{JobSub}' = {Similarity:F4} (AS IS)", 
@@ -347,8 +347,8 @@ namespace JBDH.Services.Helpers
                 }
                 else
                 {
-                    var cvSpecVector = await GetEmbeddingAsync(cvProfession.Specialty, "RETRIEVAL_DOCUMENT");
-                    var jobSpecVector = await GetEmbeddingAsync(jobProfession.Specialty, "RETRIEVAL_QUERY");
+                    var cvSpecVector = await GetEmbeddingAsync(cvProfession.Specialty!, "RETRIEVAL_DOCUMENT");
+                    var jobSpecVector = await GetEmbeddingAsync(jobProfession.Specialty!, "RETRIEVAL_QUERY");
                     specialtyScore = CalculateSimilarity(cvSpecVector, jobSpecVector);
                     
                     _logger.LogInformation("Specialty profession similarity: CV='{CvSpecialty}' vs Job='{JobSpecialty}' = {Similarity:F4} (AS IS)", 
@@ -367,88 +367,24 @@ namespace JBDH.Services.Helpers
             _logger.LogInformation("Profession scoring breakdown: Main={Main:F2}(50%) + Sub={Sub:F2}(30%) + Specialty={Specialty:F2}(20%) = {Total:F2}", 
                 mainScore, subScore, specialtyScore, totalScore);
 
-            // Apply domain-aware profession matching
+            // Optional: Manual domain knowledge can be applied to improve results
+            // Currently using pure semantic similarity for clean AI-driven approach
+            // var domainBonus = GetProfessionDomainBonus(cvProfession.Main, jobProfession.Main);
+            // var adjustedScore = Math.Min(totalScore + domainBonus, 1.0f);
+            
+            _logger.LogInformation("Profession matching using pure semantic similarity from embeddings");
+            _logger.LogInformation("Note: Manual domain rules can be enabled for enhanced accuracy");
+            
+            /*
             var domainBonus = GetProfessionDomainBonus(cvProfession.Main, jobProfession.Main);
             var adjustedScore = Math.Min(totalScore + domainBonus, 1.0f);
-            
-            _logger.LogInformation("Domain bonus applied: {DomainBonus:F3}, Adjusted score: {AdjustedScore:F3}", 
-                domainBonus, adjustedScore);
-
-            // Apply penalties based on adjusted score
-            if (adjustedScore < 0.2f)
-            {
-                _logger.LogInformation("Completely unrelated professions (adjusted < 20%), applying severe penalty");
-                return 0.05f; // Nearly zero for completely different fields
-            }
-            else if (adjustedScore < 0.3f)
-            {
-                _logger.LogInformation("Very different professions (adjusted < 30%), applying major penalty");
-                return Math.Max(adjustedScore * 0.2f, 0.05f); // 80% penalty
-            }
-            else if (adjustedScore < 0.4f)
-            {
-                _logger.LogInformation("Different professional fields detected (adjusted < 40%), applying moderate penalty");
-                return Math.Max(adjustedScore * 0.6f, 0.05f); // 40% penalty
-            }
-
             return adjustedScore;
+            */
+
+            return totalScore;
         }
 
-        /// <summary>
-        /// Calculate domain-specific bonus for related professions
-        /// NOTE: This is experimental test logic to handle profession matching edge cases
-        /// TODO: Replace with more sophisticated domain classification system
-        /// </summary>
-        private float GetProfessionDomainBonus(string? cvMain, string? jobMain)
-        {
-            if (string.IsNullOrWhiteSpace(cvMain) || string.IsNullOrWhiteSpace(jobMain))
-                return 0f;
 
-            var cv = cvMain.ToLowerInvariant();
-            var job = jobMain.ToLowerInvariant();
-
-            // EXPERIMENTAL: Tech domain relationships - hardcoded for testing
-            var techTerms = new[] { "developer", "engineer", "programmer", "coder", "architect" };
-            var isCvTech = techTerms.Any(term => cv.Contains(term));
-            var isJobTech = techTerms.Any(term => job.Contains(term));
-
-            if (isCvTech && isJobTech)
-            {
-                // TEST: High bonus for fullstack <-> backend/frontend relationship
-                // This solves the "fullstack should match backend" problem
-                if ((cv.Contains("fullstack") || cv.Contains("full stack")) && 
-                    (job.Contains("backend") || job.Contains("frontend") || job.Contains("back end") || job.Contains("front end")))
-                    return 0.25f; // TEST: 25% bonus - may need tuning
-                
-                if ((job.Contains("fullstack") || job.Contains("full stack")) && 
-                    (cv.Contains("backend") || cv.Contains("frontend") || cv.Contains("back end") || cv.Contains("front end")))
-                    return 0.25f; // TEST: 25% bonus - may need tuning
-
-                // TEST: Medium bonus for exact specialization matches
-                if ((cv.Contains("backend") && job.Contains("backend")) || 
-                    (cv.Contains("frontend") && job.Contains("frontend")) ||
-                    (cv.Contains("back end") && job.Contains("back end")) ||
-                    (cv.Contains("front end") && job.Contains("front end")))
-                    return 0.15f; // TEST: 15% bonus - may need tuning
-
-                // TEST: Small bonus for same general tech field
-                return 0.1f; // TEST: 10% bonus for any tech-to-tech - baseline
-            }
-
-            // TEST: Medical domain relationships - basic implementation
-            var medicalTerms = new[] { "doctor", "physician", "nurse", "medical", "healthcare", "clinical" };
-            var isCvMedical = medicalTerms.Any(term => cv.Contains(term));
-            var isJobMedical = medicalTerms.Any(term => job.Contains(term));
-
-            if (isCvMedical && isJobMedical)
-                return 0.15f; // TEST: 15% bonus for medical-to-medical
-
-            // TEST: Cross-domain penalty - this solves the "developer vs doctor" problem
-            if ((isCvTech && isJobMedical) || (isCvMedical && isJobTech))
-                return -0.2f; // TEST: 20% penalty for completely different domains
-
-            return 0f; // No bonus/penalty - neutral case
-        }
 
         /// <summary>
         /// FALLBACK: Generate simple embedding when API quota exceeded
@@ -481,45 +417,66 @@ namespace JBDH.Services.Helpers
             
             return embedding;
         }
-    }
 
-    /// <summary>
-    /// Response model from OpenAI Embedding API
-    /// </summary>
-    public class OpenAIEmbeddingResponse
-    {
-        [JsonProperty("object")]
-        public string? Object { get; set; }
+        /// <summary>
+        /// Optional domain-specific enhancements for profession matching 
+        /// FEATURE: Manual rules can supplement AI semantic understanding for edge cases
+        /// PURPOSE: Handle industry-specific relationships that pure embeddings might miss
+        /// STATUS: Currently disabled to showcase pure AI approach - can be enabled for production
+        /// TO ACTIVATE: Uncomment calls in CalculateProfessionScoreWithEmbeddingsAsync and update return statement after it.
+        /// </summary>
+        private float GetProfessionDomainBonus(string? cvMain, string? jobMain)
+        {
+            if (string.IsNullOrWhiteSpace(cvMain) || string.IsNullOrWhiteSpace(jobMain))
+                return 0f;
 
-        [JsonProperty("data")]
-        public List<EmbeddingData>? Data { get; set; }
+            var cv = cvMain.ToLowerInvariant();
+            var job = jobMain.ToLowerInvariant();
 
-        [JsonProperty("model")]
-        public string? Model { get; set; }
+            // ENHANCEMENT: Technology domain relationships
+            // Addresses cases where semantic similarity alone may be insufficient
+            var techTerms = new[] { "developer", "engineer", "programmer", "coder", "architect" };
+            var isCvTech = techTerms.Any(term => cv.Contains(term));
+            var isJobTech = techTerms.Any(term => job.Contains(term));
 
-        [JsonProperty("usage")]
-        public Usage? Usage { get; set; }
-    }
+            if (isCvTech && isJobTech)
+            {
+                // BUSINESS LOGIC: Fullstack developers inherently possess backend/frontend skills
+                // This addresses the common hiring scenario where fullstack → backend is highly relevant
+                if ((cv.Contains("fullstack") || cv.Contains("full stack")) && 
+                    (job.Contains("backend") || job.Contains("frontend") || job.Contains("back end") || job.Contains("front end")))
+                    return 0.25f; // 25% relevance boost for skill overlap
+                
+                if ((job.Contains("fullstack") || job.Contains("full stack")) && 
+                    (cv.Contains("backend") || cv.Contains("frontend") || cv.Contains("back end") || cv.Contains("front end")))
+                    return 0.25f; // Bidirectional relationship recognition
 
-    public class EmbeddingData
-    {
-        [JsonProperty("object")]
-        public string? Object { get; set; }
+                // SPECIALIZATION MATCHING: Exact role alignment
+                if ((cv.Contains("backend") && job.Contains("backend")) || 
+                    (cv.Contains("frontend") && job.Contains("frontend")) ||
+                    (cv.Contains("back end") && job.Contains("back end")) ||
+                    (cv.Contains("front end") && job.Contains("front end")))
+                    return 0.15f; // 15% boost for direct specialization match
 
-        [JsonProperty("embedding")]
-        public float[]? Embedding { get; set; }
+                // DOMAIN COHERENCE: General technology field alignment  
+                return 0.1f; // 10% baseline boost for same professional domain
+            }
 
-        [JsonProperty("index")]
-        public int Index { get; set; }
-    }
+            // HEALTHCARE DOMAIN: Medical professional relationships
+            var medicalTerms = new[] { "doctor", "physician", "nurse", "medical", "healthcare", "clinical" };
+            var isCvMedical = medicalTerms.Any(term => cv.Contains(term));
+            var isJobMedical = medicalTerms.Any(term => job.Contains(term));
 
-    public class Usage
-    {
-        [JsonProperty("prompt_tokens")]
-        public int PromptTokens { get; set; }
+            if (isCvMedical && isJobMedical)
+                return 0.15f; // 15% boost for healthcare domain coherence
 
-        [JsonProperty("total_tokens")]
-        public int TotalTokens { get; set; }
+            // DOMAIN MISMATCH PENALTY: Prevents false positives across unrelated fields
+            // Critical for maintaining match quality between disparate professions
+            if ((isCvTech && isJobMedical) || (isCvMedical && isJobTech))
+                return -0.2f; // 20% penalty for cross-domain mismatch
+
+            return 0f; // Neutral - rely on pure semantic similarity
+        }
     }
 
     /// <summary>

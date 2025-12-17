@@ -196,8 +196,48 @@ namespace JBDH.Services.AICommunications
                 .Where(r => comparableCategories.Contains(r.Category?.Trim() ?? ""))
                 .ToList();
 
-            _logger.LogInformation("Job ad processing complete - Requirements: {Count}, Profession: {Main}/{Sub}/{Specialty}", 
-                requirements.Count, jobProfession?.Main, jobProfession?.Sub, jobProfession?.Specialty);
+            // Log Job extraction results in table format
+            _logger.LogInformation("\n" +
+                "════════════════════════════════════════════════════════════════\n" +
+                "                       JOB AD EXTRACTION RESULTS                \n" +
+                "════════════════════════════════════════════════════════════════\n" +
+                "PROFESSION:\n" +
+                "┌─────────────┬────────────────────────────────────────────────┐\n" +
+                "│ Field       │ Value                                          │\n" +
+                "├─────────────┼────────────────────────────────────────────────┤\n" +
+                "│ Main        │ {Main,-46} │\n" +
+                "│ Sub         │ {Sub,-46} │\n" +
+                "│ Specialty   │ {Specialty,-46} │\n" +
+                "└─────────────┴────────────────────────────────────────────────┘\n" +
+                "\n" +
+                "REQUIREMENTS ({RequirementCount} found after deduplication & filtering):\n" +
+                "┌─────────────────────────────────────┬──────────────┬────────────┐\n" +
+                "│ Name                                │ Category     │ Importance │\n" +
+                "├─────────────────────────────────────┼──────────────┼────────────┤",
+                jobProfession?.Main ?? "(empty)",
+                jobProfession?.Sub ?? "(empty)",
+                jobProfession?.Specialty ?? "(empty)",
+                requirements.Count);
+
+            // Log each requirement in table format
+            if (requirements.Count > 0)
+            {
+                foreach (var req in requirements)
+                {
+                    _logger.LogInformation("│ {Name,-35} │ {Category,-12} │ {Importance,10} │",
+                        (req.Name.Length > 35 ? req.Name.Substring(0, 32) + "..." : req.Name),
+                        (req.Category.Length > 12 ? req.Category.Substring(0, 9) + "..." : req.Category),
+                        req.Importance);
+                }
+                _logger.LogInformation("└─────────────────────────────────────┴──────────────┴────────────┘");
+            }
+            else
+            {
+                _logger.LogInformation("│ No requirements extracted                                          │\n" +
+                                     "└─────────────────────────────────────┴──────────────┴────────────┘");
+            }
+            
+            _logger.LogInformation("════════════════════════════════════════════════════════════════\n");
 
             return (requirements, jobProfession);
         }
