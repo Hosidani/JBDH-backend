@@ -92,8 +92,8 @@ namespace JBDH.Controllers
                 if (targetUser == null)
                     return NotFound("User not found");
 
-                if (targetUser.Searchable != true)
-                    return Forbid("This user profile is not public");
+                //if (targetUser.Searchable != true)
+                //    return Forbid("This user profile is not public");
 
                 var userDto = new
                 {
