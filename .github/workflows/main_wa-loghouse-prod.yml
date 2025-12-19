@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP.Net Core app to Azure Web App - wa-loghouse-prod
 
 on:
@@ -9,26 +6,27 @@ on:
       - main
   workflow_dispatch:
 
-# Add concurrency control to prevent multiple simultaneous deployments
 concurrency:
   group: deploy-webapp
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: windows-latest
     permissions:
+      id-token: write
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'  # Match project TargetFramework
+          dotnet-version: '9.0.x'
 
-      - name: Cache dependencies
+      - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
@@ -39,7 +37,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build with dotnet
+      - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
       - name: Restore dotnet tools
@@ -50,35 +48,16 @@ jobs:
         run: dotnet build --configuration Release
         working-directory: ./JBDH
 
-      - name: Run EF Core migrations on Azure DB
+      - name: Run EF Core migrations
         run: dotnet tool run dotnet-ef database update --context ApplicationDbContext
         working-directory: ./JBDH
         env:
           ASPNETCORE_ENVIRONMENT: Production
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
 
-      - name: dotnet publish
+      - name: Publish app
         run: dotnet publish -c Release -o ./publish/myapp --no-build
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: .net-app
-          path: ./publish/myapp
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: .net-app
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -87,10 +66,8 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_279E8B96C0F24ED0874EF3A80E40485A }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'wa-loghouse-prod'
-          slot-name: 'Production'
-          package: .
-
+          app-name: wa-loghouse-prod
+          slot-name: Production
+          package: ./publish/myapp
