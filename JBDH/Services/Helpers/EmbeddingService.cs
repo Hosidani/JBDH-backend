@@ -309,8 +309,7 @@ namespace JBDH.Services.Helpers
                     var cvMainVector = await GetEmbeddingAsync(cvProfession.Main!, "RETRIEVAL_DOCUMENT");
                     var jobMainVector = await GetEmbeddingAsync(jobProfession.Main!, "RETRIEVAL_QUERY");
                     mainScore = CalculateSimilarity(cvMainVector, jobMainVector);
-                    
-                    _logger.LogInformation("Main profession similarity: CV='{CvMain}' vs Job='{JobMain}' = {Similarity:F4} (AS IS)", 
+                    _logger.LogInformation("Main profession similarity: CV='{CvMain}' vs Job='{JobMain}' = {Similarity:F4} (AS IS)",
                         cvProfession.Main, jobProfession.Main, mainScore);
                 }
             }
@@ -327,8 +326,7 @@ namespace JBDH.Services.Helpers
                     var cvSubVector = await GetEmbeddingAsync(cvProfession.Sub!, "RETRIEVAL_DOCUMENT");
                     var jobSubVector = await GetEmbeddingAsync(jobProfession.Sub!, "RETRIEVAL_QUERY");
                     subScore = CalculateSimilarity(cvSubVector, jobSubVector);
-                    
-                    _logger.LogInformation("Sub profession similarity: CV='{CvSub}' vs Job='{JobSub}' = {Similarity:F4} (AS IS)", 
+                    _logger.LogInformation("Sub profession similarity: CV='{CvSub}' vs Job='{JobSub}' = {Similarity:F4} (AS IS)",
                         cvProfession.Sub, jobProfession.Sub, subScore);
                 }
             }
@@ -350,8 +348,7 @@ namespace JBDH.Services.Helpers
                     var cvSpecVector = await GetEmbeddingAsync(cvProfession.Specialty!, "RETRIEVAL_DOCUMENT");
                     var jobSpecVector = await GetEmbeddingAsync(jobProfession.Specialty!, "RETRIEVAL_QUERY");
                     specialtyScore = CalculateSimilarity(cvSpecVector, jobSpecVector);
-                    
-                    _logger.LogInformation("Specialty profession similarity: CV='{CvSpecialty}' vs Job='{JobSpecialty}' = {Similarity:F4} (AS IS)", 
+                    _logger.LogInformation("Specialty profession similarity: CV='{CvSpecialty}' vs Job='{JobSpecialty}' = {Similarity:F4} (AS IS)",
                         cvProfession.Specialty, jobProfession.Specialty, specialtyScore);
                 }
             }
@@ -363,25 +360,16 @@ namespace JBDH.Services.Helpers
 
             // 4. Weighted combination: Main(50%) + Sub(30%) + Specialty(20%)
             var totalScore = (mainScore * 0.5f) + (subScore * 0.3f) + (specialtyScore * 0.2f);
-            
-            _logger.LogInformation("Profession scoring breakdown: Main={Main:F2}(50%) + Sub={Sub:F2}(30%) + Specialty={Specialty:F2}(20%) = {Total:F2}", 
-                mainScore, subScore, specialtyScore, totalScore);
 
-            // Optional: Manual domain knowledge can be applied to improve results
-            // Currently using pure semantic similarity for clean AI-driven approach
-            // var domainBonus = GetProfessionDomainBonus(cvProfession.Main, jobProfession.Main);
-            // var adjustedScore = Math.Min(totalScore + domainBonus, 1.0f);
-            
-            _logger.LogInformation("Profession matching using pure semantic similarity from embeddings");
-            _logger.LogInformation("Note: Manual domain rules can be enabled for enhanced accuracy");
-            
-            /*
+            // Aktivera domänregler för att särskilja t.ex. läkare och ingenjör
             var domainBonus = GetProfessionDomainBonus(cvProfession.Main, jobProfession.Main);
-            var adjustedScore = Math.Min(totalScore + domainBonus, 1.0f);
-            return adjustedScore;
-            */
+            // Begränsa till max 1.0 och min 0.0
+            var adjustedScore = Math.Clamp(totalScore + domainBonus, 0.0f, 1.0f);
 
-            return totalScore;
+            _logger.LogInformation("Profession scoring breakdown: Main={Main:F2}(50%) + Sub={Sub:F2}(30%) + Specialty={Specialty:F2}(20%) = {Total:F2} + DomainBonus={DomainBonus:F2} => Adjusted={Adjusted:F2}",
+                mainScore, subScore, specialtyScore, totalScore, domainBonus, adjustedScore);
+
+            return adjustedScore;
         }
 
 
@@ -433,49 +421,55 @@ namespace JBDH.Services.Helpers
             var cv = cvMain.ToLowerInvariant();
             var job = jobMain.ToLowerInvariant();
 
-            // ENHANCEMENT: Technology domain relationships
-            // Addresses cases where semantic similarity alone may be insufficient
-            var techTerms = new[] { "developer", "engineer", "programmer", "coder", "architect" };
+            // TEKNIK: Technology/Engineering domain
+            var techTerms = new[] { "developer", "engineer", "programmer", "coder", "architect", "it", "software", "system" };
             var isCvTech = techTerms.Any(term => cv.Contains(term));
             var isJobTech = techTerms.Any(term => job.Contains(term));
 
-            if (isCvTech && isJobTech)
-            {
-                // BUSINESS LOGIC: Fullstack developers inherently possess backend/frontend skills
-                // This addresses the common hiring scenario where fullstack → backend is highly relevant
-                if ((cv.Contains("fullstack") || cv.Contains("full stack")) && 
-                    (job.Contains("backend") || job.Contains("frontend") || job.Contains("back end") || job.Contains("front end")))
-                    return 0.25f; // 25% relevance boost for skill overlap
-                
-                if ((job.Contains("fullstack") || job.Contains("full stack")) && 
-                    (cv.Contains("backend") || cv.Contains("frontend") || cv.Contains("back end") || cv.Contains("front end")))
-                    return 0.25f; // Bidirectional relationship recognition
-
-                // SPECIALIZATION MATCHING: Exact role alignment
-                if ((cv.Contains("backend") && job.Contains("backend")) || 
-                    (cv.Contains("frontend") && job.Contains("frontend")) ||
-                    (cv.Contains("back end") && job.Contains("back end")) ||
-                    (cv.Contains("front end") && job.Contains("front end")))
-                    return 0.15f; // 15% boost for direct specialization match
-
-                // DOMAIN COHERENCE: General technology field alignment  
-                return 0.1f; // 10% baseline boost for same professional domain
-            }
-
-            // HEALTHCARE DOMAIN: Medical professional relationships
-            var medicalTerms = new[] { "doctor", "physician", "nurse", "medical", "healthcare", "clinical" };
+            // VÅRD: Healthcare/Medical domain
+            var medicalTerms = new[] { "doctor", "physician", "nurse", "medical", "healthcare", "clinical", "läkare", "sjuksköterska", "medicin", "vård" };
             var isCvMedical = medicalTerms.Any(term => cv.Contains(term));
             var isJobMedical = medicalTerms.Any(term => job.Contains(term));
 
+            // EKONOMI: Finance/Economy domain
+            var financeTerms = new[] { "finance", "economy", "accountant", "controller", "ekonomi", "ekonom", "bokföring", "revisor", "bank" };
+            var isCvFinance = financeTerms.Any(term => cv.Contains(term));
+            var isJobFinance = financeTerms.Any(term => job.Contains(term));
+
+            // UTBILDNING: Education domain
+            var educationTerms = new[] { "teacher", "pedagogue", "lärare", "utbildning", "skola", "pedagog" };
+            var isCvEducation = educationTerms.Any(term => cv.Contains(term));
+            var isJobEducation = educationTerms.Any(term => job.Contains(term));
+
+            // Särskilj domäner och ge bonus/straff
+            // 1. Samma domän: bonus
+            if (isCvTech && isJobTech)
+                return 0.1f;
             if (isCvMedical && isJobMedical)
-                return 0.15f; // 15% boost for healthcare domain coherence
+                return 0.15f;
+            if (isCvFinance && isJobFinance)
+                return 0.1f;
+            if (isCvEducation && isJobEducation)
+                return 0.1f;
 
-            // DOMAIN MISMATCH PENALTY: Prevents false positives across unrelated fields
-            // Critical for maintaining match quality between disparate professions
+            // 2. Teknik vs vård: tydlig straff
             if ((isCvTech && isJobMedical) || (isCvMedical && isJobTech))
-                return -0.2f; // 20% penalty for cross-domain mismatch
+                return -0.4f; // Större straff för t.ex. ingenjör vs läkare
 
-            return 0f; // Neutral - rely on pure semantic similarity
+            // 3. Teknik/vård/ekonomi/utbildning - straff mellan olika domäner
+            if ((isCvTech && (isJobFinance || isJobEducation)) || (isCvFinance && isJobTech) || (isCvEducation && isJobTech))
+                return -0.2f;
+            if ((isCvMedical && (isJobFinance || isJobEducation)) || (isCvFinance && isJobMedical) || (isCvEducation && isJobMedical))
+                return -0.2f;
+            if ((isCvFinance && isJobEducation) || (isCvEducation && isJobFinance))
+                return -0.1f;
+
+            // 4. Exempel på ytterligare domäner: lägg till fler här vid behov
+            // var legalTerms = new[] { "lawyer", "jurist", "advokat", "legal" };
+            // ...
+
+            // 5. Om ingen domän matchar, neutral
+            return 0f;
         }
     }
 
