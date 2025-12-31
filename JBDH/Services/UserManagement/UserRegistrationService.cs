@@ -73,25 +73,34 @@ namespace JBDH.Services.UserManagement
         {
             return new ServiceResult { Success = false, ErrorMessage = "Email is required" };
         }
+        // Determine primary role based on selection
+        string primaryRole = "User"; // Default
+        
+        if (model.SelectedRoles != null && model.SelectedRoles.Any())
+        {
+            // If user selected roles, use the first one as primary
+            var selectedRole = model.SelectedRoles.First();
+            if (selectedRole.Equals("Recruiter", StringComparison.OrdinalIgnoreCase) || 
+                selectedRole.Equals("Manager", StringComparison.OrdinalIgnoreCase))
+            {
+                primaryRole = selectedRole;
+            }
+            // If they selected something else, keep "User" as primary
+        }
+        // If no roles selected, primaryRole stays "User"
+        
         var user = new User
         {
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
             Email = model.Email,
-            Location = model.Location,
+            Location = model.Location ?? string.Empty,
             Searchable = model.Open,
             DeveloperMode = false,
+            Role = primaryRole // Set the discriminator role (User, Recruiter, or Manager)
         };
-        user.Roles.Add(new UserRoleAssignment { User = user, Role = "User" });
-        if (model.SelectedRoles != null)
-        {
-            foreach (var role in model.SelectedRoles.Distinct())
-            {
-                if (!string.Equals(role, "User", StringComparison.OrdinalIgnoreCase)) // Avoid duplicate
-                {
-                    user.Roles.Add(new UserRoleAssignment { User = user, Role = role });
-                }
-            }
-        }
+        
+        // Add ONLY the primary role to role assignments (no automatic "User" role)
+        user.Roles.Add(new UserRoleAssignment { User = user, Role = primaryRole });
         if (model.CVFile != null && model.CVFile.Length > 0)
         {
             var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");

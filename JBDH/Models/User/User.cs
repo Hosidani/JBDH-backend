@@ -19,6 +19,9 @@ namespace JBDH.Models.User
         public required string Email { get; set; }
         
         public required string Location { get; set; }
+        
+        [Required]
+        public string Role { get; set; } = "User";
 
         public string? Name { get; set; }
         // Backing field for EF Core storage

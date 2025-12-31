@@ -11,6 +11,10 @@ using JBDH.Models.Job;
 using Microsoft.AspNetCore.Cors;
 using JBDH.Services.Configuration;
 using JBDH.Models.DTOs;
+using JBDH.Models.Friendship;
+using JBDH.Models.Dataflow;
+using JBDH.Models.User;
+using FriendshipModel = JBDH.Models.Friendship.Friendship;
 
 
 namespace JBDH.Controllers
@@ -74,29 +78,81 @@ namespace JBDH.Controllers
         
         [HttpGet("getprofile/{userId:int}")]
         public async Task<IActionResult> GetProfile(int userId)
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            if (user.Id == userId)
+                return BadRequest("Use getmyprofile endpoint for your own profile");
+
+            try
             {
-                var authResult = this.EnsureAuthenticatedUserOrRedirect();
-                if (authResult.ErrorResult != null)
-                    return authResult.ErrorResult;
+                var targetUser = await _context.Users.FindAsync(userId);
+                if (targetUser == null)
+                    return NotFound("User not found");
 
-                if (authResult.Value.HasValue && authResult.Value.Value == userId)
-                    return this.RedirectToMyProfile();
+                //if (targetUser.Searchable != true)
+                //    return Forbid("This user profile is not public");
 
-                if (!authResult.Value.HasValue)
-                    return this.ErrorPage("Authenticated user ID is missing.");
-
-                try
+                var userDto = new
                 {
-                    var viewModel = await _profileService.GetProfileViewModelAsync(authResult.Value.Value, userId);
-                    var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
-                    ViewBag.CurrentUser = currentUser;
-                    return View(viewModel);
-                }
-                catch (Exception ex)
-                {
-                    return this.ErrorPage(ex.Message);
-                }
+                    Id = targetUser.Id,
+                    Name = targetUser.Name,
+                    Email = targetUser.Email,
+                    Location = targetUser.Location,
+                    AboutMe = targetUser.AboutMe,
+                    HasCV = !string.IsNullOrEmpty(targetUser.CVPath)
+                };
+                return Ok(userDto);
             }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Error getting profile for user {userId}: {ex.Message}");
+                return StatusCode(500, "An error occurred while retrieving the profile");
+            }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchUsers(string name, int page = 1, int pageSize = 10)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return BadRequest("Name parameter is required");
+
+            if (pageSize > 50)
+                pageSize = 50; // Limit page size for performance
+
+            var users = await _context.Users
+                .Where(u => (u.Name != null && u.Name.Contains(name)) || u.Email.Contains(name))
+                .Where(u => u.Searchable == true) // Only return searchable users
+                .Select(u => new {
+                    u.Id,
+                    u.Name,
+                    u.Email,
+                    u.Location,
+                    u.CVPath,
+                    HasCV = !string.IsNullOrEmpty(u.CVPath)
+                })
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalCount = await _context.Users
+                .Where(u => (u.Name != null && u.Name.Contains(name)) || u.Email.Contains(name))
+                .Where(u => u.Searchable == true)
+                .CountAsync();
+
+            var result = new
+            {
+                users = users,
+                totalCount = totalCount,
+                page = page,
+                pageSize = pageSize,
+                totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+
+            return Ok(result);
+        }
             
         [HttpGet("getmyprofile")]
         public async Task<IActionResult> GetMyProfile()
@@ -126,14 +182,15 @@ namespace JBDH.Controllers
                 DeveloperMode = user.DeveloperMode,
                 Searchable = user.Searchable,
                 IsBanned = user.IsBanned,
-                //SelectedRoles = user.Roles?.Select(r => r.RoleName).ToList(),
-                SentFriendRequests = user.SentFriendRequests?.ToList(),
-                ReceivedFriendRequests = user.ReceivedFriendRequests?.ToList(),
-                JobApplications = user.JobApplications?.ToList(),
-                DataFlows = user.DataFlows?.ToList(),
+                Role = user.Role, 
+                SelectedRoles = user.Roles?.Select(r => r.Role).ToList(), 
+                SentFriendRequests = new List<FriendshipModel>(), // Avoid circular references
+                ReceivedFriendRequests = new List<FriendshipModel>(), // Avoid circular references  
+                JobApplications = new List<JobApplication>(), // Avoid circular references
+                DataFlows = new List<DataFlow>(), // Avoid circular references
                 AIResponses = aiResponseDtos,
-                Roles = user.Roles?.ToList(),
-                ManagedOrganisations = user.ManagedOrganisations?.ToList(),
+                Roles = new List<UserRoleAssignment>(), // Remove circular references - use SelectedRoles instead
+                ManagedOrganisations = new List<JBDH.Models.Organisation.Organisation>(), // Avoid circular references
                 OwnedUsers = user.OwnedUsers?.Select(u => new UserDto { Id = u.Id, Name = u.Name }).ToList(),
                 Owner = user.Owner != null ? new UserDto { Id = user.Owner.Id, Name = user.Owner.Name } : null,
                 OwnerId = user.OwnerId,
@@ -142,88 +199,146 @@ namespace JBDH.Controllers
             return Ok(userDto);
         }
 
-        [HttpPost]
+        [HttpPost("sendfriendrequest/{addresseeId:int}")]
         public async Task<IActionResult> SendFriendRequest(int addresseeId)
         {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect("User is not authenticated.");
-            if (authResult.ErrorResult != null)
-                return authResult.ErrorResult;
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
 
-            var parseResult = this.ValidateAndHandleParseError(addresseeId.ToString(), "Invalid addressee ID.");
-            if (parseResult.ErrorResult != null)
-                return parseResult.ErrorResult;
+            if (addresseeId <= 0)
+                return BadRequest("Invalid addressee ID");
 
-            if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
-            if (!parseResult.Value.HasValue)
-                return this.ErrorPage("Parsed addressee ID is missing.");
-
-            var result = await _friendService.SendFriendRequestAsync(authResult.Value.Value, parseResult.Value.Value);
+            var result = await _friendService.SendFriendRequestAsync(user.Id, addresseeId);
             if (result.Success)
             {
-                return this.SetSuccessAndRedirect("Friend request sent!", "Profile", new { userId = addresseeId });
+                return Ok(new { message = "Friend request sent successfully" });
             }
             else
             {
-                return this.ErrorPage(result.ErrorMessage ?? "Could not send friend request.");
+                return BadRequest(result.ErrorMessage ?? "Could not send friend request");
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost("acceptfriendrequest/{friendshipId:int}")]
         public async Task<IActionResult> AcceptFriendRequest(int friendshipId)
         {
-            await _friendService.AcceptFriendRequestAsync(friendshipId);
-            return this.SetSuccessAndRedirect("Friend request accepted!", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
-        {
-            await _friendService.DeclineFriendRequestAsync(friendshipId);
-            return this.SetSuccessAndRedirect("Friend request declined.", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateJobApplicationNotes(int applicationId, string notes)
-        {
-            var app = await _context.Set<JobApplication>().FindAsync(applicationId);
-            if (app == null)
-                return this.ErrorPage("Job application not found.");
-
-            app.Notes = notes;
-            await _context.SaveChangesAsync();
-            return this.SetSuccessAndRedirect("Notes updated!", "MyProfile");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeveloperToolDeleteUserFromSystem(int userId)
-        {
-            var authResult = this.EnsureAuthenticatedUserOrRedirect();
-            if (authResult.ErrorResult != null)
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
                 return Unauthorized();
 
-            if (!authResult.Value.HasValue)
-                return this.ErrorPage("Authenticated user ID is missing.");
+            try
+            {
+                await _friendService.AcceptFriendRequestAsync(friendshipId);
+                return Ok(new { message = "Friend request accepted successfully" });
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Error accepting friend request {friendshipId}: {ex.Message}");
+                return BadRequest("Could not accept friend request");
+            }
+        }
 
-            var currentUser = await _context.Users.FindAsync(authResult.Value.Value);
-            if (currentUser == null || currentUser.DeveloperMode != true)
-                return this.ForbidWithMessage("You do not have permission to perform this action.");
+        [HttpPost("declinefriendrequest/{friendshipId:int}")]
+        public async Task<IActionResult> DeclineFriendRequest(int friendshipId)
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            try
+            {
+                await _friendService.DeclineFriendRequestAsync(friendshipId);
+                return Ok(new { message = "Friend request declined successfully" });
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Error declining friend request {friendshipId}: {ex.Message}");
+                return BadRequest("Could not decline friend request");
+            }
+        }
+
+        [HttpPost("updatejobapplicationnotes/{applicationId:int}")]
+        public async Task<IActionResult> UpdateJobApplicationNotes(int applicationId, [FromBody] UpdateNotesRequest request)
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            var app = await _context.Set<JobApplication>()
+                .FirstOrDefaultAsync(ja => ja.ApplicationId == applicationId && ja.UserId == user.Id);
+            if (app == null)
+                return NotFound("Job application not found or access denied");
+
+            app.Notes = request.Notes ?? string.Empty;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Notes updated successfully" });
+        }
+
+        [HttpDelete("developer/deleteuser/{userId:int}")]
+        public async Task<IActionResult> DeveloperToolDeleteUserFromSystem(int userId)
+        {
+            var currentUser = await _userPropertiesService.GetCurrentUserAsync();
+            if (currentUser == null)
+                return Unauthorized();
+
+            if (currentUser.DeveloperMode != true)
+                return Forbid("You do not have permission to perform this action");
 
             if (currentUser.Id == userId)
-                return this.BadRequestMessage("You cannot delete yourself from this action.");
+                return BadRequest("You cannot delete yourself");
 
             var userToDelete = await _context.Users.FindAsync(userId);
             if (userToDelete == null)
-                return this.ErrorPage("User not found.");
+                return NotFound("User not found");
 
-            _context.Users.Remove(userToDelete);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Users.Remove(userToDelete);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "User deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Error deleting user {userId}: {ex.Message}");
+                return StatusCode(500, "An error occurred while deleting the user");
+            }
+        }
 
-            return this.SetSuccessAndRedirect("User deleted successfully.", "Index", new { controller = "Home" });
+        [HttpDelete("deletemyaccount")]
+        public async Task<IActionResult> DeleteMyAccount([FromBody] DeleteAccountRequest request)
+        {
+            var user = await _userPropertiesService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            // Verify password for security
+            if (string.IsNullOrEmpty(request.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+                return BadRequest("Invalid password confirmation");
+
+            // Optional: Add confirmation text check
+            if (!string.Equals(request.ConfirmationText, "DELETE MY ACCOUNT", StringComparison.OrdinalIgnoreCase))
+                return BadRequest("Please type 'DELETE MY ACCOUNT' to confirm");
+
+            try
+            {
+                // Delete user's CV file if it exists
+                if (!string.IsNullOrEmpty(user.CVPath) && System.IO.File.Exists(user.CVPath))
+                {
+                    System.IO.File.Delete(user.CVPath);
+                }
+
+                // Remove user from database (cascade delete should handle related records)
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Account deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Error deleting user account {user.Id}: {ex.Message}");
+                return StatusCode(500, "An error occurred while deleting your account. Please try again.");
+            }
         }
         
         [HttpGet("LatestAIUserResponse")]
