@@ -11,6 +11,7 @@ using JBDH.Services.Configuration;
 using JBDH.Models.AI;
 using JBDH.Services.Helpers;
 using Newtonsoft.Json.Linq;
+using JBDH.Models.User;
 
 namespace JBDH.Controllers
 {
@@ -28,6 +29,9 @@ namespace JBDH.Controllers
         private readonly IManageIOService _manageIOService;
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly IAIApiClient _aiApiClient;
+        private readonly ITextChunkingService _textChunkingService;
+        private readonly IEmbeddingService _embeddingService;
+        private readonly ICVAnalysisService _cvAnalysisService;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
@@ -40,7 +44,10 @@ namespace JBDH.Controllers
             IManageIOService manageIOService,
             AIConfig aiConfig,
             IJobAIAnalysisService jobAIAnalysisService,
-            IAIApiClient aiApiClient)
+            IAIApiClient aiApiClient,
+            ITextChunkingService textChunkingService,
+            IEmbeddingService embeddingService,
+            ICVAnalysisService cvAnalysisService)
         {
             _logger = logger;
             _context = context;
@@ -52,6 +59,9 @@ namespace JBDH.Controllers
             _aiConfig = aiConfig;
             _jobAIAnalysisService = jobAIAnalysisService;
             _aiApiClient = aiApiClient;
+            _textChunkingService = textChunkingService;
+            _embeddingService = embeddingService;
+            _cvAnalysisService = cvAnalysisService;
         }
 
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -275,5 +285,93 @@ namespace JBDH.Controllers
             catch { /* ignore parse errors, return null */ }
             return Ok(new { aiResponse, analysis = parsed });
         }
+
+
+
+        [HttpPost("CompareCvToJobAdV2")]
+        public async Task<IActionResult> CompareCvToJobAdV2(CompareCvToJobAdViewModel model)
+        {
+            if (model?.CvPath == null)
+                return BadRequest("CV file is required");
+
+            if (string.IsNullOrWhiteSpace(model.JobAdText))
+                return BadRequest("Job ad text is required");
+
+            try
+            {
+                // 1. Extract CV text
+                var savedPath = await FileHelper.SaveUploadedFileAsync(
+                    model.CvPath,
+                    _environment.WebRootPath
+                );
+
+                var cvText = await _manageIOService.ExtractTextFromFile(savedPath ?? "");
+                if (string.IsNullOrWhiteSpace(cvText))
+                    return BadRequest("Could not extract CV text");
+
+                // Extract CV profession and requirements using service
+                var cvExtractionResult = await _cvAnalysisService.ExtractCVProfessionAndRequirementsAsync(cvText);
+                if (cvExtractionResult == null)
+                {
+                    _logger.LogWarning("CV extraction failed or returned null");
+                    return BadRequest("CV extraction failed");
+                }
+
+                var cvProfession = cvExtractionResult.Profession;
+                var cvRequirements = cvExtractionResult.Requirements;
+
+                // 2. Extract job requirements and profession using service
+                var (requirements, jobProfession) = await _jobAIAnalysisService.ExtractJobRequirementsAndProfessionAsync(model.JobAdText);
+
+                // Begränsa till max 100 requirements för att undvika Gemini rate limit
+                if (requirements.Count > 100)
+                {
+                    _logger.LogWarning($"Antal requirements ({requirements.Count}) överskrider 100. Endast de första 100 används för embedding.");
+                    requirements = requirements.Take(100).ToList();
+                }
+
+                if (requirements.Count == 0)
+                    return BadRequest("No comparable requirements found after processing");
+
+                // 3. Compare skills using embedding service
+                var (matchPercentage, results) = await _embeddingService.CompareSkillsWithEmbeddingsAsync(cvRequirements, requirements);
+
+                // Calculate profession score with embeddings
+                _logger.LogInformation("Calculating profession score - CV: {CvMain}/{CvSub}/{CvSpecialty} vs Job: {JobMain}/{JobSub}/{JobSpecialty}", 
+                    cvProfession?.Main, cvProfession?.Sub, cvProfession?.Specialty, 
+                    jobProfession?.Main, jobProfession?.Sub, jobProfession?.Specialty);
+                
+                var professionScore = await _embeddingService.CalculateProfessionScoreWithEmbeddingsAsync(cvProfession, jobProfession);
+                var professionPercentage = (float)Math.Round(professionScore * 100, 2);
+                
+                _logger.LogInformation("Final profession score: {ProfessionScore} ({ProfessionPercentage}%)", 
+                    professionScore, professionPercentage);
+
+                // Calculate total score using weighted combination (NOT multiplication!)
+                // Skills (30% weight) + Profession (70% weight) - profession is more important for job fit
+                var totalMatchScore = (matchPercentage / 100f * 0.3f) + (professionScore * 0.7f);
+                var totalMatchPercentage = (float)Math.Round(totalMatchScore * 100, 2);
+                
+                _logger.LogInformation("Total score calculation: Skills {SkillsPercent}% (30% weight) + Profession {ProfessionPercent}% (70% weight) = {TotalPercent}%", 
+                    matchPercentage, professionPercentage, totalMatchPercentage);
+
+                return Ok(new
+                {
+                    totalScore = totalMatchPercentage,
+                    skillsScore = matchPercentage,
+                    professionScore = professionPercentage,
+                    cvProfession,
+                    jobProfession,
+                    matches = results,
+                    totalRequirements = requirements.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError(ex.Message);
+                return BadRequest("Comparison failed");
+            }
+        }
+
     }
 }

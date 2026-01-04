@@ -57,6 +57,7 @@ namespace JBDH.Models.AI
                   "Return ONLY a valid JSON object with the following fields: " +
                   "\"Courses\" (a short list, maximum 10 courses, with titles and brief descriptions). " +
                   "\n\nCV:\n{CVText}",
+
             [5] = "Analyze the CV against this job advertisement and provide structured feedback. " +
                   "Return ONLY a valid JSON object with this structure: " +
                   "{" +
@@ -79,7 +80,52 @@ namespace JBDH.Models.AI
                   "  }," +
                   "  \"nextSteps\": [string]" +
                   "}" +
-                  "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}"
+                  "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}",
+
+            [6] = "Uppgift: Extrahera huvudkrav och önskade kvalifikationer från följande jobbannons. För varje krav, returnera: " +
+                  "- name (kort text) " +
+                  "- category (ex: skill, experience, degree, certification, language) " +
+                  "- importance (1-5, där 5 = must-have / avgörande, 1 = nice-to-have) " +
+                  "Returnera SÅ ENKEL JSON-LISTA som möjligt, t.ex: " +
+                  "[{\"name\":\"Python\",\"category\":\"skill\",\"importance\":5},{\"name\":\"SQL\",\"category\":\"skill\",\"importance\":4}] " +
+                  "Job ad: " +
+                  "---BEGIN--- " +
+                  "{JobAdText} " +
+                  "---END---",
+            [7] = "Uppgift: Analysera följande CV och extrahera kandidatens profession och alla kompetenser. " +
+                  "Identifiera profession med tre nivåer: main, sub och specialty baserat på kandidatens bakgrund och erfarenheter. " +
+                  "Till exempel: 'Engineering > Software > Backend', 'Healthcare > Surgery > Cardiac', 'Business > Marketing > Digital'. " +
+                  "Extrahera även alla kompetenser från CV:t (både hårda och mjuka skills): " +
+                  "- name (kort text) " +
+                  "- category (skill, experience, degree, certification, language, soft-skill) " +
+                  "- importance (1-5 baserat på erfarenhetsnivå: 1=nybörjare, 2=grundläggande, 3=medel, 4=avancerad, 5=expert) " +
+                  "Returnera JSON-format: " +
+                  "{\"requirements\": [{\"name\":\"Python\",\"category\":\"skill\",\"importance\":4}, {\"name\":\"Communication\",\"category\":\"soft-skill\",\"importance\":3}], \"profession\": {\"main\":\"Engineering\", \"sub\":\"Software\", \"specialty\":\"Backend\"}} " +
+                  "CV: " +
+                  "---BEGIN--- " +
+                  "{JobAdText} " +
+                  "---END---",
+            [8] = "Uppgift: Extrahera huvudkrav och önskade kvalifikationer från följande jobbannons. För varje krav, returnera: " +
+                  "- name (kort text) " +
+                  "- category (ex: skill, experience, degree, certification, language) " +
+                  "- importance (1-5, där 5 = must-have / avgörande, 1 = nice-to-have) " +
+                  "Identifiera även profession för jobbet med tre nivåer: main, sub och specialty. Om inget tydligt framgår, hittar du lämpliga nivåer baserade på textenTill exempel: 'Engineering > Software > Backend', 'Healthcare > Surgery > Cardiac', 'Logistics > Supply Chain > Procurement'. " +
+                  "Returnera SÅ ENKEL JSON-LISTA som möjligt: " +
+                  "{\"requirements\": [{\"name\":\"Python\",\"category\":\"skill\",\"importance\":5}], \"profession\": {\"main\":\"Engineering\", \"sub\":\"Software\", \"specialty\":\"Backend\"}} " +
+                  "Job ad: " +
+                  "---BEGIN--- " +
+                  "{JobAdText} " +
+                  "---END---"
         };
     }
 }
+
+
+
+
+
+
+
+
+
+        
