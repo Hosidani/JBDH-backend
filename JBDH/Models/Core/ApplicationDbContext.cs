@@ -12,7 +12,6 @@ using JBDH.Models.Messaging; // <-- Add this at the top with your other usings
 
 namespace JBDH.Models.Core
 {
-
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }

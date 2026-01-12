@@ -58,6 +58,8 @@ namespace JBDH.Models.DTOs
         public int? OwnerId { get; set; }
         public string? AboutMe { get; set; }
 
+        public string? CreatedAt { get; set; }
+
         
     }
 

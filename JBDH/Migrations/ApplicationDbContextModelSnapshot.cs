@@ -494,6 +494,9 @@ namespace JBDH.Migrations
                     b.Property<string>("Competencies")
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DesiredCity")
                         .HasColumnType("longtext");
 

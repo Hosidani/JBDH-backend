@@ -81,5 +81,12 @@ namespace JBDH.Models.User
         public int? OwnerId { get; set; }
         public string? AboutMe { get; set; }
 
+        [Required]
+        public DateTime CreatedAt { get; set; }
+
+        public User()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
     }
 }

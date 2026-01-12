@@ -102,7 +102,8 @@ namespace JBDH.Controllers
                     Email = targetUser.Email,
                     Location = targetUser.Location,
                     AboutMe = targetUser.AboutMe,
-                    HasCV = !string.IsNullOrEmpty(targetUser.CVPath)
+                    HasCV = !string.IsNullOrEmpty(targetUser.CVPath),
+                    CreatedAt = targetUser.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
                 };
                 return Ok(userDto);
             }
@@ -194,7 +195,8 @@ namespace JBDH.Controllers
                 OwnedUsers = user.OwnedUsers?.Select(u => new UserDto { Id = u.Id, Name = u.Name }).ToList(),
                 Owner = user.Owner != null ? new UserDto { Id = user.Owner.Id, Name = user.Owner.Name } : null,
                 OwnerId = user.OwnerId,
-                AboutMe = user.AboutMe
+                AboutMe = user.AboutMe,
+                CreatedAt = user.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
             };
             return Ok(userDto);
         }
