@@ -53,7 +53,7 @@ namespace JBDH.Controllers
         }
 
         [HttpPost("AnalyzeCV")]
-        public async Task<IActionResult> AnalyzeCV([FromForm] IFormFile cvFile)
+        public async Task<IActionResult> AnalyzeCV([FromForm] IFormFile cvFile, string language = "English")
         {
             LoggingConfigService.ReturnInfo("AnalyzeCV endpoint called.");
             var authResult = this.EnsureAuthenticatedUserOrRedirect();

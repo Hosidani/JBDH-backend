@@ -215,7 +215,7 @@ namespace JBDH.Controllers
         }
 
         [HttpPost("CompareCvToJobAd")]
-        public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model)
+        public async Task<IActionResult> CompareCvToJobAd(CompareCvToJobAdViewModel model, string language = "English")
         {
             _logger.LogInformation("CompareCvToJobAd called. Model: {@Model}", model);
             if (model?.CvPath == null)
@@ -289,7 +289,7 @@ namespace JBDH.Controllers
 
 
         [HttpPost("CompareCvToJobAdV2")]
-        public async Task<IActionResult> CompareCvToJobAdV2(CompareCvToJobAdViewModel model)
+        public async Task<IActionResult> CompareCvToJobAdV2(CompareCvToJobAdViewModel model, string language = "English")
         {
             if (model?.CvPath == null)
                 return BadRequest("CV file is required");

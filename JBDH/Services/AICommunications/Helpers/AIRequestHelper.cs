@@ -5,14 +5,14 @@ namespace JBDH.Services.AICommunications.Helpers
 {
     public static class AIRequestHelper
     {
-        public static StringContent BuildRequestBody(string model, string userMessage)
+        public static StringContent BuildRequestBody(string model, string userMessage, string Language)
         {
             var requestBody = new
             {
                 model = model,
                 messages = new[]
                 {
-                    new { role = "system", content = "You are to answer my questions." },
+                    new { role = "system", content = "You are to answer my questions in " + Language + " language." },
                     new { role = "user", content = userMessage }
                 },
                 stream = false
