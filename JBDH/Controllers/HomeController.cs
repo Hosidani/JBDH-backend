@@ -322,7 +322,14 @@ namespace JBDH.Controllers
 
                 // 2. Extract job requirements and profession using service
                 var (requirements, jobProfession) = await _jobAIAnalysisService.ExtractJobRequirementsAndProfessionAsync(model.JobAdText);
-                
+
+                // Begränsa till max 100 requirements för att undvika Gemini rate limit
+                if (requirements.Count > 100)
+                {
+                    _logger.LogWarning($"Antal requirements ({requirements.Count}) överskrider 100. Endast de första 100 används för embedding.");
+                    requirements = requirements.Take(100).ToList();
+                }
+
                 if (requirements.Count == 0)
                     return BadRequest("No comparable requirements found after processing");
 
