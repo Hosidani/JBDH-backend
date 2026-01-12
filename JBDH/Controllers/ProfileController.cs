@@ -167,7 +167,6 @@ namespace JBDH.Controllers
             var userDto = new UserDto
             {
                 Id = user.Id,
-                PasswordHash = user.PasswordHash,
                 Email = user.Email,
                 Location = user.Location,
                 Name = user.Name,

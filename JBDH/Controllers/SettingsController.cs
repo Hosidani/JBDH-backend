@@ -46,8 +46,6 @@ namespace JBDH.Controllers
                     return Unauthorized();
 
                 // Only update fields that are present and valid in the DTO
-                if (!string.IsNullOrWhiteSpace(dto.PasswordHash) && dto.PasswordHash != user.PasswordHash)
-                    user.PasswordHash = dto.PasswordHash;
                 if (!string.IsNullOrWhiteSpace(dto.Name))
                     user.Name = dto.Name;
                 if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != user.Email)
@@ -97,7 +95,6 @@ namespace JBDH.Controllers
                 var updatedDto = new UserDto
                 {
                     Id = user.Id,
-                    PasswordHash = user.PasswordHash,
                     Email = user.Email,
                     Location = user.Location,
                     Name = user.Name,
@@ -129,6 +126,35 @@ namespace JBDH.Controllers
                 return Ok(updatedDto);
             }
 
+            [HttpPost("changepassword")]
+            public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+            {
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                if (string.IsNullOrWhiteSpace(dto.CurrentPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+                    return BadRequest("Current and new password are required.");
+
+                // Verify current password
+                if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+                    return BadRequest("Current password is incorrect.");
+
+                // Optional: check new password strength
+                if (dto.NewPassword.Length < 6)
+                    return BadRequest("New password must be at least 6 characters.");
+
+                if (!string.IsNullOrEmpty(dto.ConfirmNewPassword) && dto.NewPassword != dto.ConfirmNewPassword)
+                    return BadRequest("New password and confirmation do not match.");
+
+                // Hash and update password
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Password changed successfully." });
+            }            
+            
             [HttpDelete("deletemyuser")]
             public async Task<IActionResult> DeleteMyUser()
             {
