@@ -49,7 +49,7 @@ jobs:
         working-directory: ./JBDH
 
       - name: Run EF Core migrations
-        run: dotnet tool run dotnet-ef database update --context ApplicationDbContext
+        run: dotnet ef database update --context ApplicationDbContext
         working-directory: ./JBDH
         env:
           ASPNETCORE_ENVIRONMENT: Production
