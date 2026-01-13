@@ -9,5 +9,6 @@ namespace JBDH.Models.AI
         public string? JobAdText { get; set; }
         public string? UserAIResponse { get; set; }
         public string? JobAIResponse { get; set; }
+        public string? Language { get; set; } // Ny property för språk
     }
 }

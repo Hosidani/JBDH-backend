@@ -29,13 +29,13 @@ namespace JBDH.Services.AICommunications
                         return new StringContent(err, System.Text.Encoding.UTF8, "application/json");
                     }
                     userMessage = AIMessageTemplates.UserMessageTemplates[0].Replace("{CVText}", cvText0);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 1:
                     LoggingConfigService.ReturnInfo("CommandId is 1, processing job ad.");
                     var jobAdText1 = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
                     userMessage = AIMessageTemplates.UserMessageTemplates[1].Replace("{JobAdText}", jobAdText1);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 2:
                     LoggingConfigService.ReturnInfo("CommandId is 2, processing job ad and CV.");
@@ -49,7 +49,7 @@ namespace JBDH.Services.AICommunications
                     userMessage = AIMessageTemplates.UserMessageTemplates[2]
                         .Replace("{JobAdText}", jobAdText2)
                         .Replace("{CVText}", cvText2);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 3:
                     LoggingConfigService.ReturnInfo("CommandId is 3, comparing UserAIResponse and JobAIResponse.");
@@ -59,7 +59,7 @@ namespace JBDH.Services.AICommunications
                     userMessage = AIMessageTemplates.UserMessageTemplates[3]
                         .Replace("{UserAIResponse}", userAIResponse3)
                         .Replace("{JobAIResponse}", jobAIResponse3);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 4:
                     LoggingConfigService.ReturnInfo("CommandId is 4, proposing courses for user.");
@@ -71,7 +71,7 @@ namespace JBDH.Services.AICommunications
                     }
                     userMessage = AIMessageTemplates.UserMessageTemplates[4]
                         .Replace("{CVText}", cvText4);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 5:
                     LoggingConfigService.ReturnInfo("CommandId is 5, processing job ad and CV.");
@@ -85,7 +85,7 @@ namespace JBDH.Services.AICommunications
                     userMessage = AIMessageTemplates.UserMessageTemplates[5]
                         .Replace("{JobAdText}", aiRequest.JobAdText ?? "")
                         .Replace("{CVText}", cvText3 ?? "");
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 6:
                     LoggingConfigService.ReturnInfo("CommandId is 6, extracting job requirements and importance.");
@@ -97,7 +97,7 @@ namespace JBDH.Services.AICommunications
                     }
                     userMessage = AIMessageTemplates.UserMessageTemplates[6]
                         .Replace("{JobAdText}", jobAdText6);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 7:
                     LoggingConfigService.ReturnInfo("CommandId is 7, extracting CV profession and skills.");
@@ -109,7 +109,7 @@ namespace JBDH.Services.AICommunications
                     }
                     userMessage = AIMessageTemplates.UserMessageTemplates[7]
                         .Replace("{JobAdText}", cvText7);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 8:
                     LoggingConfigService.ReturnInfo("CommandId is 8, extracting job requirements and profession.");
@@ -121,7 +121,7 @@ namespace JBDH.Services.AICommunications
                     }
                     userMessage = AIMessageTemplates.UserMessageTemplates[8]
                         .Replace("{JobAdText}", jobAdText8);
-                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage);
+                    return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 default:
                     return null;
