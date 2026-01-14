@@ -8,13 +8,15 @@ namespace JBDH.Models.AI
         public static readonly Dictionary<int, string> UserMessageTemplates = new()
         {
             [0] = "Analyse this CV and tell me which job is the best fit for this candidate. " +
-                  "Return ONLY a valid JSON object with the following fields: " +
+                  "Return ONLY a valid JSON object with two language versions (English and Swedish). " +
+                  "Each version should have the following fields: " +
                   "\"BestJobTitlesForUser\" (a short list, maximum 10 job titles), " +
                   "\"ReasoningBehindJobTitles\" (brief), " +
                   "\"HardSkills\" (a short list, maximum 10 skills), " +
                   "\"SoftSkills\" (a short list, maximum 10 skills), " +
                   "\"Experiences\" (a list of objects, each with \"title\" (string) and \"duration\" (string, e.g. \"3.5 years\")), and " +
                   "\"EducationAndCertifications\" (a short list, maximum 10 items, brief). " +
+                  "Structure the response as: {\"English\": {...}, \"Swedish\": {...}}. " +
                   "\n\nCV:\n{CVText}",
 
             [1] = "Analyze the following job advertisement. " +
