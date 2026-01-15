@@ -67,10 +67,26 @@ namespace JBDH.Services.Authentication
         // Sign in the user
         public async Task SignInUserAsync(string email)
         {
+            LoggingConfigService.ReturnInfo($"[SignInUserAsync] Attempting sign-in for {email}");
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                LoggingConfigService.ReturnError("[SignInUserAsync] Email is null or empty.");
+                throw new ArgumentException("Email cannot be null or empty.", nameof(email));
+            }
+
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            LoggingConfigService.ReturnInfo($"[DEBUG] user is null: {user == null}");
-            if (user == null || user.IsBanned)
-                return;
+            if (user == null)
+            {
+                LoggingConfigService.ReturnError($"[SignInUserAsync] User not found: {email}");
+                throw new Exception("User not found");
+            }
+            if (user.IsBanned)
+            {
+                LoggingConfigService.ReturnError($"[SignInUserAsync] User is banned: {email}");
+                throw new Exception("User is banned");
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Email),
@@ -79,9 +95,33 @@ namespace JBDH.Services.Authentication
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+            };
+
             if (_httpContextAccessor.HttpContext != null)
             {
-                await _httpContextAccessor.HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+                try
+                {
+                    await _httpContextAccessor.HttpContext.SignInAsync(
+                        "CookieAuth",
+                        claimsPrincipal,
+                        authProperties
+                    );
+                    LoggingConfigService.ReturnInfo($"[SignInUserAsync] Sign-in succeeded for {email}");
+                }
+                catch (Exception ex)
+                {
+                    LoggingConfigService.ReturnError($"[SignInUserAsync] Sign-in failed for {email}: {ex.Message}");
+                    throw;
+                }
+            }
+            else
+            {
+                LoggingConfigService.ReturnError("[SignInUserAsync] HttpContext is null.");
+                throw new Exception("HttpContext is null");
             }
         }
 
