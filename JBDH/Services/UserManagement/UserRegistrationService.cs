@@ -130,23 +130,32 @@ namespace JBDH.Services.UserManagement
         _context.EmailVerificationTokens.Add(emailVerificationToken);
         await _context.SaveChangesAsync();
 
-        // Send verification email in background
-        _ = Task.Run(async () =>
+        // Send verification email synchronously and handle errors
+        string? emailError = null;
+        try
         {
-            using (var scope = _serviceProvider.CreateScope())
+            LoggingConfigService.ReturnInfo($"Attempting to send verification email to {user.Email}");
+            var verificationLink = urlHelper.Action("VerifyEmail", "Register", new { token }, httpContext.Request.Scheme);
+            var emailResult = await _emailService.SendEmailAsync(user.Email, "Verify your email", $"Please verify your email by clicking this link: {verificationLink}");
+            if (!string.Equals(emailResult, "Success", StringComparison.OrdinalIgnoreCase))
             {
-                var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
-                try
-                {
-                    var verificationLink = urlHelper.Action("VerifyEmail", "Register", new { token }, httpContext.Request.Scheme);
-                    await emailService.SendEmailAsync(user.Email, "Verify your email", $"Please verify your email by clicking this link: {verificationLink}");
-                }
-                catch (Exception ex)
-                {
-                    LoggingConfigService.ReturnError($"Error sending verification email: {ex.Message}");
-                }
+                LoggingConfigService.ReturnError($"Failed to send verification email: {emailResult}");
+                emailError = emailResult;
             }
-        });
+            else
+            {
+                LoggingConfigService.ReturnInfo($"Verification email sent to {user.Email}");
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggingConfigService.ReturnError($"Exception sending verification email: {ex.Message}");
+            emailError = ex.Message;
+        }
+        if (emailError != null)
+        {
+            return ServiceResult.Failure($"Registration succeeded, but failed to send verification email: {emailError}");
+        }
 
         // Set session
         // httpContext.Session.SetString("Email", model.Email); // Uncomment if you want to store email in session

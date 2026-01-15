@@ -71,10 +71,10 @@ namespace JBDH.Controllers
         {
             return BadRequest(new { error = "Invalid registration data.", details = ModelState });
         }
-    var result = await _userRegistrationService.RegisterUserAsync(model, HttpContext, Url);
+        var result = await _userRegistrationService.RegisterUserAsync(model, HttpContext, Url);
         if (!result.Success)
         {
-            // Return the actual error message from the service for easier debugging
+            // Return the actual error message from the service for easier debugging (including email errors)
             return Conflict(new { error = result.ErrorMessage });
         }
         return Ok(new { message = "Registration successful! Please check your email." });
