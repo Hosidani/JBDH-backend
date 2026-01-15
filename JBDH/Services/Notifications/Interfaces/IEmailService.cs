@@ -4,7 +4,8 @@ namespace JBDH.Services.Notifications
 {
     public interface IEmailService
     {
-    Task SendEmailAsync(string to, string subject, string body);
+        Task<string> SendVerificationEmailAsync(string toEmail, string verificationToken);
+        Task<string> SendEmailAsync(string to, string subject, string body);
     }
 
 }
