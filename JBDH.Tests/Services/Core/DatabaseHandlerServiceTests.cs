@@ -304,7 +304,7 @@ namespace JBDH.Tests.Services.Core
             Assert.Contains("@company", insertRawTableQuery);
             Assert.Contains("@location", insertRawTableQuery);
             Assert.Contains("@PostedDate", insertRawTableQuery);
-            Assert.Contains("@webpage_url", insertRawTableQuery);
+            Assert.Contains("@WebpageUrl", insertRawTableQuery);
         }
 
         [Fact]
@@ -316,7 +316,7 @@ namespace JBDH.Tests.Services.Core
             // Assert
             Assert.NotNull(transformQuery);
             Assert.Contains("INSERT INTO Jobs", transformQuery);
-            Assert.Contains("SELECT JobId, title, description, company, location, PostedDate, webpage_url FROM raw_table", transformQuery);
+            Assert.Contains("SELECT JobId, title, description, company, location, PostedDate, WebpageUrl FROM raw_table", transformQuery);
         }
 
         [Fact]

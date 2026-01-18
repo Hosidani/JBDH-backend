@@ -27,7 +27,7 @@ namespace JBDH.Models.Core
 
         public DbSet<JBDH.Models.Organisation.Organisation> Organisations { get; set; }
 
-        public DbSet<RawJob> RawJobs { get; set; } // For raw_table
+        public DbSet<RawJob> RawJobs { get; set; } // For rawjobs managed by EF
 
         public DbSet<JBDH.Models.Job.Job> Jobs { get; set; }
 
@@ -58,6 +58,7 @@ namespace JBDH.Models.Core
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<JBDH.Models.Job.Job>().ToTable("Jobs");
+            modelBuilder.Entity<RawJob>().ToTable("rawjobs");
             modelBuilder.Entity<JBDH.Models.User.User>()
                 .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
                 .HasValue<JBDH.Models.User.User>("User")

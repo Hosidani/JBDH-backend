@@ -145,7 +145,7 @@ namespace JBDH.Services.Core
                             postedDate = dt.ToString("yyyy-MM-dd");
                     }
 
-                    var webpageUrl = job.GetValueOrDefault("webpage_url")?.ToString() ?? "Unknown URL";
+                    var webpageUrl = job.GetValueOrDefault("WebpageUrl")?.ToString() ?? "Unknown URL";
 
                     transformed.Add(new Dictionary<string, object>
                     {
@@ -196,7 +196,7 @@ namespace JBDH.Services.Core
                         LoggingConfigService.ReturnError($"MySQL error inserting job_id {job["job_id"]}: {ex.Message}");
                     }
                 }
-                LoggingConfigService.ReturnInfo("All jobs inserted into raw_table.");
+                LoggingConfigService.ReturnInfo("All jobs inserted into rawjobs.");
 
                 var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(101), connection);
                 deduplicateCommand.ExecuteNonQuery();
