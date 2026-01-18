@@ -13,6 +13,7 @@ using JBDH.Models.Messaging; // <-- Add this at the top with your other usings
 namespace JBDH.Models.Core
 {
     public class ApplicationDbContext : DbContext
+        
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -25,6 +26,8 @@ namespace JBDH.Models.Core
         public DbSet<FriendshipModel> Friendships { get; set; }
 
         public DbSet<JBDH.Models.Organisation.Organisation> Organisations { get; set; }
+
+        public DbSet<RawJob> RawJobs { get; set; } // For raw_table
 
         public DbSet<JBDH.Models.Job.Job> Jobs { get; set; }
 

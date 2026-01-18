@@ -154,8 +154,8 @@ namespace JBDH.Services.Core
                         { "description", description ?? "No Description" },
                         { "company", company ?? "Unknown Company" },
                         { "location", location ?? "Unknown Location" },
-                        { "posted_date", postedDate ?? "1970-01-01" },
-                        { "webpage_url", webpageUrl ?? "Unknown URL" }
+                        { "PostedDate", postedDate ?? "1970-01-01" },
+                        { "WebpageUrl", webpageUrl ?? "Unknown URL" }
                     });
                 }
                 catch (Exception e)
@@ -184,8 +184,8 @@ namespace JBDH.Services.Core
                     command.Parameters.AddWithValue("@description", job["description"]);
                     command.Parameters.AddWithValue("@company", job["company"]);
                     command.Parameters.AddWithValue("@location", job["location"]);
-                    command.Parameters.AddWithValue("@posted_date", job["posted_date"]);
-                    command.Parameters.AddWithValue("@webpage_url", job["webpage_url"]);
+                    command.Parameters.AddWithValue("@PostedDate", job["PostedDate"]);
+                    command.Parameters.AddWithValue("@WebpageUrl", job["WebpageUrl"]);
 
                     try
                     {

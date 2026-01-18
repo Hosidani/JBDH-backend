@@ -13,6 +13,23 @@ namespace JBDH.Services.Core
 {
     public class DatabaseHandlerService
     {
+            public static async Task<List<Dictionary<string, object>>> ReadJobsFromBlobAsync(IConfiguration config)
+            {
+                var accountName = config["AzureBlobStorage:AccountName"];
+                var accountKey = config["AzureBlobStorage:AccountKey"];
+                var containerName = config["AzureBlobStorage:ContainerName"];
+                var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
+                var connectionString = $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix=core.windows.net";
+
+                var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+                var blobClient = containerClient.GetBlobClient(blobFileName);
+
+                using var stream = await blobClient.OpenReadAsync();
+                var jobs = await System.Text.Json.JsonSerializer.DeserializeAsync<List<Dictionary<string, object>>>(stream);
+                return jobs ?? new List<Dictionary<string, object>>();
+            }
+    
         private readonly string _connectionString;
 
         public DatabaseHandlerService(IConfiguration configuration)
