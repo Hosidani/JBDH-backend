@@ -252,6 +252,35 @@ namespace JBDH.Migrations
                     b.ToTable("JobApplications", (string)null);
                 });
 
+            modelBuilder.Entity("JBDH.Models.Job.RawJob", b =>
+                {
+                    b.Property<int>("JobId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Company")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("PostedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("WebpageUrl")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("JobId");
+
+                    b.ToTable("rawjobs", (string)null);
+                });
+
             modelBuilder.Entity("JBDH.Models.Kanban.Board", b =>
                 {
                     b.Property<int>("Id")

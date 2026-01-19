@@ -8,7 +8,6 @@ namespace JBDH.Services.Core
         {
             // 0-99: CREATE TABLE/DB
             { 0, "CREATE DATABASE IF NOT EXISTS testing_purposes"},
-            { 1, "CREATE TABLE IF NOT EXISTS raw_table (JobId INT PRIMARY KEY, title VARCHAR(255), description TEXT, company VARCHAR(255), location VARCHAR(255), posted_date DATE, webpage_url VARCHAR(2083));" },
             { 2, "CREATE TABLE IF NOT EXISTS Jobs (JobId INT PRIMARY KEY AUTO_INCREMENT, Title VARCHAR(255), Description TEXT, Company VARCHAR(255), Location VARCHAR(255), PostedDate DATE, WebpageUrl VARCHAR(2083), RecruiterId INT NULL, OwnerId INT NULL, FOREIGN KEY (RecruiterId) REFERENCES Users(Id) ON DELETE CASCADE, FOREIGN KEY (OwnerId) REFERENCES Users(Id) ON DELETE SET NULL);" },
             { 3, "CREATE TABLE IF NOT EXISTS AIResponses (Id INT PRIMARY KEY AUTO_INCREMENT, Discriminator VARCHAR(128) NOT NULL DEFAULT 'AIResponse', ResponseText TEXT, CreatedAt DATETIME, UserId INT, FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE);" },
             { 4, "CREATE TABLE IF NOT EXISTS Users (Id INT PRIMARY KEY AUTO_INCREMENT, PasswordHash VARCHAR(255) NOT NULL, Email VARCHAR(255) NOT NULL UNIQUE, Location VARCHAR(255), CVPath VARCHAR(2083), Organisation VARCHAR(255), DeveloperMode BOOLEAN DEFAULT FALSE, Open BOOLEAN DEFAULT FALSE, Role VARCHAR(100) NOT NULL, IsBanned BOOLEAN DEFAULT FALSE, OwnerId INT NULL, AboutMe TEXT NULL, FOREIGN KEY (OwnerId) REFERENCES Users(Id) ON DELETE CASCADE);" },
@@ -30,9 +29,9 @@ namespace JBDH.Services.Core
             { 20, "CREATE TABLE IF NOT EXISTS AIUserCourseProposals (Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT NOT NULL, ProposalJson TEXT NOT NULL, CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE);" },
 
             // 100-199: SELECT/INSERT
-            { 100, "INSERT INTO raw_table (JobId, title, description, company, location, posted_date, webpage_url) VALUES (@job_id, @title, @description, @company, @location, @posted_date, @webpage_url);" },
-            { 101, "INSERT INTO Jobs (JobId, Title, Description, Company, Location, PostedDate, WebpageUrl) SELECT JobId, title, description, company, location, posted_date, webpage_url FROM raw_table;" },
-            { 102, "SELECT * FROM Jobs WHERE posted_date LIKE @param1 ORDER BY posted_date DESC;" },
+            { 100, "INSERT INTO rawjobs (JobId, title, description, company, location, PostedDate, WebpageUrl) VALUES (@job_id, @title, @description, @company, @location, @PostedDate, @WebpageUrl);" },
+            { 101, "INSERT INTO Jobs (JobId, Title, Description, Company, Location, PostedDate, WebpageUrl) SELECT JobId, title, description, company, location, PostedDate, WebpageUrl FROM rawjobs;" },
+            { 102, "SELECT * FROM Jobs WHERE PostedDate LIKE @param1 ORDER BY PostedDate DESC;" },
             { 103, "SELECT * FROM Jobs WHERE LOWER(title) LIKE @param1 OR LOWER(description) LIKE @param1;" },
             { 104, "SELECT * FROM Jobs WHERE LOWER(location) LIKE @param1;" },
             { 105, "SELECT * FROM Jobs;" },
@@ -43,7 +42,7 @@ namespace JBDH.Services.Core
             // 200-299: DELETES
             { 200, "DELETE FROM EmailVerificationTokens;" },
             { 201, "DELETE FROM Jobs WHERE JobId NOT IN (SELECT MIN(JobId) FROM Jobs GROUP BY description);" },
-            { 202, "DELETE FROM raw_table;" },
+            { 202, "DELETE FROM rawjobs;" },
             { 203, "DELETE FROM Jobs;" },
             { 204, "DELETE FROM Users;" },
             { 205, "DELETE FROM AIResponses;" },

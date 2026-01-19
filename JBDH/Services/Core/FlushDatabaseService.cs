@@ -15,10 +15,10 @@ namespace JBDH.Services.Core
                     connection.Open();
                     LoggingConfigService.ReturnInfo("Flushing database...");
 
-                    // Delete all rows from raw_table
+                    // Delete all rows from rawjobs
                     var deleteRawTableCommand = new MySqlCommand(SqlQueries.SqlQuery(202), connection);
                     var rawRowsDeleted = deleteRawTableCommand.ExecuteNonQuery();
-                    LoggingConfigService.ReturnInfo($"Deleted {rawRowsDeleted} rows from raw_table.");
+                    LoggingConfigService.ReturnInfo($"Deleted {rawRowsDeleted} rows from rawjobs.");
 
                     // Delete all rows from Jobs
                     var deleteJobsTableCommand = new MySqlCommand(SqlQueries.SqlQuery(203), connection);

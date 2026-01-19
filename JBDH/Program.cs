@@ -140,6 +140,7 @@ builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddTransient<DatabaseHandlerService>();
 builder.Services.AddScoped<InternalSortingService>();
 builder.Services.AddSingleton<JobStreamService>();
+builder.Services.AddScoped<JobSyncService>();
 
 builder.Services.AddSession(options =>
 {

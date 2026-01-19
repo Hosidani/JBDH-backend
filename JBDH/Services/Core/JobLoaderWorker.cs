@@ -24,21 +24,36 @@ namespace JBDH.Services.Core
             try
             {
                 LoggingConfigService.ConfigLogging();
-                LoggingConfigService.ReturnInfo("Starting background job data fetch...");
-                
+                LoggingConfigService.ReturnInfo("[STEP] Starting background job data fetch...");
+
+                LoggingConfigService.ReturnInfo("[STEP] Creating JobStreamService instance...");
                 var jobStreamService = new JobStreamService(_configuration);
+
+                LoggingConfigService.ReturnInfo("[STEP] Calling RunJobStreamAsync...");
                 var jobData = await jobStreamService.RunJobStreamAsync(Array.Empty<string>());
-                
+                LoggingConfigService.ReturnInfo($"[STEP] RunJobStreamAsync completed. Jobs fetched: {jobData?.Count ?? -1}");
+
+                LoggingConfigService.ReturnInfo("[STEP] Creating DI scope for DatabaseHandlerService...");
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                    LoggingConfigService.ReturnInfo("[STEP] Resolving DatabaseHandlerService...");
                     var dbHandler = scope.ServiceProvider.GetRequiredService<JBDH.Services.Core.DatabaseHandlerService>();
-                    dbHandler.DatabaseHandler(jobData);
+                    LoggingConfigService.ReturnInfo("[STEP] Calling DatabaseHandler with job data...");
+                    if (jobData != null)
+                    {
+                        await dbHandler.DatabaseHandlerAsync(jobData);
+                        LoggingConfigService.ReturnInfo("[STEP] DatabaseHandler completed.");
+                    }
+                    else
+                    {
+                        LoggingConfigService.ReturnError("[ERROR] jobData is null. Skipping DatabaseHandler call.");
+                    }
                 }
-                LoggingConfigService.ReturnInfo("Background job data fetch completed.");
+                LoggingConfigService.ReturnInfo("[STEP] Background job data fetch completed.");
             }
             catch (Exception ex)
             {
-                LoggingConfigService.ReturnError($"Background job fetch error: {ex.Message}");
+                LoggingConfigService.ReturnError($"[ERROR] Background job fetch error: {ex.Message}");
                 // Don't rethrow - let the app continue even if job fetching fails
             }
         }

@@ -14,9 +14,78 @@ namespace JBDH.Services.Core
 {
     public class JobStreamService
     {
+            /// <summary>
+            /// Streams and processes a large JSON blob from Azure Blob Storage in chunks.
+            /// </summary>
+            /// <param name="blobConnectionString">Azure Blob Storage connection string</param>
+            /// <param name="containerName">Blob container name</param>
+            /// <param name="blobName">Blob file name</param>
+            public async Task ProcessJsonBlobAsync(string blobConnectionString, string containerName, string blobName)
+            {
+                var blobClient = new Azure.Storage.Blobs.BlobClient(blobConnectionString, containerName, blobName);
+                using var stream = await blobClient.OpenReadAsync();
+
+                // Use a buffer and Utf8JsonReader for streaming parsing
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                bool isFinalBlock = false;
+                System.Buffers.ArrayBufferWriter<byte> jsonBuffer = new();
+
+                // Read the stream in chunks and accumulate in buffer
+                while (!isFinalBlock)
+                {
+                    bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    if (bytesRead == 0)
+                    {
+                        isFinalBlock = true;
+                    }
+                    else
+                    {
+                        buffer.AsSpan(0, bytesRead).CopyTo(jsonBuffer.GetSpan(bytesRead));
+                        jsonBuffer.Advance(bytesRead);
+                    }
+                }
+
+                // Parse the buffer as a JSON array of objects
+                var reader = new System.Text.Json.Utf8JsonReader(jsonBuffer.WrittenSpan, isFinalBlock: true, state: default);
+                var batch = new List<Dictionary<string, object>>(1000);
+                string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connectionString))
+                    throw new InvalidOperationException("DefaultConnection string is missing in configuration.");
+                if (reader.Read() && reader.TokenType == System.Text.Json.JsonTokenType.StartArray)
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == System.Text.Json.JsonTokenType.StartObject)
+                        {
+                            // Parse a single job object
+                            var job = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(ref reader);
+                            if (job != null)
+                                batch.Add(job);
+                            // Batch insert for efficiency
+                            if (batch.Count >= 1000)
+                            {
+                                var transformed = EtlPipeline.TransformData(batch);
+                                EtlPipeline.LoadData(transformed, connectionString);
+                                batch.Clear();
+                            }
+                        }
+                        else if (reader.TokenType == System.Text.Json.JsonTokenType.EndArray)
+                        {
+                            break;
+                        }
+                    }
+                    // Process any remaining jobs in the last batch
+                    if (batch.Count > 0)
+                    {
+                        var transformed = EtlPipeline.TransformData(batch);
+                        EtlPipeline.LoadData(transformed, connectionString);
+                        batch.Clear();
+                    }
+                }
+            }
         private readonly IConfiguration _configuration;
         private readonly string TimestampFile;
-        private readonly string JsonFile;
 
         private readonly string BaseUrl = "https://jobstream.api.jobtechdev.se";
         private readonly string StreamUrl;
@@ -27,7 +96,6 @@ namespace JBDH.Services.Core
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             TimestampFile = configuration.GetValue<string>("JobStream:TimestampFile") ?? "timestamp.txt";
-            JsonFile = configuration.GetValue<string>("JobStream:JsonFile") ?? @"D:\home\site\data\jobs.json";
             BaseUrl = configuration.GetValue<string>("JobStream:BaseUrl") ?? "https://jobstream.api.jobtechdev.se";
             StreamUrl = $"{BaseUrl}/stream";
             SnapshotUrl = $"{BaseUrl}/snapshot";
@@ -41,57 +109,51 @@ namespace JBDH.Services.Core
         /// </summary>
         public async Task DownloadFullJobSnapshotAsync(string filePath)
         {
-            LoggingConfigService.ReturnInfo($"Starting full job snapshot download to {filePath}...");
-            using var client = new HttpClient();
-            // Ensure long timeout for Azure background execution
-            client.Timeout = TimeSpan.FromMinutes(_configuration.GetValue<int>("JobStream:HttpTimeoutMinutes", 10));
-
-            var allJobs = new List<Dictionary<string, object>>();
-            string url = SnapshotUrl;
-
-            while (!string.IsNullOrEmpty(url))
+            var blobFileName = _configuration["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
+            LoggingConfigService.ReturnInfo($"[STORAGE] Always uploading to Azure Blob Storage. Blob file: {blobFileName}");
+            LoggingConfigService.ReturnInfo($"Starting full job snapshot streaming upload to Azure Blob Storage as {blobFileName}...");
+            try
             {
-                try
-                {
-                    LoggingConfigService.ReturnInfo($"Fetching jobs from: {url}");
-                    var response = await client.GetStringAsync(url);
-                    using var doc = JsonDocument.Parse(response);
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(_configuration.GetValue<int>("JobStream:HttpTimeoutMinutes", 30));
+                LoggingConfigService.ReturnInfo($"[DEBUG] Sending GET request to {SnapshotUrl}");
+                using var responseStream = await client.GetStreamAsync(SnapshotUrl);
 
-                    int pageCount = 0;
-                    if (doc.RootElement.TryGetProperty("results", out var resultsEl) && resultsEl.ValueKind == JsonValueKind.Array)
+                // Debug: Check stream length if possible
+                long streamLength = 0;
+                if (responseStream.CanSeek)
+                {
+                    streamLength = responseStream.Length;
+                    LoggingConfigService.ReturnInfo($"[DEBUG] Response stream length: {streamLength} bytes");
+                }
+                else
+                {
+                    // Copy to memory stream to measure size
+                    using var ms = new MemoryStream();
+                    await responseStream.CopyToAsync(ms);
+                    streamLength = ms.Length;
+                    LoggingConfigService.ReturnInfo($"[DEBUG] Response stream copied to memory. Length: {streamLength} bytes");
+                    ms.Position = 0;
+                    // Optionally log a preview of the content
+                    using (var reader = new StreamReader(ms, leaveOpen: true))
                     {
-                        foreach (var job in resultsEl.EnumerateArray())
-                        {
-                            var jobDict = JsonSerializer.Deserialize<Dictionary<string, object>>(job.GetRawText());
-                            if (jobDict != null)
-                            {
-                                allJobs.Add(jobDict);
-                                pageCount++;
-                            }
-                        }
+                        string preview = await reader.ReadLineAsync() ?? "<empty>";
+                        LoggingConfigService.ReturnInfo($"[DEBUG] First line of response: {preview}");
+                        ms.Position = 0;
                     }
-                    LoggingConfigService.ReturnInfo($"Fetched {pageCount} jobs on this page. Total so far: {allJobs.Count}");
-
-                    url = doc.RootElement.TryGetProperty("next", out var nextEl)
-                        ? nextEl.GetString() ?? ""
-                        : "";
+                    // Upload from memory stream
+                    await BlobHelper.UploadStreamToBlobAsync(ms, _configuration);
+                    LoggingConfigService.ReturnInfo($"[SUCCESS] Streamed snapshot (from memory) to Azure Blob Storage as {blobFileName}");
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    LoggingConfigService.ReturnError($"Error fetching jobs: {ex.Message}");
-                    break;
-                }
-            }
 
-            if (_configuration.GetValue<bool>("UseBlobStorage"))
-            {
-                await BlobHelper.UploadJobsToBlobAsync(JsonSerializer.Serialize(allJobs), _configuration);
-                LoggingConfigService.ReturnInfo($"Saved {allJobs.Count} jobs to Azure Blob Storage");
+                // If stream is seekable, upload directly
+                await BlobHelper.UploadStreamToBlobAsync(responseStream, _configuration);
+                LoggingConfigService.ReturnInfo($"[SUCCESS] Streamed snapshot to Azure Blob Storage as {blobFileName}");
             }
-            else
+            catch (Exception ex)
             {
-                await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(allJobs));
-                LoggingConfigService.ReturnInfo($"Saved {allJobs.Count} jobs to local file {filePath}");
+                LoggingConfigService.ReturnError($"[ERROR] Failed to stream snapshot to Azure Blob Storage as {blobFileName}: {ex}");
             }
         }
 
@@ -168,57 +230,41 @@ namespace JBDH.Services.Core
         }
 
         // --------------------------------------------------------------------
-        // SAVE TO JSON (unchanged)
-        // --------------------------------------------------------------------
-        public void SaveToJson(List<Dictionary<string, object>> data)
-        {
-            try
-            {
-                var jsonData = JsonSerializer.Serialize(
-                    data,
-                    new JsonSerializerOptions { WriteIndented = true }
-                );
-
-                var fullPath = Path.GetFullPath(JsonFile);
-                var dir = Path.GetDirectoryName(fullPath);
-
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-
-                File.WriteAllText(fullPath, jsonData);
-            }
-            catch (Exception e)
-            {
-                LoggingConfigService.ReturnError($"SaveToJson error: {e.Message}");
-            }
-        }
 
         // --------------------------------------------------------------------
         // MAIN ENTRY POINT
         // --------------------------------------------------------------------
         public async Task<List<Dictionary<string, object>>> RunJobStreamAsync(string[] args)
         {
-            bool forceSnapshot =
-                !File.Exists(JsonFile) || new FileInfo(JsonFile).Length == 0;
             bool isFirstRun = !File.Exists(TimestampFile);
 
             List<Dictionary<string, object>> jobAds;
 
-            // Get configuration from DI (for blob/local switch)
-            if (forceSnapshot || isFirstRun)
+            // Always use blob storage, never local file
+            if (isFirstRun)
             {
-                LoggingConfigService.ReturnInfo("Downloading full snapshot...");
-                await DownloadFullJobSnapshotAsync(JsonFile);
-                jobAds = EtlPipeline.ExtractData(JsonFile);
-                // jobs.json already written by DownloadFullJobSnapshotAsync
+                LoggingConfigService.ReturnInfo("Downloading full snapshot to blob storage...");
+                await DownloadFullJobSnapshotAsync(""); // filePath param is unused, passing empty string
+                // TODO: Add logic to read from blob storage directly (stream or download)
+                jobAds = new List<Dictionary<string, object>>(); // Placeholder: implement blob read
+                // If you implement blob read here, also upload to blob storage if needed:
+                // if (jobAds.Count > 0)
+                // {
+                //     var json = JsonSerializer.Serialize(jobAds);
+                //     await BlobHelper.UploadJobsToBlobAsync(json, _configuration);
+                //     LoggingConfigService.ReturnInfo($"Uploaded {jobAds.Count} jobs to blob storage (first run).");
+                // }
             }
             else
             {
                 var date = File.ReadAllText(TimestampFile);
                 jobAds = await FetchJobAdsAsync(StreamUrl, date);
-                SaveToJson(jobAds); // Only write jobs.json for incremental stream
+                if (jobAds.Count > 0)
+                {
+                    var json = JsonSerializer.Serialize(jobAds);
+                    await BlobHelper.UploadJobsToBlobAsync(json, _configuration);
+                    LoggingConfigService.ReturnInfo($"Uploaded {jobAds.Count} jobs to blob storage (incremental update).");
+                }
             }
 
             File.WriteAllText(
@@ -228,6 +274,22 @@ namespace JBDH.Services.Core
 
             LoggingConfigService.ReturnInfo($"Fetched {jobAds.Count} jobs.");
             return jobAds;
+        }
+
+        public async Task<bool> TestBlobStorageConnectionAsync()
+        {
+            try
+            {
+                var testJson = "{\"test\": true}";
+                await BlobHelper.UploadJobsToBlobAsync(testJson, _configuration);
+                LoggingConfigService.ReturnInfo("Successfully uploaded test JSON to Blob Storage as jobs_test.json.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LoggingConfigService.ReturnError($"Blob Storage connection or upload failed: {ex.Message}");
+                return false;
+            }
         }
     }
 }

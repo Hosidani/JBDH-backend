@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using JBDH.Services.JobManagement;
 using JBDH.Models.Core;
 using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
@@ -145,7 +148,7 @@ namespace JBDH.Services.Core
                             postedDate = dt.ToString("yyyy-MM-dd");
                     }
 
-                    var webpageUrl = job.GetValueOrDefault("webpage_url")?.ToString() ?? "Unknown URL";
+                    var webpageUrl = job.GetValueOrDefault("WebpageUrl")?.ToString() ?? "Unknown URL";
 
                     transformed.Add(new Dictionary<string, object>
                     {
@@ -154,8 +157,8 @@ namespace JBDH.Services.Core
                         { "description", description ?? "No Description" },
                         { "company", company ?? "Unknown Company" },
                         { "location", location ?? "Unknown Location" },
-                        { "posted_date", postedDate ?? "1970-01-01" },
-                        { "webpage_url", webpageUrl ?? "Unknown URL" }
+                        { "PostedDate", postedDate ?? "1970-01-01" },
+                        { "WebpageUrl", webpageUrl ?? "Unknown URL" }
                     });
                 }
                 catch (Exception e)
@@ -184,8 +187,8 @@ namespace JBDH.Services.Core
                     command.Parameters.AddWithValue("@description", job["description"]);
                     command.Parameters.AddWithValue("@company", job["company"]);
                     command.Parameters.AddWithValue("@location", job["location"]);
-                    command.Parameters.AddWithValue("@posted_date", job["posted_date"]);
-                    command.Parameters.AddWithValue("@webpage_url", job["webpage_url"]);
+                    command.Parameters.AddWithValue("@PostedDate", job["PostedDate"]);
+                    command.Parameters.AddWithValue("@WebpageUrl", job["WebpageUrl"]);
 
                     try
                     {
@@ -196,7 +199,7 @@ namespace JBDH.Services.Core
                         LoggingConfigService.ReturnError($"MySQL error inserting job_id {job["job_id"]}: {ex.Message}");
                     }
                 }
-                LoggingConfigService.ReturnInfo("All jobs inserted into raw_table.");
+                LoggingConfigService.ReturnInfo("All jobs inserted into rawjobs.");
 
                 var deduplicateCommand = new MySqlCommand(SqlQueries.SqlQuery(101), connection);
                 deduplicateCommand.ExecuteNonQuery();
@@ -208,10 +211,12 @@ namespace JBDH.Services.Core
             }
         }
 
-        public static void RunEtlPipeline(List<Dictionary<string, object>> rawData, string connectionString)
+        public static async Task RunEtlPipelineAsync(List<Dictionary<string, object>> rawData, string connectionString, IConfiguration config)
         {
             LoggingConfigService.ReturnInfo("Starting ETL pipeline...");
             var transformedData = TransformData(rawData);
+            // Upload pretty-printed jobs to blob storage
+            await BlobHelper.UploadJobsToBlobAsync(rawData, config);
             LoadData(transformedData, connectionString);
             LoggingConfigService.ReturnInfo("ETL pipeline completed.");
         }

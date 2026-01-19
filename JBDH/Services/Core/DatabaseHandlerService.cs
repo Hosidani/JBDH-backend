@@ -13,11 +13,33 @@ namespace JBDH.Services.Core
 {
     public class DatabaseHandlerService
     {
-        private readonly string _connectionString;
+            public static async Task<List<Dictionary<string, object>>> ReadJobsFromBlobAsync(IConfiguration config)
+            {
+                var accountName = config["AzureBlobStorage:AccountName"];
+                var accountKey = config["AzureBlobStorage:AccountKey"];
+                var containerName = config["AzureBlobStorage:ContainerName"];
+                var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
+                var connectionString = $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix=core.windows.net";
 
-        public DatabaseHandlerService(IConfiguration configuration)
+                var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+                var blobClient = containerClient.GetBlobClient(blobFileName);
+
+                using var stream = await blobClient.OpenReadAsync();
+                var jobs = await System.Text.Json.JsonSerializer.DeserializeAsync<List<Dictionary<string, object>>>(stream);
+                return jobs ?? new List<Dictionary<string, object>>();
+            }
+    
+        private readonly string _connectionString;
+        private readonly JobSyncService _jobSyncService;
+        private readonly IConfiguration _configuration;
+
+        public DatabaseHandlerService(IConfiguration configuration, JobSyncService jobSyncService)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
+            _jobSyncService = jobSyncService;
+            _configuration = configuration;
         }
 
         private const string JsonFile = "jobs.json";
@@ -89,8 +111,9 @@ namespace JBDH.Services.Core
             }
         }
 
-        public void DatabaseHandler(List<Dictionary<string, object>> jobData)
+        public async Task DatabaseHandlerAsync(List<Dictionary<string, object>> jobData)
         {
+            //JBDH.Services.Configuration.LoggingConfigService.ReturnInfo("[DatabaseHandlerService] DatabaseHandler method called.");
             var databaseExists = false;
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -112,11 +135,13 @@ namespace JBDH.Services.Core
                     LoggingConfigService.ReturnInfo("Database 'testing_purposes' created.");
                 }
             }
-            //using (var connection = Settings.OpenConnection())
             {
                 LoggingConfigService.ReturnInfo("Setting up database tables and running ETL pipeline...");
                 //EnsureTablesExist(connection);
-                EtlPipeline.RunEtlPipeline(jobData, _connectionString);
+                await EtlPipeline.RunEtlPipelineAsync(jobData, _connectionString, _configuration);
+                LoggingConfigService.ReturnInfo("ETL pipeline completed. Syncing Jobs table with EF...");
+                _jobSyncService.SyncJobsFromRaw();
+                LoggingConfigService.ReturnInfo("Jobs table sync completed.");
                 LoggingConfigService.ReturnInfo("Database handler setup completed.");
             }
         }
