@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using JBDH.Services.JobManagement;
 using JBDH.Models.Core;
 using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
@@ -208,10 +211,12 @@ namespace JBDH.Services.Core
             }
         }
 
-        public static void RunEtlPipeline(List<Dictionary<string, object>> rawData, string connectionString)
+        public static async Task RunEtlPipelineAsync(List<Dictionary<string, object>> rawData, string connectionString, IConfiguration config)
         {
             LoggingConfigService.ReturnInfo("Starting ETL pipeline...");
             var transformedData = TransformData(rawData);
+            // Upload pretty-printed jobs to blob storage
+            await BlobHelper.UploadJobsToBlobAsync(rawData, config);
             LoadData(transformedData, connectionString);
             LoggingConfigService.ReturnInfo("ETL pipeline completed.");
         }

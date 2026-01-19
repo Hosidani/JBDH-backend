@@ -9,6 +9,17 @@ namespace JBDH.Services.JobManagement
 {
     public static class BlobHelper
     {
+        /// <summary>
+        /// Serializes the job list as pretty-printed JSON and uploads it to Azure Blob Storage.
+        /// </summary>
+        /// <param name="jobs">The list of jobs to upload.</param>
+        /// <param name="config">The configuration for blob storage.</param>
+        public static async Task UploadJobsToBlobAsync(List<Dictionary<string, object>> jobs, IConfiguration config)
+        {
+            var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+            string jsonContent = System.Text.Json.JsonSerializer.Serialize(jobs, options);
+            await UploadJobsToBlobAsync(jsonContent, config);
+        }
 
             public static async Task UploadStreamToBlobAsync(Stream inputStream, IConfiguration config)
             {

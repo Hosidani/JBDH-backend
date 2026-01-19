@@ -28,7 +28,6 @@ namespace JBDH.Services.Core
                 // Use a buffer and Utf8JsonReader for streaming parsing
                 byte[] buffer = new byte[8192];
                 int bytesRead;
-                int bytesInBuffer = 0;
                 bool isFinalBlock = false;
                 System.Buffers.ArrayBufferWriter<byte> jsonBuffer = new();
 
@@ -50,7 +49,9 @@ namespace JBDH.Services.Core
                 // Parse the buffer as a JSON array of objects
                 var reader = new System.Text.Json.Utf8JsonReader(jsonBuffer.WrittenSpan, isFinalBlock: true, state: default);
                 var batch = new List<Dictionary<string, object>>(1000);
-                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connectionString))
+                    throw new InvalidOperationException("DefaultConnection string is missing in configuration.");
                 if (reader.Read() && reader.TokenType == System.Text.Json.JsonTokenType.StartArray)
                 {
                     while (reader.Read())
@@ -115,7 +116,38 @@ namespace JBDH.Services.Core
             {
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromMinutes(_configuration.GetValue<int>("JobStream:HttpTimeoutMinutes", 30));
+                LoggingConfigService.ReturnInfo($"[DEBUG] Sending GET request to {SnapshotUrl}");
                 using var responseStream = await client.GetStreamAsync(SnapshotUrl);
+
+                // Debug: Check stream length if possible
+                long streamLength = 0;
+                if (responseStream.CanSeek)
+                {
+                    streamLength = responseStream.Length;
+                    LoggingConfigService.ReturnInfo($"[DEBUG] Response stream length: {streamLength} bytes");
+                }
+                else
+                {
+                    // Copy to memory stream to measure size
+                    using var ms = new MemoryStream();
+                    await responseStream.CopyToAsync(ms);
+                    streamLength = ms.Length;
+                    LoggingConfigService.ReturnInfo($"[DEBUG] Response stream copied to memory. Length: {streamLength} bytes");
+                    ms.Position = 0;
+                    // Optionally log a preview of the content
+                    using (var reader = new StreamReader(ms, leaveOpen: true))
+                    {
+                        string preview = await reader.ReadLineAsync() ?? "<empty>";
+                        LoggingConfigService.ReturnInfo($"[DEBUG] First line of response: {preview}");
+                        ms.Position = 0;
+                    }
+                    // Upload from memory stream
+                    await BlobHelper.UploadStreamToBlobAsync(ms, _configuration);
+                    LoggingConfigService.ReturnInfo($"[SUCCESS] Streamed snapshot (from memory) to Azure Blob Storage as {blobFileName}");
+                    return;
+                }
+
+                // If stream is seekable, upload directly
                 await BlobHelper.UploadStreamToBlobAsync(responseStream, _configuration);
                 LoggingConfigService.ReturnInfo($"[SUCCESS] Streamed snapshot to Azure Blob Storage as {blobFileName}");
             }
@@ -212,15 +244,27 @@ namespace JBDH.Services.Core
             if (isFirstRun)
             {
                 LoggingConfigService.ReturnInfo("Downloading full snapshot to blob storage...");
-                await DownloadFullJobSnapshotAsync(null); // filePath param is unused, can be null
+                await DownloadFullJobSnapshotAsync(""); // filePath param is unused, passing empty string
                 // TODO: Add logic to read from blob storage directly (stream or download)
                 jobAds = new List<Dictionary<string, object>>(); // Placeholder: implement blob read
+                // If you implement blob read here, also upload to blob storage if needed:
+                // if (jobAds.Count > 0)
+                // {
+                //     var json = JsonSerializer.Serialize(jobAds);
+                //     await BlobHelper.UploadJobsToBlobAsync(json, _configuration);
+                //     LoggingConfigService.ReturnInfo($"Uploaded {jobAds.Count} jobs to blob storage (first run).");
+                // }
             }
             else
             {
                 var date = File.ReadAllText(TimestampFile);
                 jobAds = await FetchJobAdsAsync(StreamUrl, date);
-                // TODO: Upload jobAds to blob storage if needed
+                if (jobAds.Count > 0)
+                {
+                    var json = JsonSerializer.Serialize(jobAds);
+                    await BlobHelper.UploadJobsToBlobAsync(json, _configuration);
+                    LoggingConfigService.ReturnInfo($"Uploaded {jobAds.Count} jobs to blob storage (incremental update).");
+                }
             }
 
             File.WriteAllText(

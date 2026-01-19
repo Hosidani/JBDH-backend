@@ -31,10 +31,15 @@ namespace JBDH.Services.Core
             }
     
         private readonly string _connectionString;
+        private readonly JobSyncService _jobSyncService;
+        private readonly IConfiguration _configuration;
 
-        public DatabaseHandlerService(IConfiguration configuration)
+        public DatabaseHandlerService(IConfiguration configuration, JobSyncService jobSyncService)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
+            _jobSyncService = jobSyncService;
+            _configuration = configuration;
         }
 
         private const string JsonFile = "jobs.json";
@@ -106,8 +111,9 @@ namespace JBDH.Services.Core
             }
         }
 
-        public void DatabaseHandler(List<Dictionary<string, object>> jobData)
+        public async Task DatabaseHandlerAsync(List<Dictionary<string, object>> jobData)
         {
+            //JBDH.Services.Configuration.LoggingConfigService.ReturnInfo("[DatabaseHandlerService] DatabaseHandler method called.");
             var databaseExists = false;
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -129,11 +135,13 @@ namespace JBDH.Services.Core
                     LoggingConfigService.ReturnInfo("Database 'testing_purposes' created.");
                 }
             }
-            //using (var connection = Settings.OpenConnection())
             {
                 LoggingConfigService.ReturnInfo("Setting up database tables and running ETL pipeline...");
                 //EnsureTablesExist(connection);
-                EtlPipeline.RunEtlPipeline(jobData, _connectionString);
+                await EtlPipeline.RunEtlPipelineAsync(jobData, _connectionString, _configuration);
+                LoggingConfigService.ReturnInfo("ETL pipeline completed. Syncing Jobs table with EF...");
+                _jobSyncService.SyncJobsFromRaw();
+                LoggingConfigService.ReturnInfo("Jobs table sync completed.");
                 LoggingConfigService.ReturnInfo("Database handler setup completed.");
             }
         }
