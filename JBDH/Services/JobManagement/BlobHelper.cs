@@ -1,9 +1,7 @@
 using Azure.Storage.Blobs;
+using Azure.Identity;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using System.IO;
-using JBDH.Services.JobManagement;
+
 
 namespace JBDH.Services.JobManagement
 {
@@ -21,32 +19,46 @@ namespace JBDH.Services.JobManagement
             await UploadJobsToBlobAsync(jsonContent, config);
         }
 
-            public static async Task UploadStreamToBlobAsync(Stream source, IConfiguration config)
-            {
-                var accountName = config["AzureBlobStorage:AccountName"];
-                var accountKey = config["AzureBlobStorage:AccountKey"];
-                var containerName = config["AzureBlobStorage:ContainerName"];
-                var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
-                var connectionString = $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix=core.windows.net";
-
-                var blobServiceClient = new BlobServiceClient(connectionString);
-                var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-                await containerClient.CreateIfNotExistsAsync();
-
-                var blobClient = new Azure.Storage.Blobs.BlobClient(connectionString, containerName, blobFileName);
-
-                // This will stream from the provided source, internally chunking as needed
-                await blobClient.UploadAsync(source, overwrite: true);
-            }
-        public static async Task UploadJobsToBlobAsync(string jsonContent, IConfiguration config)
+        public static async Task UploadStreamToBlobAsync(Stream source, IConfiguration config)
         {
+            var connectionString = config["AzureBlobStorage:ConnectionString"];
             var accountName = config["AzureBlobStorage:AccountName"];
-            var accountKey = config["AzureBlobStorage:AccountKey"];
             var containerName = config["AzureBlobStorage:ContainerName"];
             var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
-            var connectionString = $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix=core.windows.net";
 
-            var blobServiceClient = new BlobServiceClient(connectionString);
+            BlobServiceClient blobServiceClient;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                blobServiceClient = new BlobServiceClient(connectionString);
+            }
+            else
+            {
+                var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
+                blobServiceClient = new BlobServiceClient(blobUri, new Azure.Identity.DefaultAzureCredential());
+            }
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            await containerClient.CreateIfNotExistsAsync();
+
+            var blobClient = containerClient.GetBlobClient(blobFileName);
+            await blobClient.UploadAsync(source, overwrite: true);
+        }
+        public static async Task UploadJobsToBlobAsync(string jsonContent, IConfiguration config)
+        {
+            var connectionString = config["AzureBlobStorage:ConnectionString"];
+            var accountName = config["AzureBlobStorage:AccountName"];
+            var containerName = config["AzureBlobStorage:ContainerName"];
+            var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
+
+            BlobServiceClient blobServiceClient;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                blobServiceClient = new BlobServiceClient(connectionString);
+            }
+            else
+            {
+                var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
+                blobServiceClient = new BlobServiceClient(blobUri, new Azure.Identity.DefaultAzureCredential());
+            }
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
             await containerClient.CreateIfNotExistsAsync();
 
