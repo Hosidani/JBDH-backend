@@ -44,11 +44,69 @@ namespace JBDH.Services.Core
                 client.Timeout = TimeSpan.FromMinutes(_configuration.GetValue<int>("JobStream:HttpTimeoutMinutes", 30));
                 LoggingConfigService.ReturnInfo($"[DEBUG] Sending GET request to {SnapshotUrl}");
 
-                // Get the HTTP response stream
-                using var responseStream = await client.GetStreamAsync(SnapshotUrl);
+                // Log before request
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                HttpResponseMessage? response = null;
+                try
+                {
+                    response = await client.GetAsync(SnapshotUrl, HttpCompletionOption.ResponseHeadersRead);
+                }
+                catch (Exception ex)
+                {
+                    LoggingConfigService.ReturnError($"[ERROR] HTTP GET failed: {ex.Message}");
+                    throw;
+                }
+                sw.Stop();
+                LoggingConfigService.ReturnInfo($"[DEBUG] HTTP GET completed in {sw.ElapsedMilliseconds} ms. Status: {(response != null ? ((int)response.StatusCode + " " + response.StatusCode) : "null")}");
 
-                // Stream directly to Azure Blob Storage (no buffering in MemoryStream)
-                await BlobHelper.UploadStreamToBlobAsync(responseStream, _configuration);
+                if (response == null)
+                {
+                    LoggingConfigService.ReturnError("[ERROR] HTTP response is null!");
+                    return;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    LoggingConfigService.ReturnError($"[ERROR] HTTP GET failed. Status: {(int)response.StatusCode} {response.StatusCode}");
+                    return;
+                }
+
+                var contentLength = response.Content.Headers.ContentLength;
+                LoggingConfigService.ReturnInfo($"[DEBUG] HTTP response Content-Length: {contentLength}");
+
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+
+                // --- DEBUG: Preview first 100 bytes of API response ---
+                var previewBytes = new byte[100];
+                int previewRead = 0;
+                try
+                {
+                    previewRead = await responseStream.ReadAsync(previewBytes, 0, previewBytes.Length);
+                }
+                catch (Exception ex)
+                {
+                    LoggingConfigService.ReturnError($"[CRITICAL] Failed to read preview bytes from API response: {ex.Message}");
+                }
+                string preview = System.Text.Encoding.UTF8.GetString(previewBytes, 0, previewRead);
+                LoggingConfigService.ReturnInfo($"[CRITICAL] API Response Preview: {preview}");
+
+                if (previewRead == 0)
+                {
+                    LoggingConfigService.ReturnError("[CRITICAL] API returned EMPTY response! Aborting upload.");
+                    return;
+                }
+
+                // Since most network streams are not seekable, we must prepend previewBytes to the rest of the stream for upload
+                using (var uploadStream = new MemoryStream())
+                {
+                    // Write previewed bytes
+                    if (previewRead > 0)
+                        await uploadStream.WriteAsync(previewBytes, 0, previewRead);
+                    // Copy the rest of the response
+                    await responseStream.CopyToAsync(uploadStream);
+                    uploadStream.Position = 0;
+                    await BlobHelper.UploadStreamToBlobAsync(uploadStream, _configuration);
+                }
 
                 LoggingConfigService.ReturnInfo($"[SUCCESS] Streamed snapshot to Azure Blob Storage as {blobFileName}");
             }
