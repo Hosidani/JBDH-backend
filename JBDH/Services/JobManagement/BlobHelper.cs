@@ -21,7 +21,7 @@ namespace JBDH.Services.JobManagement
             await UploadJobsToBlobAsync(jsonContent, config);
         }
 
-            public static async Task UploadStreamToBlobAsync(Stream inputStream, IConfiguration config)
+            public static async Task UploadStreamToBlobAsync(Stream source, IConfiguration config)
             {
                 var accountName = config["AzureBlobStorage:AccountName"];
                 var accountKey = config["AzureBlobStorage:AccountKey"];
@@ -33,8 +33,10 @@ namespace JBDH.Services.JobManagement
                 var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
                 await containerClient.CreateIfNotExistsAsync();
 
-                var blobClient = containerClient.GetBlobClient(blobFileName);
-                await blobClient.UploadAsync(inputStream, overwrite: true);
+                var blobClient = new Azure.Storage.Blobs.BlobClient(connectionString, containerName, blobFileName);
+
+                // This will stream from the provided source, internally chunking as needed
+                await blobClient.UploadAsync(source, overwrite: true);
             }
         public static async Task UploadJobsToBlobAsync(string jsonContent, IConfiguration config)
         {
