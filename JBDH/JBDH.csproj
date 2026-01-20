@@ -30,6 +30,7 @@
     <PackageReference Include="NLog" Version="5.0.0" />
     <PackageReference Include="NLog.Config" Version="4.7.15" />
     <PackageReference Include="PdfSharp" Version="6.2.3" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>

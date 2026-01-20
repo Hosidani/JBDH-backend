@@ -195,11 +195,10 @@ builder.Services.AddDistributedMemoryCache();
 // Register application services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseMySQL(connectionString)
-           .LogTo(Console.WriteLine, LogLevel.Information);
+    options.UseMySQL(connectionString);
     if (builder.Environment.IsDevelopment())
     {
-        options.EnableSensitiveDataLogging();
+        //options.EnableSensitiveDataLogging();
     }
 }
 );

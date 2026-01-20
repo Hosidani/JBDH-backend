@@ -5,9 +5,12 @@ using JBDH.Models.Core;
 using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Pomelo.EntityFrameworkCore.MySql.Extensions;
+
 
 using Microsoft.Extensions.Configuration;
-// ...existing code...
 
 namespace JBDH.Services.Core
 {
@@ -138,7 +141,15 @@ namespace JBDH.Services.Core
             {
                 LoggingConfigService.ReturnInfo("Setting up database tables and running ETL pipeline...");
                 //EnsureTablesExist(connection);
-                await EtlPipeline.RunEtlPipelineAsync(jobData, _connectionString, _configuration);
+                    var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                        .UseMySql(
+                            _connectionString,
+                            ServerVersion.AutoDetect(_connectionString),
+                            mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(120)
+                        )   
+                        .Options;
+                    var dbContext = new ApplicationDbContext(options);
+                await EtlPipeline.RunEtlPipelineAsync(jobData, dbContext, _configuration);
                 LoggingConfigService.ReturnInfo("ETL pipeline completed. Syncing Jobs table with EF...");
                 _jobSyncService.SyncJobsFromRaw();
                 LoggingConfigService.ReturnInfo("Jobs table sync completed.");

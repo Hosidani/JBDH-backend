@@ -8,34 +8,11 @@ using JBDH.Services.JobManagement;
 using JBDH.Models.Core;
 using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
-
+using JBDH.Models.Job;
 namespace JBDH.Services.Core
 {
     public class EtlPipeline
     {
-        public static DateTime? ParseDate(string dateStr)
-        {
-            if (string.IsNullOrEmpty(dateStr)) return null;
-            if (dateStr.EndsWith("Z")) dateStr = dateStr[..^1];
-            return DateTime.ParseExact(dateStr, "yyyy-MM-ddTHH:mm:ss", null);
-        }
-
-        public static List<Dictionary<string, object>> ExtractData(string filePath)
-        {
-            LoggingConfigService.ReturnInfo($"Extracting data from {filePath}...");
-            try
-            {
-                var jsonData = File.ReadAllText(filePath);
-                var result = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonData);
-                return result ?? new List<Dictionary<string, object>>();
-            }
-            catch (Exception e)
-            {
-                LoggingConfigService.ReturnError($"Error reading JSON file: {e.Message}");
-                return new List<Dictionary<string, object>>();
-            }
-        }
-
         public static List<Dictionary<string, object>> TransformData(List<Dictionary<string, object>> rawJobs)
         {
             LoggingConfigService.ReturnInfo($"Transforming {rawJobs.Count} jobs...");
@@ -65,6 +42,10 @@ namespace JBDH.Services.Core
 
             foreach (var job in rawJobs)
             {
+                // Skip jobs that are marked as removed
+                if (job.TryGetValue("removed", out var removedVal) && removedVal is bool removed && removed)
+                    continue;
+
                 try
                 {
                     int jobId = -1;
@@ -148,7 +129,7 @@ namespace JBDH.Services.Core
                             postedDate = dt.ToString("yyyy-MM-dd");
                     }
 
-                    var webpageUrl = job.GetValueOrDefault("WebpageUrl")?.ToString() ?? "Unknown URL";
+                    var webpageUrl = job.GetValueOrDefault("webpage_url")?.ToString() ?? "Unknown URL";
 
                     transformed.Add(new Dictionary<string, object>
                     {
@@ -189,14 +170,13 @@ namespace JBDH.Services.Core
                     command.Parameters.AddWithValue("@location", job["location"]);
                     command.Parameters.AddWithValue("@PostedDate", job["PostedDate"]);
                     command.Parameters.AddWithValue("@WebpageUrl", job["WebpageUrl"]);
-
                     try
                     {
                         command.ExecuteNonQuery();
                     }
-                    catch (MySqlException ex)
+                    catch (MySqlException)
                     {
-                        LoggingConfigService.ReturnError($"MySQL error inserting job_id {job["job_id"]}: {ex.Message}");
+                        // Loggning borttagen, endast felhantering
                     }
                 }
                 LoggingConfigService.ReturnInfo("All jobs inserted into rawjobs.");
@@ -211,13 +191,35 @@ namespace JBDH.Services.Core
             }
         }
 
-        public static async Task RunEtlPipelineAsync(List<Dictionary<string, object>> rawData, string connectionString, IConfiguration config)
+        public static void LoadDataEf(List<Dictionary<string, object>> jobs, ApplicationDbContext db)
+        {
+            foreach (var job in jobs)
+            {
+                int jobId = Convert.ToInt32(job["job_id"]);
+                if (!db.RawJobs.Any(j => j.JobId == jobId))
+                {
+                    db.RawJobs.Add(new RawJob
+                    {
+                        JobId = jobId,
+                        Title = job["title"].ToString(),
+                        Description = job["description"].ToString(),
+                        Company = job["company"].ToString(),
+                        Location = job["location"].ToString(),
+                        PostedDate = DateTime.Parse(job["PostedDate"]?.ToString() ?? "1970-01-01"),
+                        WebpageUrl = job["WebpageUrl"].ToString()
+                    });
+                }
+            }
+            db.SaveChanges();
+        }
+
+        public static async Task RunEtlPipelineAsync(List<Dictionary<string, object>> rawData, ApplicationDbContext dbContext, IConfiguration config)
         {
             LoggingConfigService.ReturnInfo("Starting ETL pipeline...");
             var transformedData = TransformData(rawData);
             // Upload pretty-printed jobs to blob storage
             await BlobHelper.UploadJobsToBlobAsync(rawData, config);
-            LoadData(transformedData, connectionString);
+            LoadDataEf(transformedData, dbContext);
             LoggingConfigService.ReturnInfo("ETL pipeline completed.");
         }
     }
