@@ -12,25 +12,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x' # eller 8.0.x om du använder .NET 8
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore JBDH-Functions/JBDH-Functions.csproj
+      - name: Restore dependencies
+        run: dotnet restore JBDH-Functions/JBDH-Functions.csproj
 
-    - name: Build
-      run: dotnet build JBDH-Functions/JBDH-Functions.csproj --configuration Release
+      - name: Build
+        run: dotnet build JBDH-Functions/JBDH-Functions.csproj --configuration Release
 
-    - name: Publish
-      run: dotnet publish JBDH-Functions/JBDH-Functions.csproj --configuration Release --output ./publish
+      - name: Publish
+        run: dotnet publish JBDH-Functions/JBDH-Functions.csproj -c Release -o JBDH-Functions/publish
 
-    - name: Deploy to Azure Functions
-      uses: Azure/functions-action@v1
-      with:
-        app-name: jbdh-job-snapshot # Ditt Azure Function App-namn
-        package: ./publish
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: jbdh-job-snapshot
+          package: JBDH-Functions/publish
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
