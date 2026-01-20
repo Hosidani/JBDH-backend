@@ -27,7 +27,8 @@ namespace JBDH.Services.Core
                 LoggingConfigService.ReturnInfo("[STEP] Starting background job data fetch...");
 
                 LoggingConfigService.ReturnInfo("[STEP] Creating JobStreamService instance...");
-                var jobStreamService = new JobStreamService(_configuration);
+                var logger = _serviceProvider.GetRequiredService<ILogger<JobStreamService>>();
+                var jobStreamService = new JobStreamService(_configuration, logger);
 
                 LoggingConfigService.ReturnInfo("[STEP] Calling RunJobStreamAsync...");
                 var jobData = await jobStreamService.RunJobStreamAsync(Array.Empty<string>());

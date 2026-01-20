@@ -21,12 +21,21 @@ namespace JBDH.Services.JobManagement
 
         public static async Task UploadStreamToBlobAsync(Stream source, IConfiguration config)
         {
+            var connectionString = config["AzureBlobStorage:ConnectionString"];
             var accountName = config["AzureBlobStorage:AccountName"];
             var containerName = config["AzureBlobStorage:ContainerName"];
             var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
 
-            var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
-            var blobServiceClient = new BlobServiceClient(blobUri, new DefaultAzureCredential());
+            BlobServiceClient blobServiceClient;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                blobServiceClient = new BlobServiceClient(connectionString);
+            }
+            else
+            {
+                var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
+                blobServiceClient = new BlobServiceClient(blobUri, new Azure.Identity.DefaultAzureCredential());
+            }
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
             await containerClient.CreateIfNotExistsAsync();
 
@@ -35,12 +44,21 @@ namespace JBDH.Services.JobManagement
         }
         public static async Task UploadJobsToBlobAsync(string jsonContent, IConfiguration config)
         {
+            var connectionString = config["AzureBlobStorage:ConnectionString"];
             var accountName = config["AzureBlobStorage:AccountName"];
             var containerName = config["AzureBlobStorage:ContainerName"];
             var blobFileName = config["AzureBlobStorage:BlobFileName"] ?? "jobs.json";
 
-            var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
-            var blobServiceClient = new BlobServiceClient(blobUri, new DefaultAzureCredential());
+            BlobServiceClient blobServiceClient;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                blobServiceClient = new BlobServiceClient(connectionString);
+            }
+            else
+            {
+                var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
+                blobServiceClient = new BlobServiceClient(blobUri, new Azure.Identity.DefaultAzureCredential());
+            }
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
             await containerClient.CreateIfNotExistsAsync();
 
