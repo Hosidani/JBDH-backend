@@ -15,6 +15,7 @@ namespace JBDH.Services.Core
     public class JobStreamService
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<JobStreamService> _logger;
         private readonly string TimestampFile;
 
         private readonly string BaseUrl = "https://jobstream.api.jobtechdev.se";
@@ -22,9 +23,10 @@ namespace JBDH.Services.Core
         private readonly string SnapshotUrl;
 
 
-        public JobStreamService(IConfiguration configuration)
+        public JobStreamService(IConfiguration configuration, ILogger<JobStreamService> logger)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             TimestampFile = configuration.GetValue<string>("JobStream:TimestampFile") ?? "timestamp.txt";
             BaseUrl = configuration.GetValue<string>("JobStream:BaseUrl") ?? "https://jobstream.api.jobtechdev.se";
             StreamUrl = $"{BaseUrl}/stream";
@@ -148,7 +150,10 @@ namespace JBDH.Services.Core
                 if (jobAds.Count > 0)
                 {
                     var json = JsonSerializer.Serialize(jobAds);
-                    await BlobHelper.UploadJobsToBlobAsync(json, _configuration);
+                    _logger.LogInformation("Json size: {len}", json.Length);
+                    _logger.LogInformation("Jobs count: {count}", jobAds.Count);
+                    LoggingConfigService.ReturnInfo($"Jobs count: {jobAds.Count}");
+                    await BlobHelper.UploadJobsToBlobAsync(jobAds, _configuration);
                     LoggingConfigService.ReturnInfo($"Uploaded {jobAds.Count} jobs to blob storage (incremental update).");
                 }
             }
