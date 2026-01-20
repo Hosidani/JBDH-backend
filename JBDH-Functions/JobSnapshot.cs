@@ -6,6 +6,7 @@ using JBDH.Services.Core;
 
 namespace JBDH.Function;
 
+// Azure Function to run JobSnapshot on a timer trigger
 public class JobSnapshot
 {
     private readonly ILogger _logger;
