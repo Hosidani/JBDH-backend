@@ -35,18 +35,6 @@ jobs:
           zip -r ../functionapp.zip .
           cd ../..
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-
-      - name: Set WEBSITE_RUN_FROM_PACKAGE
-        run: |
-          az functionapp config appsettings set \
-            --name jbdh-job-snapshot \
-            --resource-group rg-loghouse-prod-swedencentral-001 \
-            --settings WEBSITE_RUN_FROM_PACKAGE=1
-
       - name: Deploy to Azure Functions
         uses: azure/webapps-deploy@v2
         with:
