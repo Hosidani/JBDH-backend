@@ -29,12 +29,25 @@ jobs:
       - name: Publish
         run: dotnet publish JBDH-Functions/JBDH-Functions.csproj -c Release -o JBDH-Functions/publish
 
-      - name: List publish output
-        run: ls -la JBDH-Functions/publish
+      - name: Zip publish folder
+        run: |
+          cd JBDH-Functions/publish
+          zip -r ../functionapp.zip .
+          cd ../..
+
+      - name: Set WEBSITE_RUN_FROM_PACKAGE
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az functionapp config appsettings set \
+              --name jbdh-job-snapshot \
+              --resource-group <YOUR_RESOURCE_GROUP> \
+              --settings WEBSITE_RUN_FROM_PACKAGE=1
 
       - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
+        uses: azure/webapps-deploy@v2
         with:
           app-name: jbdh-job-snapshot
-          package: JBDH-Functions/publish
+          package: JBDH-Functions/functionapp.zip
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
