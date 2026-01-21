@@ -42,7 +42,7 @@ jobs:
           inlineScript: |
             az functionapp config appsettings set \
               --name jbdh-job-snapshot \
-              --resource-group <YOUR_RESOURCE_GROUP> \
+              --resource-group rg-loghouse-prod-swedencentral-001 \
               --settings WEBSITE_RUN_FROM_PACKAGE=1
 
       - name: Deploy to Azure Functions
