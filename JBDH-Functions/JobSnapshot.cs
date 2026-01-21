@@ -1,28 +1,31 @@
 using System;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using JBDH.Services.Core;
 
-namespace JBDH.Function;
-
-// Azure Function to run JobSnapshot on a timer trigger
 public class JobSnapshot
 {
-    private readonly ILogger _logger;
-    private readonly JobStreamService _jobService;
-
-    public JobSnapshot(ILoggerFactory loggerFactory, JobStreamService jobService)
-    {
-        _logger = loggerFactory.CreateLogger<JobSnapshot>();
-        _jobService = jobService;
-    }
-
     [Function("JobSnapshot")]
-    public async Task Run([TimerTrigger("0 2 * * * *")] TimerInfo myTimer)
+    public async Task Run([TimerTrigger("* * * * * *")] TimerInfo myTimer, FunctionContext context)
     {
-        _logger.LogInformation("JobSnapshot function started at: {time}", DateTime.Now);
-        await _jobService.RunJobStreamAsync(Array.Empty<string>());
-        _logger.LogInformation("JobSnapshot function completed at: {time}", DateTime.Now);
+        var log = context.GetLogger("JobSnapshot");
+
+        string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+        string containerName = "jobs";
+        string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        string blobName = environment == "Development" ? "jobs_test.json" : "jobs.json";
+        string content = "Hello from Azure Function! If sats is working live";
+
+        var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+        var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+        await containerClient.CreateIfNotExistsAsync();
+        var blobClient = containerClient.GetBlobClient(blobName);
+        using var ms = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+        await blobClient.UploadAsync(ms, overwrite: true);
+
+        log.LogInformation("Blob uploaded!");
     }
 }
