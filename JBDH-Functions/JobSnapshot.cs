@@ -6,7 +6,7 @@ using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-// This Azure Function uploads a blob to Azure Blob Storage every minute...
+// This Azure Function uploads a blob to Azure Blob Storage every minute....
 public class JobSnapshot
 {
     [Function("JobSnapshot")]

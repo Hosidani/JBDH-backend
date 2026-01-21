@@ -29,8 +29,9 @@ jobs:
       - name: Publish
         run: dotnet publish JBDH-Functions/JBDH-Functions.csproj -c Release -o JBDH-Functions/publish
 
-      - name: Zip publish folder
+      - name: Prepare deployment package (include host.json)
         run: |
+          cp JBDH-Functions/host.json JBDH-Functions/publish/
           cd JBDH-Functions/publish
           zip -r ../functionapp.zip .
           cd ../..
