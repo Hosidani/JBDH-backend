@@ -25,10 +25,27 @@ namespace JBDH.Services.Core
 
         public JobStreamService(IConfiguration configuration, ILogger<JobStreamService> logger)
         {
+            if (configuration == null)
+                Console.WriteLine("JobStreamService: IConfiguration is NULL!");
+            if (logger == null)
+                Console.WriteLine("JobStreamService: ILogger is NULL!");
+
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             TimestampFile = configuration.GetValue<string>("JobStream:TimestampFile") ?? "timestamp.txt";
-            BaseUrl = configuration.GetValue<string>("JobStream:BaseUrl") ?? "https://jobstream.api.jobtechdev.se";
+
+            // För Azure: använd Backend:BaseUrl om den finns, annars JobStream:BaseUrl, annars default
+            var azureBackendUrl = configuration["Backend:BaseUrl"] ?? configuration["Backend__BaseUrl"];
+            if (!string.IsNullOrEmpty(azureBackendUrl))
+            {
+                BaseUrl = azureBackendUrl;
+                Console.WriteLine($"JobStreamService: Using Backend:BaseUrl from Azure config: {BaseUrl}");
+            }
+            else
+            {
+                BaseUrl = configuration.GetValue<string>("JobStream:BaseUrl") ?? "https://jobstream.api.jobtechdev.se";
+                Console.WriteLine($"JobStreamService: Using JobStream:BaseUrl: {BaseUrl}");
+            }
             StreamUrl = $"{BaseUrl}/stream";
             SnapshotUrl = $"{BaseUrl}/snapshot";
         }
