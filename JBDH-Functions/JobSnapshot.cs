@@ -24,7 +24,7 @@ public class JobSnapshot
         _logger.LogInformation("JobSnapshot function completed at: {time}", DateTime.UtcNow);
     }
 
-    // HTTP-triggerad function för manuell körning
+    // HTTP-triggerad function för manuell körning.
     [Function("JobSnapshotHttp")] // Namn på functionen i Azure
     public async Task<HttpResponseData> RunHttp(
         [HttpTrigger(AuthorizationLevel.Function, "post", "get")] HttpRequestData req)
