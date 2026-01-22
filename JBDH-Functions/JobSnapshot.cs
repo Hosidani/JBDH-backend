@@ -26,7 +26,8 @@ public class JobSnapshot
         string containerName = "jobs";
         string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         string blobName = environment == "Development" ? "jobs_test.json" : "jobs.json";
-        string content = "Hello from Azure Function! If sats is working live";
+        string content = $"Hello from Azure Function!\nTimestamp: {DateTime.UtcNow:O}";
+        log.LogInformation($"Uploading content: {content}");
 
         try
         {
