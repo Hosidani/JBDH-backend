@@ -28,6 +28,7 @@
     
     <!-- ENDAST MySQL EF 8.0.x -->
     <PackageReference Include="MySql.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
     
     <!-- Övriga OK -->
     <PackageReference Include="Microsoft.Playwright" Version="1.52.0" />
