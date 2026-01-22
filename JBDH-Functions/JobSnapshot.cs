@@ -19,9 +19,21 @@ public class JobSnapshot
     [Function("JobSnapshot")]
     public async Task Run([TimerTrigger("0 */10 * * * *")] TimerInfo myTimer)
     {
-        _logger.LogInformation("JobSnapshot function started at: {time}", DateTime.UtcNow);
+        var startTime = DateTime.UtcNow;
+        _logger.LogInformation("🔥 STEG 1: Function startad! ({time})", startTime);
+
+        _logger.LogInformation("🔥 STEG 2: Kallar Snapshot API...");
+        var apiStart = DateTime.UtcNow;
         await _jobService.DownloadFullJobSnapshotAsync("");
-        _logger.LogInformation("JobSnapshot function completed at: {time}", DateTime.UtcNow);
+        var apiEnd = DateTime.UtcNow;
+        var apiDuration = apiEnd - apiStart;
+        _logger.LogInformation("🔥 STEG 3: API svarade efter {duration}", apiDuration.ToString(@"hh\:mm\:ss"));
+
+        _logger.LogInformation("🔥 STEG 4: Upload till Blob...");
+        // Om du har separat kod för upload, logga tiden här
+
+        var totalDuration = apiEnd - startTime;
+        _logger.LogInformation("✅ TOTALTID: {duration} för 460MB!", totalDuration.ToString(@"hh\:mm\:ss"));
     }
 
     // HTTP-triggerad function för manuell körning.
