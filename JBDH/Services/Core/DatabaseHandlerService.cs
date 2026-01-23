@@ -6,8 +6,6 @@ using JBDH.Services.Configuration;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Pomelo.EntityFrameworkCore.MySql.Extensions;
 
 
 using Microsoft.Extensions.Configuration;
@@ -142,11 +140,10 @@ namespace JBDH.Services.Core
                 LoggingConfigService.ReturnInfo("Setting up database tables and running ETL pipeline...");
                 //EnsureTablesExist(connection);
                     var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                        .UseMySql(
+                        .UseMySQL(
                             _connectionString,
-                            ServerVersion.AutoDetect(_connectionString),
                             mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(120)
-                        )   
+                        )
                         .Options;
                     var dbContext = new ApplicationDbContext(options);
                 await EtlPipeline.RunEtlPipelineAsync(jobData, dbContext, _configuration);
