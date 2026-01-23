@@ -1,47 +1,51 @@
+using Microsoft.Azure.Functions.Worker.Http;
 using System;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using JBDH.Services.Core;
 
-// This Azure Function uploads a blob to Azure Blob Storage every minute...
 public class JobSnapshot
 {
-    [Function("JobSnapshot")]
-    public async Task Run([TimerTrigger("* * * * * *")] TimerInfo myTimer, FunctionContext context)
+    private readonly ILogger<JobSnapshot> _logger;
+    private readonly JobStreamService _jobService;
+
+    public JobSnapshot(ILogger<JobSnapshot> logger, JobStreamService jobService)
     {
-        var log = context.GetLogger("JobSnapshot");
-        log.LogInformation($"Function started at {DateTime.UtcNow:O}");
+        _logger = logger;
+        _jobService = jobService;
+    }
 
-        string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            log.LogError("AzureWebJobsStorage connection string is missing or empty!");
-            return;
-        }
-        log.LogInformation($"Connection string starts with: {connectionString?.Substring(0, Math.Min(30, connectionString.Length))}...");
+    [Function("JobSnapshot")]
+    public async Task Run([TimerTrigger("0 */10 * * * *")] TimerInfo myTimer)
+    {
+        var startTime = DateTime.UtcNow;
+        _logger.LogInformation("🔥 STEG 1: Function startad! ({time})", startTime);
 
-        string containerName = "jobs";
-        string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-        string blobName = environment == "Development" ? "jobs_test.json" : "jobs.json";
-        string content = $"Hello from Azure Function!\nTimestamp: {DateTime.UtcNow:O}";
-        log.LogInformation($"Uploading content: {content}");
+        _logger.LogInformation("🔥 STEG 2: Kallar Snapshot API...");
+        var apiStart = DateTime.UtcNow;
+        await _jobService.DownloadFullJobSnapshotAsync("");
+        var apiEnd = DateTime.UtcNow;
+        var apiDuration = apiEnd - apiStart;
+        _logger.LogInformation("🔥 STEG 3: API svarade efter {duration}", apiDuration.ToString(@"hh\:mm\:ss"));
 
-        try
-        {
-            var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
-            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-            await containerClient.CreateIfNotExistsAsync();
-            var blobClient = containerClient.GetBlobClient(blobName);
-            using var ms = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
-            await blobClient.UploadAsync(ms, overwrite: true);
-            log.LogInformation($"Blob '{blobName}' uploaded to container '{containerName}'!");
-        }
-        catch (Exception ex)
-        {
-            log.LogError($"Exception during blob upload: {ex.Message}");
-        }
+        _logger.LogInformation("🔥 STEG 4: Upload till Blob...");
+        // Om du har separat kod för upload, logga tiden här
+
+        var totalDuration = apiEnd - startTime;
+        _logger.LogInformation("✅ TOTALTID: {duration} för 460MB!", totalDuration.ToString(@"hh\:mm\:ss"));
+    }
+
+    // HTTP-triggerad function för manuell körning.
+    [Function("JobSnapshotHttp")] // Namn på functionen i Azure
+    public async Task<HttpResponseData> RunHttp(
+        [HttpTrigger(AuthorizationLevel.Function, "post", "get")] HttpRequestData req)
+    {
+        _logger.LogInformation("JobSnapshot HTTP-trigger started at: {time}", DateTime.UtcNow);
+        await _jobService.DownloadFullJobSnapshotAsync("");
+        _logger.LogInformation("JobSnapshot HTTP-trigger completed at: {time}", DateTime.UtcNow);
+        var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
+        await response.WriteStringAsync("JobSnapshot HTTP-trigger completed.");
+        return response;
     }
 }
