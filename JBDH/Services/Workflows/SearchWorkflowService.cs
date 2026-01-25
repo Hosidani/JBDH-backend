@@ -39,17 +39,15 @@ namespace JBDH.Services.Workflows
             CVAnalysisResult cvAI = null;
             if (userId.HasValue)
             {
+                var jobIds = results.Where(r => r.Job != null).Select(r => r.Job.JobId).ToList();
+                var appliedJobIds = await _context.JobApplications
+                    .Where(a => jobIds.Contains(a.JobId) && a.UserId == userId.Value)
+                    .Select(a => a.JobId)
+                    .ToListAsync();
+
                 foreach (var item in results)
                 {
-                    if (item.Job != null)
-                    {
-                        item.HasApplied = await _context.JobApplications
-                            .AnyAsync(a => a.JobId == item.Job.JobId && a.UserId == userId.Value);
-                    }
-                    else
-                    {
-                        item.HasApplied = false;
-                    }
+                    item.HasApplied = item.Job != null && appliedJobIds.Contains(item.Job.JobId);
                 }
 
                 // Get user's AI response for CV
