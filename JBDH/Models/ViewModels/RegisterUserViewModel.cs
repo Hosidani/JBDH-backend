@@ -32,7 +32,7 @@ namespace JBDH.Models.ViewModels
         public string? Location { get; set; }
         public IFormFile? CVFile { get; set; }
         public bool Open { get; set; }
-        public string PreferredLanguage { get; set; } = "en"; // Lägg till denna rad
+        public string PreferredLanguage { get; set; } = "en";
         public List<string> AvailableRoles { get; set; } = new List<string> { "Manager", "Recruiter" };
         public List<string> SelectedRoles { get; set; } = new List<string>();
     }
