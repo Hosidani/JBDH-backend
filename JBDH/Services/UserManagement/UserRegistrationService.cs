@@ -118,6 +118,20 @@ namespace JBDH.Services.UserManagement
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
+        // Create a default Account for the new user
+        var account = new Account
+        {
+            UserId = user.Id,
+            AccountName = user.Name ?? user.Email,
+            AccountEmail = user.Email,
+            AccountPhone = null,
+            PreferredLanguage = "en",
+            AccountType = AccountType.Basic,
+            AcceptedTermsAndConditions = false
+        };
+        _context.Accounts.Add(account);
+        await _context.SaveChangesAsync();
+
         // Generate and save verification token
         var token = Guid.NewGuid().ToString();
         var emailVerificationToken = new EmailVerificationToken

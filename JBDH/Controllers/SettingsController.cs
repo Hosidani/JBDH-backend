@@ -8,6 +8,9 @@ using JBDH.Swagger;
 using Microsoft.AspNetCore.Authentication;
 using JBDH.Models.DTOs;
 using JBDH.Helpers;
+using JBDH.Models.User;
+using JBDH.Models.Organisation;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Controllers
 {
@@ -153,6 +156,260 @@ namespace JBDH.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = "Password changed successfully." });
+            }
+
+            [HttpGet("getaccountsettings")]
+            public async Task<IActionResult> GetAccountSettings()
+            {
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                var account = await _context.Accounts
+                    .Include(a => a.User)
+                        .ThenInclude(u => u.Roles)
+                    .FirstOrDefaultAsync(a => a.UserId == user.Id);
+
+                if (account == null)
+                    return NotFound(new { message = "No account found for user." });
+
+                if (account.IsTerminated)
+                    return Unauthorized(new { message = "Account has been terminated." });
+
+                var roles = account.User.Roles?.Select(r => r.Role).ToList() ?? new List<string>();
+
+                // Get organisations where user is manager OR member
+                var organisations = new List<OrganisationDto>();
+                
+                // Find organisations where user is manager (in Managers collection)
+                var managedOrgs = await _context.Organisations
+                    .Where(org => org.Managers.Any(m => m.Id == user.Id))
+                    .ToListAsync();
+                
+                organisations.AddRange(managedOrgs.Select(org => new OrganisationDto
+                {
+                    Id = org.Id,
+                    Name = org.Name,
+                    Role = "Manager"
+                }));
+
+                // Find organisations where user is member (client evaluation needed for JSON)
+                var allOrgs = await _context.Organisations.ToListAsync();
+                var memberOrgs = allOrgs.Where(org => org.Users.Contains(user.Id) && 
+                                                      !managedOrgs.Any(m => m.Id == org.Id)).ToList();
+                
+                organisations.AddRange(memberOrgs.Select(org => new OrganisationDto
+                {
+                    Id = org.Id,
+                    Name = org.Name,
+                    Role = "Member"
+                }));
+
+                var accountDto = new AccountDto
+                {
+                    Id = account.Id,
+                    UserId = account.UserId,
+                    AccountName = account.AccountName,
+                    AccountEmail = account.AccountEmail,
+                    AccountPhone = account.AccountPhone,
+                    PreferredLanguage = account.PreferredLanguage,
+                    AccountType = account.AccountType,
+                    IsTerminated = account.IsTerminated,
+                    TerminatedAt = account.TerminatedAt,
+                    AcceptedTermsAndConditions = account.AcceptedTermsAndConditions,
+                    TermsAcceptedAt = account.TermsAcceptedAt,
+                    CreatedAt = account.CreatedAt,
+                    UpdatedAt = account.UpdatedAt,
+                    Roles = roles,
+                    Organisations = organisations
+                };
+
+                return Ok(accountDto);
+            }
+
+            [HttpPut("updateaccountsettings")]
+            public async Task<IActionResult> UpdateAccountSettings([FromBody] AccountDto dto)
+            {
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                var account = await _context.Accounts
+                    .Include(a => a.User)
+                        .ThenInclude(u => u.Roles)
+                    .Include(a => a.User)
+                        .ThenInclude(u => u.ManagedOrganisations)
+                    .FirstOrDefaultAsync(a => a.UserId == user.Id);
+
+                if (account == null)
+                {
+                    // Create a new account if none exists
+                    account = new Account
+                    {
+                        UserId = user.Id,
+                        AccountName = dto.AccountName ?? user.Name ?? user.Email,
+                        AccountEmail = dto.AccountEmail ?? user.Email,
+                        AccountPhone = dto.AccountPhone,
+                        PreferredLanguage = dto.PreferredLanguage,
+                        AccountType = dto.AccountType,
+                        AcceptedTermsAndConditions = dto.AcceptedTermsAndConditions,
+                        TermsAcceptedAt = dto.AcceptedTermsAndConditions ? DateTime.UtcNow : null
+                    };
+                    _context.Accounts.Add(account);
+                }
+                else
+                {
+                    // Check if account is terminated
+                    if (account.IsTerminated)
+                        return Unauthorized(new { message = "Cannot update terminated account." });
+
+                    // Update existing account basic fields
+                    if (!string.IsNullOrWhiteSpace(dto.AccountName))
+                        account.AccountName = dto.AccountName;
+                    if (!string.IsNullOrWhiteSpace(dto.AccountEmail))
+                        account.AccountEmail = dto.AccountEmail;
+                    if (!string.IsNullOrWhiteSpace(dto.AccountPhone))
+                        account.AccountPhone = dto.AccountPhone;
+                    if (!string.IsNullOrWhiteSpace(dto.PreferredLanguage))
+                        account.PreferredLanguage = dto.PreferredLanguage;
+                    
+                    account.AccountType = dto.AccountType;
+                    
+                    // Handle terms acceptance
+                    if (dto.AcceptedTermsAndConditions && !account.AcceptedTermsAndConditions)
+                    {
+                        account.AcceptedTermsAndConditions = true;
+                        account.TermsAcceptedAt = DateTime.UtcNow;
+                    }
+                    
+                    account.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Handle role updates
+                if (dto.UpdateRoles != null)
+                {
+                    var validRoles = new[] { "User", "Manager", "Recruiter", "Sales" };
+                    var invalidRoles = dto.UpdateRoles.Where(r => !validRoles.Contains(r)).ToList();
+                    if (invalidRoles.Any())
+                        return BadRequest(new { message = $"Invalid roles: {string.Join(", ", invalidRoles)}" });
+
+                    // Remove existing roles
+                    var existingRoles = _context.UserRoleAssignments.Where(r => r.UserId == user.Id);
+                    _context.UserRoleAssignments.RemoveRange(existingRoles);
+
+                    // Add new roles
+                    foreach (var role in dto.UpdateRoles.Distinct())
+                    {
+                        _context.UserRoleAssignments.Add(new UserRoleAssignment
+                        {
+                            UserId = user.Id,
+                            User = user,
+                            Role = role
+                        });
+                    }
+                }
+
+                // Handle organisation joins
+                if (dto.JoinOrganisationIds != null)
+                {
+                    foreach (var orgId in dto.JoinOrganisationIds.Distinct())
+                    {
+                        var organisation = await _context.Organisations.FindAsync(orgId);
+                        if (organisation != null && !organisation.Users.Contains(user.Id))
+                        {
+                            organisation.Users.Add(user.Id);
+                        }
+                    }
+                }
+
+                // Handle organisation leaves
+                if (dto.LeaveOrganisationIds != null)
+                {
+                    foreach (var orgId in dto.LeaveOrganisationIds.Distinct())
+                    {
+                        var organisation = await _context.Organisations.FindAsync(orgId);
+                        if (organisation != null)
+                        {
+                            // Remove from members
+                            if (organisation.Users.Contains(user.Id))
+                                organisation.Users.Remove(user.Id);
+                            
+                            // Remove from managers if applicable
+                            var managedOrg = user.ManagedOrganisations?.FirstOrDefault(o => o.Id == orgId);
+                            if (managedOrg != null)
+                                user.ManagedOrganisations?.Remove(managedOrg);
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Reload data to get updated relationships
+                account = await _context.Accounts
+                    .Include(a => a.User)
+                        .ThenInclude(u => u.Roles)
+                    .Include(a => a.User)
+                        .ThenInclude(u => u.ManagedOrganisations)
+                    .FirstOrDefaultAsync(a => a.UserId == user.Id);
+
+                // Get updated roles
+                var roles = account!.User.Roles?.Select(r => r.Role).ToList() ?? new List<string>();
+
+                // Get updated organisations
+                var organisations = new List<OrganisationDto>();
+                if (account.User.ManagedOrganisations?.Any() == true)
+                {
+                    organisations.AddRange(account.User.ManagedOrganisations.Select(org => new OrganisationDto
+                    {
+                        Id = org.Id,
+                        Name = org.Name,
+                        Role = "Manager"
+                    }));
+                }
+
+                var updatedDto = new AccountDto
+                {
+                    Id = account.Id,
+                    UserId = account.UserId,
+                    AccountName = account.AccountName,
+                    AccountEmail = account.AccountEmail,
+                    AccountPhone = account.AccountPhone,
+                    PreferredLanguage = account.PreferredLanguage,
+                    AccountType = account.AccountType,
+                    IsTerminated = account.IsTerminated,
+                    TerminatedAt = account.TerminatedAt,
+                    AcceptedTermsAndConditions = account.AcceptedTermsAndConditions,
+                    TermsAcceptedAt = account.TermsAcceptedAt,
+                    CreatedAt = account.CreatedAt,
+                    UpdatedAt = account.UpdatedAt,
+                    Roles = roles,
+                    Organisations = organisations
+                };
+
+                return Ok(updatedDto);
+            }
+
+            [HttpPost("terminateaccount")]
+            public async Task<IActionResult> TerminateAccount()
+            {
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                var account = await _context.Accounts
+                    .FirstOrDefaultAsync(a => a.UserId == user.Id && !a.IsTerminated);
+
+                if (account == null)
+                    return NotFound(new { message = "No active account found for user." });
+
+                // Terminate the account (soft delete)
+                account.IsTerminated = true;
+                account.TerminatedAt = DateTime.UtcNow;
+                account.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Account terminated" });
             }            
             
             [HttpDelete("deletemyuser")]
@@ -166,6 +423,39 @@ namespace JBDH.Controllers
                 await _context.SaveChangesAsync();
                 await HttpContext.SignOutAsync("CookieAuth");
                 return this.SetSuccessAndRedirect("Your account has been deleted.", "Index", new { controller = "Home" });
+            }
+
+            [HttpGet("getavailableorganisations")]
+            public async Task<IActionResult> GetAvailableOrganisations()
+            {
+                var user = await _userPropertiesService.GetCurrentUserAsync();
+                if (user == null)
+                    return Unauthorized();
+
+                // Get user's current organisation IDs (both managed and member)
+                var currentOrgIds = new List<int>();
+                
+                var userWithOrgs = await _context.Users
+                    .Include(u => u.ManagedOrganisations)
+                    .FirstOrDefaultAsync(u => u.Id == user.Id);
+                
+                if (userWithOrgs?.ManagedOrganisations != null)
+                    currentOrgIds.AddRange(userWithOrgs.ManagedOrganisations.Select(o => o.Id));
+
+                // TODO: Add member organisations when Owner/OwnerId relationship is implemented
+                
+                // Return organisations user is NOT already member of
+                var availableOrgs = await _context.Organisations
+                    .Where(org => !currentOrgIds.Contains(org.Id))
+                    .Select(org => new OrganisationDto
+                    {
+                        Id = org.Id,
+                        Name = org.Name,
+                        Role = "" // Tom för available orgs
+                    })
+                    .ToListAsync();
+
+                return Ok(availableOrgs);
             }
         }
     }
