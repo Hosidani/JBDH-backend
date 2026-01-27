@@ -81,6 +81,9 @@ namespace JBDH.Models.User
         public int? OwnerId { get; set; }
         public string? AboutMe { get; set; }
 
+        // Navigation property to Accounts (1-to-many relationship)
+        public ICollection<Account> Accounts { get; set; } = new List<Account>();
+
         [Required]
         public DateTime CreatedAt { get; set; }
 

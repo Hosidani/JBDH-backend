@@ -504,6 +504,72 @@ namespace JBDH.Migrations
                     b.ToTable("Organisations");
                 });
 
+            modelBuilder.Entity("JBDH.Models.User.Account", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("AcceptedTermsAndConditions")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("AccountEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("AccountPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("AccountType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("Basic");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsTerminated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("PreferredLanguage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("en");
+
+                    b.Property<DateTime?>("TerminatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("TermsAcceptedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Accounts");
+                });
+
             modelBuilder.Entity("JBDH.Models.User.User", b =>
                 {
                     b.Property<int>("Id")
@@ -829,6 +895,17 @@ namespace JBDH.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("JBDH.Models.User.Account", b =>
+                {
+                    b.HasOne("JBDH.Models.User.User", "User")
+                        .WithMany("Accounts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("JBDH.Models.User.User", b =>
                 {
                     b.HasOne("JBDH.Models.User.User", "Owner")
@@ -893,6 +970,8 @@ namespace JBDH.Migrations
             modelBuilder.Entity("JBDH.Models.User.User", b =>
                 {
                     b.Navigation("AIResponses");
+
+                    b.Navigation("Accounts");
 
                     b.Navigation("DataFlows");
 

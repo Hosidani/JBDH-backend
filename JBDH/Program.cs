@@ -28,6 +28,7 @@ using MySql.Data.MySqlClient;
 using MySql.EntityFrameworkCore.Extensions;
 using JBDH.Services.BoardDataService;
 using JBDH.Services.ListService;
+using System.Text.Json.Serialization;  // Lägg till detta högst upp
 
 // Ensure logging is configured for the entire application
 JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
@@ -45,7 +46,11 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new Exception("Database connection string 'DefaultConnection' is missing or empty.");
 
 // Add services to the container **before** calling builder.Build
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 // Swagger / OpenAPI (only register in Development)
 if (builder.Environment.IsDevelopment())
 {
@@ -181,6 +186,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:5173",
+            "http://localhost:5174",  
             "https://victorious-bay-00a810703.3.azurestaticapps.net"
         )
         .AllowAnyHeader()

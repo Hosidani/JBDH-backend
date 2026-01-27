@@ -21,6 +21,8 @@ namespace JBDH.Models.Core
 
         public DbSet<JBDH.Models.User.User> Users { get; set; }
 
+        public DbSet<Account> Accounts { get; set; }
+
         public DbSet<Recruiter> Recruiters { get; set; }
 
         public DbSet<FriendshipModel> Friendships { get; set; }
@@ -94,6 +96,47 @@ namespace JBDH.Models.Core
 
                 entity.Property(u => u.Id)
                     .ValueGeneratedOnAdd();
+            });
+
+            // Configure the Account table
+            modelBuilder.Entity<Account>(entity =>
+            {
+                entity.HasKey(a => a.Id); // Primary key
+
+                entity.Property(a => a.AccountName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(a => a.AccountEmail)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(a => a.AccountPhone)
+                    .HasMaxLength(20);
+
+                entity.Property(a => a.PreferredLanguage)
+                    .HasMaxLength(10)
+                    .HasDefaultValue("en");
+
+                entity.Property(a => a.AccountType)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .HasDefaultValue(AccountType.Basic);
+
+                entity.Property(a => a.IsTerminated)
+                    .HasDefaultValue(false);
+
+                entity.Property(a => a.AcceptedTermsAndConditions)
+                    .HasDefaultValue(false);
+
+                entity.Property(a => a.CreatedAt)
+                    .IsRequired();
+
+                // Configure relationship with User
+                entity.HasOne(a => a.User)
+                    .WithMany(u => u.Accounts)
+                    .HasForeignKey(a => a.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configure EmailVerificationToken
