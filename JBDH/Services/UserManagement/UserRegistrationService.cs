@@ -125,7 +125,7 @@ namespace JBDH.Services.UserManagement
             AccountName = user.Name ?? user.Email,
             AccountEmail = user.Email,
             AccountPhone = null,
-            PreferredLanguage = "en",
+            PreferredLanguage = model.PreferredLanguage ?? "en",
             AccountType = AccountType.Basic,
             AcceptedTermsAndConditions = false
         };
