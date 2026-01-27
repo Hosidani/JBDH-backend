@@ -26,12 +26,13 @@ namespace JBDH.Models.ViewModels
     public class RegisterUserViewModel
     {
         // Decide which properties are required
-    public string Password { get; set; } = string.Empty;
-    public string ConfirmPassword { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string? Location { get; set; }
-    public IFormFile? CVFile { get; set; }
+        public string Password { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Location { get; set; }
+        public IFormFile? CVFile { get; set; }
         public bool Open { get; set; }
+        public string PreferredLanguage { get; set; } = "en";
         public List<string> AvailableRoles { get; set; } = new List<string> { "Manager", "Recruiter" };
         public List<string> SelectedRoles { get; set; } = new List<string>();
     }

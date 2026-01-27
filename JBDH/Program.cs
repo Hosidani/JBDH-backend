@@ -28,7 +28,7 @@ using MySql.Data.MySqlClient;
 using MySql.EntityFrameworkCore.Extensions;
 using JBDH.Services.BoardDataService;
 using JBDH.Services.ListService;
-using System.Text.Json.Serialization;  // Lägg till detta högst upp
+using System.Text.Json.Serialization;
 
 // Ensure logging is configured for the entire application
 JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
