@@ -8,7 +8,7 @@ using JBDH.Models.Authentication;
 using JBDH.Models.Notifications;
 using JBDH.Models.Organisation;
 using JBDH.Models.Kanban;
-using JBDH.Models.Messaging; // <-- Add this at the top with your other usings
+using JBDH.Models.Messaging; 
 
 namespace JBDH.Models.Core
 {
@@ -29,7 +29,7 @@ namespace JBDH.Models.Core
 
         public DbSet<JBDH.Models.Organisation.Organisation> Organisations { get; set; }
 
-        public DbSet<RawJob> RawJobs { get; set; } // For rawjobs managed by EF
+        public DbSet<RawJob> RawJobs { get; set; } 
 
         public DbSet<JBDH.Models.Job.Job> Jobs { get; set; }
 
@@ -53,16 +53,17 @@ namespace JBDH.Models.Core
         public DbSet<JBDH.Models.Kanban.BoardMembership> BoardMemberships { get; set; }
         public DbSet<JBDH.Models.Kanban.Organization> Organizations { get; set; }
 
-        public DbSet<Message> Messages { get; set; } // <-- Add this with your other DbSets
+        public DbSet<Message> Messages { get; set; } 
         public DbSet<AIUserCourseProposal> AIUserCourseProposals { get; set; }
-
+        public DbSet<JBDH.Models.Job.SavedJob> SavedJobs { get; set; }
+        public DbSet<JBDH.Models.Job.NotInterestedJob> NotInterestedJobs { get; set; } 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<JBDH.Models.Job.Job>().ToTable("Jobs");
             modelBuilder.Entity<RawJob>().ToTable("rawjobs");
             modelBuilder.Entity<JBDH.Models.User.User>()
-                .HasDiscriminator<string>("Role") // Use the "Role" property to distinguish types
+                .HasDiscriminator<string>("Role") 
                 .HasValue<JBDH.Models.User.User>("User")
                 .HasValue<Manager>("Manager")
                 .HasValue<Recruiter>("Recruiter");
@@ -77,7 +78,7 @@ namespace JBDH.Models.Core
 
                 entity.Property(u => u.Email)
                     .IsRequired()
-                    .HasMaxLength(100); // Required field with max length
+                    .HasMaxLength(100); 
 
                 entity.Property(u => u.Location)
                     .IsRequired(false) // Optional field
@@ -344,6 +345,52 @@ namespace JBDH.Models.Core
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            // Configure SavedJob relationships
+            modelBuilder.Entity<JBDH.Models.Job.SavedJob>(entity =>
+            {
+                entity.HasKey(sj => sj.Id); // Primary key
+
+                entity.Property(sj => sj.Notes)
+                    .HasMaxLength(1000); // Optional field with max length
+
+                entity.Property(sj => sj.SavedAt)
+                    .IsRequired(); // Required field
+
+                // Configure relationship with User
+                entity.HasOne(sj => sj.User)
+                    .WithMany() // User has many SavedJobs
+                    .HasForeignKey(sj => sj.UserId)
+                    .OnDelete(DeleteBehavior.Cascade); // Cascade delete: if User is deleted -> SavedJob is deleted
+
+                // Configure relationship with Job
+                entity.HasOne(sj => sj.Job)
+                    .WithMany() // Job has many SavedJobs
+                    .HasForeignKey(sj => sj.JobId)
+                    .OnDelete(DeleteBehavior.Cascade); // Cascade delete: if Job is deleted -> SavedJob is deleted
+
+                // Add unique constraint to prevent duplicate saves
+                entity.HasIndex(sj => new { sj.UserId, sj.JobId })
+                    .IsUnique();
+            });
+
+            // NotInterestedJob configuration
+            modelBuilder.Entity<NotInterestedJob>()
+                .HasOne(nij => nij.User)
+                .WithMany()
+                .HasForeignKey(nij => nij.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NotInterestedJob>()
+                .HasOne(nij => nij.Job)
+                .WithMany()
+                .HasForeignKey(nij => nij.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint - en användare kan bara markera samma jobb en gång
+            modelBuilder.Entity<NotInterestedJob>()
+                .HasIndex(nij => new { nij.UserId, nij.JobId })
+                .IsUnique();
         }
     }
 }
