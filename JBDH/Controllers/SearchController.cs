@@ -12,10 +12,14 @@ using Microsoft.AspNetCore.Mvc;
 using JBDH.Swagger;
 using JBDH.Helpers;
 using JBDH.Models.User;
+using JBDH.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace JBDH.Controllers
 {
     [IncludeInApi]
+    [Route("api/[controller]")]
+    [ApiController]
     public class SearchController : Controller
     {
         private readonly IUserPropertiesService _userPropertiesService;
@@ -30,6 +34,7 @@ namespace JBDH.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IManageIOService _manageIOService; 
         private readonly IMatchingAlgorithmCVJobService _matchingAlgorithmCVJobService;
+        private readonly ISavedJobService _savedJobService;
 
         public SearchController(
             IUserPropertiesService userPropertiesService,
@@ -43,7 +48,8 @@ namespace JBDH.Controllers
             ISearchWorkflowService searchWorkflowService,
             ApplicationDbContext context,
             IManageIOService manageIOService ,
-            IMatchingAlgorithmCVJobService matchingAlgorithmCVJobService
+            IMatchingAlgorithmCVJobService matchingAlgorithmCVJobService,
+            ISavedJobService savedJobService
         )
         {
             _userPropertiesService = userPropertiesService;
@@ -58,25 +64,62 @@ namespace JBDH.Controllers
             _context = context;
             _manageIOService = manageIOService; 
             _matchingAlgorithmCVJobService = matchingAlgorithmCVJobService;
+            _savedJobService = savedJobService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> SearchForJobs(string description, string location)
+        [HttpGet("SearchForJobs")]
+        public async Task<IActionResult> SearchForJobs(string? description = null, string? location = null)
         {
-            if (string.IsNullOrEmpty(description) && string.IsNullOrEmpty(location))
-            {
-                LoggingConfigService.ReturnError("Both description and location are empty.");
-                return BadRequest(new { error = "Please provide at least a description or a location." });
-            }
+            // Allow empty parameters - will search all jobs if both are empty
 
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int? userId = null;
             if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int parsedId))
                 userId = parsedId;
 
-            var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
+            // Use SearchJobsService to get JobSearchResultViewModel objects
+            var searchResults = await _searchJobsService.SearchJobsAsync(description ?? "", location ?? "");
+            
+            LoggingConfigService.ReturnInfo($"Search returned {searchResults.Count} jobs for description='{description}', location='{location}'");
+            
+            // Filter out not interested jobs for logged in users
+            if (userId.HasValue)
+            {
+                // Get not interested job IDs
+                var notInterestedJobIds = await _context.NotInterestedJobs
+                    .Where(nij => nij.UserId == userId.Value)
+                    .Select(nij => nij.JobId)
+                    .ToListAsync();
+                
+                // Filter out not interested jobs
+                searchResults = searchResults
+                    .Where(sr => !notInterestedJobIds.Contains(sr.Job.JobId))
+                    .ToList();
+                
+                LoggingConfigService.ReturnInfo($"After filtering out {notInterestedJobIds.Count} not interested jobs: {searchResults.Count} jobs remain");
+            }
+            
+            // Convert to JobDetailsDto format for React
+            var jobDetails = new List<JobDetailsDto>();
+            foreach (var searchResult in searchResults)
+            {
+                if (searchResult.Job != null)
+                {
+                    LoggingConfigService.ReturnInfo($"Processing job: {searchResult.Job.JobId}, Title: '{searchResult.Job.Title}', Company: '{searchResult.Job.Company}'");
+                    
+                    var isJobSaved = userId.HasValue ? await _savedJobService.IsJobSavedAsync(userId.Value, searchResult.Job.JobId) : false;
+                    var jobDto = JobDetailsDto.FromJob(searchResult.Job, false, isJobSaved, false, null);
+                    jobDetails.Add(jobDto);
+                }
+                else
+                {
+                    LoggingConfigService.ReturnError("searchResult.Job is null!");
+                }
+            }
+            
+            LoggingConfigService.ReturnInfo($"Returning {jobDetails.Count} JobDetailsDto objects");
 
-            return Ok(results); // Return as JSON for React
+            return Ok(jobDetails); // Return as JobDetailsDto for React
         }
 
         public IActionResult SearchJob()
@@ -156,7 +199,7 @@ namespace JBDH.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchForJobsAndAnalyzeCVAgainstJob(string description, string location)
+        public async Task<IActionResult> SearchForJobsAndAnalyzeCVAgainstJob(string? description = null, string? location = null)
         {
             LoggingConfigService.ReturnInfo("SearchForJobsAndAnalyzeCVAgainstJob called.");
             var user = await _userPropertiesService.GetCurrentUserAsync();
@@ -172,8 +215,8 @@ namespace JBDH.Controllers
             if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int parsedId))
                 userId = parsedId;
 
-            // Use workflow service for search and meta
-            var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description, location, userId);
+            // Use workflow service for search and meta - convert null to empty string
+            var results = await _searchWorkflowService.SearchAndAttachMetaAsync(description ?? "", location ?? "", userId);
             LoggingConfigService.ReturnInfo($"Search results count: {results.Count}");
 
             int matchPercent = 0;

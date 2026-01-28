@@ -128,6 +128,7 @@ builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>(); 
+builder.Services.AddScoped<ISavedJobService, SavedJobService>();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<DataFlowService>();
 builder.Services.AddScoped<ICVAnalysisService, CVAnalysisService>();
@@ -171,9 +172,20 @@ builder.Services.AddAuthentication("CookieAuth")
             context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
         };
-        // Enable cross-origin cookies for production/Azure
-        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-        options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+        
+        // Different cookie settings based on environment
+        if (builder.Environment.IsDevelopment())
+        {
+            // Development - more permissive for localhost
+            options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
+        }
+        else
+        {
+            // Production - secure but may need third-party cookie allowance
+            options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+            options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+        }
     });
 
 // Add authorization
