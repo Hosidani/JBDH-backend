@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using JBDH.Models.AI;
 using JBDH.Services; // <-- Lägg till denna
 using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace JBDH.Controllers
 {
@@ -23,19 +24,22 @@ namespace JBDH.Controllers
         private readonly IJobAIAnalysisService _jobAIAnalysisService;
         private readonly ApplicationDbContext _context;
         private readonly IServiceProvider _serviceProvider;
+        private readonly CancellationTokenSource _globalCancellationTokenSource;
 
         public DevController(
             IApiDescriptionGroupCollectionProvider provider,
             ILogger<DevController> logger,
             IJobAIAnalysisService jobAIAnalysisService,
             ApplicationDbContext context,
-            IServiceProvider serviceProvider) 
+            IServiceProvider serviceProvider,
+            CancellationTokenSource globalCancellationTokenSource) 
         {
             _provider = provider;
             _logger = logger;
             _jobAIAnalysisService = jobAIAnalysisService;
             _context = context;
             _serviceProvider = serviceProvider;
+            _globalCancellationTokenSource = globalCancellationTokenSource;
         }
 
         [HttpGet("apidescriptions")]
@@ -162,12 +166,8 @@ namespace JBDH.Controllers
         [HttpPost("stop-bulk-processing")]
         public IActionResult StopBulkProcessing()
         {
-            var backgroundService = _serviceProvider
-                .GetServices<IHostedService>()
-                .OfType<JobAIAnalysisBackgroundService>()
-                .FirstOrDefault();
-            backgroundService?.StopProcessing();
-            return Ok();
+            _globalCancellationTokenSource.Cancel();
+            return Ok("🛑 Global bulk processing stopped!");
         }
 
         public class BulkProcessRequest
