@@ -58,47 +58,26 @@ namespace JBDH.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("JobAIAnalysisBackgroundService started at: {time}", DateTimeOffset.Now);
-            // Vänta 1 minut innan jobbet startar
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-            _logger.LogInformation("JobAIAnalysisBackgroundService: Delay klar, startar huvudloop vid {time}", DateTimeOffset.Now);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("JobAIAnalysisBackgroundService: Väntar på startkommando vid {time}", DateTimeOffset.Now);
-                lock (_lock)
-                {
-                    while (!_shouldRun && !stoppingToken.IsCancellationRequested)
-                        Monitor.Wait(_lock);
-                    while (_isPaused && !stoppingToken.IsCancellationRequested)
-                    {
-                        _logger.LogInformation("JobAIAnalysisBackgroundService: Paused at {time}", DateTimeOffset.Now);
-                        Monitor.Wait(_lock);
-                }
-                _logger.LogInformation("JobAIAnalysisBackgroundService: Resumed at {time}", DateTimeOffset.Now);
-                }
-                if (stoppingToken.IsCancellationRequested || !_shouldRun)
-                    break;
-
                 try
                 {
-                    using (var scope = _serviceProvider.CreateScope())
-                    {
-                        var jobAIAnalysisService = scope.ServiceProvider.GetRequiredService<IJobAIAnalysisService>();
-                        _logger.LogInformation("JobAIAnalysisBackgroundService: Processing started.");
-                        await jobAIAnalysisService.ProcessAllJobsWithAIAsync(batchSize: 10, delayBetweenBatches: 3000);
-                        _logger.LogInformation("JobAIAnalysisBackgroundService: Processing completed.");
-                    }
+                    using var scope = _serviceProvider.CreateScope();
+                    var globalCts = scope.ServiceProvider.GetRequiredService<CancellationTokenSource>();
+                    var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, globalCts.Token).Token;
+
+                    var service = scope.ServiceProvider.GetRequiredService<IJobAIAnalysisService>();
+                    await service.ProcessAllJobsWithAIAsync(10, 3000, linkedToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogInformation("⏹️ Job analysis cancelled gracefully - service stopping");
+                    break;  // Graceful exit
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "JobAIAnalysisBackgroundService failed: {message}", ex.Message);
-                }
-
-                // Efter körning, vänta på ny start
-                lock (_lock)
-                {
-                    _shouldRun = false;
+                    _logger.LogError(ex, "❌ Job analysis failed - retrying in 5min");
+                    await Task.Delay(300000, stoppingToken);  // 5min retry
                 }
             }
         }

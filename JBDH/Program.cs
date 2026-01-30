@@ -260,7 +260,18 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 
 // Register the JobAIAnalysisBackgroundService
 builder.Services.AddHostedService<JobAIAnalysisBackgroundService>();
+builder.Services.AddSingleton<CancellationTokenSource>(provider =>
+{
+    var cts = new CancellationTokenSource();
+    var lifetime = provider.GetRequiredService<IHostApplicationLifetime>();
+    lifetime.ApplicationStopping.Register(() => cts.Cancel());
+    return cts;
+});
 
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
 
 // Build the application
 var app = builder.Build();
