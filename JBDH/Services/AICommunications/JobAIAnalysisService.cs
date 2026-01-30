@@ -9,10 +9,13 @@ using JBDH.Models.Core;
 using JBDH.Models.User;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Polly;
+using Polly.Extensions.Http;
+using System.Net;
+using System.Threading;
 
 namespace JBDH.Services.AICommunications
 {
-
     public class JobAIAnalysisService : IJobAIAnalysisService
     {
         private readonly IUserPropertiesService _userPropertiesService;
@@ -23,6 +26,10 @@ namespace JBDH.Services.AICommunications
         private readonly ILogger<JobAIAnalysisService> _logger;
         private static readonly AIConfig AIConfig = new AIConfig();
         private readonly ApplicationDbContext _context;
+        
+        // SemaphoreSlim för att begränsa samtidiga anrop
+        private readonly SemaphoreSlim _concurrencySemaphore;
+        private readonly int _maxConcurrency;
 
         public JobAIAnalysisService(
             IUserPropertiesService userPropertiesService,
@@ -40,7 +47,39 @@ namespace JBDH.Services.AICommunications
             _aiApiClient = aiApiClient;
             _textChunkingService = textChunkingService;
             _logger = logger;
+            
+            // Begränsa till 3 samtidiga anrop för att inte överbelasta databas/nätverk
+            _maxConcurrency = 3;
+            _concurrencySemaphore = new SemaphoreSlim(_maxConcurrency, _maxConcurrency);
         }
+
+        // Polly Retry Policy specifikt för DeepSeek 429-fel
+        private static readonly IAsyncPolicy<HttpResponseMessage> DeepSeekRetryPolicy = Policy
+            .Handle<HttpRequestException>()
+            .Or<TaskCanceledException>()
+            .OrResult<HttpResponseMessage>(r => 
+                r.StatusCode == HttpStatusCode.TooManyRequests || // 429
+                r.StatusCode == HttpStatusCode.ServiceUnavailable || // 503
+                r.StatusCode == HttpStatusCode.BadGateway || // 502
+                r.StatusCode == HttpStatusCode.InternalServerError) // 500
+            .WaitAndRetryAsync(
+                retryCount: 5,
+                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000)), // Exponential backoff + jitter
+                onRetry: (outcome, timespan, retryCount, context) =>
+                {
+                    var logger = context.GetLogger();
+                    if (outcome.Exception != null)
+                    {
+                        logger?.LogWarning($"Retry {retryCount} for DeepSeek API after {timespan}s due to: {outcome.Exception.Message}");
+                    }
+                    else if (outcome.Result != null)
+                    {
+                        logger?.LogWarning($"Retry {retryCount} for DeepSeek API after {timespan}s due to HTTP {(int)outcome.Result.StatusCode} {outcome.Result.StatusCode}");
+                    }
+                }
+            );
+
+        // Old method for getting or creating job analysis based on job ad URL and job ID
 
         public async Task<string> GetOrCreateAnalysisAsync(string jobAdUrl, int jobId)
         {
@@ -100,7 +139,7 @@ namespace JBDH.Services.AICommunications
                 return cleanJson; 
             }
         }
-
+        
         public async Task<string> GetCvJobComparisonAsync(string jobAdText, string cvPath)
         {
             var request = new AIRequest
@@ -241,5 +280,309 @@ namespace JBDH.Services.AICommunications
 
             return (requirements, jobProfession);
         }
+
+
+    // New method to fill JobAIResponse table base on job ad in jobs table and AIMessageTemplates[1]
+
+
+        // New method to read job ad from jobs table and return String URL
+        public async Task<List<(int JobId, string WebpageUrl)>> GetAllJobURLsFromDatabaseAsync()
+        {
+            _logger.LogInformation("Retrieving all job URLs from database...");
+
+            List<(int JobId, string WebpageUrl)> result = new();
+
+            try
+            {
+                var jobs = await _context.Jobs
+                    .Select(j => new { j.JobId, j.WebpageUrl })
+                    .ToListAsync();
+
+                foreach (var j in jobs)
+                {
+                    try
+                    {
+                        if (
+                            !string.IsNullOrEmpty(j.WebpageUrl) &&
+                            !j.WebpageUrl.Trim().Equals("Unknown URL", StringComparison.OrdinalIgnoreCase) &&
+                            !j.WebpageUrl.Trim().Equals("n/a", StringComparison.OrdinalIgnoreCase) &&
+                            j.WebpageUrl.StartsWith("http")
+                        )
+                        {
+                            result.Add((j.JobId, j.WebpageUrl));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Exception when processing job. JobId: {JobId}, WebpageUrl: {WebpageUrl}", j.JobId, j.WebpageUrl);
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception when reading jobs from DB.");
+                throw;
+            }
+
+            _logger.LogInformation($"Retrieved {result.Count} jobs with valid URLs from database");
+            return result;
+        }
+
+        // New method to fill JobAIResponse table base on job ad in jobs table and AIMessageTemplates[1]
+        // Helper method with retry logic for API calls
+        private async Task<string?> ExecuteAIAnalysisWithRetryAsync(string webpageUrl, int jobId, int maxRetries = 3)
+        {
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    var result = await GetOrCreateAnalysisAsync(webpageUrl, jobId);
+                    return result;
+                }
+                catch (HttpRequestException ex) when (ex.Message.Contains("503") || ex.Message.Contains("502") || ex.Message.Contains("429"))
+                {
+                    if (attempt == maxRetries)
+                    {
+                        _logger.LogError($"Failed to process JobId: {jobId} after {maxRetries} attempts. Last error: {ex.Message}");
+                        throw;
+                    }
+                    
+                    int backoffDelay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
+                    _logger.LogWarning($"Server busy for JobId: {jobId}, attempt {attempt}/{maxRetries}. Retrying in {backoffDelay}ms...");
+                    await Task.Delay(backoffDelay);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Unexpected error processing JobId: {jobId}, attempt {attempt}: {ex.Message}");
+                    if (attempt == maxRetries) throw;
+                    await Task.Delay(1000);
+                }
+            }
+            
+            return null;
+        }
+
+        // Optimerad metod med Polly, Checkpointing och Concurrency Control
+        public async Task ProcessAllJobsWithAIAsync(int batchSize = 10, int delayBetweenBatches = 3000, CancellationToken cancellationToken = default)
+        {
+            var allJobs = await GetAllJobURLsFromDatabaseAsync();
+
+            for (int i = 0; i < allJobs.Count; i += batchSize)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var batch = allJobs.Skip(i).Take(batchSize).ToList();
+                _logger.LogInformation($"Processing batch {i / batchSize + 1}/{Math.Ceiling((double)allJobs.Count / batchSize)} ({batch.Count} jobs)");
+
+                // SEKVENTIELL - EN JOBB I TAGET!
+                foreach (var (jobId, url) in batch)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        await ProcessSingleJobWithCheckpointAsync(jobId, url); // VÄNTA på varje!
+                        await Task.Delay(500, cancellationToken); // 0.5s paus mellan jobs (API rate limit)
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Failed job {jobId}");
+                    }
+                }
+
+                // Paus mellan batcher
+                if (i + batchSize < allJobs.Count)
+                {
+                    _logger.LogInformation($"Batch completed. Waiting {delayBetweenBatches}ms...");
+                    await Task.Delay(delayBetweenBatches, cancellationToken);
+                }
+            }
+        }
+
+        // Enum för resultat-typer
+        private enum JobProcessResult
+        {
+            Processed,
+            Skipped,
+            Error
+        }
+
+        // Metod som sparar varje jobb direkt efter bearbetning (Checkpointing)
+        private async Task<JobProcessResult> ProcessSingleJobWithCheckpointAsync(int jobId, string webpageUrl)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
+            try
+            {
+                // Check if already successfully processed
+                var existingResponse = await _context.JobAIResponses
+                    .Where(r => r.JobId == jobId && r.Status == JobStatus.Completed)
+                    .FirstOrDefaultAsync();
+                
+                if (existingResponse != null)
+                {
+                    _logger.LogDebug($"Skipped JobId: {jobId} - already successfully processed");
+                    return JobProcessResult.Skipped;
+                }
+                
+                _logger.LogInformation($"Processing JobId: {jobId}, URL: {webpageUrl}");
+                
+                // CREATE PROCESSING RECORD
+                var processingResponse = new JobAIResponse
+                {
+                    JobId = jobId,
+                    ResponseText = "{}", 
+                    Status = JobStatus.Processing
+                    // CreatedAt sätts automatiskt till DateTime.UtcNow
+                };
+                _context.JobAIResponses.Add(processingResponse);
+                await _context.SaveChangesAsync();
+                
+                // Execute AI analysis with Polly retry logic
+                var result = await ExecuteAIAnalysisWithPollyAsync(webpageUrl, jobId);
+                
+                stopwatch.Stop();
+                
+                if (!string.IsNullOrEmpty(result))
+                {
+                    // UPDATE TO COMPLETED
+                    processingResponse.ResponseText = result;
+                    processingResponse.Status = JobStatus.Completed;
+                    processingResponse.CreatedAt = DateTime.UtcNow; // Update completion time
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation($"✅ JobId: {jobId} Status: {JobStatus.Completed}, Duration: {stopwatch.ElapsedMilliseconds}ms");
+                    return JobProcessResult.Processed;
+                }
+                else
+                {
+                    // UPDATE TO FAILED
+                    processingResponse.Status = JobStatus.Failed;
+                    processingResponse.CreatedAt = DateTime.UtcNow;
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogWarning($"❌ JobId: {jobId} Status: {JobStatus.Failed} - DeepSeek returned no result");
+                    return JobProcessResult.Error;
+                }
+            }
+            catch (Exception ex)
+            {
+                // UPDATE TO FAILED WITH ERROR
+                try
+                {
+                    var failedResponse = await _context.JobAIResponses
+                        .Where(r => r.JobId == jobId && r.Status == JobStatus.Processing)
+                        .FirstOrDefaultAsync();
+                    
+                    if (failedResponse != null)
+                    {
+                        failedResponse.Status = JobStatus.Failed;
+                        failedResponse.CreatedAt = DateTime.UtcNow;
+                        
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($"Updated JobId: {jobId} Status: {JobStatus.Failed}");
+                    }
+                }
+                catch (Exception saveEx)
+                {
+                    _logger.LogError($"Failed to update error status for JobId: {jobId} - {saveEx.Message}");
+                }
+                
+                _logger.LogError($"❌ Error processing JobId: {jobId}, URL: {webpageUrl} - {ex.Message}");
+                return JobProcessResult.Error;
+            }
+        }
+
+        // Ny metod som använder Polly för robust retry-hantering
+        private async Task<string?> ExecuteAIAnalysisWithPollyAsync(string webpageUrl, int jobId)
+        {
+            var context = new Context($"JobId-{jobId}")
+            {
+                ["Logger"] = _logger
+            };
+            
+            try
+            {
+                using var httpClient = new HttpClient();
+                
+                var response = await DeepSeekRetryPolicy.ExecuteAsync(async (ctx) =>
+                {
+                    // Build AI request med optimerad context caching
+                    var user = await _userPropertiesService.GetCurrentUserAsync();
+                    var request = new AIRequest
+                    {
+                        CommandId = 1, // AIMessageTemplates[1] för jobb-analys
+                        JobAdUrl = webpageUrl,
+                        User = user
+                    };
+                    
+                    // ADD: Log before AI request building
+                    _logger.LogInformation($"🔧 Building AI request for JobId: {jobId}");
+                    
+                    var requestContent = await _aiRequestBuilderService.AIRequestBuilder(request);
+                    
+                    var apiUrl = AIConfig.OpenAIUrl;
+                    if (string.IsNullOrEmpty(AIConfig.OpenAIKey))
+                        throw new InvalidOperationException("OpenAI API key is not configured.");
+
+                    httpClient.DefaultRequestHeaders.Clear();
+                    httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {AIConfig.OpenAIKey}");
+                    
+                    // ADD: Log before API call
+                    _logger.LogInformation($"🚀 Sending request to DeepSeek API: {apiUrl} for JobId: {jobId}");
+                    
+                    var httpResponse = await httpClient.PostAsync(apiUrl, requestContent);
+                    
+                    // ADD: Log API response status
+                    _logger.LogInformation($"📡 DeepSeek API responded with {httpResponse.StatusCode} for JobId: {jobId}");
+                    
+                    return httpResponse;
+                    
+                }, context);
+
+                if (response == null)
+                    throw new Exception("HTTP response is null.");
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent == null)
+                    throw new Exception("AI response content is null.");
+
+                // ADD: Log response processing
+                _logger.LogInformation($"📄 AI response received, length: {responseContent.Length} characters for JobId: {jobId}");
+
+                var cleanJson = _manageIOService.ExtractInnerJsonFromJobAIResponse(responseContent);
+                
+                // ADD: Log JSON extraction result
+                if (string.IsNullOrEmpty(cleanJson))
+                {
+                    _logger.LogWarning($"⚠️ JSON extraction failed for JobId: {jobId}");
+                }
+                else
+                {
+                    _logger.LogInformation($"✅ JSON extracted successfully, length: {cleanJson.Length} characters for JobId: {jobId}");
+                }
+                
+                return cleanJson;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ Failed to process JobId: {jobId} with Polly after all retries. Error: {ex.Message}");
+                return null;
+            }
+        }
+
+        // ...existing code för GetAllJobURLsFromDatabaseAsync och andra metoder...
+    }
+}
+
+// Extension för Context
+public static class ContextExtensions
+{
+    public static ILogger? GetLogger(this Context context)
+    {
+        return context.TryGetValue("Logger", out var logger) ? logger as ILogger : null;
     }
 }

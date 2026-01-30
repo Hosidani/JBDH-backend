@@ -29,6 +29,9 @@ using MySql.EntityFrameworkCore.Extensions;
 using JBDH.Services.BoardDataService;
 using JBDH.Services.ListService;
 using System.Text.Json.Serialization;
+using Polly;
+using Polly.Extensions.Http;
+using JBDH.Services;
 
 // Ensure logging is configured for the entire application
 JBDH.Services.Configuration.LoggingConfigService.ConfigLogging();
@@ -104,7 +107,7 @@ if (builder.Environment.IsDevelopment())
         c.DocumentFilter<JBDH.Swagger.IncludeInApiDocumentFilter>();
     });
 }
-builder.Services.AddHostedService<JobLoaderWorker>();
+
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IUserPropertiesService, UserPropertiesService>();
@@ -147,6 +150,11 @@ builder.Services.AddTransient<DatabaseHandlerService>();
 builder.Services.AddScoped<InternalSortingService>();
 builder.Services.AddSingleton<JobStreamService>();
 builder.Services.AddScoped<JobSyncService>();
+builder.Services.AddScoped<GiveJobPriorityService>();
+builder.Services.AddHttpClient("DeepSeekClient")
+    .AddPolicyHandler(GetRetryPolicy());
+
+
 
 builder.Services.AddSession(options =>
 {
@@ -232,6 +240,27 @@ if (smtpSettings == null ||
 {
     throw new Exception("SMTP configuration is invalid. Please check your appsettings.json.");
 }
+
+
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        .WaitAndRetryAsync(
+            retryCount: 5,
+            sleepDurationProvider: retryAttempt => 
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + 
+                TimeSpan.FromMilliseconds(new Random().Next(0, 1000)),
+            onRetry: (outcome, timespan, retryCount, context) =>
+            {
+                Console.WriteLine($"Retry {retryCount} for DeepSeek after {timespan}s");
+            });
+}
+
+// Register the JobAIAnalysisBackgroundService
+builder.Services.AddHostedService<JobAIAnalysisBackgroundService>();
+
 
 // Build the application
 var app = builder.Build();

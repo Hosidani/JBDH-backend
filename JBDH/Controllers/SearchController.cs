@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using Newtonsoft.Json;
 using JBDH.Models.Core;
 using JBDH.Models.ViewModels;
@@ -93,7 +94,7 @@ namespace JBDH.Controllers
                 
                 // Filter out not interested jobs
                 searchResults = searchResults
-                    .Where(sr => !notInterestedJobIds.Contains(sr.Job.JobId))
+                    .Where(sr => sr.Job != null && !notInterestedJobIds.Contains(sr.Job.JobId))
                     .ToList();
                 
                 LoggingConfigService.ReturnInfo($"After filtering out {notInterestedJobIds.Count} not interested jobs: {searchResults.Count} jobs remain");
@@ -101,14 +102,14 @@ namespace JBDH.Controllers
             
             // Convert to JobDetailsDto format for React
             var jobDetails = new List<JobDetailsDto>();
+
             foreach (var searchResult in searchResults)
             {
                 if (searchResult.Job != null)
                 {
-                    LoggingConfigService.ReturnInfo($"Processing job: {searchResult.Job.JobId}, Title: '{searchResult.Job.Title}', Company: '{searchResult.Job.Company}'");
-                    
                     var isJobSaved = userId.HasValue ? await _savedJobService.IsJobSavedAsync(userId.Value, searchResult.Job.JobId) : false;
                     var jobDto = JobDetailsDto.FromJob(searchResult.Job, false, isJobSaved, false, null);
+                    LoggingConfigService.ReturnInfo($"Processing job: {searchResult.Job.JobId}, Title: '{searchResult.Job.Title}', Company: '{searchResult.Job.Company}', match score: {jobDto.MatchCount} ");
                     jobDetails.Add(jobDto);
                 }
                 else
@@ -131,10 +132,19 @@ namespace JBDH.Controllers
         {
             return Ok(new { message = "Search endpoint is available." });
         }
+        public class AnalyzeJobRequest
+        {
+            public string JobAdUrl { get; set; } = "";
+            public string JobId { get; set; } = "";
+        }
+
 
         [HttpPost]
-        public async Task<IActionResult> AnalyzeJob(string jobAdUrl, string jobId)
+        public async Task<IActionResult> AnalyzeJob([FromBody] AnalyzeJobRequest request)
         {
+            string jobAdUrl = request.JobAdUrl;
+            string jobId = request.JobId;
+            
             LoggingConfigService.ReturnInfo($"AnalyzeJob called with URL: {jobAdUrl} and Job ID: {jobId}");
 
             if (!int.TryParse(jobId, out int parsedJobId))
@@ -231,10 +241,14 @@ namespace JBDH.Controllers
 
             if (results != null && results.Count > 0 && results.First().Job != null)
             {
-                var jobAIResponse = await _jobAIResponseService.GetLatestJobAIResponseAsync(results.First().Job.JobId);
-                if (jobAIResponse != null && !string.IsNullOrEmpty(jobAIResponse.ResponseText))
+                var firstJob = results.First().Job;
+                if (firstJob != null)
                 {
-                    jobAI = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(jobAIResponse.ResponseText);
+                    var jobAIResponse = await _jobAIResponseService.GetLatestJobAIResponseAsync(firstJob.JobId);
+                    if (jobAIResponse != null && !string.IsNullOrEmpty(jobAIResponse.ResponseText))
+                    {
+                        jobAI = JsonConvert.DeserializeObject<JobAdAIResponseViewModel>(jobAIResponse.ResponseText);
+                    }
                 }
             }
 
@@ -248,14 +262,279 @@ namespace JBDH.Controllers
             });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> SearchUsers(string query)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-                return BadRequest(new List<User>());
 
-            var users = await _userPropertiesService.SearchUsersAsync(query);
-            return Ok(users);
+        [HttpGet("searchV2")]
+        public async Task<IActionResult> SearchJobsV2([FromQuery] JobSearchRequestDto request)
+        {
+            LoggingConfigService.ReturnInfo("SearchJobs V2 called - Optimized version");
+            
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? userId = null;
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int parsedId))
+                userId = parsedId;
+
+            // STEP 1: Single query to get Jobs + latest JobAIResponse
+            var jobsWithAI = await GetJobsWithLatestAIResponseAsync(request);
+            LoggingConfigService.ReturnInfo($"Loaded {jobsWithAI.Count} jobs with AI data in single query");
+
+            // STEP 2: In-memory filtering and deserialization
+            var matchingJobs = await FilterJobsInMemoryAsync(jobsWithAI, request, userId);
+            LoggingConfigService.ReturnInfo($"After filtering: {matchingJobs.Count} jobs match criteria");
+
+            // Skriv ut alla JobId
+            var jobIds = matchingJobs.Select(j => j.JobId).ToList();
+            LoggingConfigService.ReturnInfo("JobIds: " + string.Join(", ", jobIds));
+
+
+            // Sortera så att de med flest träffar kommer först
+            matchingJobs = matchingJobs.OrderByDescending(j => j.MatchCount).ToList();
+            /*
+            foreach (var job in matchingJobs)
+            {
+                LoggingConfigService.ReturnInfo($"JobId: {job.JobId}, match score: {job.MatchCount}");
+            }
+            */
+            return Ok(matchingJobs);
+        }
+
+        // OPTIMIZED: Single query with join and subquery for latest AI response
+        private async Task<List<JobWithAIData>> GetJobsWithLatestAIResponseAsync(JobSearchRequestDto request)
+        {
+            var query = _context.Jobs.AsQueryable();
+
+            // Basic filtering at DB level
+            if (!string.IsNullOrWhiteSpace(request.Description))
+            {
+                var description = request.Description;
+                query = query.Where(j => (j.Title != null && j.Title.Contains(description!)) || 
+                                       (j.Description != null && j.Description.Contains(description!)));
+            }
+            
+            if (!string.IsNullOrWhiteSpace(request.Location))
+            {
+                query = query.Where(j => j.Location != null && j.Location.Contains(request.Location!));
+            }
+
+            // Single query with LEFT JOIN to get latest JobAIResponse per job
+            var jobsWithAI = await query
+                .Select(j => new JobWithAIData
+                {
+                    Job = j,
+                    LatestAIResponse = _context.JobAIResponses
+                        .Where(jar => jar.JobId == j.JobId)
+                        .OrderByDescending(jar => jar.CreatedAt)
+                        .Select(jar => jar.ResponseText)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return jobsWithAI;
+        }
+
+        // OPTIMIZED: In-memory processing with single deserialization per job
+        private async Task<List<JobDetailsDto>> FilterJobsInMemoryAsync(
+            List<JobWithAIData> jobsWithAI, 
+            JobSearchRequestDto request, 
+            int? userId)
+        {
+            var matchingJobs = new List<JobDetailsDto>();
+            var hasAICriteria = HasAISearchCriteria(request);
+
+            // Get user-specific data in batch queries if userId exists
+            Dictionary<int, bool>? savedJobsLookup = null;
+            Dictionary<int, bool>? appliedJobsLookup = null;
+            HashSet<int>? notInterestedJobIds = null;
+
+            if (userId.HasValue)
+            {
+                var jobIds = jobsWithAI.Select(j => j.Job.JobId).ToList();
+                
+                // Batch load all user-specific data
+                savedJobsLookup = await _context.SavedJobs
+                    .Where(sj => sj.UserId == userId.Value && jobIds.Contains(sj.JobId))
+                    .ToDictionaryAsync(sj => sj.JobId, sj => true);
+
+                appliedJobsLookup = await _context.JobApplications
+                    .Where(ja => ja.UserId == userId.Value && jobIds.Contains(ja.JobId))
+                    .ToDictionaryAsync(ja => ja.JobId, ja => true);
+
+                notInterestedJobIds = await _context.NotInterestedJobs
+                    .Where(nij => nij.UserId == userId.Value && jobIds.Contains(nij.JobId))
+                    .Select(nij => nij.JobId)
+                    .ToHashSetAsync();
+            }
+
+            // Process jobs in memory
+            foreach (var jobWithAI in jobsWithAI)
+            {
+                var job = jobWithAI.Job;
+
+                // Skip not interested jobs
+                if (notInterestedJobIds?.Contains(job.JobId) == true)
+                    continue;
+
+                // Location måste matcha om det är angivet
+                if (!string.IsNullOrWhiteSpace(request.Location) &&
+                    (job.Location == null || !job.Location.Contains(request.Location, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue; // Hoppa över jobb där location inte matchar
+                }
+
+                // AI-based filtering if criteria provided
+                if (hasAICriteria)
+                {
+                    if (!await MatchesAICriteriaOptimizedAsync(request, jobWithAI))
+                        continue;
+                }
+
+                // Create DTO with user-specific data
+                var isJobSaved = savedJobsLookup?.GetValueOrDefault(job.JobId) == true;
+                var hasApplied = appliedJobsLookup?.GetValueOrDefault(job.JobId) == true;
+                
+                var jobDto = JobDetailsDto.FromJob(job, hasApplied, isJobSaved);
+
+                int matchCount = 0;
+                // 1. Jobs-tabellen (JobDetailsDto)
+                if (!string.IsNullOrWhiteSpace(request.Location) && jobDto.Location?.Contains(request.Location, StringComparison.OrdinalIgnoreCase) == true)
+                    matchCount++;
+                if (!string.IsNullOrWhiteSpace(request.Description) && jobDto.Description?.Contains(request.Description, StringComparison.OrdinalIgnoreCase) == true)
+                    matchCount++;
+
+                // 2. AI-data (JobAIAnalysisDto)
+                JobAIAnalysisDto? aiData = null;
+                if (!string.IsNullOrEmpty(jobWithAI.LatestAIResponse))
+                {
+                    try
+                    {
+                        aiData = JsonConvert.DeserializeObject<JobAIAnalysisDto>(jobWithAI.LatestAIResponse);
+                    }
+                    catch { }
+                }
+
+                if (aiData != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(request.Competence) &&
+                        (aiData.HardRequirements.Any(req => req.Contains(request.Competence, StringComparison.OrdinalIgnoreCase)) ||
+                         aiData.GoodToHaves.Any(req => req.Contains(request.Competence, StringComparison.OrdinalIgnoreCase))))
+                        matchCount++;
+
+                    if (!string.IsNullOrWhiteSpace(request.WorkArea) &&
+                        (aiData.WorkArea.Any(area => area.Contains(request.WorkArea, StringComparison.OrdinalIgnoreCase)) ||
+                         aiData.Experiences.Any(exp => exp.Contains(request.WorkArea, StringComparison.OrdinalIgnoreCase))))
+                        matchCount++;
+
+                    if (!string.IsNullOrWhiteSpace(request.Roles) &&
+                        (aiData.JobTitle.Any(title => title.Contains(request.Roles, StringComparison.OrdinalIgnoreCase)) ||
+                         aiData.Roles.Any(role => role.Contains(request.Roles, StringComparison.OrdinalIgnoreCase))))
+                        matchCount++;
+                }
+
+                jobDto.MatchCount = matchCount;
+                matchingJobs.Add(jobDto);
+            }
+
+            return matchingJobs;
+        }
+
+        // OPTIMIZED: Single deserialization with efficient Any() matching
+        private async Task<bool> MatchesAICriteriaOptimizedAsync(
+            JobSearchRequestDto request, 
+            JobWithAIData jobWithAI)
+        {
+            // Try AI matching first
+            if (!string.IsNullOrEmpty(jobWithAI.LatestAIResponse))
+            {
+                try
+                {
+                    var aiData = JsonConvert.DeserializeObject<JobAIAnalysisDto>(jobWithAI.LatestAIResponse);
+                    
+                    if (aiData != null)
+                    {
+                        return MatchesAICriteria(request, aiData);
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    LoggingConfigService.ReturnError($"JSON deserialization failed for job {jobWithAI.Job.JobId}: {ex.Message}");
+                }
+            }
+
+            // Fallback to basic text matching
+            return MatchesBasicCriteria(request, jobWithAI.Job);
+        }
+
+        // OPTIMIZED: Efficient Any() matching with OrdinalIgnoreCase
+        private static bool MatchesAICriteria(JobSearchRequestDto request, JobAIAnalysisDto aiData)
+        {
+            // Check Competence against HardRequirements + GoodToHaves
+            if (!string.IsNullOrWhiteSpace(request.Competence))
+            {
+                bool hasCompetence = aiData.HardRequirements.Any(req => 
+                    req.Contains(request.Competence, StringComparison.OrdinalIgnoreCase)) ||
+                    aiData.GoodToHaves.Any(req => 
+                    req.Contains(request.Competence, StringComparison.OrdinalIgnoreCase));
+                
+                if (!hasCompetence) return false;
+            }
+            
+            // Check WorkArea against WorkArea + Experiences
+            if (!string.IsNullOrWhiteSpace(request.WorkArea))
+            {
+                bool hasWorkArea = aiData.WorkArea.Any(area => 
+                    area.Contains(request.WorkArea, StringComparison.OrdinalIgnoreCase)) ||
+                    aiData.Experiences.Any(exp => 
+                    exp.Contains(request.WorkArea, StringComparison.OrdinalIgnoreCase));
+                
+                if (!hasWorkArea) return false;
+            }
+            
+            // Check Roles against JobTitle + Roles
+            if (!string.IsNullOrWhiteSpace(request.Roles))
+            {
+                bool hasRole = aiData.JobTitle.Any(title => 
+                    title.Contains(request.Roles, StringComparison.OrdinalIgnoreCase)) ||
+                    aiData.Roles.Any(role => 
+                    role.Contains(request.Roles, StringComparison.OrdinalIgnoreCase));
+                
+                if (!hasRole) return false;
+            }
+            
+            return true;
+        }
+
+        // Fallback for jobs without AI data
+        private static bool MatchesBasicCriteria(JobSearchRequestDto request, JBDH.Models.Job.Job job)
+        {
+            var jobContent = $"{job.Title} {job.Description}".ToLower();
+            
+            if (!string.IsNullOrWhiteSpace(request.Competence) && 
+                !jobContent.Contains(request.Competence, StringComparison.OrdinalIgnoreCase))
+                return false;
+                
+            if (!string.IsNullOrWhiteSpace(request.WorkArea) && 
+                !jobContent.Contains(request.WorkArea, StringComparison.OrdinalIgnoreCase))
+                return false;
+                
+            if (!string.IsNullOrWhiteSpace(request.Roles) && 
+                !jobContent.Contains(request.Roles, StringComparison.OrdinalIgnoreCase))
+                return false;
+            
+            return true;
+        }
+
+        // Helper methods
+        private static bool HasAISearchCriteria(JobSearchRequestDto request)
+        {
+            return !string.IsNullOrWhiteSpace(request.Competence) ||
+                   !string.IsNullOrWhiteSpace(request.WorkArea) ||
+                   !string.IsNullOrWhiteSpace(request.Roles);
+        }
+
+        // DTO for single query result
+        private class JobWithAIData
+        {
+            public JBDH.Models.Job.Job Job { get; set; } = null!;
+            public string? LatestAIResponse { get; set; }
         }
     }
 }
