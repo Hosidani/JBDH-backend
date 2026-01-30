@@ -39,7 +39,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AIUserCourseProposals");
+                    b.ToTable("AIUserCourseProposals", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.AI.AIResponse", b =>
@@ -56,7 +56,7 @@ namespace JBDH.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AIResponses");
+                    b.ToTable("AIResponses", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.AI.JobAIResponse", b =>
@@ -75,11 +75,14 @@ namespace JBDH.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobAIResponses");
+                    b.ToTable("JobAIResponses", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.AI.UserAIResponse", b =>
@@ -101,7 +104,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAIResponses");
+                    b.ToTable("UserAIResponses", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Authentication.PasswordReset", b =>
@@ -128,7 +131,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResets");
+                    b.ToTable("PasswordResets", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Dataflow.DataFlow", b =>
@@ -161,7 +164,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DataFlows");
+                    b.ToTable("DataFlows", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Friendship.Friendship", b =>
@@ -188,7 +191,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("RequesterId");
 
-                    b.ToTable("Friendships");
+                    b.ToTable("Friendships", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Job.Job", b =>
@@ -298,7 +301,7 @@ namespace JBDH.Migrations
                     b.HasIndex("UserId", "JobId")
                         .IsUnique();
 
-                    b.ToTable("NotInterestedJobs");
+                    b.ToTable("NotInterestedJobs", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Job.RawJob", b =>
@@ -356,7 +359,7 @@ namespace JBDH.Migrations
                     b.HasIndex("UserId", "JobId")
                         .IsUnique();
 
-                    b.ToTable("SavedJobs");
+                    b.ToTable("SavedJobs", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Kanban.Board", b =>
@@ -386,7 +389,7 @@ namespace JBDH.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Boards");
+                    b.ToTable("Boards", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Kanban.BoardMembership", b =>
@@ -422,7 +425,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("BoardId");
 
-                    b.ToTable("BoardMemberships");
+                    b.ToTable("BoardMemberships", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Kanban.Card", b =>
@@ -457,7 +460,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("ListId");
 
-                    b.ToTable("Cards");
+                    b.ToTable("Cards", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Kanban.KanbanList", b =>
@@ -483,7 +486,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("BoardId");
 
-                    b.ToTable("Lists");
+                    b.ToTable("Lists", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Kanban.Organization", b =>
@@ -501,7 +504,7 @@ namespace JBDH.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Organizations");
+                    b.ToTable("Organizations", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Messaging.Message", b =>
@@ -533,7 +536,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Notifications.EmailVerificationToken", b =>
@@ -559,7 +562,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("EmailVerificationTokens");
+                    b.ToTable("EmailVerificationTokens", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.Organisation.Organisation", b =>
@@ -579,7 +582,7 @@ namespace JBDH.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Organisations");
+                    b.ToTable("Organisations", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.User.Account", b =>
@@ -645,7 +648,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("Accounts", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.User.User", b =>
@@ -729,7 +732,7 @@ namespace JBDH.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasDiscriminator<string>("Role").HasValue("User");
 
@@ -764,7 +767,7 @@ namespace JBDH.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserReports");
+                    b.ToTable("UserReports", (string)null);
                 });
 
             modelBuilder.Entity("JBDH.Models.User.UserRoleAssignment", b =>
@@ -777,7 +780,7 @@ namespace JBDH.Migrations
 
                     b.HasKey("UserId", "Role");
 
-                    b.ToTable("UserRoleAssignments");
+                    b.ToTable("UserRoleAssignments", (string)null);
                 });
 
             modelBuilder.Entity("OrganisationUser", b =>

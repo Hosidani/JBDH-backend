@@ -33,8 +33,30 @@ namespace JBDH.Services.AICommunications
 
                 case 1:
                     LoggingConfigService.ReturnInfo("CommandId is 1, processing job ad.");
-                    var jobAdText1 = await _manageIOService.ExtractTextFromWebPage(aiRequest.JobAdUrl ?? "");
+                    var jobAdUrl = aiRequest.JobAdUrl ?? "";
+                    
+                    // ADD: Log start of web scraping
+                    LoggingConfigService.ReturnInfo($"🕷️ Starting web scraping for URL: {jobAdUrl}");
+                    
+                    var jobAdText1 = await _manageIOService.ExtractTextFromWebPage(jobAdUrl);
+                    
+                    // ADD: Log web scraping result
+                    if (string.IsNullOrWhiteSpace(jobAdText1))
+                    {
+                        LoggingConfigService.ReturnError($"❌ Web scraping failed - no text extracted from: {jobAdUrl}");
+                        var errorResponse = "{\"error\":\"No job ad text found. Web scraping failed.\"}";
+                        return new StringContent(errorResponse, System.Text.Encoding.UTF8, "application/json");
+                    }
+                    else
+                    {
+                        LoggingConfigService.ReturnInfo($"✅ Web scraping completed for {jobAdUrl}, extracted {jobAdText1.Length} characters");
+                    }
+                    
                     userMessage = AIMessageTemplates.UserMessageTemplates[1].Replace("{JobAdText}", jobAdText1);
+                    
+                    // ADD: Log AI request preparation
+                    LoggingConfigService.ReturnInfo($"📝 AI request built, prompt length: {userMessage.Length} characters");
+                    
                     return Helpers.AIRequestHelper.BuildRequestBody(_aiConfig.OpenAIModel, userMessage, aiRequest.Language ?? "English");
 
                 case 2:

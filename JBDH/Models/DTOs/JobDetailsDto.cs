@@ -19,6 +19,8 @@ namespace JBDH.Models.DTOs
         public DateTime? ApplicationDeadline { get; set; }
         public List<string> RequiredSkills { get; set; } = new();
         public List<string> RequiredSoftSkills { get; set; } = new();
+
+        public int MatchCount { get; set; }
         
         // USER ACTIONS
         public bool IsSaved { get; set; }

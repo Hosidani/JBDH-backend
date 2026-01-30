@@ -19,16 +19,27 @@ namespace JBDH.Models.AI
                   "Structure the response as: {\"English\": {...}, \"Swedish\": {...}}. " +
                   "\n\nCV:\n{CVText}",
 
-            [1] = "Analyze the following job advertisement. " +
-                  "Extract and summarize the key requirements and characteristics of the ideal candidate. " +
-                  "Return ONLY a valid JSON object with the following fields: " +
-                  "\"JobTitle\" (a short list, maximum 10 relevant job titles which are suitable to the job annons.), " +
-                  "\"HardRequirements\" (a short list, maximum 10 must-have requirements or skills), " +
-                  "\"GoodToHaves\" (a short list, maximum 10 nice-to-have skills or traits), " +
-                  "\"Experiences\" (a short list, maximum 10 relevant experiences), " +
-                  "\"EducationAndCertifications\" (a short list, maximum 10 items, brief), " +
-                  "\"JobSummary\" (a brief summary of the job). " +
-                  "\n\nJob Ad:\n{JobAdText}",
+            [1] = "SYSTEM INSTRUCTIONS FOR JOB ANALYSIS (Keep identical for caching):\n" +
+                  "You are an expert HR analyst specializing in job advertisement analysis.\n" +
+                  "Always respond with EXACTLY the specified JSON structure.\n" +
+                  "Be precise, concise, and consistent in your analysis.\n" +
+                  "Focus on extracting concrete requirements and skills.\n\n" +
+
+                  "TASK: Analyze the following job advertisement and extract key information.\n\n" +
+
+                  "REQUIRED JSON OUTPUT FORMAT (no additional text):\n" +
+                  "{\n" +
+                  "  \"JobTitle\": [\"max 10 relevant job titles\"],\n" +
+                  "  \"HardRequirements\": [\"max 10 must-have requirements\"],\n" +
+                  "  \"GoodToHaves\": [\"max 10 nice-to-have skills\"],\n" +
+                  "  \"Experiences\": [\"max 10 relevant experiences\"],\n" +
+                  "  \"EducationAndCertifications\": [\"max 10 education items\"],\n" +
+                  "  \"WorkArea\": [\"max 5 industries like IT, Healthcare\"],\n" +
+                  "  \"Roles\": [\"max 5 role types like Manager, Developer\"],\n" +
+                  "  \"JobSummary\": \"brief job description\"\n" +
+                  "}\n\n" +
+
+                  "JOB ADVERTISEMENT TO ANALYZE:\n{JobAdText}",
 
             [2] = "You are given a job advertisement and a candidate's CV. " +
                   "Compare the candidate's qualifications, skills, and experiences to the requirements in the job ad. " +
@@ -130,4 +141,3 @@ namespace JBDH.Models.AI
 
 
 
-        
