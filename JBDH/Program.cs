@@ -127,6 +127,21 @@ builder.Services.AddScoped<IUserVerificationService, UserVerificationService>();
 builder.Services.AddScoped<ISearchJobsService, SearchJobsService>();
 builder.Services.AddScoped<IJobAIResponseService, JobAIResponseService>();
 builder.Services.AddScoped<IJobAIAnalysisService, JobAIAnalysisService>();
+
+builder.Services.AddSingleton<CancellationTokenSource>(provider =>
+{
+    var cts = new CancellationTokenSource();
+    var lifetime = provider.GetRequiredService<IHostApplicationLifetime>();
+    lifetime.ApplicationStopping.Register(() => cts.Cancel());
+    return cts;
+});
+
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
+
+builder.Services.AddHostedService<JobAIAnalysisBackgroundService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
@@ -258,20 +273,6 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
             });
 }
 
-// Register the JobAIAnalysisBackgroundService
-builder.Services.AddHostedService<JobAIAnalysisBackgroundService>();
-builder.Services.AddSingleton<CancellationTokenSource>(provider =>
-{
-    var cts = new CancellationTokenSource();
-    var lifetime = provider.GetRequiredService<IHostApplicationLifetime>();
-    lifetime.ApplicationStopping.Register(() => cts.Cancel());
-    return cts;
-});
-
-builder.Services.Configure<HostOptions>(options =>
-{
-    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
-});
 
 // Build the application
 var app = builder.Build();
