@@ -141,7 +141,7 @@ builder.Services.Configure<HostOptions>(options =>
     options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
 });
 
-builder.Services.AddHostedService<JobAIAnalysisBackgroundService>();
+//builder.Services.AddHostedService<JobAIAnalysisBackgroundService>();
 builder.Services.AddScoped<ISearchCandidateService, SearchCandidateService>();
 builder.Services.AddScoped<IRapportUserService, RapportUserService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
