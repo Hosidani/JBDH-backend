@@ -8,6 +8,7 @@ using JBDH.Models.Core;
 using JBDH.Helpers;
 using JBDH.Services.AICommunications;
 using JBDH.Services.Configuration;
+using Newtonsoft.Json;
 using JBDH.Models.AI;
 using JBDH.Services.Helpers;
 using Newtonsoft.Json.Linq;
@@ -320,6 +321,54 @@ namespace JBDH.Controllers
                 var cvProfession = cvExtractionResult.Profession;
                 var cvRequirements = cvExtractionResult.Requirements;
 
+                // Logging and extraction for CareerSummaryPitch
+                LoggingConfigService.ReturnInfo("cvText: " + cvText);
+                var cvjobpitch = await _jobAIAnalysisService.GetCvJobComparisonAsync(model.JobAdText, savedPath ?? "");
+                _logger.LogInformation("cvjobpitch raw response: {Pitch}", cvjobpitch);
+
+                string? pitch = null;
+                RequirementExtractionResponse? extraction = null;
+                if (!string.IsNullOrWhiteSpace(cvjobpitch))
+                {
+                    var clean = cvjobpitch.Trim();
+                    _logger.LogInformation("Cleaned AI response before JSON parse: {Cleaned}", clean);
+                    if (clean.StartsWith("```json"))
+                        clean = clean.Substring(7).Trim();
+                    if (clean.EndsWith("```") && clean.Length > 3)
+                        clean = clean.Substring(0, clean.Length - 3).Trim();
+
+                    _logger.LogInformation("Final cleaned JSON string: {Cleaned}", clean);
+
+                    if (clean.StartsWith("{"))
+                    {
+                        try
+                        {
+                            extraction = JsonConvert.DeserializeObject<RequirementExtractionResponse>(clean);
+                            _logger.LogInformation("extraction object: {@Extraction}", extraction);
+                            pitch = extraction?.CareerSummaryPitch;
+                            _logger.LogInformation("CareerSummaryPitch extracted: {Pitch}", pitch);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to deserialize cvjobpitch");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("cvjobpitch is not valid JSON after cleaning: {Pitch}", clean);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("cvjobpitch is not valid JSON: {Pitch}", cvjobpitch);
+                }
+                cvExtractionResult.CareerSummaryPitch = pitch;
+                if (string.IsNullOrWhiteSpace(pitch))
+                {
+                    _logger.LogWarning("CareerSummaryPitch could not be extracted or is empty.");
+                    return BadRequest("CareerSummaryPitch could not be extracted from AI response.");
+                }
+                
                 // 2. Extract job requirements and profession using service
                 var (requirements, jobProfession) = await _jobAIAnalysisService.ExtractJobRequirementsAndProfessionAsync(model.JobAdText);
 
@@ -363,7 +412,8 @@ namespace JBDH.Controllers
                     cvProfession,
                     jobProfession,
                     matches = results,
-                    totalRequirements = requirements.Count
+                    totalRequirements = requirements.Count,
+                    careerSummaryPitch = cvExtractionResult.CareerSummaryPitch
                 });
             }
             catch (Exception ex)
@@ -372,6 +422,6 @@ namespace JBDH.Controllers
                 return BadRequest("Comparison failed");
             }
         }
-
     }
+            
 }

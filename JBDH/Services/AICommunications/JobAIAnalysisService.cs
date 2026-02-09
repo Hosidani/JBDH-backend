@@ -149,7 +149,7 @@ namespace JBDH.Services.AICommunications
                 JobAdText = jobAdText
             };
             var aiResult = await _aiApiClient.GetAIResponse(request); 
-            return aiResult?.ToString() ?? string.Empty;
+            return aiResult?.Response ?? string.Empty;
         }
 
         public async Task<(List<Requirement> requirements, Profession? jobProfession)> ExtractJobRequirementsAndProfessionAsync(string jobAdText)

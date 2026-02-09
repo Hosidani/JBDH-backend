@@ -40,7 +40,8 @@ namespace JBDH.Models.AI
                   "}\n\n" +
 
                   "JOB ADVERTISEMENT TO ANALYZE:\n{JobAdText}",
-
+            
+            //Depricated
             [2] = "You are given a job advertisement and a candidate's CV. " +
                   "Compare the candidate's qualifications, skills, and experiences to the requirements in the job ad. " +
                   "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. " +
@@ -71,7 +72,7 @@ namespace JBDH.Models.AI
                   "\"Courses\" (a short list, maximum 10 courses, with titles and brief descriptions). " +
                   "\n\nCV:\n{CVText}",
 
-            [5] = "Analyze the CV against this job advertisement and provide structured feedback. " +
+            [5] = "You are a senior IT recruiter. Respond with professionalism, clarity, and insight. Support your assessments with examples from the CV and job ad. Tailor feedback for both technical and non-technical readers. Structure your answer objectively for maximum value to candidate and employer. Address gaps honestly but highlight strengths. Use personal, persuasive language. Analyze the CV against the job ad and provide structured feedback. " +
                   "Return ONLY a valid JSON object with this structure: " +
                   "{" +
                   "  \"matchScore\": 0-100," +
@@ -91,7 +92,8 @@ namespace JBDH.Models.AI
                   "    \"skillDevelopment\": [string]," +
                   "    \"interviewPreparation\": [string]" +
                   "  }," +
-                  "  \"nextSteps\": [string]" +
+                  "  \"nextSteps\": [string]," +
+                  "  \"CareerSummaryPitch\": string" +
                   "}" +
                   "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}",
 

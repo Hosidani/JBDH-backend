@@ -18,5 +18,6 @@ namespace JBDH.Models.AI
     {
         public List<Requirement> Requirements { get; set; } = new List<Requirement>();
         public Profession Profession { get; set; } = new Profession();
+        public string? CareerSummaryPitch { get; set; }
     }
 }
