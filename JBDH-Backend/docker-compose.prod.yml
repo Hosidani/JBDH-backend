@@ -1,0 +1,50 @@
+services:
+  postgres:
+    command: postgres -c password_encryption=md5
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped
+
+  backend:
+    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DEBUG: "False"
+    restart: unless-stopped
+
+  frontend:
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+  etl:
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          echo "🚀 Starting ETL batch..."
+          python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
+          echo "⏳ Waiting 30s before next batch..."
+          sleep 30
+        done
+    mem_limit: 2g
+    cpus: 1.0
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DEBUG: "False"
+    restart: unless-stopped

@@ -1,0 +1,52 @@
+name: Deploy Azure Function (Flex Consumption)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'JBDH-Functions/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore JBDH-Functions/JBDH-Functions.csproj
+
+      - name: Build
+        run: dotnet build JBDH-Functions/JBDH-Functions.csproj -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish JBDH-Functions/JBDH-Functions.csproj -c Release -o JBDH-Functions/publish
+
+      - name: Prepare deployment package (include host.json)
+        run: |
+          cp JBDH-Functions/host.json JBDH-Functions/publish/
+          cd JBDH-Functions/publish
+          zip -r ../functionapp.zip .
+          cd ../..
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set subscription
+        run: az account set --subscription 7534f0ad-1c36-4655-ac73-22b793e309e7
+
+      - name: Deploy to Azure Functions (Flex Consumption)
+        run: |
+          az functionapp deployment source config-zip \
+            --resource-group rg-loghouse-prod-swedencentral-001 \
+            --name jbdh-job-snapshot \
+            --src JBDH-Functions/functionapp.zip
