@@ -1,19 +1,8 @@
-bin/
-obj/
-*.dll
-*.cache
-*.json
-!JBDH/appsettings.json
-!JBDH/appsettings.Development.json
-!.config/dotnet-tools.json
+.env
+.env.*
+!.env.example
 
-# Upload files - don't track user uploads
-wwwroot/uploads/
-
-# Coverage reports
-coveragereport/
-coverage.*
-TestResults/
-*.lcov
-*.cobertura.xml
-!.config/dotnet-tools.json
+__pycache__/
+*.pyc
+Rawjobs.json
+etl_progress.json
