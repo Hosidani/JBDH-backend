@@ -140,7 +140,11 @@ $body = @{
 
 iwr -Uri "http://localhost:8000/api/Register/RegisterUser" -Method POST -ContentType "application/json" -Body $body
 
-
+#### ERROR: 
+Error response from daemon: ports are not available: exposing port TCP 127.0.0.1:5432 s 
+-> 127.0.0.1:0: listen tcp4 127.0.0.1:5432: bind: Ett försök gjordes att få åtkomst ti->ll en socket
+run: netstat -ano | findstr :5432
+then win + R -> services.msc -> stop postgres and build and run docker again
 
 ### Local (utveckling)
 
