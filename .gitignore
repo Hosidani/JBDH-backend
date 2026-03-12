@@ -2,7 +2,37 @@
 .env.*
 !.env.example
 
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Django
+staticfiles/
+media/
+*.log
+db.sqlite3
+
+# ETL
 Rawjobs.json
 etl_progress.json
+
+# Old folders (should not be in backend repo)
+JBDH-Backend/
+JBDH.Tests/
+JBDH/
+
+# .NET artifacts
+bin/
+obj/
+*.user
+*.suo
