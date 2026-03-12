@@ -2,31 +2,43 @@ import numpy as np
 import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
-try:
-	from sentence_transformers import SentenceTransformer
-except ImportError:
-	SentenceTransformer = None
+# ============================================================
+# MiniLM FLYTTAD TILL SEPARAT MICROSERVICE (OOM-problem)
+# ============================================================
+# try:
+# 	from sentence_transformers import SentenceTransformer
+# except ImportError:
+# 	SentenceTransformer = None
 
+SentenceTransformer = None
 embedding_model = None
 
 logger = logging.getLogger(__name__)
 
 
 def get_embedding_model():
+	"""
+	Returnerar None - embedding-modellen körs nu i separat service
+	"""
 	global embedding_model
-	if embedding_model is not None:
-		return embedding_model
-
-	if SentenceTransformer is None:
-		logger.error("sentence-transformers är inte installerat")
-		return None
-
-	try:
-		embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-		return embedding_model
-	except Exception:
-		logger.exception("Kunde inte initiera SentenceTransformer-modellen")
-		return None
+	
+	# ORIGINAL KOD (återaktivera när MiniLM körs lokalt eller via API):
+	# if embedding_model is not None:
+	# 	return embedding_model
+	# 
+	# if SentenceTransformer is None:
+	# 	logger.error("sentence-transformers är inte installerat")
+	# 	return None
+	# 
+	# try:
+	# 	embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+	# 	return embedding_model
+	# except Exception:
+	# 	logger.exception("Kunde inte initiera SentenceTransformer-modellen")
+	# 	return None
+	
+	logger.info("MiniLM är flyttad till separat microservice - returnerar None")
+	return None
 
 
 def build_embedding_text(parts: Iterable[Any], separator: str = " | ") -> str:
