@@ -2,6 +2,8 @@ import numpy as np
 import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
+from core.embedding_client import embed_texts
+
 # ============================================================
 # MiniLM FLYTTAD TILL SEPARAT MICROSERVICE (OOM-problem)
 # ============================================================
@@ -76,25 +78,24 @@ def vectorize_job_data(job_data: Dict[str, Any]) -> List[float]:
 		if not text:
 			logger.debug("vectorize_job_data: tom text, returnerar tom vektor")
 			return []
-		return vectorize_text(text)
+		return vectorize_text(text, context="job")
 	except Exception:
 		logger.exception("vectorize_job_data misslyckades")
 		return []
 
 
-def vectorize_text(text: Optional[str]) -> List[float]:
+def vectorize_text(text: Optional[str], context: Optional[str] = None) -> List[float]:
 	try:
 		normalized_text = " ".join(str(text or "").split())
 		if not normalized_text:
 			logger.debug("vectorize_text: tom text, returnerar tom vektor")
 			return []
 
-		model = get_embedding_model()
-		if model is None:
+		embeddings = embed_texts([normalized_text], context=context)
+		if not embeddings:
 			return []
 
-		vector = model.encode(normalized_text, convert_to_numpy=True)
-
+		vector = np.asarray(embeddings[0], dtype=float)
 		if isinstance(vector, np.ndarray):
 			return vector.astype(float).tolist()
 

@@ -53,6 +53,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minilm:
+        condition: service_healthy
 
   frontend:
     build:
@@ -93,6 +95,21 @@ services:
         condition: service_healthy
       backend:
         condition: service_started
+
+  minilm:
+    build:
+      context: .
+      dockerfile: Dockerfile.minilm
+    container_name: jbdh_minilm
+    ports:
+      - "8001:8000"
+    networks:
+      - jbdh_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://minilm:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
 
