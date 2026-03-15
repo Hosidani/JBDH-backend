@@ -35,10 +35,7 @@ urlpatterns = [
     # Frontend-kompatibla alias (PascalCase)
     path('api/profile/getmyprofile/', views.get_my_profile, name='get-my-profile-alias'),
     path('api/profile/getprofile/<int:user_id>/', views.get_profile, name='get-profile-alias'),
-    # Frontend-kompatibla alias UTAN /api/ prefix
-    path('Register/RegisterUser', RegisterUserView.as_view(), name='register-no-api'),
-    path('login', LoginView.as_view(), name='login-no-api'),
-    path('logout', LogoutView.as_view(), name='logout-no-api'),
+    # Frontend-kompatibla alias (PascalCase) under /api/ hanteras redan via include/app-url-maps
     path('profile/analyzecv/', analyze_cv, name='analyze-cv'),
 ]
 

@@ -25,6 +25,10 @@ services:
     restart: unless-stopped
 
   frontend:
+    build:
+      args:
+        VITE_MODE: production
+        # Leave VITE_API_URL empty to use .env.production
     ports:
       - "3000:80"
     restart: unless-stopped
