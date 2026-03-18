@@ -22,7 +22,7 @@ from apps.users import views
 from apps.authentication.views import RegisterUserView, LoginView, LogoutView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.users.views import analyze_cv
-from apps.ai_services.views import compare_cv_to_job_ad_v2
+from apps.ai_services.views import compare_cv_to_job_ad_v2, compare_cv_job_sse
 from apps.jobs.views import search_for_jobs, search_v2
 
 urlpatterns = [
@@ -31,6 +31,8 @@ urlpatterns = [
     path('api/', include('apps.users.urls')),
     # Compare CV to Job Ad V2 (frontend: POST /api/Home/CompareCvToJobAdV2)
     path('api/Home/CompareCvToJobAdV2', compare_cv_to_job_ad_v2, name='compare-cv-to-job-ad-v2'),
+    # Compare CV to Job SSE (frontend: POST /api/Home/CompareCvJobSSE)
+    path('api/home/CompareCvJobSSE', compare_cv_job_sse, name='compare_cv_job_sse'),
 
     # Frontend-kompatibla alias (PascalCase)
     path('api/profile/getmyprofile/', views.get_my_profile, name='get-my-profile-alias'),

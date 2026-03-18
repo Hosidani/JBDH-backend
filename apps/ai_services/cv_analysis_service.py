@@ -8,7 +8,7 @@ from apps.ai_services.ai_message_templates import AIMessageTemplates
 from apps.ai_services.user_ai_response_service import UserAIResponseService
 from apps.ai_services.ai_models import CVAnalysisResult, RequirementExtractionResponse
 
-logger = logging.getLogger("CVAnalysisService")
+logger = logging.getLogger(__name__)
 
 
 def _repair_truncated_requirement_json(raw: str) -> str | None:
@@ -133,10 +133,13 @@ class CVAnalysisService:
                 temperature=attempt["temperature"],
             )
 
+            logger.info(f"DeepSeek full response: {ai_result!r}")
+
             response_text = ai_result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            logger.info(f"DeepSeek raw response: {response_text!r}")
             if not response_text or not response_text.strip():
-                last_error = ValueError("AI returned empty response")
-                continue
+                # Skicka fel till frontend direkt
+                return None
 
             cleaned_response = extract_json_from_code_block(response_text)
             cleaned_response = re.sub(r'```(json)?', '', cleaned_response).strip()

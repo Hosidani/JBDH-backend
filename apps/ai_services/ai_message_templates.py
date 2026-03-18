@@ -42,6 +42,18 @@ class AIMessageTemplates:
             "}\n\n"
             "JOB ADVERTISEMENT TO ANALYZE:\n{JobAdText}"
         ),
+        2: (
+            "You are given a job advertisement and a candidate's CV. "
+            "Compare the candidate's qualifications, skills, and experiences to the requirements in the job ad. "
+            "Be explicit about where the candidate is a strong fit and where there are gaps or missing requirements. "
+            "Return ONLY a valid JSON object with the following fields: "
+            "\"FitSummary\" (brief summary of fit), "
+            "\"MissingRequirements\" (list of gaps or missing requirements), "
+            "\"MatchingSkills\" (list of skills from the CV that match the job ad), "
+            "\"RelevantExperiences\" (list of relevant experiences from the CV), "
+            "\"EducationAndCertifications\" (from the CV, relevant to the job ad). "
+            "\n\nJob Ad:\n{JobAdText}\n\nCV:\n{CVText}"
+        ),
         4: (
             "You are given a candidate profile summary (from prior AI CV analysis) and a job description. "
             "Compare them and return ONLY valid JSON with these keys: "
@@ -52,6 +64,36 @@ class AIMessageTemplates:
             "\"CoachTips\" (short coaching advice). "
             "No markdown, no extra text, no code fences. "
             "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobDescription:\n{JobDescription}"
+        ),
+        5: (
+            "🎯 **CV vs Jobb Matchningsanalys** 🎯\n\n"
+            "Analysera CV och jobbannons SAMULTAN. Ge:\n\n"
+            "1. **CV-profession**: main/sub/specialty (t.ex. 'Engineering > Software > Backend')\n"
+            "2. **CV-kompetenser**: name/category/importance (1-5)\n"
+            "3. **Jobb-profession**: main/sub/specialty\n"
+            "4. **Jobb-krav**: name/category/importance (1-5, 5=must-have)\n"
+            "5. **Matchningsresultat**:\n"
+            "   - totalMatchScore (0-100)\n"
+            "   - skillsMatchScore (0-100)\n"
+            "   - professionMatchScore (0-100)\n"
+            "6. **Sammanfattning** (1-2 meningar)\n"
+            "7. **Styrkor** (topp 3-5 matchningar)\n"
+            "8. **Brister** (topp 3-5 saknade krav)\n"
+            "9. **FitAssessment**: 'Excellent' | 'Good' | 'Fair' | 'Poor'\n\n"
+            "📋 **Format (ENDAST JSON, lowercase nycklar):**\n"
+            '{{\n'
+            '  "cvProfession": {{"main": "...", "sub": "...", "specialty": "..."}},\n'
+            '  "cvRequirements": [{{"name": "Python", "category": "skill", "importance": 5}}],\n'
+            '  "jobProfession": {{"main": "...", "sub": "...", "specialty": "..."}},\n'
+            '  "jobRequirements": [{{"name": "Docker", "category": "skill", "importance": 4}}],\n'
+            '  "matchScores": {{"totalMatchScore": 87, "skillsMatchScore": 82, "professionMatchScore": 95}},\n'
+            '  "summary": "Kandidaten är stark backendutvecklare med Docker/Python men saknar React frontend.",\n'
+            '  "strengths": ["Python expert", "Docker production", "FastAPI erfarenhet"],\n'
+            '  "gaps": ["React saknas", "Frontend testing", "TypeScript"],\n'
+            '  "fitAssessment": "Good"\n'
+            '}}\n\n'
+            "CV:\n---CV---\n{cv_text}\n---CV---\n\n"
+            "Jobbannons:\n---JOBB---\n{job_ad_text}\n---JOBB---"
         ),
         # Template 7: CV → Profession + Requirements (same structure as job extraction)
         7: (

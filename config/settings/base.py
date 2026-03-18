@@ -75,9 +75,9 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',  # <-- Kommentera bort
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -190,7 +190,7 @@ SIMPLE_JWT = {
 # CORS
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_ALL_ORIGINS = True
+
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -202,6 +202,11 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+]
+
+# Expose Authorization header to frontend if needed
+CORS_EXPOSE_HEADERS = [
+    'authorization',
 ]
 
 # AI Configuration
