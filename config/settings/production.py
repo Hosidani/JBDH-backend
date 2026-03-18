@@ -17,4 +17,6 @@ DATABASES = {
 
 CORS_ALLOWED_ORIGINS = [
     "https://loghouse.se",
+    "http://loghouse.se",       
+    "http://89.167.117.88:8000", 
 ]
