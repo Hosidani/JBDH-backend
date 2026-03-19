@@ -31,7 +31,7 @@ from django.utils import timezone
 @permission_classes([IsAuthenticated])
 def get_profile(request, user_id):
     """
-    GET /api/profile/getprofile/<user_id>
+    GET /profile/getprofile/<user_id>
     Get another user's profile (limited public data)
     """
     current_user = request.user
@@ -51,7 +51,7 @@ def get_profile(request, user_id):
 @permission_classes([IsAuthenticated])
 def get_my_profile(request):
     """
-    GET /api/profile/getmyprofile
+    GET /profile/getmyprofile
     Get current user's complete profile with all data
     """
     user = request.user
@@ -65,7 +65,7 @@ def get_my_profile(request):
 
 def analyze_cv(request):
     """
-    POST /api/profile/analyzecv
+    POST /profile/analyzecv
     Upload and analyze CV file, call CVAnalysisService, debug Deepseek flow
     """
     logger.info("AnalyzeCV endpoint called")
@@ -179,7 +179,7 @@ def analyze_cv(request):
 @permission_classes([IsAuthenticated])
 def latest_ai_user_response(request):
     """
-    GET /api/profile/latestaiuserresponse
+    GET /profile/latestaiuserresponse
     Get the latest AI analysis for current user
     """
     user = request.user

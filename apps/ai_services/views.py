@@ -218,7 +218,7 @@ def compare_cv_job_sse(request):
 @parser_classes([MultiPartParser, FormParser])
 def compare_cv_to_job_ad_v2(request):
     """
-    POST /api/Home/CompareCvToJobAdV2
+    POST /Home/CompareCvToJobAdV2
     Body: multipart/form-data with CvPath (file), JobAdText (string). Optional: language (default English).
     Returns: totalScore, skillsScore, professionScore, cvProfession, jobProfession, matches, totalRequirements.
     """

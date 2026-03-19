@@ -10,7 +10,7 @@ from apps.users.views import vector_search_jobs, ai_match_jobs
 class VectorSearchJobsEndpointTests(SimpleTestCase):
 	def setUp(self):
 		self.factory = APIRequestFactory()
-		self.url = "/api/profile/vectorsearchjobs/"
+		self.url = "/profile/vectorsearchjobs/"
 		self.user = type("AuthUser", (), {"is_authenticated": True})()
 
 	@patch("apps.users.views.UserAIJobMatchingService.create_vector_search_session")
@@ -33,7 +33,7 @@ class VectorSearchJobsEndpointTests(SimpleTestCase):
 class AIMatchJobsEndpointTests(SimpleTestCase):
 	def setUp(self):
 		self.factory = APIRequestFactory()
-		self.url = "/api/profile/aimatchjobs/"
+		self.url = "/profile/aimatchjobs/"
 		self.user = type("AuthUser", (), {"is_authenticated": True})()
 
 	def test_ai_match_jobs_requires_session_id(self):

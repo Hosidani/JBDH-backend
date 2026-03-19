@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterUserView(APIView):
     """
-    POST /api/Register/RegisterUser
+    POST /Register/RegisterUser
     Register a new user account
     """
     permission_classes = [AllowAny]
@@ -74,7 +74,7 @@ class RegisterUserView(APIView):
 
 class LoginView(APIView):
     """
-    POST /api/Login
+    POST /Login
     Authenticate user and create session
     """
     permission_classes = [AllowAny]
@@ -121,7 +121,7 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     """
-    GET/POST /api/Logout
+    GET/POST /Logout
     Logout current user
     """
     permission_classes = [IsAuthenticated]
@@ -142,7 +142,7 @@ class LogoutView(APIView):
 
 class VerifyEmailView(APIView):
     """
-    GET /api/Register/VerifyEmail?token=<token>
+    GET /Register/VerifyEmail?token=<token>
     Verify user email with token
     """
     permission_classes = [AllowAny]
@@ -173,7 +173,7 @@ class VerifyEmailView(APIView):
 
 class ResendVerificationEmailView(APIView):
     """
-    POST /api/Register/ResendVerificationEmail
+    POST /Register/ResendVerificationEmail
     Resend verification email
     """
     permission_classes = [AllowAny]

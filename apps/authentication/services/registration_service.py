@@ -128,7 +128,7 @@ class RegistrationService:
             # Build verification URL
             scheme = 'https' if request.is_secure() else 'http'
             host = request.get_host()
-            verification_url = f"{scheme}://{host}/api/Register/VerifyEmail?token={token}"
+            verification_url = f"{scheme}://{host}/Register/VerifyEmail?token={token}"
             
             subject = "Verify your email"
             message = f"Please verify your email by clicking this link: {verification_url}"

@@ -7,7 +7,7 @@ import urllib.request
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Manual test for /api/profile/comparecvjob/ endpoint"
+        description="Manual test for /profile/comparecvjob/ endpoint"
     )
     parser.add_argument("--base-url", default="http://127.0.0.1:8000", help="Backend base URL")
     parser.add_argument("--token", required=True, help="JWT access token")
@@ -43,7 +43,7 @@ def main() -> int:
     job_ad_text = resolve_text(args.job_ad_text, args.job_ad_file)
     cv_text = resolve_text(args.cv_text, args.cv_file)
 
-    endpoint = f"{args.base_url.rstrip('/')}/api/profile/comparecvjob/"
+    endpoint = f"{args.base_url.rstrip('/')}/profile/comparecvjob/"
     payload = {"language": args.language}
 
     if job_ad_text and cv_text:

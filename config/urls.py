@@ -29,15 +29,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.authentication.urls')),
     path('api/', include('apps.users.urls')),
-    # Compare CV to Job Ad V2 (frontend: POST /api/Home/CompareCvToJobAdV2)
+    # Compare CV to Job Ad V2 (frontend: POST /Home/CompareCvToJobAdV2)
     path('api/Home/CompareCvToJobAdV2', compare_cv_to_job_ad_v2, name='compare-cv-to-job-ad-v2'),
-    # Compare CV to Job SSE (frontend: POST /api/Home/CompareCvJobSSE)
+    # Compare CV to Job SSE (frontend: POST /Home/CompareCvJobSSE)
     path('api/home/CompareCvJobSSE', compare_cv_job_sse, name='compare_cv_job_sse'),
 
     # Frontend-kompatibla alias (PascalCase)
     path('api/profile/getmyprofile/', views.get_my_profile, name='get-my-profile-alias'),
     path('api/profile/getprofile/<int:user_id>/', views.get_profile, name='get-profile-alias'),
-    # Frontend-kompatibla alias (PascalCase) under /api/ hanteras redan via include/app-url-maps
+    # Frontend-kompatibla alias (PascalCase) under / hanteras redan via include/app-url-maps
     path('profile/analyzecv/', analyze_cv, name='analyze-cv'),
 ]
 
