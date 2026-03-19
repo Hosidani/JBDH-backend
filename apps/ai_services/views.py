@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.http import StreamingHttpResponse
-
+from apps.ai_services.services.cv_job_analysis_service import extract_cv_job_analysis
 import json
 from apps.ai_services.file_text_extraction_service import extract_text_from_file
 from core.utils import vectorize_text
@@ -24,6 +24,8 @@ from apps.ai_services.job_analysis_service import extract_job_requirements_and_p
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import renderer_classes
 from rest_framework.renderers import BaseRenderer
+from core.utils import vectorize_text
+from apps.ai_services.minilm_embedding_service import cosine_similarity
 
 class EventStreamRenderer(BaseRenderer):
     media_type = 'text/event-stream'
@@ -147,10 +149,55 @@ def compare_cv_job_sse(request):
         #     print("SSE event to FE:", error_event)
         #     yield error_event
         # Nytt steg 4: Kombinerad AI-analys med template 5
-        from apps.ai_services.services.cv_job_analysis_service import extract_cv_job_analysis
+
         result_json = extract_cv_job_analysis(cv_text, job_ad_text)
         if result_json:
-            final_event = f"data: {json.dumps({'progress': 100, 'message': '✅ AI-analys klar!', 'result': result_json})}\n\n"
+            def join_profession_fields(prof):
+                if not isinstance(prof, dict):
+                    return ""
+                return " ".join([prof.get(k, "") for k in ["main", "sub", "specialty"] if prof.get(k)])
+
+            def join_skill_names(skills):
+                if not isinstance(skills, list):
+                    return ""
+                return " ".join([s.get("name", "") for s in skills if isinstance(s, dict) and s.get("name")])
+
+
+
+            # Profession vector similarity
+            cv_profession_str = join_profession_fields(result_json.get("cv_profession", {}))
+            job_profession_str = join_profession_fields(result_json.get("job_profession", {}))
+            profession_vector_similarity = 0.0
+            if cv_profession_str.strip() and job_profession_str.strip():
+                profession_vector_similarity = round(
+                    cosine_similarity(
+                        vectorize_text(cv_profession_str),
+                        vectorize_text(job_profession_str)
+                    ) * 100, 2)
+
+            # Skills/requirements vector similarity
+            cv_skills_str = join_skill_names(result_json.get("cv_skills", []))
+            job_requirements_str = join_skill_names(result_json.get("job_requirements", []))
+            skills_vector_similarity = 0.0
+            if cv_skills_str.strip() and job_requirements_str.strip():
+                skills_vector_similarity = round(
+                    cosine_similarity(
+                        vectorize_text(cv_skills_str),
+                        vectorize_text(job_requirements_str)
+                    ) * 100, 2)
+
+            frontend_payload = {
+                "summary": result_json.get("summary", ""),
+                "matching_skills": result_json.get("cv_skills", []),
+                "missing_requirements": result_json.get("gaps", []),
+                "relevant_experiences": result_json.get("relevant_experiences", []),
+                "education_and_certifications": result_json.get("education_and_certifications", []),
+                "strengths": result_json.get("strengths", []),
+                "gaps": result_json.get("gaps", []),
+                "profession_vector_similarity": profession_vector_similarity,
+                "skills_vector_similarity": skills_vector_similarity,
+            }
+            final_event = f"data: {json.dumps({'progress': 100, 'message': '✅ AI-analys klar!', 'result': frontend_payload})}\n\n"
             print("SSE event to FE:", final_event)
             yield final_event
         else:

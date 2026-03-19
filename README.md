@@ -154,6 +154,19 @@ Starta:
 docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 ```
 
+bygga bara en eller flera container tillsammans:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
+
+
+docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend frontend
+```
+
+Starta utan att bygga:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
 Stoppa:
 
 ```bash

@@ -9,7 +9,7 @@ def extract_cv_job_analysis(cv_text: str, job_ad_text: str) -> dict | None:
     Kombinerad analys av CV och jobbannons med template 2.
     Returnerar ett dict med analysresultat eller None vid fel.
     """
-    prompt = AIMessageTemplates.USER_MESSAGE_TEMPLATES[2].format(JobAdText=job_ad_text, CVText=cv_text)
+    prompt = AIMessageTemplates.USER_MESSAGE_TEMPLATES[5].format(cv_text=cv_text, job_ad_text=job_ad_text)
     ai_result = AIClient.call_deepseek(prompt)
     logger = logging.getLogger(__name__)
     logger.info(f"DeepSeek full response: {ai_result!r}")

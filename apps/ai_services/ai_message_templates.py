@@ -66,34 +66,55 @@ class AIMessageTemplates:
             "\n\nUserAIResponse:\n{UserAIResponse}\n\nJobDescription:\n{JobDescription}"
         ),
         5: (
-            "🎯 **CV vs Jobb Matchningsanalys** 🎯\n\n"
-            "Analysera CV och jobbannons SAMULTAN. Ge:\n\n"
-            "1. **CV-profession**: main/sub/specialty (t.ex. 'Engineering > Software > Backend')\n"
-            "2. **CV-kompetenser**: name/category/importance (1-5)\n"
-            "3. **Jobb-profession**: main/sub/specialty\n"
-            "4. **Jobb-krav**: name/category/importance (1-5, 5=must-have)\n"
-            "5. **Matchningsresultat**:\n"
-            "   - totalMatchScore (0-100)\n"
-            "   - skillsMatchScore (0-100)\n"
-            "   - professionMatchScore (0-100)\n"
-            "6. **Sammanfattning** (1-2 meningar)\n"
-            "7. **Styrkor** (topp 3-5 matchningar)\n"
-            "8. **Brister** (topp 3-5 saknade krav)\n"
-            "9. **FitAssessment**: 'Excellent' | 'Good' | 'Fair' | 'Poor'\n\n"
-            "📋 **Format (ENDAST JSON, lowercase nycklar):**\n"
-            '{{\n'
-            '  "cvProfession": {{"main": "...", "sub": "...", "specialty": "..."}},\n'
-            '  "cvRequirements": [{{"name": "Python", "category": "skill", "importance": 5}}],\n'
-            '  "jobProfession": {{"main": "...", "sub": "...", "specialty": "..."}},\n'
-            '  "jobRequirements": [{{"name": "Docker", "category": "skill", "importance": 4}}],\n'
-            '  "matchScores": {{"totalMatchScore": 87, "skillsMatchScore": 82, "professionMatchScore": 95}},\n'
-            '  "summary": "Kandidaten är stark backendutvecklare med Docker/Python men saknar React frontend.",\n'
-            '  "strengths": ["Python expert", "Docker production", "FastAPI erfarenhet"],\n'
-            '  "gaps": ["React saknas", "Frontend testing", "TypeScript"],\n'
-            '  "fitAssessment": "Good"\n'
-            '}}\n\n'
-            "CV:\n---CV---\n{cv_text}\n---CV---\n\n"
-            "Jobbannons:\n---JOBB---\n{job_ad_text}\n---JOBB---"
+            "You are given a CV and a job advertisement.\n\n"
+            "Your task is to extract structured information to enable semantic matching.\n\n"
+            "IMPORTANT:\n"
+            "- Return ONLY valid JSON\n"
+            "- Do not include explanations, do NOT use markdown, code blocks, or extra formatting\n"
+            "- Keep the structure simple and consistent, If the response is too long, shorten lists or summarize, but always return valid, complete JSON.\n\n"
+            "Extract the following:\n\n"
+            "1. cv_profession:\n"
+            "   - main\n"
+            "   - sub\n"
+            "   - specialty\n\n"
+            "2. cv_skills:\n"
+            "   - list of objects with:\n"
+            "     - name\n"
+            "     - category (skill | tool | technology)\n"
+            "     - importance (1-5)\n\n"
+            "3. job_profession:\n"
+            "   - main\n"
+            "   - sub\n"
+            "   - specialty\n\n"
+            "4. job_requirements:\n"
+            "   - list of objects with:\n"
+            "     - name\n"
+            "     - category (skill | tool | technology)\n"
+            "     - importance (1-5)\n\n"
+            "5. relevant_experiences: []\n"
+            "6. summary:\n"
+            "   - short 1-2 sentence summary of fit\n\n"
+            "7. strengths:\n"
+            "   - list (max 5)\n\n"
+            "8. gaps:\n"
+            "   - list (max 5)\n\n"
+            "Return JSON in this format:\n\n"
+            "{{{{\n"
+            '  "cv_profession": {{{{ "main": "", "sub": "", "specialty": "" }}}},\n'
+            '  "cv_skills": [\n'
+            '    {{{{ "name": "", "category": "", "importance": 3 }}}}\n'
+            "  ],\n"
+            '  "job_profession": {{{{ "main": "", "sub": "", "specialty": "" }}}},\n'
+            '  "job_requirements": [\n'
+            '    {{{{ "name": "", "category": "", "importance": 4 }}}}\n'
+            "  ],\n"
+            '  "relevant_experiences": [],\n'
+            '  "summary": "",\n'
+            '  "strengths": [],\n'
+            '  "gaps": []\n'
+            "}}}}\n\n"
+            "CV:\n{cv_text}\n\n"
+            "Job:\n{job_ad_text}\n"
         ),
         # Template 7: CV → Profession + Requirements (same structure as job extraction)
         7: (
