@@ -26,7 +26,7 @@ class AccountSettingsSerializer(serializers.ModelSerializer):
     accountType = serializers.SerializerMethodField()
     isTerminated = serializers.BooleanField(source='is_terminated')
     acceptedTermsAndConditions = serializers.BooleanField(source='accepted_terms_and_conditions')
-    roles = serializers.SerializerMethodField()  # Ändra till SerializerMethodField
+    roles = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     organisations = serializers.SerializerMethodField()
 
     class Meta:
@@ -41,14 +41,20 @@ class AccountSettingsSerializer(serializers.ModelSerializer):
         # Map enum to int: 0=Basic, 1=Premium
         return 0 if obj.account_type == 'Basic' else 1
 
-    def get_roles(self, obj):
-        # Anpassa denna logik efter din databasstruktur
-        # Exempel: returnera roller kopplade till användaren
-        user = obj.user
-        # Om du har en relation eller lista av roller, returnera den här
-        # Exempel: return [role.name for role in user.roles.all()]
-        # Om du inte har roller, returnera en tom lista
-        return []
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['roles'] = list(instance.user.role_assignments.values_list('role', flat=True))
+        return data
+
+    def update(self, instance, validated_data):
+        from apps.users.models.roles import UserRoleAssignment
+        roles = validated_data.pop('roles', None)
+        instance = super().update(instance, validated_data)
+        if roles is not None:
+            UserRoleAssignment.objects.filter(user=instance.user).delete()
+            for role in roles:
+                UserRoleAssignment.objects.get_or_create(user=instance.user, role=role)
+        return instance
 
     def get_organisations(self, obj):
         user = obj.user
