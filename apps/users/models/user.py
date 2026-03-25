@@ -80,6 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     
     # Job search details
+    desired_job_title = models.CharField(max_length=255, null=True, blank=True)
     travel_availability = models.BooleanField(default=False)
     available_from = models.DateTimeField(null=True, blank=True)
     desired_city = models.CharField(max_length=255, null=True, blank=True)
