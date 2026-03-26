@@ -225,35 +225,42 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
 
 class MyProfileSerializer(serializers.ModelSerializer):
     """Serializer for user's own profile (full data)"""
-    selected_roles = serializers.SerializerMethodField()
-    ai_responses = serializers.SerializerMethodField()
-    owned_users = serializers.SerializerMethodField()
+    selectedRoles = serializers.SerializerMethodField()
+    aiResponses = serializers.SerializerMethodField()
+    ownedUsers = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
-    
+    phoneNumber = serializers.CharField(source='phone_number', allow_null=True, required=False)
+    travelAvailability = serializers.BooleanField(source='travel_availability', required=False)
+    desiredWorkModes = serializers.ListField(source='desired_work_modes', required=False, allow_null=True)
+    desiredEmploymentTypes = serializers.ListField(source='desired_employment_types', required=False, allow_null=True)
+    desiredCity = serializers.CharField(source='desired_city', allow_null=True, required=False)
+    desiredEmploymentType = serializers.CharField(source='desired_job_title', allow_null=True, required=False)
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+
     class Meta:
         model = User
         fields = [
             'id', 'email', 'location', 'name',
-            'desired_employment_types', 'desired_work_modes',
-            'phone_number', 'travel_availability', 'available_from',
-            'desired_city', 'work_place', 'competencies', 'cv_path',
+            'desiredEmploymentTypes', 'desiredWorkModes',
+            'phoneNumber', 'travelAvailability', 'available_from',
+            'desiredCity', 'work_place', 'competencies', 'cv_path',
             'developer_mode', 'searchable', 'is_banned', 'role',
-            'selected_roles', 'owner_id', 'about_me', 'created_at',
-            'ai_responses', 'owned_users', 'owner'
+            'selectedRoles', 'owner_id', 'about_me', 'createdAt',
+            'aiResponses', 'ownedUsers', 'owner', 'desiredEmploymentType'
         ]
-        read_only_fields = ['id', 'created_at', 'is_banned']
-    
-    def get_selected_roles(self, obj):
+        read_only_fields = ['id', 'createdAt', 'is_banned']
+
+    def get_selectedRoles(self, obj):
         return list(obj.role_assignments.values_list('role', flat=True))
-    
-    def get_ai_responses(self, obj):
+
+    def get_aiResponses(self, obj):
         responses = obj.ai_responses.all()
         return UserAIResponseSerializer(responses, many=True).data
-    
-    def get_owned_users(self, obj):
+
+    def get_ownedUsers(self, obj):
         owned = obj.owned_users.all()
         return [{'id': u.id, 'name': u.name} for u in owned]
-    
+
     def get_owner(self, obj):
         if obj.owner:
             return {'id': obj.owner.id, 'name': obj.owner.name}
@@ -263,22 +270,28 @@ class MyProfileSerializer(serializers.ModelSerializer):
 class UserSettingsSerializer(serializers.ModelSerializer):
     email = serializers.CharField(required=True)
     searchable = serializers.BooleanField(required=False)
-    travel_availability = serializers.BooleanField(required=False)
-    desired_work_modes = serializers.ListField(
+    travelAvailability = serializers.BooleanField(source='travel_availability', required=False)
+    desiredWorkModes = serializers.ListField(
+        source='desired_work_modes',
         child=serializers.ChoiceField(choices=["På plats", "Hybrid", "Distans"]),
         required=False
     )
+    desiredCity = serializers.CharField(source='desired_city', allow_null=True, required=False, allow_blank=True)
+    desiredEmploymentTypes = serializers.ListField(source='desired_employment_types', required=False)
+    desiredEmploymentType = serializers.CharField(source='desired_job_title', allow_null=True, required=False, allow_blank=True)
+    location = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
         fields = [
-            'name', 'email', 'phone_number',
-            'searchable', 'travel_availability', 'desired_work_modes'
+            'name', 'email', 'phone_number', 'location',
+            'searchable', 'travelAvailability', 'desiredWorkModes',
+            'desiredCity', 'desiredEmploymentTypes', 'desiredEmploymentType',
         ]
         extra_kwargs = {
-            'name': {'required': True},
+            'name': {'required': False},
             'email': {'required': True},
-            'phone_number': {'required': True},
+            'phone_number': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
 
 # Så här kan du förhindra inloggning för terminerade konton i Django REST Framework + SimpleJWT:
