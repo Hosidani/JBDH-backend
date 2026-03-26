@@ -1,4 +1,6 @@
 from rest_framework.views import APIView
+import json
+from core.utils import cosine_similarity
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
@@ -6,6 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from core.utils import vectorize_text
 from apps.jobs.models import Job, JobApplication, NotInterestedJob, SavedJob
 from apps.jobs.dto_mapper import build_job_details_dto, build_saved_job_dto
 from apps.jobs.services.job_interaction_service import (
@@ -178,50 +181,57 @@ def search_for_jobs(request):
 
 @require_GET
 def search_v2(request):
-    description = request.GET.get('description', '')
-    location = request.GET.get('location', '')
-    work_area = request.GET.get('workArea', '')
-    roles = request.GET.get('roles', '')
-    competence = request.GET.get('competence', '')
+    def get_param(name):
+        return request.GET.get(name, '').strip()
 
+    # DRY: Hämta alla sökparametrar
+    params = {
+        'description': get_param('description'),
+        'location': get_param('location'),
+        'workArea': get_param('workArea'),
+        'roles': get_param('roles'),
+        'competence': get_param('competence'),
+    }
+
+
+    # Skapa exakt 5 vektorer, en för varje sökfält (även om fältet är tomt)
+    description_vector = vectorize_text(params['description']) if params['description'] else []
+    location_vector = vectorize_text(params['location']) if params['location'] else []
+    workarea_vector = vectorize_text(params['workArea']) if params['workArea'] else []
+    roles_vector = vectorize_text(params['roles']) if params['roles'] else []
+    competence_vector = vectorize_text(params['competence']) if params['competence'] else []
+
+    # här vill jag räkna medelvärde av alla 5 vektorer för att skapa en sammanslagen sökvektor, det går bra att vara tomma vektorer i listan, de ska bara ignoreras i medelvärdesberäkningen
+    all_vectors = [v for v in [description_vector, location_vector, workarea_vector, roles_vector, competence_vector] if v]
+    if all_vectors:
+        search_vector = [sum(x) / len(all_vectors) for x in zip(*all_vectors)]
+    else:
+        search_vector = []
+
+    # hämta de närmaste jobben baserat på cosine similarity mellan sökvektorn och jobben i databasen med hjälp av pgvector
     jobs = Job.objects.all()
-    if description:
-        jobs = jobs.filter(description__icontains=description)
-    if location:
-        jobs = jobs.filter(location__icontains=location)
-    if work_area:
-        jobs = jobs.filter(work_type__icontains=work_area)  # Anpassa om du har annat fält
-    if roles:
-        jobs = jobs.filter(employment_type__icontains=roles)  # Anpassa om du har annat fält
-    if competence:
-        jobs = jobs.filter(required_skills__icontains=competence)  # <-- ändrat här!
-
     job_list = []
     for job in jobs:
-        job_list.append({
-            "externalJobId": job.job_id,  # <-- rätt fält
-            "jobId": job.id,
-            "title": job.title,
-            "description": job.description,
-            "company": job.company,
-            "location": job.location,
-            "postedDate": job.posted_date.isoformat() if job.posted_date else None,
-            "webpageUrl": job.webpage_url,
-            "workType": job.work_type,
-            "employmentType": job.employment_type,
-            "applicationDeadline": job.application_deadline.isoformat() if job.application_deadline else None,
-            "requiredSkills": build_job_details_dto(
-                job=job,
-                has_applied=False,
-                is_saved=False,
-                is_not_interested=False,
-                notes=None,
-            )["requiredSkills"],
-            "requiredSoftSkills": [],
-            "isSaved": False,
-            "hasApplied": False,
-            "isNotInterested": False,
-            # Lägg till fler fält om frontend behöver
-        })
+        if job.text_vector:
+            similarity = cosine_similarity(search_vector, job.text_vector)
+            job_list.append((similarity, job))
+    job_list.sort(key=lambda x: x[0], reverse=True)  # sortera efter likhet
+    job_list = [build_job_details_dto(
+        job=job,
+        has_applied=False,
+        is_saved=False,
+        is_not_interested=False,
+        notes=None,
+    ) for _, job in job_list[:20]]  # returnera top 20 resultat
 
-    return JsonResponse(job_list, safe=False)
+    #
+    print("Jobbresultat:", json.dumps(job_list, ensure_ascii=False, indent=2, default=str))
+    return JsonResponse({
+        "results": job_list,
+        "descriptionVector": description_vector,
+        "locationVector": location_vector,
+        "workAreaVector": workarea_vector,
+        "rolesVector": roles_vector,
+        "competenceVector": competence_vector,
+        "searchVector": search_vector,
+    }, safe=False)

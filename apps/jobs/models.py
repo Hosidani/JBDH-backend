@@ -1,5 +1,6 @@
 from django.db import models
 from apps.users.models import User
+from pgvector.django import VectorField
 
 class RawJob(models.Model):
     job_id = models.CharField(max_length=100, primary_key=True)  # Platsbankens/JobTechs id
@@ -22,6 +23,7 @@ class Job(models.Model):
     application_deadline = models.DateTimeField(null=True, blank=True)
     required_skills = models.CharField(max_length=1000, null=True, blank=True)
     text_vector = models.JSONField(null=True, blank=True)
+    text_vector_new = VectorField(dimensions=384, null=True, blank=True)
     recruiter = models.ForeignKey(User, related_name='recruited_jobs', null=True, blank=True, on_delete=models.SET_NULL)
     owner = models.ForeignKey(User, related_name='owned_jobs', null=True, blank=True, on_delete=models.SET_NULL)
 
