@@ -8,10 +8,12 @@ from django.middleware.csrf import get_token
 from apps.authentication.serializers import (
     RegisterUserSerializer,
     LoginSerializer,
-    UserSerializer
+    UserSerializer,
+    FeedbackSerializer
 )
 from apps.authentication.services.registration_service import RegistrationService
 from apps.authentication.services.login_service import LoginService
+from apps.authentication.services.email_service import EmailService
 import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -200,3 +202,30 @@ class ResendVerificationEmailView(APIView):
             {'message': result['message']},
             status=status.HTTP_200_OK
         )
+
+class FeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = FeedbackSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = serializer.validated_data
+        body = (
+            f"JBDH Feedback\n"
+            f"Namn: {data['accountName']}\n"
+            f"Email: {data['accountEmail']}\n"
+            f"URL: {data.get('url', 'Ingen')}\n"
+            f"Tid: {data['timestamp']}\n"
+            f"----------------------\n"
+            f"Feedback:\n{data['text']}"
+        )
+        result = EmailService().send_email(
+            to_email="info@loghouse.se",
+            subject="JBDH Feedback",
+            body=body
+        )
+        if result == "Success":
+            return Response({'success': True, 'message': 'Feedback skickad!'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'success': False, 'message': 'Kunde inte skicka feedback.', 'error': result}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

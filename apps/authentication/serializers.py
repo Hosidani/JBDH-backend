@@ -2,6 +2,7 @@ from rest_framework import serializers
 from apps.users.models import User, Account, UserRole, AccountType
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils import timezone
 
 class AnalyzeCVSerializer(serializers.Serializer):
     cv_file = serializers.FileField()
@@ -99,5 +100,13 @@ class AccountSerializer(serializers.ModelSerializer):
             'terms_accepted_at', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class FeedbackSerializer(serializers.Serializer):
+    text = serializers.CharField(max_length=2000, min_length=10)
+    url = serializers.CharField(required=False, allow_blank=True, max_length=300)
+    accountName = serializers.CharField(max_length=100)
+    accountEmail = serializers.EmailField()
+    timestamp = serializers.DateTimeField()
 
 
