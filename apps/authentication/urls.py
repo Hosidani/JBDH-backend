@@ -6,6 +6,7 @@ from apps.authentication.views import (
     VerifyEmailView,
     ResendVerificationEmailView
 )
+from .views import FeedbackView
 
 app_name = 'authentication'
 
@@ -16,4 +17,5 @@ urlpatterns = [
     path('Logout', LogoutView.as_view(), name='logout'),
     path('Register/VerifyEmail', VerifyEmailView.as_view(), name='verify-email'),
     path('Register/ResendVerificationEmail', ResendVerificationEmailView.as_view(), name='resend-verification'),
+    path('feedback/', FeedbackView.as_view(), name='feedback'),
 ]
