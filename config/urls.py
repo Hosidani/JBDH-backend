@@ -18,8 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from apps.authentication.views import FeedbackView 
 from apps.users import views
-from apps.authentication.views import RegisterUserView, LoginView, LogoutView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.users.views import analyze_cv
 from apps.ai_services.views import compare_cv_to_job_ad_v2, compare_cv_job_sse
@@ -70,4 +70,5 @@ urlpatterns += [
     path('api/Search/SearchV2', search_v2, name='search_v2'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api/feedback/', FeedbackView.as_view(), name='feedback'),
 ]
