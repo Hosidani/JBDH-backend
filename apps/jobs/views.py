@@ -210,6 +210,17 @@ def search_v2(request):
 
     # hämta de närmaste jobben baserat på cosine similarity mellan sökvektorn och jobben i databasen med hjälp av pgvector
     jobs = Job.objects.all()
+    if params['description']:
+        jobs = jobs.filter(description__icontains=params['description'])
+    if params['location']:
+        jobs = jobs.filter(location__icontains=params['location'])
+    if params['workArea']:
+        jobs = jobs.filter(line_of_business__icontains=params['workArea'])
+    if params['roles']:
+        jobs = jobs.filter(employment_type__icontains=params['roles'])
+    if params['competence']:
+        jobs = jobs.filter(required_skills__icontains=params['competence'])
+
     job_list = []
     for job in jobs:
         if job.text_vector:

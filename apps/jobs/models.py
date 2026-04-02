@@ -20,6 +20,7 @@ class Job(models.Model):
     webpage_url = models.CharField(max_length=500, null=True, blank=True)
     work_type = models.CharField(max_length=50, null=True, blank=True)
     employment_type = models.CharField(max_length=50, null=True, blank=True)
+    line_of_business = models.CharField(max_length=200, null=True, blank=True)
     application_deadline = models.DateTimeField(null=True, blank=True)
     required_skills = models.CharField(max_length=1000, null=True, blank=True)
     text_vector = models.JSONField(null=True, blank=True)
