@@ -25,6 +25,11 @@ class Job(models.Model):
     required_skills = models.CharField(max_length=1000, null=True, blank=True)
     text_vector = models.JSONField(null=True, blank=True)
     text_vector_new = VectorField(dimensions=384, null=True, blank=True)
+    description_vector = VectorField(dimensions=384, null=True, blank=True)
+    location_vector = VectorField(dimensions=384, null=True, blank=True)
+    line_of_business_vector = VectorField(dimensions=384, null=True, blank=True)
+    employment_type_vector = VectorField(dimensions=384, null=True, blank=True)
+    competence_vector = VectorField(dimensions=384, null=True, blank=True)
     recruiter = models.ForeignKey(User, related_name='recruited_jobs', null=True, blank=True, on_delete=models.SET_NULL)
     owner = models.ForeignKey(User, related_name='owned_jobs', null=True, blank=True, on_delete=models.SET_NULL)
 

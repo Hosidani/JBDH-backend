@@ -221,11 +221,27 @@ def search_v2(request):
     if params['competence']:
         jobs = jobs.filter(required_skills__icontains=params['competence'])
 
+    vector_pairs = [
+        (description_vector, 'description_vector'),
+        (location_vector, 'location_vector'),
+        (workarea_vector, 'line_of_business_vector'),
+        (roles_vector, 'employment_type_vector'),
+        (competence_vector, 'competence_vector'),
+    ]
+
     job_list = []
     for job in jobs:
-        if job.text_vector:
-            similarity = cosine_similarity(search_vector, job.text_vector)
-            job_list.append((similarity, job))
+        scores = []
+        for query_vector, field_name in vector_pairs:
+            if not query_vector:
+                continue
+
+            job_vector = getattr(job, field_name, None) or []
+            if job_vector:
+                scores.append(cosine_similarity(query_vector, job_vector))
+
+        similarity = (sum(scores) / len(scores)) if scores else 0.0
+        job_list.append((similarity, job))
     job_list.sort(key=lambda x: x[0], reverse=True)  # sortera efter likhet
     job_list = [build_job_details_dto(
         job=job,
@@ -234,6 +250,7 @@ def search_v2(request):
         is_not_interested=False,
         notes=None,
     ) for _, job in job_list[:20]]  # returnera top 20 resultat
+    job_list = job_list if isinstance(job_list, list) else []
 
     #
     print("Jobbresultat:", json.dumps(job_list, ensure_ascii=False, indent=2, default=str))
