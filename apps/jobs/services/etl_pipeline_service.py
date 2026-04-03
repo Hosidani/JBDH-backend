@@ -184,14 +184,66 @@ class ETLPipelineService:
             return None
         return vectorize_text(normalized, context="job") or None
 
+    @staticmethod
+    def _extract_line_of_business_from_raw(raw_data):
+        def _label_or_empty(value):
+            if isinstance(value, dict):
+                return (value.get("label") or "").strip()
+            if isinstance(value, str):
+                return value.strip()
+            return ""
+
+        return (
+            _label_or_empty(raw_data.get("occupation_field"))
+            or _label_or_empty(raw_data.get("occupation_group"))
+            or _label_or_empty(raw_data.get("occupation"))
+            or ""
+        )
+
+    @classmethod
+    def backfill_missing_line_of_business(cls, limit=500):
+        jobs = list(
+            Job.objects.filter(Q(line_of_business__isnull=True) | Q(line_of_business=""))
+            .order_by("id")[:limit]
+        )
+        if not jobs:
+            logger.info("🏷️ line_of_business backfill | nothing missing")
+            return 0
+
+        job_ids = [job.job_id for job in jobs]
+        raw_map = {
+            row["job_id"]: row["raw_data"]
+            for row in RawJob.objects.filter(job_id__in=job_ids).values("job_id", "raw_data")
+        }
+
+        updated = 0
+        for job in jobs:
+            raw_data = raw_map.get(job.job_id) or {}
+            line_of_business = cls._extract_line_of_business_from_raw(raw_data)
+            if not line_of_business:
+                continue
+
+            job.line_of_business = line_of_business
+            if job.line_of_business_vector is None:
+                job.line_of_business_vector = cls._to_vector_or_none(line_of_business)
+                job.save(update_fields=["line_of_business", "line_of_business_vector"])
+            else:
+                job.save(update_fields=["line_of_business"])
+            updated += 1
+
+        logger.info("🏷️ line_of_business backfill | scanned=%s updated=%s", len(jobs), updated)
+        return updated
+
     @classmethod
     def backfill_missing_job_vectors(cls, limit=300):
+        # Only select jobs where a source field has text but its vector is still missing.
+        # This prevents re-processing jobs with empty source fields indefinitely.
         missing_filter = (
-            Q(description_vector__isnull=True)
-            | Q(location_vector__isnull=True)
-            | Q(line_of_business_vector__isnull=True)
-            | Q(employment_type_vector__isnull=True)
-            | Q(competence_vector__isnull=True)
+            (Q(description__isnull=False) & ~Q(description='') & Q(description_vector__isnull=True))
+            | (Q(location__isnull=False) & ~Q(location='') & Q(location_vector__isnull=True))
+            | (Q(line_of_business__isnull=False) & ~Q(line_of_business='') & Q(line_of_business_vector__isnull=True))
+            | (Q(title__isnull=False) & ~Q(title='') & Q(title_vector__isnull=True))
+            | (Q(required_skills__isnull=False) & Q(competence_vector__isnull=True))
         )
 
         jobs = list(Job.objects.filter(missing_filter).order_by("id")[:limit])
@@ -204,7 +256,7 @@ class ETLPipelineService:
             "description_vector",
             "location_vector",
             "line_of_business_vector",
-            "employment_type_vector",
+            "title_vector",
             "competence_vector",
         ]
 
@@ -221,8 +273,8 @@ class ETLPipelineService:
             if job.line_of_business_vector is None:
                 job.line_of_business_vector = cls._to_vector_or_none(job.line_of_business)
                 changed = True
-            if job.employment_type_vector is None:
-                job.employment_type_vector = cls._to_vector_or_none(job.employment_type)
+            if job.title_vector is None:
+                job.title_vector = cls._to_vector_or_none(job.title)
                 changed = True
             if job.competence_vector is None:
                 job.competence_vector = cls._to_vector_or_none(skill_text)
@@ -331,7 +383,7 @@ class ETLPipelineService:
             job_data["description_vector"] = ETLPipelineService._to_vector_or_none(job_data.get("description"))
             job_data["location_vector"] = ETLPipelineService._to_vector_or_none(job_data.get("location"))
             job_data["line_of_business_vector"] = ETLPipelineService._to_vector_or_none(job_data.get("line_of_business"))
-            job_data["employment_type_vector"] = ETLPipelineService._to_vector_or_none(job_data.get("employment_type"))
+            job_data["title_vector"] = ETLPipelineService._to_vector_or_none(job_data.get("title"))
             job_data["competence_vector"] = ETLPipelineService._to_vector_or_none(skill_text)
 
             transformed_jobs.append(job_data)
@@ -345,6 +397,20 @@ class ETLPipelineService:
     @staticmethod
     def _transform_single_job(raw_data):
         """Hjälpfunktion: raw_data → Job dictionary"""
+        def _label_or_empty(value):
+            if isinstance(value, dict):
+                return value.get("label", "") or ""
+            if isinstance(value, str):
+                return value
+            return ""
+
+        line_of_business = (
+            _label_or_empty(raw_data.get("occupation_field"))
+            or _label_or_empty(raw_data.get("occupation_group"))
+            or _label_or_empty(raw_data.get("occupation"))
+            or ""
+        )
+
         # Hantera datum
         raw_date = raw_data.get("publication_date")
         posted_date = None
@@ -382,7 +448,7 @@ class ETLPipelineService:
             "webpage_url": raw_data.get("webpage_url"),
             "work_type": raw_data.get("working_hours_type", {}).get("label", "") if raw_data.get("working_hours_type") else "",
             "employment_type": raw_data.get("employment_type", {}).get("label", "") if raw_data.get("employment_type") else "",
-            "line_of_business": raw_data.get("occupation_field", {}).get("label", "") if raw_data.get("occupation_field") else "",
+            "line_of_business": line_of_business,
             "application_deadline": application_deadline,
             "required_skills": json.dumps({
                 "needs": raw_data.get("needs", []),
@@ -455,8 +521,11 @@ class ETLPipelineService:
             total_raw = raw_count
             logger.warning("⚠️ total_raw var 0, fallback till raw_count=%s", total_raw)
 
+        # Fyll först saknad line_of_business från rådata, sedan saknade vektorer.
+        cls.backfill_missing_line_of_business(limit=min(batch_size, 5000))
+
         # Kör alltid en liten backfill-batch så äldre jobb med saknade vektorer fylls upp över tid.
-        cls.backfill_missing_job_vectors(limit=min(batch_size, 500))
+        cls.backfill_missing_job_vectors(limit=min(batch_size, 5000))
 
         if processed > raw_count:
             logger.warning("⚠️ Ogiltig progress (%s) > RawJob-count (%s) - reset till 0", processed, raw_count)

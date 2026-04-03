@@ -1,13 +1,15 @@
 from rest_framework.views import APIView
 import json
-from core.utils import cosine_similarity
+from functools import lru_cache, reduce
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from django.db.models import Q
+from django.db.models import Q, F, Value, FloatField, ExpressionWrapper
+from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from pgvector.django import CosineDistance
 from core.utils import vectorize_text
 from apps.jobs.models import Job, JobApplication, NotInterestedJob, SavedJob
 from apps.jobs.dto_mapper import build_job_details_dto, build_saved_job_dto
@@ -179,12 +181,17 @@ def search_for_jobs(request):
     return Response(result)
 
 
+@lru_cache(maxsize=512)
+def _cached_query_embedding(text: str) -> tuple[float, ...]:
+    vector = vectorize_text(text, context="job") or []
+    return tuple(vector)
+
+
 @require_GET
 def search_v2(request):
     def get_param(name):
         return request.GET.get(name, '').strip()
 
-    # DRY: Hämta alla sökparametrar
     params = {
         'description': get_param('description'),
         'location': get_param('location'),
@@ -193,73 +200,108 @@ def search_v2(request):
         'competence': get_param('competence'),
     }
 
+    jobs = Job.objects.all()
 
-    # Skapa exakt 5 vektorer, en för varje sökfält (även om fältet är tomt)
-    description_vector = vectorize_text(params['description']) if params['description'] else []
-    location_vector = vectorize_text(params['location']) if params['location'] else []
-    workarea_vector = vectorize_text(params['workArea']) if params['workArea'] else []
-    roles_vector = vectorize_text(params['roles']) if params['roles'] else []
-    competence_vector = vectorize_text(params['competence']) if params['competence'] else []
+    field_mapping = {
+        'description': 'description_vector',
+        'location': 'location_vector',
+        'workArea': 'line_of_business_vector',
+        'roles': 'title_vector',
+        'competence': 'competence_vector',
+    }
+    text_field_mapping = {
+        'description': ['description', 'title'],
+        'location': ['location'],
+        'workArea': ['line_of_business', 'title', 'description'],
+        'roles': ['title', 'description'],
+        'competence': ['required_skills', 'description'],
+    }
 
-    # här vill jag räkna medelvärde av alla 5 vektorer för att skapa en sammanslagen sökvektor, det går bra att vara tomma vektorer i listan, de ska bara ignoreras i medelvärdesberäkningen
-    all_vectors = [v for v in [description_vector, location_vector, workarea_vector, roles_vector, competence_vector] if v]
+    similarity_aliases = []
+    similarity_threshold = 0.3
+    query_vectors = {
+        'description': [],
+        'location': [],
+        'workArea': [],
+        'roles': [],
+        'competence': [],
+    }
+
+    for param_key, db_vector_field in field_mapping.items():
+        query_text = params.get(param_key, '')
+        if not query_text:
+            continue
+
+        db_text_fields = text_field_mapping[param_key]
+        text_query = Q()
+        for field_name in db_text_fields:
+            text_query |= Q(**{f"{field_name}__icontains": query_text})
+
+        query_vector = list(_cached_query_embedding(query_text))
+        if not query_vector:
+            jobs = jobs.filter(text_query)
+            continue
+
+        query_vectors[param_key] = query_vector
+
+        distance_alias = f"{param_key}_distance"
+        similarity_alias = f"{param_key}_similarity"
+
+        jobs = jobs.annotate(**{distance_alias: CosineDistance(db_vector_field, query_vector)})
+        jobs = jobs.annotate(
+            **{
+                similarity_alias: ExpressionWrapper(
+                    Value(1.0) - F(distance_alias),
+                    output_field=FloatField(),
+                )
+            }
+        )
+        jobs = jobs.filter(
+            Q(**{f"{similarity_alias}__gt": similarity_threshold})
+            | text_query
+        )
+        similarity_aliases.append(similarity_alias)
+
+    if similarity_aliases:
+        similarity_values = [Coalesce(F(alias), Value(0.0)) for alias in similarity_aliases]
+        total_similarity_expr = reduce(
+            lambda left, right: left + right,
+            similarity_values[1:],
+            similarity_values[0],
+        )
+        jobs = jobs.annotate(
+            overall_similarity=ExpressionWrapper(
+                total_similarity_expr / Value(float(len(similarity_aliases))),
+                output_field=FloatField(),
+            )
+        ).order_by('-overall_similarity')
+    else:
+        jobs = jobs.order_by('-posted_date')
+
+    job_list = [
+        build_job_details_dto(
+            job=job,
+            has_applied=False,
+            is_saved=False,
+            is_not_interested=False,
+            notes=None,
+        )
+        for job in jobs[:20]
+    ]
+
+    all_vectors = [v for v in query_vectors.values() if v]
     if all_vectors:
         search_vector = [sum(x) / len(all_vectors) for x in zip(*all_vectors)]
     else:
         search_vector = []
 
-    # hämta de närmaste jobben baserat på cosine similarity mellan sökvektorn och jobben i databasen med hjälp av pgvector
-    jobs = Job.objects.all()
-    if params['description']:
-        jobs = jobs.filter(description__icontains=params['description'])
-    if params['location']:
-        jobs = jobs.filter(location__icontains=params['location'])
-    if params['workArea']:
-        jobs = jobs.filter(line_of_business__icontains=params['workArea'])
-    if params['roles']:
-        jobs = jobs.filter(employment_type__icontains=params['roles'])
-    if params['competence']:
-        jobs = jobs.filter(required_skills__icontains=params['competence'])
-
-    vector_pairs = [
-        (description_vector, 'description_vector'),
-        (location_vector, 'location_vector'),
-        (workarea_vector, 'line_of_business_vector'),
-        (roles_vector, 'employment_type_vector'),
-        (competence_vector, 'competence_vector'),
-    ]
-
-    job_list = []
-    for job in jobs:
-        scores = []
-        for query_vector, field_name in vector_pairs:
-            if not query_vector:
-                continue
-
-            job_vector = getattr(job, field_name, None) or []
-            if job_vector:
-                scores.append(cosine_similarity(query_vector, job_vector))
-
-        similarity = (sum(scores) / len(scores)) if scores else 0.0
-        job_list.append((similarity, job))
-    job_list.sort(key=lambda x: x[0], reverse=True)  # sortera efter likhet
-    job_list = [build_job_details_dto(
-        job=job,
-        has_applied=False,
-        is_saved=False,
-        is_not_interested=False,
-        notes=None,
-    ) for _, job in job_list[:20]]  # returnera top 20 resultat
-    job_list = job_list if isinstance(job_list, list) else []
-
-    #
     print("Jobbresultat:", json.dumps(job_list, ensure_ascii=False, indent=2, default=str))
     return JsonResponse({
         "results": job_list,
-        "descriptionVector": description_vector,
-        "locationVector": location_vector,
-        "workAreaVector": workarea_vector,
-        "rolesVector": roles_vector,
-        "competenceVector": competence_vector,
+        "descriptionVector": query_vectors['description'],
+        "locationVector": query_vectors['location'],
+        "workAreaVector": query_vectors['workArea'],
+        "rolesVector": query_vectors['roles'],
+        "competenceVector": query_vectors['competence'],
         "searchVector": search_vector,
     }, safe=False)
