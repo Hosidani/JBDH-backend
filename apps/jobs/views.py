@@ -199,7 +199,13 @@ def search_v2(request):
         'roles': get_param('roles'),
         'competence': get_param('competence'),
     }
+    # 1. Förbättra hastigheten: Använd .only() eller .values_list()/ Filterer i databasen istället för att hämta alla jobb och filtrera i Python. Detta gör att vi kan utnyttja indexering och vektorberäkningar i databasen, vilket är mycket snabbare än att göra det i applikationslagret.
+    # 2.  Sökkvalitet: Viktning (Boosting) LOCATION högre än DESCRIPTION, eftersom användare ofta värderar plats mer än andra faktorer. Detta kan göras genom att justera tröskelvärdena eller vikterna i sökalgoritmen.'
+    # 3. Hantering av tomma sökningar Problem: Om en användare inte fyller i något alls (else-blocket), sorterar du på posted_date.
 
+    # TODO: Implementera Geokodning (t.ex. GeoPy). 
+    # Istället för att bara förlita oss på MiniLM-likhet för städer, bör vi 
+    # omvandla söksträngen till lat/long för att stödja radiesökning (+50 km).
     jobs = Job.objects.all()
 
     field_mapping = {
