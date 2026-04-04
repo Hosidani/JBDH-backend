@@ -4,6 +4,28 @@ from typing import Any
 from apps.jobs.models import Job, SavedJob
 
 
+def _extract_skill_names(items: Any) -> list[str]:
+    if not isinstance(items, list):
+        return []
+
+    result: list[str] = []
+    for item in items:
+        if isinstance(item, str):
+            text = item.strip()
+            if text:
+                result.append(text)
+            continue
+
+        if isinstance(item, dict):
+            for key in ("label", "name", "skill", "value"):
+                value = item.get(key)
+                if isinstance(value, str) and value.strip():
+                    result.append(value.strip())
+                    break
+
+    return result
+
+
 def _to_skill_list(value: Any) -> list[str]:
     if value is None:
         return []
@@ -14,6 +36,19 @@ def _to_skill_list(value: Any) -> list[str]:
     text = str(value).strip()
     if not text:
         return []
+
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, list):
+            return [str(item).strip() for item in parsed if str(item).strip()]
+
+        if isinstance(parsed, dict):
+            # ETL lagrar ofta required_skills som {"needs": [...], "requirements": [...]}.
+            needs = _extract_skill_names(parsed.get("needs"))
+            requirements = _extract_skill_names(parsed.get("requirements"))
+            return [item for item in needs + requirements if item]
+    except (json.JSONDecodeError, TypeError):
+        pass
 
     if text.startswith("[") and text.endswith("]"):
         try:
