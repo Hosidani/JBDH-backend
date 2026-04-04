@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple
 from django.db.models import Case, ExpressionWrapper, F, FloatField, IntegerField, Q, Value, When
 from django.db.models.functions import Lower, StrIndex
 from pgvector.django import CosineDistance
+from .job_interaction_service import JobInteractionService
 from apps.jobs.dto_mapper import build_job_details_dto
 from apps.jobs.models import Job
 from core.utils import build_embedding_text, rank_by_vector_similarity, vectorize_text
@@ -179,6 +180,39 @@ class SemanticJobConfig:
             )
             for j in jobs
         ]
+    
+    @staticmethod
+    def basic_search(description: str, location: str, user: Any) -> List[Dict]:
+        jobs = Job.objects.all()
+        
+        # 1. Vanlig text-filtrering
+        if description:
+            jobs = jobs.filter(Q(title__icontains=description) | Q(description__icontains=description))
+        if location:
+            jobs = jobs.filter(location__icontains=location)
+
+        # Begränsa resultatet tidigt för prestanda
+        jobs = jobs[:20] 
+        job_ids = [j.id for j in jobs]
+        user_id = user.id if user and user.is_authenticated else None
+
+        # 2. Hämta kontext (sparade/dolda) via vår nya metod i InteractionService
+        context = JobInteractionService.get_user_interaction_context(user_id, job_ids)
+
+        # 3. Bygg DTOs och exkludera dolda jobb
+        results = []
+        for job in jobs:
+            if job.id in context["not_interested_ids"]:
+                continue
+            
+            results.append(build_job_details_dto(
+                job=job,
+                has_applied=False, # Kan utökas vid behov
+                is_saved=job.id in context["saved_ids"],
+                is_not_interested=False,
+                notes=None
+            ))
+        return results
 
 class SemanticJobService:
     @staticmethod
