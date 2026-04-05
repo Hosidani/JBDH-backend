@@ -11,7 +11,7 @@ from django.db.models import Q
 
 from apps.jobs.models import Job
 from apps.ai_services.models import JobAIResponse
-from apps.ai_services.ai_message_templates import AIMessageTemplates
+from apps.ai_services.infrastructure.ai_message_templates import AIMessageTemplates
 
 logger = logging.getLogger(__name__)
 

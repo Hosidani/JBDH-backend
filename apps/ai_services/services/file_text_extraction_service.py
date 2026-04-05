@@ -6,7 +6,7 @@ import os
 import logging
 from typing import Optional
 
-from apps.ai_services.pdf_text_extraction_service import PDFTextExtractionService
+from apps.ai_services.services.pdf_text_extraction_service import PDFTextExtractionService
 
 logger = logging.getLogger(__name__)
 

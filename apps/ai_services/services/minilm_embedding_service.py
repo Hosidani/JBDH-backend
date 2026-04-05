@@ -1,9 +1,9 @@
 from typing import Optional
-from apps.ai_services.ai_models import Profession
+from apps.ai_services.domain.ai_models import Profession
 import math
 from typing import List, Tuple, Any
-from apps.ai_services.ai_config import AIConfig
-from apps.ai_services.ai_models import RequirementItem
+from apps.ai_services.infrastructure.ai_config import AIConfig
+from apps.ai_services.domain.ai_models import RequirementItem
 
 
 def calculate_profession_score_with_embeddings_minilm(

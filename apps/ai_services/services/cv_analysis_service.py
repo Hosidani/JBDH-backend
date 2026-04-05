@@ -3,10 +3,17 @@
 import logging
 import json
 import re
-from apps.ai_services.ai_client import AIClient
-from apps.ai_services.ai_message_templates import AIMessageTemplates
-from apps.ai_services.user_ai_response_service import UserAIResponseService
-from apps.ai_services.ai_models import CVAnalysisResult, RequirementExtractionResponse
+import os
+from django.conf import settings
+from apps.ai_services.infrastructure.ai_client import AIClient
+from apps.ai_services.infrastructure.ai_message_templates import AIMessageTemplates
+from apps.ai_services.services.user_ai_response_service import UserAIResponseService
+from apps.ai_services.domain.ai_models import CVAnalysisResult, RequirementExtractionResponse
+from apps.ai_services.services.pdf_text_extraction_service import PDFTextExtractionService
+try:
+    from apps.ai_services.domain.exceptions import MissingRequiredFileError, TextExtractionError, AIExtractionError
+except ImportError:
+    from apps.ai_services.domain.exceptions import MissingRequiredFileError, TextExtractionError, AIExtractionError
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +52,65 @@ def extract_json_from_code_block(text):
     return text.strip()
 
 class CVAnalysisService:
+    LANGUAGE_MAP = {
+        "sv": "Swedish",
+        "en": "English",
+        "swedish": "Swedish",
+        "english": "English",
+        "Swedish": "Swedish",
+        "English": "English",
+    }
+
+    @classmethod
+    def normalize_language(cls, language_raw: str | None) -> str:
+        if language_raw is None:
+            return "English"
+        language = str(language_raw).strip().strip('"')
+        return cls.LANGUAGE_MAP.get(language, cls.LANGUAGE_MAP.get(language.lower(), "English"))
+
+    def analyze_uploaded_cv(self, user, cv_file, language_raw: str | None = None):
+        """End-to-end CV upload + text extraction + AI analysis for the profile endpoint."""
+        if not cv_file:
+            raise MissingRequiredFileError("No CV file provided")
+
+        language = self.normalize_language(language_raw)
+
+        upload_dir = os.path.join(settings.MEDIA_ROOT, "cvs")
+        os.makedirs(upload_dir, exist_ok=True)
+
+        file_name = f"cv_{user.id}_{cv_file.name}"
+        file_path = os.path.join(upload_dir, file_name)
+
+        with open(file_path, "wb+") as destination:
+            for chunk in cv_file.chunks():
+                destination.write(chunk)
+
+        user.cv_path = file_path
+        user.save()
+
+        try:
+            cv_text = PDFTextExtractionService.extract_text_from_pdf(file_path)
+        except Exception as ex:
+            raise TextExtractionError(f"Failed to extract text from PDF: {ex}") from ex
+
+        if not cv_text or not cv_text.strip():
+            raise TextExtractionError("Could not extract text from CV")
+
+        try:
+            analysis_result = self.analyze_and_save_cv(user, cv_text, language)
+        except Exception as ex:
+            raise AIExtractionError(f"AI analysis failed: {ex}") from ex
+
+        if not analysis_result or not analysis_result.get("success"):
+            raise AIExtractionError("AI analysis failed")
+
+        return {
+            "success": True,
+            "message": "CV uploaded and analysis completed.",
+            "savedResponseId": analysis_result.get("savedResponseId"),
+            "language": language,
+        }
+
     @staticmethod
     def _attempt_repair_json(raw: str) -> str | None:
         if not raw or not raw.strip():

@@ -11,9 +11,12 @@ from .serializers import (
     MyProfileSerializer,
     UserAIResponseSerializer,
 )
-from apps.ai_services.cv_analysis_service import CVAnalysisService
-from apps.ai_services.user_ai_job_matching_service import UserAIJobMatchingService
-from apps.ai_services.pdf_text_extraction_service import PDFTextExtractionService
+from apps.ai_services.services.cv_analysis_service import CVAnalysisService
+from apps.ai_services.services.user_ai_job_matching_service import UserAIJobMatchingService
+try:
+    from apps.ai_services.domain.exceptions import MissingRequiredFileError
+except ImportError:
+    from apps.ai_services.domain.exceptions import MissingRequiredFileError
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -64,115 +67,15 @@ def get_my_profile(request):
 @parser_classes([MultiPartParser, FormParser])
 
 def analyze_cv(request):
-    """
-    POST /profile/analyzecv
-    Upload and analyze CV file, call CVAnalysisService, debug Deepseek flow
-    """
+    """POST /profile/analyzecv: Upload CV and run AI analysis via service layer."""
     logger.info("AnalyzeCV endpoint called")
-
-    # Log raw request info
-    logger.info(f"RAW META CONTENT_TYPE: {request.META.get('CONTENT_TYPE')}")
-    logger.info(f"request.content_type: {request.content_type}")
-    logger.info(f"request.method: {request.method}")
-    logger.info(f"request.path: {request.path}")
-    logger.info(f"Request.FILES keys: {list(request.FILES.keys())}")
-    logger.info(f"Request.FILES: {request.FILES}")
-    logger.info(f"Request.POST: {request.POST}")
-    try:
-        logger.info(f"Raw body (truncated): {request.body[:500]}")
-    except Exception as e:
-        logger.warning(f"Could not read request.body: {e}")
-    logger.info(f"Request.data: {request.data}")
-    logger.info(f"Request.headers: {dict(request.headers)}")
-
-    user = request.user
-    cv_file = request.FILES.get('cv_file')
-    language_raw = request.data.get('language', 'English')
-    logger.info(f"Language received from request: {language_raw}")
-    LANGUAGE_MAP = {
-        "sv": "Swedish",
-        "en": "English",
-        "Swedish": "Swedish",
-        "English": "English"
-    }
-    language = LANGUAGE_MAP.get(language_raw, 'English')
-    # Remove any accidental extra quotes from language string
-    if isinstance(language, str):
-        language = language.strip('"')
-    logger.info(f"Language after mapping: {language}")
-
-    if not cv_file:
-        logger.warning("No CV file provided in request.FILES")
-        return Response(
-            {"error": "No CV file provided"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    try:
-        import os
-        from django.conf import settings
-
-        upload_dir = os.path.join(settings.MEDIA_ROOT, 'cvs')
-        os.makedirs(upload_dir, exist_ok=True)
-
-        file_name = f"cv_{user.id}_{cv_file.name}"
-        file_path = os.path.join(upload_dir, file_name)
-
-        with open(file_path, 'wb+') as destination:
-            for chunk in cv_file.chunks():
-                destination.write(chunk)
-
-        user.cv_path = file_path
-        user.save()
-
-
-        # Extract text from PDF for AI analysis
-        try:
-            cv_text = PDFTextExtractionService.extract_text_from_pdf(file_path)
-        except Exception as e:
-            logger.error(f"Failed to extract text from PDF: {e}")
-            return Response({"error": f"Failed to extract text from PDF: {e}"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Replace newlines with spaces for logging
-        cv_text_single_line = cv_text.replace('\n', ' ').replace('\r', ' ')
-        logger.info(f"CV file content (truncated): {cv_text_single_line[:500]}")
-
-        # Extract text from PDF for AI analysis
-        try:
-            cv_text = PDFTextExtractionService.extract_text_from_pdf(file_path)
-        except Exception as e:
-            logger.error(f"Failed to extract text from PDF: {e}")
-            return Response({"error": f"Failed to extract text from PDF: {e}"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Call CVAnalysisService with debug logging
-        service = CVAnalysisService()
-        logger.info("Calling CVAnalysisService.analyze_and_save_cv...")
-        try:
-            analysis_result = service.analyze_and_save_cv(user, cv_text, language)
-            if not analysis_result or not analysis_result.get("success"):
-                return Response({"error": "AI analysis failed"}, status=status.HTTP_502_BAD_GATEWAY)
-            logger.info("CVAnalysisService completed successfully.")
-        except Exception as e:
-            import traceback
-            logger.error(f"CVAnalysisService failed: {e} (type: {type(e)})\nTraceback:\n{traceback.format_exc()}")
-            return Response({"error": f"AI analysis failed: {e}"}, status=status.HTTP_502_BAD_GATEWAY)
-
-        # Fetch latest AI responses for user
-        ai_responses = user.ai_responses.all()
-        serializer = UserAIResponseSerializer(ai_responses, many=True)
-
-        return Response({
-            "success": True,
-            "message": "CV uploaded and analysis completed.",
-            "aiResponses": serializer.data
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        logger.error(f"Error analyzing CV: {str(e)}")
-        return Response(
-            {"error": f"Failed to upload or analyze CV: {str(e)}"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    service = CVAnalysisService()
+    result = service.analyze_uploaded_cv(
+        user=request.user,
+        cv_file=request.FILES.get('cv_file'),
+        language_raw=request.data.get('language', 'English')
+    )
+    return Response(result)
 
 
 @api_view(['GET'])

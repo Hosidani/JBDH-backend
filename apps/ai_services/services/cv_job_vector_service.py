@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List
 
-from apps.ai_services.ai_models import RequirementExtractionResponse
+from apps.ai_services.domain.ai_models import RequirementExtractionResponse
 from apps.jobs.models import Job
 from core.utils import build_embedding_text, rank_by_vector_similarity, vectorize_text
 

@@ -27,6 +27,20 @@ def custom_exception_handler(exc, context):
         if isinstance(exc, InvalidInputError):
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
+        # ===== NYA: CV/Job exceptions =====
+        try:
+            try:
+                from apps.ai_services.domain.exceptions import CVJobAnalysisError
+            except ImportError:
+                from apps.ai_services.domain.exceptions import CVJobAnalysisError
+
+            if isinstance(exc, CVJobAnalysisError):
+                status_code = getattr(exc, 'status_code', status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": str(exc)}, status=status_code)
+        except ImportError:
+            # Om ai_services.exceptions inte finns än, ignorera tyst
+            pass
+
         # Logga oväntade fel (500)
         logger.error(f"Unexpected error: {exc}", exc_info=True)
         return Response({"detail": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
