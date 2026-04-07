@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     'apps.organisations',
     'apps.ai_services',
     'drf_spectacular',
-    'drf_yasg',
 ]
 
 # Custom user model

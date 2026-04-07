@@ -24,19 +24,21 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.users.views import analyze_cv
 from apps.ai_services.views import compare_cv_to_job_ad_v2, compare_cv_job_sse
 from apps.jobs.views import search_for_jobs, search_v2
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
 from rest_framework import permissions
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="JBDH API",
-        default_version='v1',
-        description="API documentation",
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
+if settings.DEBUG:
+    from drf_yasg.views import get_schema_view
+    from drf_yasg import openapi
+
+    schema_view = get_schema_view(
+        openapi.Info(
+            title="JBDH API",
+            default_version='v1',
+            description="API documentation",
+        ),
+        public=True,
+        permission_classes=(permissions.AllowAny,),
+    )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -68,7 +70,11 @@ urlpatterns += [
     path('api/jobs/', include('apps.jobs.urls')),
     path('api/Search/SearchForJobs', search_for_jobs, name='search_for_jobs'),
     path('api/Search/SearchV2', search_v2, name='search_v2'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/feedback/', FeedbackView.as_view(), name='feedback'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    ]
