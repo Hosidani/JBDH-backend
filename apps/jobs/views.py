@@ -181,6 +181,12 @@ def search_for_jobs(request):
 @require_GET
 def search_v2(request):
     params = JobSearchParams.from_request(request)
-    jobs = SemanticJobService.multi_field_search(params.dict())
+    jobs, total_matches = SemanticJobService.multi_field_search(params.dict())
     results = SemanticJobService.serialize_jobs(jobs)
-    return JsonResponse({"results": results}, safe=False)
+    return JsonResponse({
+        "results": results,           # 20 jobb
+        "total": total_matches,       # 85360!
+        "offset": params.offset,
+        "limit": params.limit,
+        "has_more": params.offset + params.limit < total_matches
+    }, safe=False)

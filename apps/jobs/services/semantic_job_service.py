@@ -1,10 +1,9 @@
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List
-from django.db.models import Case, ExpressionWrapper, F, FloatField, Q, Value, When
-from django.db.models.functions import Coalesce
+from typing import Any, Dict, List, Tuple
+from django.db.models import Case, ExpressionWrapper, F, FloatField, IntegerField, Q, Value, When
+from django.db.models.functions import Lower, StrIndex
 from pgvector.django import CosineDistance
-
 from apps.jobs.dto_mapper import build_job_details_dto
 from apps.jobs.models import Job
 from core.utils import build_embedding_text, rank_by_vector_similarity, vectorize_text
@@ -46,87 +45,126 @@ class SemanticJobConfig:
     }
 
     THRESHOLDS = {
-        'description': 0.3,
-        'location': 0.3,
-        'workArea': 0.3,
-        'roles': 0.3,
-        'competence': 0.3,
+        'description': 0.35,
+        'location': 0.35,
+        'workArea': 0.35,
+        'roles': 0.35,
+        'competence': 0.35,
     }
 
+    
+
+
     @staticmethod
-    def multi_field_search(params: Dict[str, str], top_k: int = 20) -> List[Job]:
-        """Search med 1-5 fält + vektor + text fallback + pagination."""
+    def multi_field_search(params: Dict[str, str], top_k: int = 20) -> Tuple[List[Job], int]:
+        """Returnerar (paginated_jobs, total_matches) med titel-prio + vektorsortering."""
         offset = int(params.pop('offset', 0))
-        limit = int(params.pop('limit', 20))
-        offset = max(0, offset)
-        limit = max(1, min(100, limit))
+        limit = int(params.pop('limit', top_k))
+
+        print(f"🔍 START: offset={offset}, limit={limit}")
         
-        active_fields = {k: v.strip() for k, v in params.items() if isinstance(v, str) and v.strip()}
-        if not active_fields:
-            jobs = Job.objects.order_by('-posted_date')[offset:offset + limit]
-            return list(jobs)
-
-        jobs = Job.objects.all()
-        similarity_aliases: List[str] = []
-        priority_aliases: List[str] = []
-
+        qs = Job.objects.all()
+        active_fields = {k: v.strip() for k, v in params.items() if v.strip()}
+        roles_query = active_fields.get('roles', '').strip()
+        
+        similarity_aliases = []
+        roles_vector_condition = None
+        
+        # 1. Vector search på alla fält (FIX: rätt variabler!)
         for fe_field, vector_col in SemanticJobConfig.FIELD_MAPPING.items():
             if fe_field not in active_fields:
                 continue
-
+                
             query_text = active_fields[fe_field]
             query_emb = list(_cached_query_embedding(query_text))
-            text_fields = SemanticJobConfig.TEXT_FALLBACK.get(fe_field, [])
-            text_q = Q()
-            for tf in text_fields:
-                text_q |= Q(**{f"{tf}__icontains": query_text})
-
+            
             if query_emb:
-                threshold = SemanticJobConfig.THRESHOLDS.get(fe_field, 0.3)
-                sim_name = f"{fe_field}_sim"
+                threshold = SemanticJobConfig.THRESHOLDS.get(fe_field, 0.35)
+                
                 dist_name = f"{fe_field}_dist"
-
-                jobs = jobs.annotate(
-                    **{dist_name: CosineDistance(vector_col, query_emb)}
-                ).annotate(
-                    **{sim_name: ExpressionWrapper(
-                        Value(1.0) - F(dist_name),
-                        output_field=FloatField(),
-                    )}
-                ).filter(
-                    Q(**{f"{sim_name}__gt": threshold}) | text_q
-                )
-                similarity_aliases.append(sim_name)
+                sim_name = f"{fe_field}_sim"
+                
+                # FIX: annotate med korrekta variabler
+                qs = qs.annotate(**{
+                    dist_name: CosineDistance(vector_col, query_emb),  # RÄTT vector_col!
+                    sim_name: ExpressionWrapper(
+                        Value(1.0) - F(dist_name), 
+                        output_field=FloatField()
+                    )
+                })
 
                 if fe_field == 'roles':
-                    exact_alias = f"{fe_field}_exact"
-                    jobs = jobs.annotate(**{
-                        exact_alias: Case(
-                            When(title__iexact=query_text, then=Value(1.0)),
-                            default=Value(0.0),
-                            output_field=FloatField(),
-                        )
-                    })
-                    priority_aliases.append(exact_alias)
-            else:
-                jobs = jobs.filter(text_q)
-
+                    # Roles/title should allow exact/partial text matches even when vector score is low.
+                    roles_vector_condition = Q(**{f"{sim_name}__gte": threshold})
+                else:
+                    qs = qs.filter(**{f"{sim_name}__gte": threshold})
+                
+                similarity_aliases.append(sim_name)
+                print(f"✅ {fe_field}: '{query_text}' → {qs.count()} kvar")
+        
+        # 2. Ranking (FIX: enkel summa istället för komplex reduce)
         if similarity_aliases:
-            from functools import reduce
-            sim_values = [Coalesce(F(alias), Value(0.0)) for alias in similarity_aliases]
-            total_sim = reduce(lambda a, b: a + b, sim_values)
-            jobs = jobs.annotate(
-                overall_similarity=ExpressionWrapper(
-                    total_sim / Value(float(len(similarity_aliases))),
-                    output_field=FloatField(),
+            num_scores = len(similarity_aliases)
+            if num_scores == 1:
+                qs = qs.annotate(overall_score=F(similarity_aliases[0]))
+            elif num_scores == 2:
+                qs = qs.annotate(
+                    overall_score=ExpressionWrapper(
+                        (F(similarity_aliases[0]) + F(similarity_aliases[1])) / Value(2.0),
+                        output_field=FloatField()
+                    )
+                )
+            elif num_scores >= 3:
+                # FIX: Summa av max 3 scores (prestanda)
+                score1, score2, score3 = similarity_aliases[:3]
+                qs = qs.annotate(
+                    overall_score=ExpressionWrapper(
+                        (F(score1) + F(score2) + F(score3)) / Value(3.0),
+                        output_field=FloatField()
+                    )
+                )
+        else:
+            qs = qs.annotate(overall_score=Value(0.0, output_field=FloatField()))
+
+        # 3. Titel-prio i tre nivåer:
+        # 0 = exakt match (högst), 1 = delvis match, 2 = övriga vektorträffar
+        if roles_query:
+            normalized_roles_query = ' '.join(roles_query.lower().split())
+            qs = qs.annotate(
+                query_contains_title=StrIndex(Value(normalized_roles_query), Lower(F('title')))
+            ).annotate(
+                title_match_tier=Case(
+                    When(title__iexact=normalized_roles_query, then=Value(0)),
+                    When(
+                        Q(title__icontains=normalized_roles_query) | Q(query_contains_title__gt=0),
+                        then=Value(1),
+                    ),
+                    default=Value(2),
+                    output_field=IntegerField(),
                 )
             )
-            order_fields = [f"-{a}" for a in priority_aliases] + ['-overall_similarity', '-posted_date']
-            jobs = jobs.order_by(*order_fields)
-        else:
-            jobs = jobs.order_by('-posted_date')
 
-        return list(jobs[offset:offset + limit])
+            if roles_vector_condition is not None:
+                # Include all exact/partial title matches + remaining role-vector matches.
+                qs = qs.filter(Q(title_match_tier__in=[0, 1]) | roles_vector_condition)
+            else:
+                qs = qs.filter(title_match_tier__in=[0, 1])
+
+            qs = qs.order_by('title_match_tier', '-overall_score', '-posted_date')
+        else:
+            qs = qs.order_by('-overall_score', '-posted_date')
+        
+        print(f"📊 TOTALT {qs.count()} matcher INNAN pagination")
+        
+        # 4. Pagination: returnera endast efterfrågad sida.
+        max_fetch = offset + limit + 50  # Buffer för säkerhet
+        all_results = list(qs[:max_fetch])
+        paginated = all_results[offset:offset + limit]
+        
+        print(f"✅ Returnerar {len(paginated)} av {len(all_results)} totalt (max={max_fetch})")
+        
+        return paginated, qs.count()  # Tuple: (jobs, total_matches)!
+
 
     @staticmethod
     def serialize_jobs(jobs: List[Job]) -> List[Dict]:
