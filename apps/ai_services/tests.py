@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from apps.ai_services.user_ai_job_matching_service import UserAIJobMatchingService
+from apps.ai_services.services.user_ai_job_matching_service import UserAIJobMatchingService
 
 
 class UserAIJobMatchingServiceTests(SimpleTestCase):

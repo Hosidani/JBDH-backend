@@ -4,9 +4,9 @@ import re
 import uuid
 from typing import Any, Callable, Dict, List, Tuple
 
-from apps.ai_services.ai_client import AIClient
-from apps.ai_services.ai_message_templates import AIMessageTemplates
-from apps.ai_services.user_ai_response_service import UserAIResponseService
+from apps.ai_services.infrastructure.ai_client import AIClient
+from apps.ai_services.infrastructure.ai_message_templates import AIMessageTemplates
+from apps.ai_services.services.user_ai_response_service import UserAIResponseService
 from apps.jobs.models import Job
 from core.utils import rank_by_vector_similarity, vectorize_text
 from django.core.cache import cache

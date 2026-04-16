@@ -9,8 +9,8 @@ from typing import List, Tuple, Any, Optional
 
 import requests
 
-from apps.ai_services.ai_config import AIConfig
-from apps.ai_services.ai_models import RequirementItem, Profession
+from apps.ai_services.infrastructure.ai_config import AIConfig
+from apps.ai_services.domain.ai_models import RequirementItem, Profession
 
 logger = logging.getLogger(__name__)
 

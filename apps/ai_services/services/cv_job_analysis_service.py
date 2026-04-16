@@ -1,5 +1,5 @@
-from apps.ai_services.ai_client import AIClient
-from apps.ai_services.ai_message_templates import AIMessageTemplates
+from apps.ai_services.infrastructure.ai_client import AIClient
+from apps.ai_services.infrastructure.ai_message_templates import AIMessageTemplates
 import json
 import re
 import logging
