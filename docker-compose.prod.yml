@@ -67,6 +67,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@jbdh.se
       PGADMIN_DEFAULT_PASSWORD: jbdh2026!
+      SCRIPT_NAME: /pgadmin
     expose:           
       - "80"
     #ports:                       # uncomment if nginx is down and you want direct access to pgadmin
