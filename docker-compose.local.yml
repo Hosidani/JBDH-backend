@@ -45,3 +45,19 @@ services:
     restart: unless-stopped
     env_file:
       - .env.local
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: jbdh_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@localhost.com
+      PGADMIN_DEFAULT_PASSWORD: jbdh2026!
+    ports:
+      - "8080:80"
+    networks:
+      - jbdh_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
