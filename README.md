@@ -1,133 +1,234 @@
 # JBDH Django Backend
 
-Django REST API backend för JBDH (Job Board & Development Hub) - en jobbsöknings- och ansökningshanteringsplattform med AI-integration.
+Django REST API backend for JBDH (Job Board & Development Hub) — a job search and application management platform with AI integration.
 
-## 🏗️ Arkitektur
+## 🏗️ Architecture
 
-Detta är Django-implementationen av JBDH backend, designad för att köra parallellt med den befintliga .NET-backend under migrationsperioden.
-
-### Teknologier
+### Technologies
 
 - **Django 5.2** - Web framework
 - **Django REST Framework** - REST API
-- **PostgreSQL 16** - Databas
-- **Redis** - Caching
+- **PostgreSQL 16 + pgvector** - Database with vector search
+- **Redis** - Caching & JWT blacklisting
+- **MiniLM** - Local embedding service
 - **Docker & Docker Compose** - Containerization
-- **DeepSeek AI** - CV och jobbanalys
+- **DeepSeek AI** - CV and job analysis
 - **Gemini AI** - Embeddings
 
 ---
 
-## 📁 Projektstruktur
+## 📁 Project Structure
 
+```
 JBDH-Backend/
-├── manage.py # Django management script
-├── requirements.txt # Python dependencies
-├── docker-compose.yml # Docker services configuration
-├── Dockerfile # Backend container build
-├── .env # Lokal development environment
-├── .env.docker # Docker environment
+├── manage.py
+├── requirements.txt
+├── Dockerfile
+├── Dockerfile.minilm
+├── docker-compose.yml          # Shared base — never run alone
+├── docker-compose.local.yml    # Local override
+├── docker-compose.staging.yml  # Staging override
+├── docker-compose.prod.yml     # Production override
+├── .env.local                  # Local secrets (not in git)
+├── .env.staging                # Staging secrets (not in git)
+├── .env.prod                   # Production secrets (not in git)
 │
-├── config/ # Django projekt-konfiguration
-│ ├── settings/
-│ │ ├── base.py # Bas-inställningar
-│ │ ├── development.py # Dev-inställningar
-│ │ └── production.py # Prod-inställningar
-│ ├── urls.py # Huvudrouting
-│ └── wsgi.py
+├── config/
+│   └── settings/
+│       ├── base.py
+│       ├── development.py
+│       ├── staging.py
+│       └── production.py
 │
-└── apps/ # Django apps
-├── authentication/ # Login, Register, Token auth
-├── users/ # User profiles, CV upload
-├── ai_services/ # AI analysis (CV, Jobs)
-├── jobs/ # Job listings, applications
-├── kanban/ # Boards, Lists, Cards
-├── friendship/ # Friend requests, connections
-├── messaging/ # User messaging
-└── organisations/ # Company management
-
-
-🎯 Viktig Information: Databas Setup
-Vi använder ALLTID Docker för databasen!
-⚠️ OBS: Det finns ingen lokal PostgreSQL installation. Databasen körs alltid i Docker, även när du kör Django lokalt på din maskin.
-
-┌─────────────────────────────────────┐
-│   Din Windows-dator                 │
-│                                     │
-│  ┌──────────────┐                  │
-│  │ Python/Django│ ◄──┐             │
-│  │ (Lokalt)     │    │             │
-│  └──────────────┘    │             │
-│                       │             │
-│  ┌────────────────────┼──────────┐ │
-│  │ Docker Desktop     │          │ │
-│  │                    │          │ │
-│  │  ┌─────────────────▼───────┐ │ │
-│  │  │ PostgreSQL Container    │ │ │
-│  │  │ Port: 5432             │ │ │
-│  │  │ Name: jbdh_postgres    │ │ │
-│  │  └─────────────────────────┘ │ │
-│  │                               │ │
-│  │  ┌─────────────────────────┐ │ │
-│  │  │ Redis Container         │ │ │
-│  │  │ Port: 6379             │ │ │
-│  │  └─────────────────────────┘ │ │
-│  └────────────────────────────── │ │
-└─────────────────────────────────────┘
-
-# 1. Starta PostgreSQL och Redis i Docker (MÅSTE GÖRAS FÖRST!)
-docker-compose up -d postgres redis
-
-# Vänta några sekunder tills databaserna är redo
-# Kolla status:
-docker ps
-
-# 2. Kör migrations
-python manage.py migrate
-
-# 3. Skapa superuser
-python manage.py createsuperuser
-
-# 4. Starta Django development server
-python manage.py runserver
-
-# Öppna: http://localhost:8000/api/
-
-
-Alternativ 2: Allt i Docker
-# Starta alla services (backend + databaser)
-docker-compose up -d
-
-# Eller med loggar synliga
-docker-compose up
-
-# Services som startas:
-# - PostgreSQL: localhost:5432
-# - Redis: localhost:6379  
-# - Django: localhost:8000
+└── apps/
+    ├── authentication/         # Login, Register, Token auth
+    ├── users/                  # User profiles, CV upload
+    ├── ai_services/            # AI analysis (CV, Jobs)
+    ├── jobs/                   # Job listings, applications
+    ├── kanban/                 # Boards, Lists, Cards
+    ├── friendship/             # Friend requests, connections
+    ├── messaging/              # User messaging
+    └── organisations/          # Company management
+```
 
 ---
 
-## 🚀 Setup & Installation
+## 🐳 Docker Environments
 
-## 🐳 Docker Environments (Local vs Prod)
+This repo uses a **shared base file + environment-specific overrides**. Never run `docker-compose.yml` alone.
 
-Detta repo använder en gemensam basfil + miljöspecifika overrides:
+| File | Purpose | Env file |
+|---|---|---|
+| `docker-compose.yml` | Shared base (images, networks, volumes, healthchecks) | — |
+| `docker-compose.local.yml` | Local development | `.env.local` |
+| `docker-compose.staging.yml` | Staging server | `.env.staging` |
+| `docker-compose.prod.yml` | Production server | `.env.prod` |
 
-- `docker-compose.yml` = gemensam bas
-- `docker-compose.local.yml` = lokal utveckling
-- `docker-compose.prod.yml` = produktion
+### Services per environment
 
-Miljöfiler:
+| Service | Local | Staging | Prod |
+|---|---|---|---|
+| postgres | `localhost:5432` | `localhost:5433` | internal only |
+| redis | `localhost:6379` | internal only | internal only |
+| backend | `localhost:8000` | `localhost:8001` | `localhost:8000` |
+| frontend | `localhost:3000` | `localhost:3001` | `localhost:3000` |
+| minilm | `localhost:8500` | `localhost:8500` | internal only |
+| pgadmin | `localhost:8080` | `localhost:8081` | via `/admin` proxy |
+| etl | background | background | background |
 
-- `.env.local` för lokal Docker-körning
-- `.env.prod` för produktion
-- `.env.example` som mall utan hemligheter
+---
 
+## 🚀 Docker Commands
 
-#### Create a user with curl
+### Local
 
-# Testa utan roller eller med "admin" (liten bokstav)
+```bash
+# Start everything (build first)
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+
+# Start without rebuilding
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+
+# Stop
+docker compose -f docker-compose.yml -f docker-compose.local.yml down
+
+# Validate merged config
+docker compose -f docker-compose.yml -f docker-compose.local.yml config
+```
+
+### Staging
+
+```bash
+docker compose --project-name jbdh-staging -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+docker compose --project-name jbdh-staging -f docker-compose.yml -f docker-compose.staging.yml down
+docker compose --project-name jbdh-staging -f docker-compose.yml -f docker-compose.staging.yml config
+```
+
+### Production
+
+```bash
+docker compose --project-name jbdh-prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose --project-name jbdh-prod -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose --project-name jbdh-prod -f docker-compose.yml -f docker-compose.prod.yml config
+```
+
+### Build specific services
+
+```bash
+# Build one service
+docker compose -f docker-compose.yml -f docker-compose.local.yml build backend
+
+# Build multiple services
+docker compose -f docker-compose.yml -f docker-compose.local.yml build backend frontend
+
+# Rebuild and restart one service without stopping others
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build backend
+```
+
+### Useful commands
+
+```bash
+# View logs for a service
+docker compose -f docker-compose.yml -f docker-compose.local.yml logs -f backend
+
+# Run a one-off management command
+docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend python manage.py migrate
+
+# Open a shell inside a running container
+docker exec -it jbdh_backend bash
+
+# Run ETL job manually
+docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
+  python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
+
+# Run Job AI analysis manually
+docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
+  python manage.py run_job_ai --batch-size 10 --delay 1
+```
+
+---
+
+## 🗄️ PostgreSQL Commands
+
+Connect to the database inside Docker:
+
+```bash
+docker exec -it jbdh_backend_postgres psql -U postgres -d jbdh_db
+```
+
+### User management
+
+```sql
+-- List all users
+SELECT id, email, is_active, is_staff FROM users_customuser;
+
+-- Create a superuser via Django (preferred)
+-- docker compose ... run --rm backend python manage.py createsuperuser
+
+-- Deactivate a user
+UPDATE users_customuser SET is_active = false WHERE email = 'user@example.com';
+
+-- Activate a user
+UPDATE users_customuser SET is_active = true WHERE email = 'user@example.com';
+
+-- Delete a user (hard delete)
+DELETE FROM users_customuser WHERE email = 'user@example.com';
+
+-- Promote user to staff/admin
+UPDATE users_customuser SET is_staff = true, is_superuser = true WHERE email = 'user@example.com';
+
+-- Reset password hash (use Django shell instead — see below)
+```
+
+Reset a password via Django shell:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
+  python manage.py shell -c "
+from apps.users.models import CustomUser
+u = CustomUser.objects.get(email='user@example.com')
+u.set_password('newpassword123')
+u.save()
+"
+```
+
+### Database inspection
+
+```sql
+-- List all tables
+\dt
+
+-- Count jobs
+SELECT COUNT(*) FROM jobs_job;
+
+-- Check table size
+SELECT pg_size_pretty(pg_total_relation_size('jobs_job'));
+
+-- List active connections
+SELECT pid, usename, application_name, state FROM pg_stat_activity WHERE datname = 'jbdh_db';
+
+-- Kill a connection
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid = <pid>;
+```
+
+---
+
+## ⚠️ Common Errors
+
+**Port 5432 already in use:**
+```bash
+netstat -ano | findstr :5432
+# Then: Win+R → services.msc → stop the PostgreSQL Windows service → retry
+```
+
+**Container name conflict (running staging + prod on same host):**  
+Always use `--project-name` flag when running multiple environments on the same machine/server.
+
+---
+
+## 🧪 Create a test user (PowerShell)
+
+```powershell
 $body = @{
     Email = "test@test.com"
     Password = "test12"
@@ -135,124 +236,16 @@ $body = @{
     Location = "Stockholm"
     PreferredLanguage = "sv"
     Open = $false
-    # SelectedRoles = @("admin")  # Prova "admin" istället
 } | ConvertTo-Json
 
 iwr -Uri "http://localhost:8000/api/Register/RegisterUser" -Method POST -ContentType "application/json" -Body $body
-
-#### ERROR: 
-Error response from daemon: ports are not available: exposing port TCP 127.0.0.1:5432 s 
--> 127.0.0.1:0: listen tcp4 127.0.0.1:5432: bind: Ett försök gjordes att få åtkomst ti->ll en socket
-run: netstat -ano | findstr :5432
-then win + R -> services.msc -> stop postgres and build and run docker again
-
-### Local (utveckling)
-
-Starta:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 ```
 
-bygga bara en eller flera container tillsammans:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
+---
 
+## 📡 API Endpoints
 
-docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend frontend
-```
-
-Starta utan att bygga:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
-
-Stoppa:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.local.yml down
-```
-
-Validera konfiguration:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.local.yml config
-```
-
-### Prod
-
-Starta:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-```
-
-Stoppa:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml down
-```
-
-Validera konfiguration:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml config
-```
-
-### Job AI manuellt (fyll saknade analyser)
-
-```bash
-docker compose run --rm backend python manage.py run_job_ai --batch-size 10 --delay 1
-```
-
-Tips:
-
-- Lägg alltid riktiga hemligheter i `.env.prod` på servern (inte i git).
-- Rotera API-nycklar/lösenord om de tidigare exponerats.
-
-### **Förutsättningar**
-
-- Python 3.11+
-- Docker Desktop (för PostgreSQL)
-- Git
-
-### **1.Klona projektet,  2. Installera Python-dependencies,  3. Konfigurera miljövariabler .env**
-
-
-```bash
-cd JBDH_V0.1/JBDH-Backend
-
-pip install -r requirements.txt
-```
-
-Kopiera och anpassa .env:
-
-DEBUG=True
-SECRET_KEY=django-insecure-change-this-in-production
-DJANGO_SETTINGS_MODULE=config.settings.development
-
-# Database - Lokal anslutning till Docker PostgreSQL
-DATABASE_NAME=jbdh_db
-DATABASE_USER=postgres
-DATABASE_PASSWORD=ArianAAA123
-DATABASE_HOST=127.0.0.1
-DATABASE_PORT=5432
-
-# AI Services
-DEEPSEEK_API_KEY=your-api-key-here
-DEEPSEEK_MODEL=deepseek-chat
-DEEPSEEK_URL=https://api.deepseek.com/v1/chat/completions
-
-# Email
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USE_TLS=True
-SMTP_USERNAME=your@email.com
-SMTP_PASSWORD=your-app-password
-
-# START WITH MODELS
-
-Auth:
+### Auth
 
 POST /api/Login  ☑️
 POST /api/Register/RegisterUser  ☑️

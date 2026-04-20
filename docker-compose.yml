@@ -99,7 +99,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.minilm
-    container_name: jbdh_minilm
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_minilm
     ports:
       - "8500:8000"
     networks:
