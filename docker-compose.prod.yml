@@ -11,6 +11,8 @@ services:
     restart: unless-stopped
 
   backend:
+    build: .
+    image: jbdh-app-base:latest
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,6 +41,7 @@ services:
     restart: unless-stopped
 
   etl:
+    image: jbdh-app-base:latest
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,12 +66,12 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: jbdh_pgadmin_prod
+    container_name: ${COMPOSE_PROJECT_NAME}_pgadmin_prod
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@jbdh.se
       PGADMIN_DEFAULT_PASSWORD: jbdh2026!
       SCRIPT_NAME: /admin
-    expose:           
+    expose:
       - "80"
     #ports:                       # uncomment if nginx is down and you want direct access to pgadmin
     #- "8080:80"

@@ -1,11 +1,11 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: jbdh_postgres
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_postgres
     environment:
-      POSTGRES_DB: jbdh_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ArianAAA123
+      POSTGRES_DB: ${DATABASE_NAME:-jbdh_db}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-ArianAAA123}
     ports:
       - "127.0.0.1:5432:5432" 
     volumes:
@@ -22,9 +22,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: jbdh_redis
-    ports:
-      - "6379:6379"
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_redis
     volumes:
       - redis_data:/data
     networks:
@@ -37,7 +35,7 @@ services:
 
   backend:
     build: .
-    container_name: jbdh_backend
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
@@ -61,7 +59,7 @@ services:
     build:
       context: ../JBDH-frontend/myapp-frontend
       dockerfile: Dockerfile
-    container_name: jbdh_frontend
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_frontend
     ports:
       - "3000:80"
     networks:
@@ -71,7 +69,7 @@ services:
 
   etl:
     build: .
-    container_name: jbdh_etl
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_etl
     command:
       - sh
       - -c
@@ -103,7 +101,7 @@ services:
       dockerfile: Dockerfile.minilm
     container_name: jbdh_minilm
     ports:
-      - "8001:8000"
+      - "8500:8000"
     networks:
       - jbdh_network
     healthcheck:

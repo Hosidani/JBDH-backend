@@ -20,3 +20,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://loghouse.se",       
     "http://89.167.117.88:8000", 
 ]
+
+MINILM_URL = os.getenv('MINILM_URL', 'http://localhost:8001')
