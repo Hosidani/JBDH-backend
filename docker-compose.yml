@@ -6,8 +6,6 @@ services:
       POSTGRES_DB: ${DATABASE_NAME:-jbdh_db}
       POSTGRES_USER: ${DATABASE_USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-ArianAAA123}
-    ports:
-      - "127.0.0.1:5432:5432" 
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-pgvector.sql:/docker-entrypoint-initdb.d/init-pgvector.sql
