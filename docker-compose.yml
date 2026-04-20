@@ -98,8 +98,6 @@ services:
       context: .
       dockerfile: Dockerfile.minilm
     container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_minilm
-    ports:
-      - "8500:8000"
     networks:
       - jbdh_network
     healthcheck:
