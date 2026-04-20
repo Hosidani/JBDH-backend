@@ -60,7 +60,7 @@ def analyze_cv(request):
     result = ProfileService.analyze_cv(
         user=request.user,
         cv_file=request.FILES.get('cv_file'),
-        language_raw=request.data.get('language', 'English')
+        language=request.data.get('language', 'English')
     )
     return Response(result)
 
