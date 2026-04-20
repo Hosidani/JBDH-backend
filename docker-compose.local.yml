@@ -22,6 +22,15 @@ services:
     env_file:
       - .env.local
 
+  frontend:
+    build:
+      args:
+        VITE_MODE: development
+    environment:
+      - PGADMIN_HOST=${COMPOSE_PROJECT_NAME:-jbdh}_pgadmin
+    ports:
+      - "3000:80"
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_pgadmin
@@ -37,15 +46,6 @@ services:
         condition: service_healthy
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-
-  frontend:
-    build:
-      args:
-        VITE_MODE: development
-    environment:
-      - PGADMIN_HOST=${COMPOSE_PROJECT_NAME:-jbdh}_pgadmin
-    ports:
-      - "3000:80"
 
   etl:
     command:
