@@ -33,7 +33,7 @@ services:
   frontend:
     build:
       args:
-        VITE_MODE: development
+        VITE_MODE: staging
         VITE_API_URL: http://localhost:8001
     environment:
       - PGADMIN_HOST=${COMPOSE_PROJECT_NAME}_pgadmin_staging

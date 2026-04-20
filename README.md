@@ -84,65 +84,73 @@ This repo uses a **shared base file + environment-specific overrides**. Never ru
 
 ```bash
 # Start everything (build first)
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml up -d --build
 
 # Start without rebuilding
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml up -d
 
 # Stop
-docker compose -f docker-compose.yml -f docker-compose.local.yml down
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml down
 
 # Validate merged config
-docker compose -f docker-compose.yml -f docker-compose.local.yml config
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml config
 ```
 
 ### Staging
 
 ```bash
-docker compose --project-name jbdh-staging -f docker-compose.yml -f docker-compose.staging.yml up -d --build
-docker compose --project-name jbdh-staging -f docker-compose.yml -f docker-compose.staging.yml down
-docker compose --project-name jbdh-staging -f docker-compose.yml -f docker-compose.staging.yml config
+docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml down
+docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml config
+docker compose --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml up -d
+docker compose --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml logs -f backend
 ```
 
 ### Production
 
 ```bash
-docker compose --project-name jbdh-prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-docker compose --project-name jbdh-prod -f docker-compose.yml -f docker-compose.prod.yml down
-docker compose --project-name jbdh-prod -f docker-compose.yml -f docker-compose.prod.yml config
+docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml config
 ```
 
 ### Build specific services
 
 ```bash
-# Build one service
-docker compose -f docker-compose.yml -f docker-compose.local.yml build backend
+# Build one service (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml build backend
 
-# Build multiple services
-docker compose -f docker-compose.yml -f docker-compose.local.yml build backend frontend
+# Build multiple services (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml build backend frontend
 
-# Rebuild and restart one service without stopping others
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build backend
+# Rebuild and restart one service without stopping others (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml up -d --build backend
+
+# Build one service (staging)
+docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml build backend
+
+# Build one service (prod)
+docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml build backend
 ```
 
 ### Useful commands
 
 ```bash
-# View logs for a service
-docker compose -f docker-compose.yml -f docker-compose.local.yml logs -f backend
+# View logs for a service (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml logs -f backend
 
-# Run a one-off management command
-docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend python manage.py migrate
+# Run a one-off management command (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml run --rm backend python manage.py migrate
 
 # Open a shell inside a running container
 docker exec -it jbdh_backend bash
 
-# Run ETL job manually
-docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
+# Run ETL job manually (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
   python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
 
-# Run Job AI analysis manually
-docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
+# Run Job AI analysis manually (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml run --rm backend \
   python manage.py run_job_ai --batch-size 10 --delay 1
 ```
 
