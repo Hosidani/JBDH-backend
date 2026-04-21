@@ -43,7 +43,8 @@ variable "server_image" {
 variable "location" {
   description = "Hetzner datacenter location. Options: nbg1, fsn1, hel1, ash, hil."
   type        = string
-  default     = "hel1"   # Helsinki — matches your existing ubuntu-4gb-hel1-1 server
+  # Helsinki — matches your existing ubuntu-4gb-hel1-1 server
+  default = "hel1"
 }
 
 variable "network_zone" {

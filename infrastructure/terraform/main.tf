@@ -64,11 +64,11 @@ resource "hcloud_firewall" "app" {
 # To add a dedicated dev server in the future, set create_dev = true.
 # ─────────────────────────────────────────────────────────────────────
 resource "hcloud_server" "app" {
-  name        = "${var.project_name}-app"
-  image       = var.server_image
-  server_type = var.server_type
-  location    = var.location
-  ssh_keys    = [hcloud_ssh_key.deployer.id]
+  name         = "${var.project_name}-app"
+  image        = var.server_image
+  server_type  = var.server_type
+  location     = var.location
+  ssh_keys     = [hcloud_ssh_key.deployer.id]
   firewall_ids = [hcloud_firewall.app.id]
 
   labels = {
@@ -94,12 +94,12 @@ resource "hcloud_server" "app" {
 # Will run on a separate server when the dev branch workflow is ready.
 # ─────────────────────────────────────────────────────────────────────
 resource "hcloud_server" "dev" {
-  count       = var.create_dev ? 1 : 0
-  name        = "${var.project_name}-dev"
-  image       = var.server_image
-  server_type = var.dev_server_type
-  location    = var.location
-  ssh_keys    = [hcloud_ssh_key.deployer.id]
+  count        = var.create_dev ? 1 : 0
+  name         = "${var.project_name}-dev"
+  image        = var.server_image
+  server_type  = var.dev_server_type
+  location     = var.location
+  ssh_keys     = [hcloud_ssh_key.deployer.id]
   firewall_ids = [hcloud_firewall.app.id]
 
   labels = {
