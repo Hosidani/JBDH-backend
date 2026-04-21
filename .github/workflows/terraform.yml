@@ -1,0 +1,78 @@
+name: Terraform Plan & Apply
+
+on:
+  # Run PLAN on PRs to main/staging/dev and on direct pushes to dev
+  pull_request:
+    branches: [main, staging, dev]
+    paths:
+      - "infrastructure/terraform/**"
+
+  push:
+    branches:
+      - dev    # plan only on dev — so you can see what will be created
+      - main   # plan + apply on main (creates real infra)
+    paths:
+      - "infrastructure/terraform/**"
+
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action"
+        required: true
+        default: "plan"
+        type: choice
+        options: [plan, apply, destroy]
+
+jobs:
+  terraform:
+    # On dev branch: always plan only. On main: plan then apply.
+    name: Terraform ${{ github.event.inputs.action || (github.ref == 'refs/heads/main' && github.event_name == 'push' && 'apply') || 'plan' }}
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infrastructure/terraform
+
+    environment:
+      name: ${{ (github.event_name == 'push' || github.event.inputs.action == 'apply') && 'production' || 'staging' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.0"
+
+      - name: Create terraform.tfvars from secrets
+        run: |
+          cat > terraform.tfvars <<EOF
+          hcloud_token   = "${{ secrets.HCLOUD_TOKEN }}"
+          ssh_public_key = "${{ secrets.DEPLOY_SSH_PUBLIC_KEY }}"
+          create_dev     = false
+          EOF
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: >
+          (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+          github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve tfplan
+
+      - name: Print server IPs
+        if: >
+          (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+          github.event.inputs.action == 'apply'
+        run: terraform output

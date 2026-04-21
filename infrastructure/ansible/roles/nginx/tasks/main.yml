@@ -1,0 +1,56 @@
+---
+# roles/nginx/tasks/main.yml
+# Installs nginx on the host and deploys a reverse-proxy config
+# for the current environment (staging or prod).
+
+- name: Install nginx and certbot
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+  become: true
+
+- name: Ensure nginx is started and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  become: true
+
+- name: Deploy nginx site config
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: "/etc/nginx/sites-available/{{ domain }}"
+    mode: "0644"
+  become: true
+  notify: reload nginx
+
+- name: Enable nginx site
+  ansible.builtin.file:
+    src:  "/etc/nginx/sites-available/{{ domain }}"
+    dest: "/etc/nginx/sites-enabled/{{ domain }}"
+    state: link
+  become: true
+  notify: reload nginx
+
+- name: Remove default nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: true
+  notify: reload nginx
+
+- name: Obtain SSL certificate via certbot
+  ansible.builtin.command:
+    cmd: >
+      certbot --nginx
+      -d {{ domain }}
+      --non-interactive
+      --agree-tos
+      -m {{ certbot_email }}
+      --redirect
+    creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+  become: true
+  notify: reload nginx

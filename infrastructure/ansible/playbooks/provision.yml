@@ -1,0 +1,17 @@
+---
+# playbooks/provision.yml
+# Run ONCE when a new server is created by Terraform.
+# Sets up OS hardening, Docker, nginx + SSL.
+#
+# Usage:
+#   ansible-playbook -i inventory/staging.yml playbooks/provision.yml
+#   ansible-playbook -i inventory/prod.yml    playbooks/provision.yml
+
+- name: Provision server
+  hosts: all
+  gather_facts: true
+
+  roles:
+    - role: common   # OS hardening, UFW, fail2ban
+    - role: docker   # Docker Engine + Compose plugin
+    - role: nginx    # nginx + certbot SSL

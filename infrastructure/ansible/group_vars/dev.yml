@@ -1,0 +1,14 @@
+---
+# group_vars/dev.yml
+
+environment: dev
+git_branch: dev
+
+compose_override_file: "docker-compose.dev.yml"
+compose_project_name: "jbdh-dev"
+compose_env_file: "{{ deploy_dir }}/.env.dev"
+
+domain: "webapp-dev.loghouse.se"
+
+backend_port: 8002
+frontend_port: 3002
