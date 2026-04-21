@@ -38,23 +38,23 @@ resource "hcloud_firewall" "app" {
 
   # Allow all outbound
   rule {
-    direction        = "out"
-    protocol         = "tcp"
-    port             = "any"
-    destination_ips  = ["0.0.0.0/0", "::/0"]
+    direction       = "out"
+    protocol        = "tcp"
+    port            = "any"
+    destination_ips = ["0.0.0.0/0", "::/0"]
   }
 
   rule {
-    direction        = "out"
-    protocol         = "udp"
-    port             = "any"
-    destination_ips  = ["0.0.0.0/0", "::/0"]
+    direction       = "out"
+    protocol        = "udp"
+    port            = "any"
+    destination_ips = ["0.0.0.0/0", "::/0"]
   }
 
   rule {
-    direction        = "out"
-    protocol         = "icmp"
-    destination_ips  = ["0.0.0.0/0", "::/0"]
+    direction       = "out"
+    protocol        = "icmp"
+    destination_ips = ["0.0.0.0/0", "::/0"]
   }
 }
 
