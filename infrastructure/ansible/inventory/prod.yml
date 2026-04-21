@@ -1,0 +1,13 @@
+---
+# Ansible inventory for the production environment.
+# Both staging and prod run on the SAME physical server.
+
+all:
+  children:
+    prod:
+      hosts:
+        app-server:
+          ansible_host: "89.167.117.88"   # your current server IP
+          ansible_user: root               # change to 'deploy' after first Ansible provision
+          ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
+          ansible_python_interpreter: /usr/bin/python3

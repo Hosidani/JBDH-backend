@@ -1,0 +1,74 @@
+name: Deploy → Staging
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+# Only one staging deployment at a time
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+
+    environment:
+      name: staging
+      url: https://webapp-staging.loghouse.se
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Install tools ──────────────────────────────────────────────────
+      - name: Set up Python (for Ansible)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Install Ansible community.general collection
+        run: ansible-galaxy collection install community.general
+
+      # ── SSH agent ─────────────────────────────────────────────────────
+      - name: Start SSH agent and load deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add staging server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      # ── Update inventory with real IP ──────────────────────────────────
+      - name: Set server IP in inventory
+        run: |
+          sed -i "s/89.167.117.88/${{ secrets.SERVER_IP }}/" \
+            infrastructure/ansible/inventory/staging.yml
+
+      # ── Deploy ────────────────────────────────────────────────────────
+      - name: Run Ansible deploy playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          ansible-playbook \
+            -i infrastructure/ansible/inventory/staging.yml \
+            infrastructure/ansible/playbooks/deploy.yml \
+            -e "env_file_content=${{ secrets.STAGING_ENV_FILE }}"
+
+  notify:
+    name: Notify on failure
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification
+        # Replace with your preferred notification method (Slack, email, etc.)
+        run: echo "Staging deployment FAILED for ${{ github.sha }}"
