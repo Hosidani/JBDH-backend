@@ -1,0 +1,15 @@
+---
+# group_vars/prod.yml
+
+environment: production
+git_branch: main
+
+compose_override_file: "docker-compose.prod.yml"
+compose_project_name: "jbdh-prod"
+compose_env_file: "{{ deploy_dir }}/.env.prod"
+
+domain: "webapp.loghouse.se"
+
+# Ports exposed on the host (must match docker-compose.prod.yml)
+backend_port: 8000
+frontend_port: 3000

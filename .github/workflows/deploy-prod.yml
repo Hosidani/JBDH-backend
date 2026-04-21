@@ -1,0 +1,70 @@
+name: Deploy → Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Only one prod deployment at a time — never cancel a running one
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    # GitHub Environment with required reviewers — adds manual approval gate
+    environment:
+      name: production
+      url: https://webapp.loghouse.se
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python (for Ansible)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Install Ansible community.general collection
+        run: ansible-galaxy collection install community.general
+
+      - name: Start SSH agent and load deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add prod server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Set server IP in inventory
+        run: |
+          sed -i "s/89.167.117.88/${{ secrets.SERVER_IP }}/" \
+            infrastructure/ansible/inventory/prod.yml
+
+      - name: Run Ansible deploy playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          ansible-playbook \
+            -i infrastructure/ansible/inventory/prod.yml \
+            infrastructure/ansible/playbooks/deploy.yml \
+            -e "env_file_content=${{ secrets.PROD_ENV_FILE }}"
+
+  notify:
+    name: Notify on failure
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification
+        run: echo "Production deployment FAILED for ${{ github.sha }}"

@@ -1,0 +1,76 @@
+---
+# roles/app/tasks/main.yml
+# Pulls latest code and (re)starts the Docker Compose stack.
+# This role is called on EVERY deployment — not just initial setup.
+
+- name: Ensure deploy directory exists
+  ansible.builtin.file:
+    path: "{{ deploy_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0750"
+  become: true
+
+- name: Clone or pull latest code
+  ansible.builtin.git:
+    repo: "{{ git_repo }}"
+    dest: "{{ deploy_dir }}/repo"
+    version: "{{ git_branch }}"
+    force: true          # discard local changes on the server
+    accept_hostkey: true
+  become_user: "{{ deploy_user }}"
+  become: true
+
+- name: Copy .env file to server (from GitHub Secrets via CI)
+  # The CI pipeline writes the env file content to DEPLOY_ENV_FILE secret,
+  # then passes it as an extra-vars string: -e "env_file_content={{ secret }}"
+  ansible.builtin.copy:
+    content: "{{ env_file_content }}"
+    dest: "{{ compose_env_file }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"   # secrets — owner-only read
+  become: true
+  no_log: true     # never print env file contents in logs
+
+- name: Build and restart Docker Compose stack
+  ansible.builtin.command:
+    cmd: >
+      docker compose
+      --project-name {{ compose_project_name }}
+      --env-file {{ compose_env_file }}
+      -f {{ deploy_dir }}/repo/docker-compose.yml
+      -f {{ deploy_dir }}/repo/{{ compose_override_file }}
+      up -d --build --remove-orphans
+  become_user: "{{ deploy_user }}"
+  become: true
+  register: compose_result
+
+- name: Show compose output
+  ansible.builtin.debug:
+    var: compose_result.stdout_lines
+
+- name: Run Django migrations
+  ansible.builtin.command:
+    cmd: >
+      docker compose
+      --project-name {{ compose_project_name }}
+      --env-file {{ compose_env_file }}
+      -f {{ deploy_dir }}/repo/docker-compose.yml
+      -f {{ deploy_dir }}/repo/{{ compose_override_file }}
+      exec -T backend python manage.py migrate --noinput
+  become_user: "{{ deploy_user }}"
+  become: true
+
+- name: Collect static files
+  ansible.builtin.command:
+    cmd: >
+      docker compose
+      --project-name {{ compose_project_name }}
+      --env-file {{ compose_env_file }}
+      -f {{ deploy_dir }}/repo/docker-compose.yml
+      -f {{ deploy_dir }}/repo/{{ compose_override_file }}
+      exec -T backend python manage.py collectstatic --noinput
+  become_user: "{{ deploy_user }}"
+  become: true

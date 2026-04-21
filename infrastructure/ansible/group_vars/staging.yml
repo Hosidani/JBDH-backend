@@ -1,0 +1,15 @@
+---
+# group_vars/staging.yml
+
+environment: staging
+git_branch: staging
+
+compose_override_file: "docker-compose.staging.yml"
+compose_project_name: "jbdh-staging"
+compose_env_file: "{{ deploy_dir }}/.env.staging"
+
+domain: "webapp-staging.loghouse.se"
+
+# Ports exposed on the host (must match docker-compose.staging.yml)
+backend_port: 8001
+frontend_port: 3001

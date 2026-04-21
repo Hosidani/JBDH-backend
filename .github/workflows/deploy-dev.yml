@@ -1,0 +1,69 @@
+name: Deploy → Dev
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+# Cancel any in-progress dev deployment when a new push comes in
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to dev
+    runs-on: ubuntu-latest
+
+    environment:
+      name: dev
+      url: https://webapp-dev.loghouse.se
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python (for Ansible)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Install Ansible community.general collection
+        run: ansible-galaxy collection install community.general
+
+      - name: Start SSH agent and load deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add dev server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DEV_SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Set dev server IP in inventory
+        run: |
+          sed -i "s/REPLACE_WITH_TERRAFORM_OUTPUT_DEV_IP/${{ secrets.DEV_SERVER_IP }}/" \
+            infrastructure/ansible/inventory/dev.yml
+
+      - name: Run Ansible deploy playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          ansible-playbook \
+            -i infrastructure/ansible/inventory/dev.yml \
+            infrastructure/ansible/playbooks/deploy.yml \
+            -e "env_file_content=${{ secrets.DEV_ENV_FILE }}"
+
+  notify:
+    name: Notify on failure
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification
+        run: echo "Dev deployment FAILED for ${{ github.sha }}"

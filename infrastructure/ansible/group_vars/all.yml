@@ -1,0 +1,19 @@
+---
+# group_vars/all.yml — shared variables across all environments
+
+project_name: jbdh
+deploy_user: deploy
+deploy_dir: /opt/{{ project_name }}
+
+# Git repo — git_repo points to JBDH_backend (this repo)
+git_repo: "git@github.com:YOUR_ORG/JBDH_backend.git"   # update this
+
+# Docker Compose base files (always applied)
+compose_base_files:
+  - "docker-compose.yml"
+
+# Nginx
+nginx_worker_processes: auto
+
+# Certbot
+certbot_email: "your-email@example.com"   # update this

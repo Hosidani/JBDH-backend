@@ -1,0 +1,18 @@
+---
+# playbooks/deploy.yml
+# Called on EVERY push by the CI/CD pipeline.
+# Pulls new code, rebuilds Docker images, runs migrations.
+#
+# Required extra-vars (injected by GitHub Actions):
+#   env_file_content  — raw content of the .env file (from GitHub Secrets)
+#
+# Usage (manual):
+#   ansible-playbook -i inventory/staging.yml playbooks/deploy.yml \
+#     -e "env_file_content=$(cat .env.staging)"
+
+- name: Deploy application
+  hosts: all
+  gather_facts: false
+
+  roles:
+    - role: app
