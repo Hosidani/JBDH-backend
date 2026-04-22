@@ -1,14 +1,13 @@
 ---
-# Ansible inventory for the dev environment.
-# Dev runs on its OWN dedicated server (created by Terraform when create_dev = true).
-# Update ansible_host after running: terraform output dev_ip
+# Dev runs on the SAME physical server as staging and prod.
+# Separate Docker project + separate directory keeps them isolated.
 
 all:
   children:
     dev:
       hosts:
-        dev-server:
-          ansible_host: "REPLACE_WITH_TERRAFORM_OUTPUT_DEV_IP"
-          ansible_user: root               # change to 'deploy' after first provision
+        app-server:
+          ansible_host: "89.167.117.88"
+          ansible_user: root
           ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
           ansible_python_interpreter: /usr/bin/python3

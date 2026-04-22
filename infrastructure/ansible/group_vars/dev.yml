@@ -1,12 +1,17 @@
 ---
 # group_vars/dev.yml
+# Dev runs on the SAME server as staging/prod but in a separate directory
+# and Docker project, pulling from the dev branch.
 
 environment: dev
 git_branch: dev
 
 compose_override_file: "docker-compose.dev.yml"
 compose_project_name: "jbdh-dev"
-compose_env_file: "{{ deploy_dir }}/.env.dev"
+compose_env_file: "/opt/app/JBDH-backend-dev/.env.dev"
+
+# Separate deploy dir so it doesn't conflict with staging/prod
+deploy_dir: /opt/app/JBDH-backend-dev
 
 domain: "webapp-dev.loghouse.se"
 
