@@ -17,3 +17,5 @@ domain: "webapp-dev.loghouse.se"
 
 backend_port: 8002
 frontend_port: 3002
+
+db_name: jbdh_dev

@@ -51,6 +51,47 @@
   ansible.builtin.debug:
     var: compose_result.stdout_lines
 
+# --- Database initialisation (idempotent) -----------------------------------
+
+- name: Wait for postgres to be ready
+  ansible.builtin.command:
+    cmd: docker exec {{ compose_project_name }}_postgres pg_isready -U {{ db_user }}
+  register: pg_ready
+  until: pg_ready.rc == 0
+  retries: 30
+  delay: 2
+  become: true
+  changed_when: false
+
+- name: Check if database exists
+  ansible.builtin.command:
+    cmd: >
+      docker exec {{ compose_project_name }}_postgres
+      psql -U {{ db_user }} -tAc
+      "SELECT 1 FROM pg_database WHERE datname='{{ db_name }}'"
+  register: db_exists
+  become: true
+  changed_when: false
+
+- name: Create database
+  ansible.builtin.command:
+    cmd: >
+      docker exec {{ compose_project_name }}_postgres
+      psql -U {{ db_user }} -c "CREATE DATABASE {{ db_name }};"
+  become: true
+  when: db_exists.stdout.strip() != "1"
+
+- name: Create pgvector extension
+  ansible.builtin.command:
+    cmd: >
+      docker exec {{ compose_project_name }}_postgres
+      psql -U {{ db_user }} -d {{ db_name }}
+      -c "CREATE EXTENSION IF NOT EXISTS vector;"
+  become: true
+  changed_when: false
+
+# --- Migrations & static files -----------------------------------------------
+
 - name: Run Django migrations
   ansible.builtin.command:
     cmd: >

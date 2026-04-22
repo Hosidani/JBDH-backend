@@ -13,3 +13,5 @@ domain: "webapp-staging.loghouse.se"
 # Ports exposed on the host (must match docker-compose.staging.yml)
 backend_port: 8001
 frontend_port: 3001
+
+db_name: jbdh_staging

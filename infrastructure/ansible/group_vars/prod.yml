@@ -13,3 +13,5 @@ domain: "webapp.loghouse.se"
 # Ports exposed on the host (must match docker-compose.prod.yml)
 backend_port: 8000
 frontend_port: 3000
+
+db_name: jbdh_db
