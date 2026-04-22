@@ -15,5 +15,8 @@ compose_base_files:
 # Nginx
 nginx_worker_processes: auto
 
+# Database (matches POSTGRES_USER in docker-compose.yml)
+db_user: postgres
+
 # Certbot
 certbot_email: "your-email@example.com"   # update this
