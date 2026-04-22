@@ -1,0 +1,76 @@
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5434:5432"
+    restart: unless-stopped
+
+  backend:
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env.dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
+
+  frontend:
+    build:
+      args:
+        VITE_MODE: staging
+        VITE_API_URL: /api
+    environment:
+      - PGADMIN_HOST=${COMPOSE_PROJECT_NAME}_pgadmin_dev
+    ports:
+      - "3002:80"
+
+  etl:
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          echo "Starting ETL batch..."
+          python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
+          echo "Waiting 30s before next batch..."
+          sleep 30
+        done
+    volumes:
+      - static_volume:/app/staticfiles
+    mem_limit: 1g
+    cpus: 0.5
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_pgadmin_dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@localhost.com
+      PGADMIN_DEFAULT_PASSWORD: jbdh2026!
+    ports:
+      - "8082:80"
+    networks:
+      - jbdh_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
