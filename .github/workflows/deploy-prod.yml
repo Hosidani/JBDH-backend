@@ -74,13 +74,14 @@ jobs:
             infrastructure/ansible/inventory/prod.yml
 
       - name: Run Ansible deploy playbook
+        working-directory: infrastructure/ansible
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_ROLES_PATH: "infrastructure/ansible/roles"
+          ANSIBLE_ROLES_PATH: "roles"
         run: |
           ansible-playbook \
-            -i infrastructure/ansible/inventory/prod.yml \
-            infrastructure/ansible/playbooks/deploy.yml \
+            -i inventory/prod.yml \
+            playbooks/deploy.yml \
             -e "env_file_content=${{ secrets.PROD_ENV_FILE }}"
 
   notify:

@@ -55,13 +55,14 @@ jobs:
 
       # ── Deploy ────────────────────────────────────────────────────────
       - name: Run Ansible deploy playbook
+        working-directory: infrastructure/ansible
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_ROLES_PATH: "infrastructure/ansible/roles"
+          ANSIBLE_ROLES_PATH: "roles"
         run: |
           ansible-playbook \
-            -i infrastructure/ansible/inventory/staging.yml \
-            infrastructure/ansible/playbooks/deploy.yml \
+            -i inventory/staging.yml \
+            playbooks/deploy.yml \
             -e "env_file_content=${{ secrets.STAGING_ENV_FILE }}"
 
   notify:
