@@ -3,7 +3,7 @@
 # Dev runs on the SAME server as staging/prod but in a separate directory
 # and Docker project, pulling from the dev branch.
 
-environment: dev
+app_env: dev
 git_branch: dev
 
 compose_override_file: "docker-compose.dev.yml"
