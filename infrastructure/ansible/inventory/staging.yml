@@ -10,4 +10,5 @@ all:
         app-server:
           ansible_host: "89.167.117.88"   # your current server IP
           ansible_user: root
+          ansible_ssh_extra_args: "-o ForwardAgent=yes"
           ansible_python_interpreter: /usr/bin/python3
