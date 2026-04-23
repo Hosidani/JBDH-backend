@@ -9,6 +9,6 @@ class AIConfig:
     GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
     GEMINI_EMBEDDING_URL = os.getenv("GEMINI_EMBEDDING_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent")
 
-    MAX_TOKENS = 1000
+    MAX_TOKENS = 4000
     TEMPERATURE = 0.7
     TOP_P = 1.0

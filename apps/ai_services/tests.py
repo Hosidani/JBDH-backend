@@ -1,3 +1,8 @@
+import io
+import json
+from unittest.mock import patch, MagicMock
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -210,10 +215,145 @@ class ExternalJobAdDetailTests(TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Original service tests
+# ExternalCV – PDF upload endpoint
 # ---------------------------------------------------------------------------
 
-from apps.ai_services.services.user_ai_job_matching_service import UserAIJobMatchingService
+class ExternalCVUploadPDFTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = make_user()
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('external-cv-upload-pdf')
+
+    def _make_pdf(self, name='cv.pdf', content=b'%PDF-1.4 fake pdf content'):
+        return SimpleUploadedFile(name, content, content_type='application/pdf')
+
+    @patch('apps.ai_services.views.extract_text_from_file', return_value='Extracted CV text from PDF')
+    def test_upload_pdf_creates_external_cv(self, _mock_extract):
+        response = self.client.post(
+            self.url,
+            {'file': self._make_pdf()},
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('Extracted CV text from PDF', response.data['text'])
+        self.assertEqual(ExternalCV.objects.filter(user=self.user).count(), 1)
+
+    @patch('apps.ai_services.views.extract_text_from_file', return_value='Extracted CV text from PDF')
+    def test_upload_pdf_includes_filename_label_in_text(self, _mock_extract):
+        response = self.client.post(self.url, {'file': self._make_pdf(name='mitt-cv.pdf')}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('mitt-cv', response.data['text'])
+
+    def test_upload_without_file_returns_400(self):
+        response = self.client.post(self.url, {}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+
+    @patch('apps.ai_services.views.extract_text_from_file', return_value='')
+    def test_upload_empty_pdf_returns_400(self, _mock_extract):
+        """Filen laddas upp men textextraktionen ger tom sträng."""
+        response = self.client.post(self.url, {'file': self._make_pdf()}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+
+    def test_unauthenticated_upload_returns_401(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.post(self.url, {'file': self._make_pdf()}, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @patch('apps.ai_services.views.extract_text_from_file', return_value='Extracted CV text from PDF')
+    def test_upload_stores_cv_for_correct_user(self, _mock_extract):
+        other = make_user('other@example.com')
+        other_client = APIClient()
+        other_client.force_authenticate(user=other)
+        other_client.post(self.url, {'file': self._make_pdf()}, format='multipart')
+
+        self.client.post(self.url, {'file': self._make_pdf()}, format='multipart')
+
+        self.assertEqual(ExternalCV.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(ExternalCV.objects.filter(user=other).count(), 1)
+
+
+# ---------------------------------------------------------------------------
+# CVJobSSEService – generate_events med external_cv_id
+# ---------------------------------------------------------------------------
+
+class CVJobSSEExternalCVTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.cv = ExternalCV.objects.create(user=self.user, text='Sparad CV-text från databasen')
+
+    def _make_request(self, post_data, files=None):
+        """Bygger ett minimalt fake request."""
+        req = MagicMock()
+        req.user = self.user
+        req.POST = post_data
+        req.FILES = files or {}
+        req.data = {}
+        return req
+
+    @patch('apps.ai_services.services.cv_job_sse_service.vectorize_text', return_value=[0.1, 0.2, 0.3])
+    @patch('apps.ai_services.services.cv_job_sse_service.extract_cv_job_analysis', return_value={'result': 'ok'})
+    @patch('apps.ai_services.services.cv_job_sse_service.cosine_similarity', return_value=0.85)
+    def test_generate_events_with_external_cv_id(self, _cos, _analysis, _vec):
+        from apps.ai_services.services.cv_job_sse_service import CVJobSSEService
+        req = self._make_request({
+            'external_cv_id': str(self.cv.pk),
+            'JobAdText': 'Vi söker en Python-utvecklare.',
+        })
+        events = list(CVJobSSEService().generate_events(req))
+        payloads = [json.loads(e.replace('data: ', '').strip()) for e in events if e.strip()]
+        # Ska inte innehålla error
+        errors = [p for p in payloads if 'error' in p]
+        self.assertEqual(errors, [], msg=f"Fick ej förväntade SSE-fel: {errors}")
+
+    def test_generate_events_with_invalid_cv_id_returns_error(self):
+        from apps.ai_services.services.cv_job_sse_service import CVJobSSEService
+        req = self._make_request({
+            'external_cv_id': '99999',
+            'JobAdText': 'Vi söker en Python-utvecklare.',
+        })
+        events = list(CVJobSSEService().generate_events(req))
+        payloads = [json.loads(e.replace('data: ', '').strip()) for e in events if e.strip()]
+        errors = [p for p in payloads if 'error' in p]
+        self.assertTrue(len(errors) > 0)
+        self.assertIn('hittades inte', errors[-1]['error'])
+
+    def test_generate_events_without_cv_returns_error(self):
+        from apps.ai_services.services.cv_job_sse_service import CVJobSSEService
+        req = self._make_request({'JobAdText': 'Vi söker en Python-utvecklare.'})
+        events = list(CVJobSSEService().generate_events(req))
+        payloads = [json.loads(e.replace('data: ', '').strip()) for e in events if e.strip()]
+        errors = [p for p in payloads if 'error' in p]
+        self.assertTrue(len(errors) > 0)
+
+    def test_generate_events_without_job_ad_returns_error(self):
+        from apps.ai_services.services.cv_job_sse_service import CVJobSSEService
+        req = self._make_request({'external_cv_id': str(self.cv.pk)})
+        events = list(CVJobSSEService().generate_events(req))
+        payloads = [json.loads(e.replace('data: ', '').strip()) for e in events if e.strip()]
+        errors = [p for p in payloads if 'error' in p]
+        self.assertTrue(len(errors) > 0)
+
+    def test_generate_events_cannot_use_another_users_cv(self):
+        from apps.ai_services.services.cv_job_sse_service import CVJobSSEService
+        other = make_user('other@example.com')
+        other_cv = ExternalCV.objects.create(user=other, text='Hemlig CV')
+        req = self._make_request({
+            'external_cv_id': str(other_cv.pk),
+            'JobAdText': 'Jobbtext',
+        })
+        req.user = self.user  # försöker hämta annan användares CV
+        events = list(CVJobSSEService().generate_events(req))
+        payloads = [json.loads(e.replace('data: ', '').strip()) for e in events if e.strip()]
+        errors = [p for p in payloads if 'error' in p]
+        self.assertTrue(len(errors) > 0)
+
+
+# ---------------------------------------------------------------------------
+# Original service tests
+# ---------------------------------------------------------------------------
 
 
 class UserAIJobMatchingServiceTests(SimpleTestCase):

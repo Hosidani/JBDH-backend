@@ -74,17 +74,34 @@ class CVJobSSEService:
         yield self._build_event(progress=10, message="🔄 Laddar CV...")
 
         cv_file = request.FILES.get("CvPath")
+        external_cv_id = (
+            request.POST.get("external_cv_id")
+            or getattr(request, "data", {}).get("external_cv_id")
+        )
         job_ad_text = (
             getattr(request, "data", {}).get("JobAdText")
             or request.POST.get("JobAdText")
             or ""
         ).strip()
 
-        if not cv_file or not job_ad_text:
+        if not job_ad_text:
             yield self._build_event(progress=100, error="CV och Jobbtext krävs.")
             return
 
-        cv_text = self._save_and_extract_cv_text(cv_file)
+        if external_cv_id:
+            from apps.ai_services.models import ExternalCV
+            try:
+                cv_obj = ExternalCV.objects.get(pk=int(external_cv_id), user=request.user)
+                cv_text = cv_obj.text.strip()
+            except (ExternalCV.DoesNotExist, ValueError, TypeError):
+                yield self._build_event(progress=100, error="Valt CV hittades inte.")
+                return
+        elif cv_file:
+            cv_text = self._save_and_extract_cv_text(cv_file)
+        else:
+            yield self._build_event(progress=100, error="CV och Jobbtext krävs.")
+            return
+
         if not cv_text:
             yield self._build_event(progress=100, error="Kunde inte extrahera CV-text.")
             return

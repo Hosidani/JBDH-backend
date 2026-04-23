@@ -22,7 +22,7 @@ from apps.authentication.views import FeedbackView
 from apps.users import views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.users.views import analyze_cv
-from apps.ai_services.views import compare_cv_to_job_ad_v2, compare_cv_job_sse
+from apps.ai_services.views import compare_cv_job_sse
 from apps.jobs.views import search_for_jobs, search_v2
 from rest_framework import permissions
 
@@ -44,8 +44,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.authentication.urls')),
     path('api/', include('apps.users.urls')),
-    # Compare CV to Job Ad V2 (frontend: POST /Home/CompareCvToJobAdV2)
-    path('api/Home/CompareCvToJobAdV2', compare_cv_to_job_ad_v2, name='compare-cv-to-job-ad-v2'),
     # Compare CV to Job SSE (frontend: POST /Home/CompareCvJobSSE)
     path('api/home/CompareCvJobSSE', compare_cv_job_sse, name='compare_cv_job_sse'),
 
