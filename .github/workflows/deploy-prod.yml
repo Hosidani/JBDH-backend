@@ -1,10 +1,7 @@
 name: Deploy → Production
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch:   # prod deploys ONLY when manually triggered from GitHub UI
 
 # Only one prod deployment at a time — never cancel a running one
 concurrency:

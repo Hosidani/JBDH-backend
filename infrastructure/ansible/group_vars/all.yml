@@ -6,7 +6,7 @@ deploy_user: deploy
 deploy_dir: /opt/{{ project_name }}
 
 # Git repo — git_repo points to JBDH_backend (this repo)
-git_repo: "git@github.com:YOUR_ORG/JBDH_backend.git"   # update this
+git_repo: "git@github.com:Hosidani/JBDH-backend.git"
 
 # Docker Compose base files (always applied)
 compose_base_files:
@@ -19,4 +19,4 @@ nginx_worker_processes: auto
 db_user: postgres
 
 # Certbot
-certbot_email: "your-email@example.com"   # update this
+certbot_email: "hosidani25@gmail.com"

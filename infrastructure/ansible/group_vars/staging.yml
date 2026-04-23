@@ -2,7 +2,7 @@
 # group_vars/staging.yml
 
 environment: staging
-git_branch: staging
+git_branch: main
 
 compose_override_file: "docker-compose.staging.yml"
 compose_project_name: "jbdh-staging"
