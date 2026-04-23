@@ -77,6 +77,7 @@ class ExternalCV(models.Model):
         related_name='external_cvs',
         help_text='User who owns this external CV',
     )
+    name = models.CharField(max_length=255, default='', help_text='Display name for this CV')
     text = models.TextField(help_text='Raw CV text content')
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 
@@ -99,6 +100,7 @@ class ExternalJobAd(models.Model):
         related_name='external_job_ads',
         help_text='User who owns this external job ad',
     )
+    name = models.CharField(max_length=255, default='', help_text='Display name for this job ad')
     text = models.TextField(help_text='Raw job advertisement text content')
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 

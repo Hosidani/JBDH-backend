@@ -37,21 +37,30 @@ class ExternalCVListCreateTests(TestCase):
 
     def test_list_returns_only_own_cvs(self):
         other = make_user("other@example.com")
-        ExternalCV.objects.create(user=self.user, text="my cv")
-        ExternalCV.objects.create(user=other, text="other cv")
+        ExternalCV.objects.create(user=self.user, name='My CV', text="my cv")
+        ExternalCV.objects.create(user=other, name='Other CV', text="other cv")
 
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['text'], "my cv")
+        self.assertEqual(response.data[0]['name'], "My CV")
 
     def test_create_cv(self):
         response = self.client.post(self.url, {'text': 'Python developer'})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['text'], 'Python developer')
+        self.assertIn('name', response.data)
+        self.assertTrue(response.data['name'])  # auto-generated from text
         self.assertEqual(ExternalCV.objects.filter(user=self.user).count(), 1)
+
+    def test_create_cv_with_custom_name(self):
+        response = self.client.post(self.url, {'text': 'Python developer', 'name': 'My Python CV'})
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'My Python CV')
 
     def test_create_cv_missing_text_returns_400(self):
         response = self.client.post(self.url, {})
@@ -70,7 +79,7 @@ class ExternalCVDetailTests(TestCase):
         self.client = APIClient()
         self.user = make_user()
         self.client.force_authenticate(user=self.user)
-        self.cv = ExternalCV.objects.create(user=self.user, text="original text")
+        self.cv = ExternalCV.objects.create(user=self.user, name='Original CV', text="original text")
         self.url = reverse('external-cv-detail', args=[self.cv.pk])
 
     def test_retrieve_own_cv(self):
@@ -78,13 +87,15 @@ class ExternalCVDetailTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['text'], "original text")
+        self.assertEqual(response.data['name'], "Original CV")
 
     def test_put_updates_cv(self):
-        response = self.client.put(self.url, {'text': 'updated text'})
+        response = self.client.put(self.url, {'text': 'updated text', 'name': 'Updated CV'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.cv.refresh_from_db()
         self.assertEqual(self.cv.text, 'updated text')
+        self.assertEqual(self.cv.name, 'Updated CV')
 
     def test_patch_updates_cv(self):
         response = self.client.patch(self.url, {'text': 'patched text'})
@@ -132,21 +143,30 @@ class ExternalJobAdListCreateTests(TestCase):
 
     def test_list_returns_only_own_job_ads(self):
         other = make_user("other@example.com")
-        ExternalJobAd.objects.create(user=self.user, text="my job ad")
-        ExternalJobAd.objects.create(user=other, text="other job ad")
+        ExternalJobAd.objects.create(user=self.user, name='My Job', text="my job ad")
+        ExternalJobAd.objects.create(user=other, name='Other Job', text="other job ad")
 
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['text'], "my job ad")
+        self.assertEqual(response.data[0]['name'], "My Job")
 
     def test_create_job_ad(self):
         response = self.client.post(self.url, {'text': 'Senior Django developer'})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['text'], 'Senior Django developer')
+        self.assertIn('name', response.data)
+        self.assertTrue(response.data['name'])  # auto-generated from text
         self.assertEqual(ExternalJobAd.objects.filter(user=self.user).count(), 1)
+
+    def test_create_job_ad_with_custom_name(self):
+        response = self.client.post(self.url, {'text': 'Senior Django developer', 'name': 'Django Job'})
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Django Job')
 
     def test_create_job_ad_missing_text_returns_400(self):
         response = self.client.post(self.url, {})
@@ -165,7 +185,7 @@ class ExternalJobAdDetailTests(TestCase):
         self.client = APIClient()
         self.user = make_user()
         self.client.force_authenticate(user=self.user)
-        self.job_ad = ExternalJobAd.objects.create(user=self.user, text="original job ad")
+        self.job_ad = ExternalJobAd.objects.create(user=self.user, name='Original Job', text="original job ad")
         self.url = reverse('external-job-ad-detail', args=[self.job_ad.pk])
 
     def test_retrieve_own_job_ad(self):
@@ -173,13 +193,15 @@ class ExternalJobAdDetailTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['text'], "original job ad")
+        self.assertEqual(response.data['name'], "Original Job")
 
     def test_put_updates_job_ad(self):
-        response = self.client.put(self.url, {'text': 'updated job ad'})
+        response = self.client.put(self.url, {'text': 'updated job ad', 'name': 'Updated Job'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.job_ad.refresh_from_db()
         self.assertEqual(self.job_ad.text, 'updated job ad')
+        self.assertEqual(self.job_ad.name, 'Updated Job')
 
     def test_patch_updates_job_ad(self):
         response = self.client.patch(self.url, {'text': 'patched job ad'})
@@ -228,7 +250,7 @@ class ExternalCVUploadPDFTests(TestCase):
     def _make_pdf(self, name='cv.pdf', content=b'%PDF-1.4 fake pdf content'):
         return SimpleUploadedFile(name, content, content_type='application/pdf')
 
-    @patch('apps.ai_services.views.extract_text_from_file', return_value='Extracted CV text from PDF')
+    @patch('apps.ai_services.services.external_cv_job_ad_service.extract_text_from_file', return_value='Extracted CV text from PDF')
     def test_upload_pdf_creates_external_cv(self, _mock_extract):
         response = self.client.post(
             self.url,
@@ -239,18 +261,18 @@ class ExternalCVUploadPDFTests(TestCase):
         self.assertIn('Extracted CV text from PDF', response.data['text'])
         self.assertEqual(ExternalCV.objects.filter(user=self.user).count(), 1)
 
-    @patch('apps.ai_services.views.extract_text_from_file', return_value='Extracted CV text from PDF')
+    @patch('apps.ai_services.services.external_cv_job_ad_service.extract_text_from_file', return_value='Extracted CV text from PDF')
     def test_upload_pdf_includes_filename_label_in_text(self, _mock_extract):
         response = self.client.post(self.url, {'file': self._make_pdf(name='mitt-cv.pdf')}, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('mitt-cv', response.data['text'])
+        self.assertIn('mitt-cv', response.data['name'])
 
     def test_upload_without_file_returns_400(self):
         response = self.client.post(self.url, {}, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
 
-    @patch('apps.ai_services.views.extract_text_from_file', return_value='')
+    @patch('apps.ai_services.services.external_cv_job_ad_service.extract_text_from_file', return_value='')
     def test_upload_empty_pdf_returns_400(self, _mock_extract):
         """Filen laddas upp men textextraktionen ger tom sträng."""
         response = self.client.post(self.url, {'file': self._make_pdf()}, format='multipart')
@@ -262,7 +284,7 @@ class ExternalCVUploadPDFTests(TestCase):
         response = self.client.post(self.url, {'file': self._make_pdf()}, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    @patch('apps.ai_services.views.extract_text_from_file', return_value='Extracted CV text from PDF')
+    @patch('apps.ai_services.services.external_cv_job_ad_service.extract_text_from_file', return_value='Extracted CV text from PDF')
     def test_upload_stores_cv_for_correct_user(self, _mock_extract):
         other = make_user('other@example.com')
         other_client = APIClient()
@@ -282,7 +304,7 @@ class ExternalCVUploadPDFTests(TestCase):
 class CVJobSSEExternalCVTests(TestCase):
     def setUp(self):
         self.user = make_user()
-        self.cv = ExternalCV.objects.create(user=self.user, text='Sparad CV-text från databasen')
+        self.cv = ExternalCV.objects.create(user=self.user, name='Sparad CV', text='Sparad CV-text från databasen')
 
     def _make_request(self, post_data, files=None):
         """Bygger ett minimalt fake request."""

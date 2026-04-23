@@ -8,6 +8,12 @@ from apps.ai_services.serializers import ExternalCVSerializer, ExternalJobAdSeri
 from apps.ai_services.services.file_text_extraction_service import extract_text_from_file
 
 
+def _name_from_text(text: str) -> str:
+    """Generate a short display name from the first 3 words of text."""
+    words = text.split()[:3]
+    return ' '.join(words)[:60] if words else 'Namnlös'
+
+
 class ExternalCVService:
 
     @staticmethod
@@ -17,7 +23,11 @@ class ExternalCVService:
 
     @staticmethod
     def create(data, user):
-        serializer = ExternalCVSerializer(data=data)
+        text = data.get('text', '') or ''
+        name = (data.get('name', '') or '').strip()
+        if not name:
+            name = _name_from_text(text)
+        serializer = ExternalCVSerializer(data={'text': text, 'name': name})
         if serializer.is_valid():
             serializer.save(user=user)
             return serializer.data, None
@@ -43,7 +53,7 @@ class ExternalCVService:
         cv.delete()
 
     @staticmethod
-    def upload_pdf(uploaded_file, user):
+    def upload_pdf(uploaded_file, user, name: str = ''):
         """Extract text from uploaded PDF/DOCX and save as ExternalCV."""
         suffix = os.path.splitext(uploaded_file.name)[1]
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -59,8 +69,8 @@ class ExternalCVService:
         if not cv_text:
             return None, 'Kunde inte extrahera text ur filen.'
 
-        label = os.path.splitext(uploaded_file.name)[0][:60]
-        cv = ExternalCV.objects.create(user=user, text=f"[{label}]\n{cv_text}")
+        display_name = name.strip() if name and name.strip() else os.path.splitext(uploaded_file.name)[0][:60]
+        cv = ExternalCV.objects.create(user=user, name=display_name, text=cv_text)
         return ExternalCVSerializer(cv).data, None
 
 
@@ -73,7 +83,11 @@ class ExternalJobAdService:
 
     @staticmethod
     def create(data, user):
-        serializer = ExternalJobAdSerializer(data=data)
+        text = data.get('text', '') or ''
+        name = (data.get('name', '') or '').strip()
+        if not name:
+            name = _name_from_text(text)
+        serializer = ExternalJobAdSerializer(data={'text': text, 'name': name})
         if serializer.is_valid():
             serializer.save(user=user)
             return serializer.data, None

@@ -123,7 +123,8 @@ class ExternalCVUploadPDFView(APIView):
         uploaded = request.FILES.get('file')
         if not uploaded:
             return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
-        data, error = ExternalCVService.upload_pdf(uploaded, request.user)
+        name = request.data.get('name', '')
+        data, error = ExternalCVService.upload_pdf(uploaded, request.user, name=name)
         if error:
             return Response({'error': error}, status=status.HTTP_400_BAD_REQUEST)
         return Response(data, status=status.HTTP_201_CREATED)
