@@ -50,6 +50,16 @@ jobs:
           sed -i "s/REPLACE_WITH_TERRAFORM_OUTPUT_DEV_IP/${{ secrets.DEV_SERVER_IP }}/" \
             infrastructure/ansible/inventory/dev.yml
 
+      - name: Write extra-vars file (safe multiline secret handling)
+        env:
+          ENV_FILE_CONTENT: ${{ secrets.DEV_ENV_FILE }}
+        run: |
+          python3 -c "
+          import os, json
+          vars = {'env_file_content': os.environ['ENV_FILE_CONTENT']}
+          open('/tmp/extra_vars.json', 'w').write(json.dumps(vars))
+          "
+
       - name: Run Ansible deploy playbook
         working-directory: infrastructure/ansible
         env:
@@ -59,7 +69,7 @@ jobs:
           ansible-playbook \
             -i inventory/dev.yml \
             playbooks/deploy.yml \
-            -e "env_file_content=${{ secrets.DEV_ENV_FILE }}"
+            -e @/tmp/extra_vars.json
 
   notify:
     name: Notify on failure
