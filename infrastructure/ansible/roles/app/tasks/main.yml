@@ -30,13 +30,12 @@
 
 - name: Clone or pull latest frontend code
   ansible.builtin.git:
-    repo: "https://github.com/Hosidani/JBDH-frontend.git"
+    repo: "git@github.com:Hosidani/JBDH-frontend.git"
     dest: "{{ deploy_dir }}/JBDH-frontend"
     version: main
     force: true
     depth: 1
-  environment:
-    GIT_TERMINAL_PROMPT: "0"
+    accept_hostkey: true
   async: 600
   poll: 15
 
