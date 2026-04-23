@@ -57,6 +57,7 @@ jobs:
       - name: Run Ansible deploy playbook
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_ROLES_PATH: "infrastructure/ansible/roles"
         run: |
           ansible-playbook \
             -i infrastructure/ansible/inventory/staging.yml \
