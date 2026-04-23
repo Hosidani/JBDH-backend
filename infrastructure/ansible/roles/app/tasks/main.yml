@@ -24,6 +24,7 @@
     force: true
     accept_hostkey: true
     depth: 1
+    key_file: /root/.ssh/id_ed25519 
   # Run as root so it can use the forwarded SSH agent
   async: 300
   poll: 15
@@ -36,6 +37,7 @@
     force: true
     depth: 1
     accept_hostkey: true
+    key_file: /root/.ssh/id_ed25519
   async: 600
   poll: 15
 
