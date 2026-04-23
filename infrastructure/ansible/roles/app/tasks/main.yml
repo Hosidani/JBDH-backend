@@ -35,10 +35,10 @@
     version: main
     force: true
     depth: 1
-  # Public repo — HTTPS, no SSH agent needed
-  # async: run on server independently so long clone doesn't drop SSH connection
-  async: 600   # allow up to 10 minutes
-  poll: 15     # check every 15 seconds
+  environment:
+    GIT_TERMINAL_PROMPT: "0"
+  async: 600
+  poll: 15
 
 - name: Set ownership of deploy dir to deploy user
   ansible.builtin.file:
