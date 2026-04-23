@@ -16,19 +16,26 @@
   ansible.builtin.command:
     cmd: git config --global --add safe.directory {{ deploy_dir }}/repo
 
-- name: Clone or pull latest code
+- name: Clone or pull latest backend code
   ansible.builtin.git:
     repo: "{{ git_repo }}"
     dest: "{{ deploy_dir }}/repo"
     version: "{{ git_branch }}"
-    force: true          # discard local changes on the server
+    force: true
     accept_hostkey: true
   # Run as root so it can use the forwarded SSH agent
-  # (the deploy user cannot access root's SSH_AUTH_SOCK socket)
 
-- name: Set repo ownership to deploy user
+- name: Clone or pull latest frontend code
+  ansible.builtin.git:
+    repo: "https://github.com/Hosidani/JBDH-frontend.git"
+    dest: "{{ deploy_dir }}/JBDH-frontend"
+    version: main
+    force: true
+  # Public repo — HTTPS, no SSH agent needed
+
+- name: Set ownership of deploy dir to deploy user
   ansible.builtin.file:
-    path: "{{ deploy_dir }}/repo"
+    path: "{{ deploy_dir }}"
     owner: "{{ deploy_user }}"
     group: "{{ deploy_user }}"
     recurse: true
