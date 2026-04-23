@@ -128,6 +128,39 @@
 
 # --- Migrations & static files -----------------------------------------------
 
+- name: Wait for backend container to be running
+  ansible.builtin.command:
+    cmd: >
+      docker compose
+      --project-name {{ compose_project_name }}
+      --env-file {{ deploy_dir }}/repo/.env.docker
+      -f {{ deploy_dir }}/repo/docker-compose.yml
+      -f {{ deploy_dir }}/repo/{{ compose_override_file }}
+      ps --format json backend
+  register: backend_ps
+  until: "'running' in backend_ps.stdout"
+  retries: 20
+  delay: 5
+  become: true
+  changed_when: false
+
+- name: Show backend logs (last 50 lines for debugging)
+  ansible.builtin.command:
+    cmd: >
+      docker compose
+      --project-name {{ compose_project_name }}
+      --env-file {{ deploy_dir }}/repo/.env.docker
+      -f {{ deploy_dir }}/repo/docker-compose.yml
+      -f {{ deploy_dir }}/repo/{{ compose_override_file }}
+      logs backend --tail=50
+  become: true
+  changed_when: false
+  register: backend_logs
+
+- name: Print backend logs
+  ansible.builtin.debug:
+    var: backend_logs.stdout_lines
+
 - name: Run Django migrations
   ansible.builtin.command:
     cmd: >
