@@ -5,6 +5,7 @@ app_env: production
 git_branch: main
 
 compose_override_file: "docker-compose.prod.yml"
+compose_env_filename: ".env.prod"
 compose_project_name: "jbdh-prod"
 compose_env_file: "{{ deploy_dir }}/.env.prod"
 
