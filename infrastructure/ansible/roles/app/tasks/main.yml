@@ -19,9 +19,17 @@
     version: "{{ git_branch }}"
     force: true          # discard local changes on the server
     accept_hostkey: true
-  become_user: "{{ deploy_user }}"
+  # Run as root so it can use the forwarded SSH agent
+  # (the deploy user cannot access root's SSH_AUTH_SOCK socket)
+
+- name: Set repo ownership to deploy user
+  ansible.builtin.file:
+    path: "{{ deploy_dir }}/repo"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    recurse: true
+    state: directory
   become: true
-  become_flags: "--preserve-env=SSH_AUTH_SOCK"
 
 - name: Copy .env file to server (from GitHub Secrets via CI)
   # The CI pipeline writes the env file content to DEPLOY_ENV_FILE secret,
