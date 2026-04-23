@@ -70,6 +70,7 @@ resource "hcloud_server" "app" {
   location     = var.location
   ssh_keys     = [hcloud_ssh_key.deployer.id]
   firewall_ids = [hcloud_firewall.app.id]
+  backups      = true   # daily automated backups — keeps last 7
 
   labels = {
     project = var.project_name
