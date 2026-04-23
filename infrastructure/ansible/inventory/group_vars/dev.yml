@@ -7,6 +7,7 @@ app_env: dev
 git_branch: dev
 
 compose_override_file: "docker-compose.dev.yml"
+compose_env_filename: ".env.dev"
 compose_project_name: "jbdh-dev"
 compose_env_file: "/opt/app/JBDH-backend-dev/.env.dev"
 

@@ -32,23 +32,28 @@
   become: true
 
 - name: Copy .env file to server (from GitHub Secrets via CI)
-  # The CI pipeline writes the env file content to DEPLOY_ENV_FILE secret,
-  # then passes it as an extra-vars string: -e "env_file_content={{ secret }}"
+  # The CI pipeline passes the env file content via -e "env_file_content=..."
+  # We write it to two places:
+  #   1. .env.docker  — required by the base docker-compose.yml env_file: entry
+  #   2. .env.<env>   — required by the override compose file (docker-compose.dev.yml etc.)
   ansible.builtin.copy:
     content: "{{ env_file_content }}"
-    dest: "{{ compose_env_file }}"
+    dest: "{{ item }}"
     owner: "{{ deploy_user }}"
     group: "{{ deploy_user }}"
-    mode: "0600"   # secrets — owner-only read
+    mode: "0600"
+  loop:
+    - "{{ deploy_dir }}/repo/.env.docker"
+    - "{{ deploy_dir }}/repo/{{ compose_env_filename }}"
   become: true
-  no_log: true     # never print env file contents in logs
+  no_log: true
 
 - name: Build and restart Docker Compose stack
   ansible.builtin.command:
     cmd: >
       docker compose
       --project-name {{ compose_project_name }}
-      --env-file {{ compose_env_file }}
+      --env-file {{ deploy_dir }}/repo/.env.docker
       -f {{ deploy_dir }}/repo/docker-compose.yml
       -f {{ deploy_dir }}/repo/{{ compose_override_file }}
       up -d --build --remove-orphans
