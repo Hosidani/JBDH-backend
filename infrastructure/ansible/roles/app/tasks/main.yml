@@ -23,6 +23,7 @@
     version: "{{ git_branch }}"
     force: true
     accept_hostkey: true
+    depth: 1
   # Run as root so it can use the forwarded SSH agent
 
 - name: Clone or pull latest frontend code
@@ -31,6 +32,7 @@
     dest: "{{ deploy_dir }}/JBDH-frontend"
     version: main
     force: true
+    depth: 1
   # Public repo — HTTPS, no SSH agent needed
 
 - name: Set ownership of deploy dir to deploy user
