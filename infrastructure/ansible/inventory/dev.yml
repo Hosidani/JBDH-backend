@@ -9,5 +9,4 @@ all:
         app-server:
           ansible_host: "89.167.117.88"
           ansible_user: root
-          ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
           ansible_python_interpreter: /usr/bin/python3
