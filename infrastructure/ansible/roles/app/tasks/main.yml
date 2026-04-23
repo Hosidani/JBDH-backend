@@ -14,7 +14,7 @@
 
 - name: Mark repo dir as safe for git (ownership mismatch between runs)
   ansible.builtin.command:
-    cmd: git config --global --add safe.directory {{ deploy_dir }}/repo
+    cmd: git config --global --add safe.directory {{ item }}
   loop:
     - "{{ deploy_dir }}/repo"
     - "{{ deploy_dir }}/JBDH-frontend"
