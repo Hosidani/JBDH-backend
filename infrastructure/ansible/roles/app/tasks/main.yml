@@ -61,7 +61,6 @@
       -f {{ deploy_dir }}/repo/docker-compose.yml
       -f {{ deploy_dir }}/repo/{{ compose_override_file }}
       up -d --build --remove-orphans
-  become_user: "{{ deploy_user }}"
   become: true
   register: compose_result
 
@@ -115,11 +114,10 @@
     cmd: >
       docker compose
       --project-name {{ compose_project_name }}
-      --env-file {{ compose_env_file }}
+      --env-file {{ deploy_dir }}/repo/.env.docker
       -f {{ deploy_dir }}/repo/docker-compose.yml
       -f {{ deploy_dir }}/repo/{{ compose_override_file }}
       exec -T backend python manage.py migrate --noinput
-  become_user: "{{ deploy_user }}"
   become: true
 
 - name: Collect static files
@@ -127,9 +125,8 @@
     cmd: >
       docker compose
       --project-name {{ compose_project_name }}
-      --env-file {{ compose_env_file }}
+      --env-file {{ deploy_dir }}/repo/.env.docker
       -f {{ deploy_dir }}/repo/docker-compose.yml
       -f {{ deploy_dir }}/repo/{{ compose_override_file }}
       exec -T backend python manage.py collectstatic --noinput
-  become_user: "{{ deploy_user }}"
   become: true
