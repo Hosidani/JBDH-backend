@@ -208,3 +208,116 @@ def compare_cv_to_job_ad_v2(request):
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+# ---------------------------------------------------------------------------
+# External CV CRUD
+# ---------------------------------------------------------------------------
+from rest_framework.views import APIView
+from .models import ExternalCV, ExternalJobAd
+from .serializers import ExternalCVSerializer, ExternalJobAdSerializer
+from django.shortcuts import get_object_or_404
+
+
+class ExternalCVListCreateView(APIView):
+    """List all CVs for the logged-in user, or create a new one."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        cvs = ExternalCV.objects.filter(user=request.user)
+        serializer = ExternalCVSerializer(cvs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ExternalCVSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ExternalCVDetailView(APIView):
+    """Retrieve, update or delete a single CV owned by the logged-in user."""
+    permission_classes = [IsAuthenticated]
+
+    def _get_object(self, pk, user):
+        return get_object_or_404(ExternalCV, pk=pk, user=user)
+
+    def get(self, request, pk):
+        cv = self._get_object(pk, request.user)
+        return Response(ExternalCVSerializer(cv).data)
+
+    def put(self, request, pk):
+        cv = self._get_object(pk, request.user)
+        serializer = ExternalCVSerializer(cv, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        cv = self._get_object(pk, request.user)
+        serializer = ExternalCVSerializer(cv, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        cv = self._get_object(pk, request.user)
+        cv.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------------------
+# External Job Ad CRUD
+# ---------------------------------------------------------------------------
+
+class ExternalJobAdListCreateView(APIView):
+    """List all job ads for the logged-in user, or create a new one."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        job_ads = ExternalJobAd.objects.filter(user=request.user)
+        serializer = ExternalJobAdSerializer(job_ads, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ExternalJobAdSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ExternalJobAdDetailView(APIView):
+    """Retrieve, update or delete a single job ad owned by the logged-in user."""
+    permission_classes = [IsAuthenticated]
+
+    def _get_object(self, pk, user):
+        return get_object_or_404(ExternalJobAd, pk=pk, user=user)
+
+    def get(self, request, pk):
+        job_ad = self._get_object(pk, request.user)
+        return Response(ExternalJobAdSerializer(job_ad).data)
+
+    def put(self, request, pk):
+        job_ad = self._get_object(pk, request.user)
+        serializer = ExternalJobAdSerializer(job_ad, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        job_ad = self._get_object(pk, request.user)
+        serializer = ExternalJobAdSerializer(job_ad, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        job_ad = self._get_object(pk, request.user)
+        job_ad.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

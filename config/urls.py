@@ -71,6 +71,7 @@ urlpatterns += [
     path('api/Search/SearchForJobs', search_for_jobs, name='search_for_jobs'),
     path('api/Search/SearchV2', search_v2, name='search_v2'),
     path('api/feedback/', FeedbackView.as_view(), name='feedback'),
+    path('api/', include('apps.ai_services.urls')),
 ]
 
 if settings.DEBUG:
