@@ -3,7 +3,7 @@ name: Deploy → Staging
 on:
   push:
     branches:
-      - staging
+      - main
   workflow_dispatch:   # allow manual trigger from GitHub UI
 
 # Only one staging deployment at a time
