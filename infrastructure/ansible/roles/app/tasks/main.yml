@@ -25,6 +25,8 @@
     accept_hostkey: true
     depth: 1
   # Run as root so it can use the forwarded SSH agent
+  async: 300
+  poll: 15
 
 - name: Clone or pull latest frontend code
   ansible.builtin.git:
@@ -34,6 +36,9 @@
     force: true
     depth: 1
   # Public repo — HTTPS, no SSH agent needed
+  # async: run on server independently so long clone doesn't drop SSH connection
+  async: 600   # allow up to 10 minutes
+  poll: 15     # check every 15 seconds
 
 - name: Set ownership of deploy dir to deploy user
   ansible.builtin.file:
@@ -72,6 +77,8 @@
       up -d --build --remove-orphans
   become: true
   register: compose_result
+  async: 1800
+  poll: 30
 
 - name: Show compose output
   ansible.builtin.debug:
