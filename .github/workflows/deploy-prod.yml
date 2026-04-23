@@ -25,6 +25,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install hcloud CLI
+        run: |
+          curl -fsSL https://github.com/hetznercloud/cli/releases/latest/download/hcloud-linux-amd64.tar.gz \
+            | tar -xz hcloud
+          sudo mv hcloud /usr/local/bin/
+
+      - name: Take pre-deploy snapshot
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          SERVER_ID=$(hcloud server describe jbdh-app --output json | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          SNAP_NAME="pre-deploy-$(date +%Y%m%d-%H%M%S)"
+          hcloud server create-image --type snapshot --description "$SNAP_NAME" "$SERVER_ID"
+          echo "Snapshot '$SNAP_NAME' created for server $SERVER_ID"
+
+          # Keep only the 5 most recent pre-deploy snapshots (cleanup old ones)
+          hcloud image list --type snapshot --output json \
+            | python3 -c "
+          import sys, json
+          snaps = [s for s in json.load(sys.stdin) if s.get('description','').startswith('pre-deploy-')]
+          snaps.sort(key=lambda s: s['created'], reverse=True)
+          for s in snaps[5:]:
+              print(s['id'])
+          " | xargs -r -I{} hcloud image delete {}
+
       - name: Set up Python (for Ansible)
         uses: actions/setup-python@v5
         with:
