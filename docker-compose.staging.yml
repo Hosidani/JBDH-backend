@@ -5,7 +5,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     restart: unless-stopped
   backend:
     volumes:
@@ -72,7 +72,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@localhost.com
       PGADMIN_DEFAULT_PASSWORD: jbdh2026!
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
     networks:
       - jbdh_network
     depends_on:
