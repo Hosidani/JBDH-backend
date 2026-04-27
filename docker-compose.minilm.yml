@@ -14,8 +14,6 @@ services:
     container_name: jbdh_minilm_shared
     networks:
       - jbdh_shared
-    ports:
-      - "8500:8000"
     logging:
       driver: "json-file"
       options:
@@ -31,4 +29,4 @@ services:
 networks:
   jbdh_shared:
     name: jbdh_shared
-    driver: bridge
+    external: true
