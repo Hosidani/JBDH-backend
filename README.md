@@ -53,6 +53,25 @@ JBDH-Backend/
 
 ---
 
+
+### 🧠 Resurshantering & Swap (RAM-säkerhet)
+Servern har **4GB fysiskt RAM**. För att förhindra krascher vid tunga byggen (t.ex. `npm run build`) eller när vi kör flera miljöer samtidigt (Prod + Staging + Dev), har vi aktiverat en **4GB Swap-fil**.
+
+- **Funktion:** Om RAM-minnet går över 3.7GB börjar servern använda swap-filen på hårddisken. Servern kan då bli något långsammare, men den kraschar inte.
+- **Optimering:** `swappiness` är satt till **10**, vilket betyder att servern prioriterar det snabba RAM-minnet i det längsta och bara använder swap vid kris.
+
+#### Kontrollera resursanvändning:
+Se hur mycket RAM och Swap som används just nu:
+```bash
+free -h
+```
+
+Se resursförbrukning per container:
+```bash
+docker stats --no-stream
+```
+
+
 ## 🐳 Docker Environments
 
 This repo uses a **shared base file + environment-specific overrides**. Never run `docker-compose.yml` alone.
@@ -99,7 +118,7 @@ docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.loc
 ### Staging
 
 ```bash
-docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml up -d --build --remove-orphans
 docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml down
 docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml config
 docker compose --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml up -d
@@ -109,7 +128,7 @@ docker compose --env-file .env.staging -f docker-compose.yml -f docker-compose.s
 ### Production
 
 ```bash
-docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans
 docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml down
 docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml config
 ```
@@ -198,6 +217,35 @@ u = CustomUser.objects.get(email='user@example.com')
 u.set_password('newpassword123')
 u.save()
 "
+```
+
+markdown
+## 🗄 Database & Backups
+
+Dessa kommandon körs i terminalen på Ubuntu-servern.
+
+### Skapa en manuell backup (Prod)
+Använd detta innan du gör ändringar i Docker-volymer eller större uppdateringar:
+```bash
+docker exec jbdh-prod_postgres pg_dumpall -U postgres | gzip > manual_prod_backup_$(date +%F).sql.gz
+```
+
+### Återställ databas från backup
+**Varning:** Detta skriver över nuvarande data i databasen.
+```bash
+# 1. Packa upp och läs in filen (byt ut filnamnet mot rätt datum)
+zcat manual_prod_backup_YYYY-MM-DD.sql.gz | docker exec -i jbdh-prod_postgres psql -U postgres
+```
+
+### Kontrollera storlek på existerande volymer
+```bash
+docker system df -v
+```
+
+### Ladda ner backup till lokal dator (Mac/Windows)
+Körs från din **lokala terminal**, inte från servern:
+```bash
+scp root@<SERVER_IP>:/opt/app/JBDH-backend/manual_prod_backup_*.sql.gz ./
 ```
 
 ### Database inspection
