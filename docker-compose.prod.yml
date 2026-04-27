@@ -29,6 +29,9 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
       DEBUG: "False"
+    networks:
+      - jbdh_network
+      - jbdh_shared
     restart: unless-stopped
 
   frontend:
@@ -52,9 +55,9 @@ services:
       - -c
       - |
         while true; do
-          echo "🚀 Starting ETL batch..."
+          echo "Starting ETL batch..."
           python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
-          echo "⏳ Waiting 30s before next batch..."
+          echo "Waiting 30s before next batch..."
           sleep 30
         done
     mem_limit: 2g
@@ -64,6 +67,9 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
       DEBUG: "False"
+    networks:
+      - jbdh_network
+      - jbdh_shared
     restart: unless-stopped
 
   pgadmin:
@@ -85,3 +91,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+networks:
+  jbdh_shared:
+    name: jbdh_shared
+    external: true
