@@ -8,6 +8,7 @@ from django.conf import settings
 from apps.ai_services.services.file_text_extraction_service import extract_text_from_file
 from apps.ai_services.services.minilm_embedding_service import cosine_similarity
 from apps.ai_services.services.cv_job_analysis_service import extract_cv_job_analysis
+from core.ats_client import score_cv_job_ats
 from core.utils import vectorize_text
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class CVJobSSEService:
         error: str | None = None,
         result: Dict | None = None,
         vector_result: Dict | None = None,
+        ats_result: Dict | None = None,
     ) -> str:
         payload: Dict = {"progress": progress}
         if message:
@@ -33,6 +35,8 @@ class CVJobSSEService:
             payload["result"] = result
         if vector_result is not None:
             payload["vectorResult"] = vector_result
+        if ats_result is not None:
+            payload["atsResult"] = ats_result
         return f"data: {json.dumps(payload)}\n\n"
 
     @staticmethod
@@ -116,7 +120,7 @@ class CVJobSSEService:
                 "jobAdVectorSize": len(job_ad_vector),
             }
             yield self._build_event(
-                progress=30,
+                progress=25,
                 message=f"⚡ Vektoranalys klar: {vector_similarity}%",
                 vector_result=vector_result,
             )
@@ -125,7 +129,29 @@ class CVJobSSEService:
             yield self._build_event(progress=100, error="Vektoranalys misslyckades.")
             return
 
-        yield self._build_event(progress=50, message="🧠 DeepSeek analyserar...")
+        yield self._build_event(progress=40, message="📋 ATS-analys pågår...")
+
+        ats_result: Dict | None = None
+        try:
+            raw_ats = score_cv_job_ats(cv_text, job_ad_text)
+            ats_result = {
+                "totalScore": raw_ats.get("total_score"),
+                "breakdown": raw_ats.get("breakdown"),
+                "matchedSkills": raw_ats.get("matched_skills", []),
+                "missingSkills": raw_ats.get("missing_skills", []),
+                "bonusSkills": raw_ats.get("bonus_skills", []),
+                "recommendations": raw_ats.get("recommendations", []),
+            }
+            yield self._build_event(
+                progress=60,
+                message=f"📋 ATS-poäng: {raw_ats.get('total_score')}%",
+                ats_result=ats_result,
+            )
+        except Exception as exc:
+            logger.warning("ATS-analys misslyckades (fortsätter utan den): %s", exc)
+            yield self._build_event(progress=60, message="⚠️ ATS-analys ej tillgänglig.")
+
+        yield self._build_event(progress=70, message="🧠 DeepSeek analyserar...")
 
         result_json = extract_cv_job_analysis(cv_text, job_ad_text)
         if not result_json:
@@ -156,4 +182,5 @@ class CVJobSSEService:
             progress=100,
             message="✅ AI-analys klar!",
             result=frontend_payload,
+            ats_result=ats_result,
         )

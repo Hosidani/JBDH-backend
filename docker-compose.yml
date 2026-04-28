@@ -63,6 +63,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minilm:
+        condition: service_healthy
+      ats:
+        condition: service_healthy
 
   frontend:
     build:
@@ -111,6 +115,32 @@ services:
         condition: service_healthy
       backend:
         condition: service_started
+
+  minilm:
+    build:
+      context: .
+      dockerfile: Dockerfile.minilm
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_minilm
+    networks:
+      - jbdh_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://minilm:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ats:
+    build:
+      context: .
+      dockerfile: Dockerfile.ats
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_ats
+    networks:
+      - jbdh_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ats:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
 

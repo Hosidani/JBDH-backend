@@ -11,6 +11,7 @@ Django REST API backend for JBDH (Job Board & Development Hub) — a job search 
 - **PostgreSQL 16 + pgvector** - Database with vector search
 - **Redis** - Caching & JWT blacklisting
 - **MiniLM** - Local embedding service
+- **ATS Service** - CV/job parsing & ATS scoring (spaCy, no GPU)
 - **Docker & Docker Compose** - Containerization
 - **DeepSeek AI** - CV and job analysis
 - **Gemini AI** - Embeddings
@@ -25,6 +26,7 @@ JBDH-Backend/
 ├── requirements.txt
 ├── Dockerfile
 ├── Dockerfile.minilm
+├── Dockerfile.ats
 ├── docker-compose.yml          # Shared base — never run alone
 ├── docker-compose.local.yml    # Local override
 ├── docker-compose.staging.yml  # Staging override
@@ -92,6 +94,7 @@ This repo uses a **shared base file + environment-specific overrides**. Never ru
 | backend | `localhost:8000` | `localhost:8001` | `localhost:8000` |
 | frontend | `localhost:3000` | `localhost:3001` | `localhost:3000` |
 | minilm | `localhost:8500` | `localhost:8500` | internal only |
+| ats | `localhost:8501` | internal only | internal only |
 | pgadmin | `localhost:8080` | `localhost:8081` | via `/admin` proxy |
 | etl | background | background | background |
 
@@ -142,11 +145,17 @@ docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.loc
 # Build multiple services (local)
 docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml build backend frontend
 
+# Build ATS service (local)
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml build ats
+
 # Rebuild and restart one service without stopping others (local)
 docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml up -d --build backend
 
 # Build one service (staging)
 docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml build backend
+
+# Build ATS service (staging)
+docker compose --project-name jbdh-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml build ats
 
 # Build one service (prod)
 docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml build backend
