@@ -66,3 +66,49 @@ class JobAIResponse(models.Model):
 
     def __str__(self):
         return f"JobAIResponse(job_id={self.job_id}, status={self.status})"
+
+
+class ExternalCV(models.Model):
+    """External CV text uploaded by a user for AI comparison"""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='external_cvs',
+        help_text='User who owns this external CV',
+    )
+    name = models.CharField(max_length=255, default='', help_text='Display name for this CV')
+    text = models.TextField(help_text='Raw CV text content')
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        db_table = 'external_cvs'
+        verbose_name = 'External CV'
+        verbose_name_plural = 'External CVs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"ExternalCV(id={self.pk}, user={self.user.email})"
+
+
+class ExternalJobAd(models.Model):
+    """External job advertisement text uploaded by a user for AI comparison"""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='external_job_ads',
+        help_text='User who owns this external job ad',
+    )
+    name = models.CharField(max_length=255, default='', help_text='Display name for this job ad')
+    text = models.TextField(help_text='Raw job advertisement text content')
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        db_table = 'external_job_ads'
+        verbose_name = 'External Job Ad'
+        verbose_name_plural = 'External Job Ads'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"ExternalJobAd(id={self.pk}, user={self.user.email})"

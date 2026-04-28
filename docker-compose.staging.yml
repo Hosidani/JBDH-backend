@@ -5,7 +5,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     restart: unless-stopped
   backend:
     volumes:
@@ -17,6 +17,9 @@ services:
       - .env.staging
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.staging
+    networks:
+      - jbdh_network
+      - jbdh_shared
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,9 +49,9 @@ services:
       - -c
       - |
         while true; do
-          echo "🚀 Starting ETL batch..."
+          echo "Starting ETL batch..."
           python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
-          echo "⏳ Waiting 30s before next batch..."
+          echo "Waiting 30s before next batch..."
           sleep 30
         done
     volumes:
@@ -58,6 +61,9 @@ services:
     restart: unless-stopped
     env_file:
       - .env.staging
+    networks:
+      - jbdh_network
+      - jbdh_shared
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -66,7 +72,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@localhost.com
       PGADMIN_DEFAULT_PASSWORD: jbdh2026!
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
     networks:
       - jbdh_network
     depends_on:
@@ -74,3 +80,8 @@ services:
         condition: service_healthy
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
+networks:
+  jbdh_shared:
+    name: jbdh_shared
+    external: true

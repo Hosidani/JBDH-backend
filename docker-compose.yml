@@ -12,6 +12,11 @@ services:
     networks:
       - jbdh_network
     command: postgres -c password_encryption=md5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -25,6 +30,11 @@ services:
       - redis_data:/data
     networks:
       - jbdh_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -43,12 +53,15 @@ services:
       - .env.docker
     networks:
       - jbdh_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      minilm:
         condition: service_healthy
 
   frontend:
@@ -58,6 +71,11 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_frontend
     networks:
       - jbdh_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       - backend
 
@@ -69,9 +87,9 @@ services:
       - -c
       - |
         while true; do
-          echo "🚀 Starting ETL batch..."
+          echo "Starting ETL batch..."
           python manage.py shell -c "from apps.jobs.services.etl_pipeline_service import ETLPipelineService; ETLPipelineService.run_pipeline_batched(1000)"
-          echo "⏳ Waiting 30s before next batch..."
+          echo "Waiting 30s before next batch..."
           sleep 30
         done
     volumes:
@@ -81,6 +99,11 @@ services:
     restart: unless-stopped
     env_file:
       - .env.docker
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
     networks:
       - jbdh_network
     depends_on:
@@ -88,19 +111,6 @@ services:
         condition: service_healthy
       backend:
         condition: service_started
-
-  minilm:
-    build:
-      context: .
-      dockerfile: Dockerfile.minilm
-    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_minilm
-    networks:
-      - jbdh_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://minilm:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
 

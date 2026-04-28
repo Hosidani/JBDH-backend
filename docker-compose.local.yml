@@ -5,11 +5,28 @@ services:
 
   redis:
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
   minilm:
+    build:
+      context: .
+      dockerfile: Dockerfile.minilm
+    container_name: ${COMPOSE_PROJECT_NAME:-jbdh}_minilm
     ports:
       - "8500:8000"
+    networks:
+      - jbdh_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   backend:
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
@@ -21,6 +38,9 @@ services:
       - "8000:8000"
     env_file:
       - .env.local
+    depends_on:
+      minilm:
+        condition: service_healthy
 
   frontend:
     build:

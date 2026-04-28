@@ -1,0 +1,32 @@
+# Shared MiniLM service — run once, used by both staging and prod.
+#
+# Start with:
+#   docker compose --project-name jbdh-shared -f docker-compose.minilm.yml up -d --build
+#
+# Requires the external network to exist first:
+#   docker network create jbdh_shared
+
+services:
+  minilm:
+    build:
+      context: .
+      dockerfile: Dockerfile.minilm
+    container_name: jbdh_minilm_shared
+    networks:
+      - jbdh_shared
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  jbdh_shared:
+    name: jbdh_shared
+    external: true
