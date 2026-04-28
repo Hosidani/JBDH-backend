@@ -59,6 +59,9 @@ services:
     env_file:
       - .env.staging
 
+  ats:
+    restart: unless-stopped
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: ${COMPOSE_PROJECT_NAME}_pgadmin_staging
