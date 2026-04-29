@@ -5,6 +5,7 @@ from .views import (
     ExternalJobAdListCreateView,
     ExternalJobAdDetailView,
     ExternalCVUploadPDFView,
+    ats_score_view,
 )
 
 urlpatterns = [
@@ -16,4 +17,7 @@ urlpatterns = [
     # External Job Ads
     path('external-job-ads/', ExternalJobAdListCreateView.as_view(), name='external-job-ad-list-create'),
     path('external-job-ads/<int:pk>/', ExternalJobAdDetailView.as_view(), name='external-job-ad-detail'),
+
+    # ATS Score
+    path('ats/score', ats_score_view, name='ats-score'),
 ]

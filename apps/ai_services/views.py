@@ -10,6 +10,34 @@ from core.middleware.jwt_required import jwt_required
 from apps.ai_services.services.cv_job_sse_service import CVJobSSEService
 
 from rest_framework.parsers import MultiPartParser, FormParser
+from core.ats_client import score_cv_job_ats
+
+# --- ATS Score Endpoint ---
+from django.utils.encoding import smart_str
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def ats_score_view(request):
+    """
+    POST: Beräknar ATS-score mellan CV och jobbannons.
+    Tar emot:
+      - CvPath: fil (PDF, DOCX, TXT)
+      - JobAdText: text
+    Returnerar ATS-score och breakdown.
+    """
+    cv_file = request.FILES.get('CvPath')
+    job_ad_text = request.data.get('JobAdText', '')
+    if not cv_file or not job_ad_text.strip():
+        return Response({'error': 'CV och jobbannons krävs.'}, status=400)
+
+    # För framtida utökning: hantera olika filtyper
+    try:
+        cv_text = cv_file.read().decode('utf-8', errors='ignore')
+    except Exception:
+        return Response({'error': 'Kunde inte läsa CV-filen som text.'}, status=400)
+
+    ats_result = score_cv_job_ats(cv_text, job_ad_text)
+    return Response(ats_result)
 
 logger = logging.getLogger(__name__)
 
