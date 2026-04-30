@@ -130,6 +130,7 @@ docker compose --env-file .env.staging -f docker-compose.yml -f docker-compose.s
 
 ### Production
 
+
 ```bash
 docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans
 docker compose --project-name jbdh-prod --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml down

@@ -29,8 +29,34 @@ class ExternalCVService:
             name = _name_from_text(text)
         serializer = ExternalCVSerializer(data={'text': text, 'name': name})
         if serializer.is_valid():
-            serializer.save(user=user)
-            return serializer.data, None
+            cv_obj = serializer.save(user=user)
+
+            # --- Batch-matchning mot alla användarens jobb ---
+            from apps.ai_services.models import ExternalJobAd, ATSResult
+            from core.ats_client import score_cv_job_ats
+            job_ads = ExternalJobAd.objects.filter(user=user)
+            matches_created = 0
+            for job in job_ads:
+                # Dubblettkontroll: finns redan denna matchning?
+                exists = ATSResult.objects.filter(
+                    user=user,
+                    cv_text__startswith=text[:200],
+                    job_text__startswith=job.text[:200]
+                ).exists()
+                if not exists:
+                    ats_json = score_cv_job_ats(text, job.text)
+                    ATSResult.objects.create(
+                        user=user,
+                        cv_text=text,
+                        job_text=job.text,
+                        ats_json=ats_json,
+                        overall_score=ats_json.get('overall_score') or ats_json.get('total_score') or ats_json.get('totalScore') or 0
+                    )
+                    matches_created += 1
+
+            result = serializer.data.copy()
+            result['matches_created'] = matches_created
+            return result, None
         return None, serializer.errors
 
     @staticmethod
@@ -89,8 +115,34 @@ class ExternalJobAdService:
             name = _name_from_text(text)
         serializer = ExternalJobAdSerializer(data={'text': text, 'name': name})
         if serializer.is_valid():
-            serializer.save(user=user)
-            return serializer.data, None
+            job_obj = serializer.save(user=user)
+
+            # --- Batch-matchning mot alla användarens CV:n ---
+            from apps.ai_services.models import ExternalCV, ATSResult
+            from core.ats_client import score_cv_job_ats
+            cvs = ExternalCV.objects.filter(user=user)
+            matches_created = 0
+            for cv in cvs:
+                # Dubblettkontroll: finns redan denna matchning?
+                exists = ATSResult.objects.filter(
+                    user=user,
+                    cv_text__startswith=cv.text[:200],
+                    job_text__startswith=text[:200]
+                ).exists()
+                if not exists:
+                    ats_json = score_cv_job_ats(cv.text, text)
+                    ATSResult.objects.create(
+                        user=user,
+                        cv_text=cv.text,
+                        job_text=text,
+                        ats_json=ats_json,
+                        overall_score=ats_json.get('overall_score') or ats_json.get('total_score') or ats_json.get('totalScore') or 0
+                    )
+                    matches_created += 1
+
+            result = serializer.data.copy()
+            result['matches_created'] = matches_created
+            return result, None
         return None, serializer.errors
 
     @staticmethod

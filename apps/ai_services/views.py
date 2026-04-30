@@ -37,6 +37,17 @@ def ats_score_view(request):
         return Response({'error': 'Kunde inte läsa CV-filen som text.'}, status=400)
 
     ats_result = score_cv_job_ats(cv_text, job_ad_text)
+
+    # --- Spara ATS-resultat till DB ---
+    from .models import ATSResult
+    ATSResult.objects.create(
+        user=request.user,
+        cv_text=cv_text,
+        job_text=job_ad_text,
+        ats_json=ats_result,
+        overall_score=ats_result.get('overall_score') or ats_result.get('total_score') or ats_result.get('totalScore') or 0
+    )
+
     return Response(ats_result)
 
 logger = logging.getLogger(__name__)
@@ -61,7 +72,12 @@ from .models import ExternalCV, ExternalJobAd
 from .serializers import ExternalCVSerializer, ExternalJobAdSerializer
 from django.shortcuts import get_object_or_404
 from apps.ai_services.services.external_cv_job_ad_service import ExternalCVService, ExternalJobAdService
-
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.filters import OrderingFilter
+from .models import ATSResult
+from .serializers import ATSResultPreviewSerializer, ATSResultDetailSerializer
+from .utils import api_response
 
 class ExternalCVListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -70,10 +86,25 @@ class ExternalCVListCreateView(APIView):
         return Response(ExternalCVService.list(request.user))
 
     def post(self, request):
+        from .utils import api_response
         data, errors = ExternalCVService.create(request.data, request.user)
         if errors:
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data, status=status.HTTP_201_CREATED)
+            return api_response(
+                success=False,
+                message="Validation error",
+                data=errors,
+                status_code=400
+            )
+        matches_created = data.get("matches_created", 0)
+        return api_response(
+            success=True,
+            message=f"CV uploaded successfully! Created {matches_created} ATS matches",
+            data={
+                "cv": data,
+                "matches_created": matches_created
+            },
+            status_code=201
+        )
 
 
 class ExternalCVDetailView(APIView):
@@ -156,3 +187,33 @@ class ExternalCVUploadPDFView(APIView):
         if error:
             return Response({'error': error}, status=status.HTTP_400_BAD_REQUEST)
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class ATSResultListView(ListAPIView):
+    serializer_class = ATSResultPreviewSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['overall_score', 'created_at', 'cv_text', 'job_text']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        return ATSResult.objects.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True) if page is not None else self.get_serializer(queryset, many=True)
+        data = serializer.data
+        return api_response(success=True, message="ATS results fetched", data=data)
+
+class ATSResultDetailView(RetrieveAPIView):
+    serializer_class = ATSResultDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ATSResult.objects.filter(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return api_response(success=True, message="ATS result detail", data=serializer.data)

@@ -6,6 +6,8 @@ from .views import (
     ExternalJobAdDetailView,
     ExternalCVUploadPDFView,
     ats_score_view,
+    ATSResultListView,
+    ATSResultDetailView,
 )
 
 urlpatterns = [
@@ -20,4 +22,7 @@ urlpatterns = [
 
     # ATS Score
     path('ats/score', ats_score_view, name='ats-score'),
+    # ATS Result
+    path('ats/getexternalrelation/', ATSResultListView.as_view(), name='atsresult-list'),
+    path('ats/getexternalrelation/<int:pk>/', ATSResultDetailView.as_view(), name='atsresult-detail'),
 ]
