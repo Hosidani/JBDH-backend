@@ -195,16 +195,15 @@ class ATSResultListView(ListAPIView):
     filter_backends = [OrderingFilter]
     ordering_fields = ['overall_score', 'created_at', 'cv_text', 'job_text']
     ordering = ['-created_at']
+    pagination_class = None  # Returnera alla resultat utan sidbrytning
 
     def get_queryset(self):
         return ATSResult.objects.filter(user=self.request.user)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True) if page is not None else self.get_serializer(queryset, many=True)
-        data = serializer.data
-        return api_response(success=True, message="ATS results fetched", data=data)
+        serializer = self.get_serializer(queryset, many=True)
+        return api_response(success=True, message="ATS results fetched", data=serializer.data)
 
 class ATSResultDetailView(RetrieveAPIView):
     serializer_class = ATSResultDetailSerializer
