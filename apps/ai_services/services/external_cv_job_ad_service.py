@@ -1,5 +1,8 @@
 import os
 import tempfile
+import logging
+
+logger = logging.getLogger(__name__)
 
 from django.shortcuts import get_object_or_404
 
@@ -44,7 +47,8 @@ class ExternalCVService:
                     job_text__startswith=job.text[:200]
                 ).exists()
                 if not exists:
-                    ats_json = score_cv_job_ats(text, job.text)
+                    logger.info(f"Kör ATS-motor för user={user.id}, CV={cv_obj.id if cv_obj else '-'}, JOB={job.id if job else '-'}")
+                    ats_json = score_cv_job_ats(text, job.text)  # eller (cv.text, text)
                     ATSResult.objects.create(
                         user=user,
                         cv_text=text,
@@ -53,6 +57,7 @@ class ExternalCVService:
                         overall_score=ats_json.get('overall_score') or ats_json.get('total_score') or ats_json.get('totalScore') or 0
                     )
                     matches_created += 1
+                    logger.info(f"ATSResult: Skapar matchning user={user.id} cv={cv_obj.id if cv_obj else '-'} job={job.id if job else '-'}")
 
             result = serializer.data.copy()
             result['matches_created'] = matches_created
@@ -130,7 +135,8 @@ class ExternalJobAdService:
                     job_text__startswith=text[:200]
                 ).exists()
                 if not exists:
-                    ats_json = score_cv_job_ats(cv.text, text)
+                    logger.info(f"Kör ATS-motor för user={user.id}, CV={cv.id if cv else '-'}, JOB={job_obj.id if job_obj else '-'}")
+                    ats_json = score_cv_job_ats(cv.text, text)  # eller (cv.text, text)
                     ATSResult.objects.create(
                         user=user,
                         cv_text=cv.text,
@@ -139,6 +145,7 @@ class ExternalJobAdService:
                         overall_score=ats_json.get('overall_score') or ats_json.get('total_score') or ats_json.get('totalScore') or 0
                     )
                     matches_created += 1
+                    logger.info(f"ATSResult: Skapar matchning user={user.id} cv={cv.id if cv else '-'} job={job_obj.id if job_obj else '-'}")
 
             result = serializer.data.copy()
             result['matches_created'] = matches_created
