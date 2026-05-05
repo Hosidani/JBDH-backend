@@ -1,8 +1,24 @@
 # apps/ai_services/models.py
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 from apps.users.models import User
 
+# --- MVP: ATSResult för sales demo ---
+class ATSResult(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ats_results')
+    cv_text = models.TextField()
+    job_text = models.TextField()
+    ats_json = models.JSONField()
+    overall_score = models.FloatField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['user', 'overall_score'])]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"ATSResult(user={self.user_id}, score={self.overall_score}, created={self.created_at})"
 
 class UserAIResponse(models.Model):
     """Store AI analysis responses for user CVs"""
