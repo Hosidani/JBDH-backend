@@ -15,8 +15,9 @@ COPY requirements-ats.txt /app/
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements-ats.txt
 
-# Download the lightweight English spaCy model (~12 MB, no torch required)
-RUN python -m spacy download en_core_web_sm
+# Download English and Swedish spaCy models (~12 MB each, no torch required)
+RUN python -m spacy download en_core_web_sm \
+    && python -m spacy download sv_core_news_sm
 
 COPY ats_service/ /app/ats_service/
 COPY tests/ /app/tests/

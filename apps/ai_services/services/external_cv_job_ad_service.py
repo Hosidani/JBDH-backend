@@ -81,6 +81,8 @@ class ExternalCVService:
     @staticmethod
     def delete(pk, user):
         cv = get_object_or_404(ExternalCV, pk=pk, user=user)
+        from apps.ai_services.models import ATSResult
+        ATSResult.objects.filter(user=user, cv_text=cv.text).delete()
         cv.delete()
 
     @staticmethod
@@ -102,6 +104,31 @@ class ExternalCVService:
 
         display_name = name.strip() if name and name.strip() else os.path.splitext(uploaded_file.name)[0][:60]
         cv = ExternalCV.objects.create(user=user, name=display_name, text=cv_text)
+
+        # --- Batch-matchning mot alla användarens jobb ---
+        from apps.ai_services.models import ExternalJobAd, ATSResult
+        from core.ats_client import score_cv_job_ats
+        job_ads = ExternalJobAd.objects.filter(user=user)
+        for job in job_ads:
+            exists = ATSResult.objects.filter(
+                user=user,
+                cv_text__startswith=cv_text[:200],
+                job_text__startswith=job.text[:200]
+            ).exists()
+            if not exists:
+                logger.info(f"Kör ATS-motor för user={user.id}, CV={cv.id}, JOB={job.id}")
+                try:
+                    ats_json = score_cv_job_ats(cv_text, job.text)
+                    ATSResult.objects.create(
+                        user=user,
+                        cv_text=cv_text,
+                        job_text=job.text,
+                        ats_json=ats_json,
+                        overall_score=ats_json.get('total_score') or ats_json.get('overall_score') or ats_json.get('totalScore') or 0
+                    )
+                except Exception as e:
+                    logger.error(f"ATS-matchning misslyckades för CV={cv.id} JOB={job.id}: {e}")
+
         return ExternalCVSerializer(cv).data, None
 
 
@@ -169,4 +196,6 @@ class ExternalJobAdService:
     @staticmethod
     def delete(pk, user):
         job_ad = get_object_or_404(ExternalJobAd, pk=pk, user=user)
+        from apps.ai_services.models import ATSResult
+        ATSResult.objects.filter(user=user, job_text=job_ad.text).delete()
         job_ad.delete()

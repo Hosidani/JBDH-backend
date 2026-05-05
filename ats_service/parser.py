@@ -11,29 +11,47 @@ import re
 from typing import Dict, List, Set
 
 import spacy
+from langdetect import detect, LangDetectException
 from spacy.matcher import PhraseMatcher
 
 from ats_service.skills_db import CATEGORY_MAP, get_all_skills
 
 # ---------------------------------------------------------------------------
-# Load spaCy model once at module level (startup cost, zero per-request cost).
-# Fallback to blank model if the download is missing so the container still
+# Load English and Swedish spaCy models once at module level.
+# Fallback to blank models if downloads are missing so the container still
 # starts and returns a useful error via /health.
 # ---------------------------------------------------------------------------
 try:
-    _nlp = spacy.load("en_core_web_sm")
+    _nlp_en = spacy.load("en_core_web_sm")
 except OSError:
-    try:
-        _nlp = spacy.load("sv_core_news_sm")
-    except OSError:
-        _nlp = spacy.blank("en")
+    _nlp_en = spacy.blank("en")
+
+try:
+    _nlp_sv = spacy.load("sv_core_news_sm")
+except OSError:
+    _nlp_sv = spacy.blank("sv")
 
 # ---------------------------------------------------------------------------
-# Build PhraseMatcher from the skills database (done once at import time).
+# Build a PhraseMatcher for each model (done once at import time).
 # ---------------------------------------------------------------------------
-_matcher = PhraseMatcher(_nlp.vocab, attr="LOWER")
-_patterns = list(_nlp.pipe(get_all_skills()))
-_matcher.add("SKILL", _patterns)
+_all_skills = get_all_skills()
+
+_matcher_en = PhraseMatcher(_nlp_en.vocab, attr="LOWER")
+_matcher_en.add("SKILL", list(_nlp_en.pipe(_all_skills)))
+
+_matcher_sv = PhraseMatcher(_nlp_sv.vocab, attr="LOWER")
+_matcher_sv.add("SKILL", list(_nlp_sv.pipe(_all_skills)))
+
+
+def _get_nlp_and_matcher(text: str):
+    """Detect language and return the matching (nlp, matcher) pair."""
+    try:
+        lang = detect(text)
+    except LangDetectException:
+        lang = "en"
+    if lang == "sv":
+        return _nlp_sv, _matcher_sv
+    return _nlp_en, _matcher_en
 
 
 # ---------------------------------------------------------------------------
@@ -49,9 +67,9 @@ _EXP_SECTION_RE = re.compile(
 )
 
 
-def _extract_skills_from_doc(doc) -> Dict[str, List[str]]:
+def _extract_skills_from_doc(doc, matcher) -> Dict[str, List[str]]:
     """Run PhraseMatcher and return skills grouped by category."""
-    matches = _matcher(doc)
+    matches = matcher(doc)
     seen: Set[str] = set()
     by_category: Dict[str, List[str]] = {}
 
@@ -119,8 +137,9 @@ def parse_cv(text: str) -> Dict:
         experience_years:    estimated years of experience (int)
         education:           list of education-related lines
     """
-    doc = _nlp(text)
-    skills_by_category = _extract_skills_from_doc(doc)
+    nlp, matcher = _get_nlp_and_matcher(text)
+    doc = nlp(text)
+    skills_by_category = _extract_skills_from_doc(doc, matcher)
     all_skills: List[str] = [
         skill
         for category, skills in skills_by_category.items()
@@ -145,8 +164,9 @@ def parse_job(text: str) -> Dict:
         experience_required: estimated minimum years mentioned
         education_hints:     education-related lines
     """
-    doc = _nlp(text)
-    skills_by_category = _extract_skills_from_doc(doc)
+    nlp, matcher = _get_nlp_and_matcher(text)
+    doc = nlp(text)
+    skills_by_category = _extract_skills_from_doc(doc, matcher)
     all_skills: List[str] = [
         skill
         for skills in skills_by_category.values()
@@ -170,13 +190,13 @@ def parse_job(text: str) -> Dict:
     merit_match = merit_pattern.search(text)
 
     if req_match:
-        req_doc = _nlp(req_match.group(1))
-        req_skills_map = _extract_skills_from_doc(req_doc)
+        req_doc = nlp(req_match.group(1))
+        req_skills_map = _extract_skills_from_doc(req_doc, matcher)
         required_skills = [s for skills in req_skills_map.values() for s in skills]
 
     if merit_match:
-        merit_doc = _nlp(merit_match.group(1))
-        merit_skills_map = _extract_skills_from_doc(merit_doc)
+        merit_doc = nlp(merit_match.group(1))
+        merit_skills_map = _extract_skills_from_doc(merit_doc, matcher)
         preferred_skills = [s for skills in merit_skills_map.values() for s in skills]
 
     # If section splitting didn't work, treat all skills as required

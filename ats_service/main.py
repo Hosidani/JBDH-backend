@@ -76,7 +76,7 @@ def score_endpoint(req: ScoreRequest) -> dict:
         )
     cv_parsed = parse_cv(req.cv_text)
     job_parsed = parse_job(req.job_text)
-    result = score(cv_parsed, job_parsed)
+    result = score(cv_parsed, job_parsed, cv_text=req.cv_text, job_text=req.job_text)
     result["cv_parsed"] = cv_parsed
     result["job_parsed"] = job_parsed
     return result
