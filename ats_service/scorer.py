@@ -1,21 +1,25 @@
 """
 ATS Scorer – produces a 0–100 ATS score with per-category breakdown.
 
-Weights (tunable via environment variables later):
-  skills_match      40 %
-  experience_match  25 %
-  education_match   20 %
-  soft_skills_match 15 %
+Base weights:
+  skills_match      75 %  (base; +5 % bonus when > 50 % and education not required)
+  experience_match  15 %  (base; +5 % bonus when > 50 % and education not required)
+  soft_skills_match 10 %
+  education_match   10 %  (only included when job explicitly requires education)
+
+keyword_coverage is NOT a weighted component – it is baked into skills_raw as a
+fallback when the skills DB has sparse coverage, and shown in breakdown for debugging.
 
 When a component has no requirement in the job ad it is excluded from the
-weighted average (its weight is redistributed to the remaining components).
-This prevents "100 % auto-pass" for unspecified dimensions.
+weighted average (weight redistributed to remaining components via normalisation).
 """
 
 from __future__ import annotations
 
 import re
 from typing import Dict, List, Optional, Set, Tuple
+
+from ats_service.skills_db import CANONICAL_DISPLAY
 
 try:
     from langdetect import detect as _langdetect, LangDetectException as _LDE
@@ -32,13 +36,16 @@ except ImportError:
 
 # ---------------------------------------------------------------------------
 # Weight configuration
+#
+# Weights are dynamic: education_match is only included when the job ad
+# specifies education requirements (weight redistributed automatically).
+# keyword_coverage is NOT a weighted component – it is used as a fallback
+# signal inside skills_raw and shown in breakdown for debugging only.
 # ---------------------------------------------------------------------------
-WEIGHTS = {
-    "skills": 0.40,
-    "experience": 0.25,
-    "education": 0.20,
-    "soft_skills": 0.15,
-}
+_W_SKILLS      = 0.75   # base; +0.05 bonus when skills_raw > 0.5 and no edu required
+_W_EXPERIENCE  = 0.15   # base; +0.05 bonus when exp_raw   > 0.5 and no edu required
+_W_SOFT_SKILLS = 0.10
+_W_EDUCATION   = 0.10   # only added when job explicitly requires education
 
 _TECH_CATEGORIES = {"programming", "framework", "database", "cloud_devops", "tools"}
 
@@ -70,7 +77,8 @@ def _experience_score(cv_years: int, required_years: int) -> Optional[float]:
         return None  # not specified – excluded from weighted average
     if cv_years >= required_years:
         return 1.0
-    return round(cv_years / required_years, 4)
+    ratio = cv_years / required_years
+    return round(ratio ** 0.5, 4)  # concave curve: softer penalty for near-misses
 
 
 _DEGREE_SYNONYMS: dict = {
@@ -94,11 +102,13 @@ def _education_score(cv_education: List[str], job_education: List[str]) -> Optio
     cv_text = " ".join(cv_education).lower()
 
     def _hint_matches(hint: str) -> bool:
-        hint_lower = hint.lower()
-        if hint_lower in cv_text:
+        hint_words = [w for w in re.split(r'\W+', hint.lower()) if len(w) > 3]
+        if not hint_words:
+            return False
+        if any(w in cv_text for w in hint_words):
             return True
         for _canonical, synonyms in _DEGREE_SYNONYMS.items():
-            if hint_lower in synonyms:
+            if any(w in synonyms for w in hint_words):
                 return any(syn in cv_text for syn in synonyms)
         return False
 
@@ -107,15 +117,45 @@ def _education_score(cv_education: List[str], job_education: List[str]) -> Optio
 
 
 _KEYWORD_STOP = {
-    # Swedish
+    # Swedish 5+ char function words
     "eller", "genom", "kommer", "också", "detta", "dessa", "vilka",
     "deras", "bland", "under", "efter", "innan", "varje", "alltid",
     "kunna", "minst",
-    # English
+    # Swedish 4-char function words (needed after threshold lowered to {4,})
+    "från", "till", "även", "alla", "hela", "vara", "utan", "inga",
+    "dock", "samt", "dels", "inom", "ovan", "just", "goda", "dina",
+    "sina", "ditt", "sitt", "vars", "hade", "bara", "alls", "enda",
+    "vart", "åren", "kvar", "slut", "igen", "resp",
+    # English 5+ char function words
     "where", "which", "their", "there", "about", "would", "should",
     "could", "might", "shall", "years", "have", "will", "within",
     "least", "other", "experience",
+    # English 4-char function words
+    "that", "this", "with", "from", "also", "both", "some", "when",
+    "then", "than", "they", "them", "what", "your", "more", "over",
+    "been", "were", "does", "each", "only", "same", "such", "into",
+    "upon", "have", "your", "very", "just",
 }
+
+
+def _soft_skill_text_fallback(job_soft: Set[str], cv_text: str) -> float:
+    """
+    Word-level fallback for soft skill matching when spaCy detected zero
+    soft skills in the CV (common with PDF concatenation artifacts).
+
+    Splits each job soft skill phrase into words (≥4 chars) and checks
+    whether any appear anywhere in the raw CV text (substring search).
+    Returns 0–1.
+    """
+    if not cv_text:
+        return 0.0
+    cv_lower = cv_text.lower()
+    hits = 0
+    for skill in job_soft:
+        words = [w for w in re.split(r'\W+', skill.lower()) if len(w) >= 4]
+        if words and any(w in cv_lower for w in words):
+            hits += 1
+    return hits / len(job_soft)
 
 
 def _keyword_coverage(job_text: str, cv_text: str) -> Optional[float]:
@@ -129,7 +169,7 @@ def _keyword_coverage(job_text: str, cv_text: str) -> Optional[float]:
     """
     if not job_text:
         return None
-    tokens = re.findall(r"[a-zA-ZåäöÅÄÖ]{5,}", job_text)
+    tokens = re.findall(r"[a-zA-ZåäöÅÄÖ]{4,}", job_text)
     important = [t.lower() for t in tokens if t.lower() not in _KEYWORD_STOP]
     if not important:
         return None
@@ -197,9 +237,20 @@ def score(
         cv_parsed.get("education", []),
         job_parsed.get("education_hints", []),
     )
-    soft_raw: Optional[float] = _overlap_score(cv_soft, job_soft) if job_soft else None
-    if soft_raw == -1.0:
-        soft_raw = None  # job specified no soft skills → exclude
+    soft_raw: Optional[float]
+    if job_soft:
+        if cv_soft:
+            soft_raw = _overlap_score(cv_soft, job_soft)
+            if soft_raw == -1.0:
+                soft_raw = None
+        elif cv_text:
+            # CV has zero detected soft skills – common PDF concatenation artifact.
+            # Fall back to word-level search in raw CV text.
+            soft_raw = _soft_skill_text_fallback(job_soft, cv_text)
+        else:
+            soft_raw = None  # no CV text – exclude rather than penalise with 0
+    else:
+        soft_raw = None
 
     # --- Skills score: PhraseMatcher DB + keyword-coverage fallback ---
     #
@@ -246,27 +297,77 @@ def score(
         skills_raw = db_skills_raw  # DB has good coverage – trust it
 
     # --- Weighted average over only the components the job actually specifies ---
-    components: Dict[str, tuple] = {"skills": (skills_raw, WEIGHTS["skills"])}
+    # skills + experience + soft_skills = 1.0 base.
+    # education adds 0.10 on top when required; total_weight normalises.
+    # keyword_coverage stays as debug/fallback only – not a weighted component.
+    #
+    # When education is NOT required: the freed 0.10 is redistributed:
+    #   +0.05 to skills     if skills_raw   > 0.5
+    #   +0.05 to experience if experience_raw > 0.5 (and experience is present)
+    # Any unallocated portion stays unspent (normalisation handles the rest).
+    edu_required = education_raw is not None
+    w_skills = _W_SKILLS
+    w_experience = _W_EXPERIENCE
+
+    if not edu_required:
+        if skills_raw > 0.5:
+            w_skills += 0.05
+        if experience_raw is not None and experience_raw > 0.5:
+            w_experience += 0.05
+
+    components: Dict[str, tuple] = {"skills": (skills_raw, w_skills)}
     if experience_raw is not None:
-        components["experience"] = (experience_raw, WEIGHTS["experience"])
+        components["experience"] = (experience_raw, w_experience)
     if education_raw is not None:
-        components["education"] = (education_raw, WEIGHTS["education"])
+        components["education"] = (education_raw, _W_EDUCATION)
     if soft_raw is not None:
-        components["soft_skills"] = (soft_raw, WEIGHTS["soft_skills"])
+        components["soft_skills"] = (soft_raw, _W_SOFT_SKILLS)
 
     total_weight = sum(w for _, w in components.values())
     total = sum(raw * w for raw, w in components.values()) / total_weight
     total_pct = round(total * 100, 1)
 
     # --- Matched / missing / bonus ---
-    matched: List[str] = sorted(
-        s for s in job_required_lower if s in cv_all_lower
-    )
+    # matched = tech skills that appear in BOTH cv and job.
+    # Domain/certification overlaps are also included because they are
+    # meaningful for job matching. Soft and language skills are excluded
+    # to avoid noisy output (e.g. "svenska", "noggrannhet" in matched list).
+    _DOMAIN_CATS = {"domain", "certification"}
+    cv_domain: Set[str] = {
+        s.lower() for cat in _DOMAIN_CATS for s in cv_by_cat.get(cat, [])
+    }
+    job_domain: Set[str] = {
+        s.lower() for cat in _DOMAIN_CATS for s in job_by_cat.get(cat, [])
+    }
+    matched_lower: Set[str] = (cv_tech & job_tech) | (cv_domain & job_domain)
+
+    def _display(s: str) -> str:
+        return CANONICAL_DISPLAY.get(s.lower(), s)
+
+    matched: List[str] = sorted(_display(s) for s in matched_lower)
+
+    # missing = required job skills not found by PhraseMatcher in the CV.
+    # Exception: soft skills – if the raw CV text contains the word(s) we
+    # don't mark it missing, because PhraseMatcher often fails on PDF-extracted
+    # Swedish text with ligatures or unusual unicode (e.g. "självständigt").
+    _cv_text_lower = cv_text.lower() if cv_text else ""
+    _soft_cat: Set[str] = {s.lower() for s in job_by_cat.get("soft", [])}
+
+    def _missed_by_text_fallback(skill_lower: str) -> bool:
+        """True if the skill is a soft skill found via raw-text word search."""
+        if skill_lower not in _soft_cat:
+            return False
+        words = [w for w in re.split(r'\W+', skill_lower) if len(w) >= 4]
+        return bool(words) and any(w in _cv_text_lower for w in words)
+
     missing: List[str] = sorted(
-        s for s in job_required_lower if s not in cv_all_lower
+        _display(s)
+        for s in job_required_lower
+        if s not in cv_all_lower and not _missed_by_text_fallback(s)
     )
+    # bonus = tech/domain CV skills not mentioned in the job ad at all
     bonus: List[str] = sorted(
-        s for s in cv_all_lower if s not in job_all_db
+        _display(s) for s in (cv_tech | cv_domain) if s not in job_all_db
     )
 
     # --- Recommendations ---

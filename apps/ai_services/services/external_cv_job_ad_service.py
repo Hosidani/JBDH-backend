@@ -40,11 +40,12 @@ class ExternalCVService:
             job_ads = ExternalJobAd.objects.filter(user=user)
             matches_created = 0
             for job in job_ads:
-                # Dubblettkontroll: finns redan denna matchning?
+                # Duplicate check: exact text match (startswith was too broad and
+                # caused CV 66 and CV 66(1) to be treated as identical).
                 exists = ATSResult.objects.filter(
                     user=user,
-                    cv_text__startswith=text[:200],
-                    job_text__startswith=job.text[:200]
+                    cv_text=text,
+                    job_text=job.text,
                 ).exists()
                 if not exists:
                     logger.info(f"Kör ATS-motor för user={user.id}, CV={cv_obj.id if cv_obj else '-'}, JOB={job.id if job else '-'}")
@@ -112,8 +113,8 @@ class ExternalCVService:
         for job in job_ads:
             exists = ATSResult.objects.filter(
                 user=user,
-                cv_text__startswith=cv_text[:200],
-                job_text__startswith=job.text[:200]
+                cv_text=cv_text,
+                job_text=job.text,
             ).exists()
             if not exists:
                 logger.info(f"Kör ATS-motor för user={user.id}, CV={cv.id}, JOB={job.id}")
@@ -155,11 +156,11 @@ class ExternalJobAdService:
             cvs = ExternalCV.objects.filter(user=user)
             matches_created = 0
             for cv in cvs:
-                # Dubblettkontroll: finns redan denna matchning?
+                # Duplicate check: exact text match (startswith was too broad).
                 exists = ATSResult.objects.filter(
                     user=user,
-                    cv_text__startswith=cv.text[:200],
-                    job_text__startswith=text[:200]
+                    cv_text=cv.text,
+                    job_text=text,
                 ).exists()
                 if not exists:
                     logger.info(f"Kör ATS-motor för user={user.id}, CV={cv.id if cv else '-'}, JOB={job_obj.id if job_obj else '-'}")

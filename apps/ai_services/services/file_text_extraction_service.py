@@ -5,6 +5,7 @@ Extract text from uploaded CV files. Supports PDF and DOCX (mirrors .NET FileHel
 import os
 import logging
 from typing import Optional
+import re
 
 from apps.ai_services.services.pdf_text_extraction_service import PDFTextExtractionService
 
@@ -23,9 +24,11 @@ def extract_text_from_file(file_path: str) -> str:
     ext = os.path.splitext(file_path)[1].lower()
     try:
         if ext == ".pdf":
-            return PDFTextExtractionService.extract_text_from_pdf(file_path)
+            raw = PDFTextExtractionService.extract_text_from_pdf(file_path)
+            return _normalize_extracted_text(raw)
         if ext in (".docx", ".doc"):
-            return _extract_text_from_docx(file_path)
+            raw = _extract_text_from_docx(file_path)
+            return _normalize_extracted_text(raw)
         logger.error("Unsupported file extension: %s. Only PDF and DOCX are supported.", ext)
         return ""
     except Exception as e:
@@ -47,3 +50,13 @@ def _extract_text_from_docx(file_path: str) -> str:
     except Exception as e:
         logger.error("DOCX extraction error: %s", e)
         return ""
+
+
+def _normalize_extracted_text(text: str) -> str:
+    # Collapse multiple spaces / tabs to a single space
+    text = re.sub(r'[ \t]{2,}', ' ', text)
+    # Remove single-char noise lines (e.g. stray bullet remnants)
+    text = re.sub(r'^\s*[a-zA-ZåäöÅÄÖ]\s*$', '', text, flags=re.MULTILINE)
+    # Collapse excessive blank lines
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()

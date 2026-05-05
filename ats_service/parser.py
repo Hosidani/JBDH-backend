@@ -8,7 +8,7 @@ model is required – en_core_web_sm (12 MB) is sufficient.
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 import spacy
 from langdetect import detect, LangDetectException
@@ -55,11 +55,39 @@ def _get_nlp_and_matcher(text: str):
 
 
 # ---------------------------------------------------------------------------
+# Text normalisation – run BEFORE spaCy so symbol-heavy terms tokenise
+# consistently regardless of spelling variant in the source text.
+#
+# Strategy: map every known variant → one unambiguous single word that
+# already exists in FRAMEWORK_ALIASES (so PhraseMatcher picks it up).
+# Order matters: more specific rules (ASP.NET) must precede general ones (.NET).
+# ---------------------------------------------------------------------------
+_NORMALIZATIONS: List[Tuple[re.Pattern, str]] = [
+    (re.compile(r"\bASP\.NET\b", re.IGNORECASE), "aspnet"),
+    (re.compile(r"\bASP\s+NET\b", re.IGNORECASE), "aspnet"),
+    (re.compile(r"\bNode\.js\b", re.IGNORECASE), "nodejs"),
+    (re.compile(r"(?<!\w)\.NET\b", re.IGNORECASE), "dotnet"),
+    (re.compile(r"\bC\s*\+\s*\+", re.IGNORECASE), "cplusplus"),
+    (re.compile(r"\bC\s*#", re.IGNORECASE), "csharp"),
+    (re.compile(r"\bCI\s*/\s*CD\b", re.IGNORECASE), "cicd"),
+    (re.compile(r"\bci\s+cd\b", re.IGNORECASE), "cicd"),
+]
+
+
+def _normalize_text(text: str) -> str:
+    """Normalise symbol-heavy tech terms so spaCy tokenises them as a single
+    unambiguous word that maps directly to an entry in FRAMEWORK_ALIASES."""
+    for pattern, replacement in _NORMALIZATIONS:
+        text = pattern.sub(replacement, text)
+    return text
+
+
+# ---------------------------------------------------------------------------
 # Regex helpers
 # ---------------------------------------------------------------------------
 _YEAR_RE = re.compile(r"\b(?:19|20)\d{2}\b")
 _DURATION_RE = re.compile(
-    r"\b(\d+)\s*(?:\+\s*)?(?:år|years?|yrs?|år)\b", re.IGNORECASE
+    r"\b(\d+)\s*(?:\+\s*)?(?:år[s]?|years?|yrs?)\b", re.IGNORECASE
 )
 _EXP_SECTION_RE = re.compile(
     r"(?:erfarenhet|experience|arbetslivserfarenhet)[^\n]*\n(.*?)(?:\n{2,}|\Z)",
@@ -137,6 +165,7 @@ def parse_cv(text: str) -> Dict:
         experience_years:    estimated years of experience (int)
         education:           list of education-related lines
     """
+    text = _normalize_text(text)
     nlp, matcher = _get_nlp_and_matcher(text)
     doc = nlp(text)
     skills_by_category = _extract_skills_from_doc(doc, matcher)
@@ -164,6 +193,7 @@ def parse_job(text: str) -> Dict:
         experience_required: estimated minimum years mentioned
         education_hints:     education-related lines
     """
+    text = _normalize_text(text)
     nlp, matcher = _get_nlp_and_matcher(text)
     doc = nlp(text)
     skills_by_category = _extract_skills_from_doc(doc, matcher)
