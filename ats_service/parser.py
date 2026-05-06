@@ -63,6 +63,10 @@ def _get_nlp_and_matcher(text: str):
 # Order matters: more specific rules (ASP.NET) must precede general ones (.NET).
 # ---------------------------------------------------------------------------
 _NORMALIZATIONS: List[Tuple[re.Pattern, str]] = [
+    # Strip invisible Unicode formatting characters that PDF extractors embed
+    # (zero-width space, ZW non-joiner/joiner, LRM/RLM, soft-hyphen, BOM).
+    # These attach silently to words ("Docker​") making PhraseMatcher miss them.
+    (re.compile(r"[\u200b\u200c\u200d\u200e\u200f\u00ad\ufeff]"), ""),
     (re.compile(r"\bASP\.NET\b", re.IGNORECASE), "aspnet"),
     (re.compile(r"\bASP\s+NET\b", re.IGNORECASE), "aspnet"),
     (re.compile(r"\bNode\.js\b", re.IGNORECASE), "nodejs"),
@@ -71,6 +75,10 @@ _NORMALIZATIONS: List[Tuple[re.Pattern, str]] = [
     (re.compile(r"\bC\s*#", re.IGNORECASE), "csharp"),
     (re.compile(r"\bCI\s*/\s*CD\b", re.IGNORECASE), "cicd"),
     (re.compile(r"\bci\s+cd\b", re.IGNORECASE), "cicd"),
+    # K8s is the universally accepted abbreviation for Kubernetes – treat them
+    # as identical so CV/job comparisons always match regardless of which form
+    # the author chose.
+    (re.compile(r"\bK8s\b", re.IGNORECASE), "Kubernetes"),
 ]
 
 

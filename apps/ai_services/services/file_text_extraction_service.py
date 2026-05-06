@@ -53,6 +53,9 @@ def _extract_text_from_docx(file_path: str) -> str:
 
 
 def _normalize_extracted_text(text: str) -> str:
+    # Strip invisible Unicode formatting characters embedded by PDF generators
+    # (zero-width space, ZW non-joiner/joiner, LRM/RLM, soft-hyphen, BOM).
+    text = re.sub(r'[\u200b\u200c\u200d\u200e\u200f\u00ad\ufeff]', '', text)
     # Collapse multiple spaces / tabs to a single space
     text = re.sub(r'[ \t]{2,}', ' ', text)
     # Remove single-char noise lines (e.g. stray bullet remnants)

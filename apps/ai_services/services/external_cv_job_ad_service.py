@@ -141,10 +141,20 @@ class ExternalCVService:
 
     @staticmethod
     def update(pk, user, data, partial=False):
+        from apps.ai_services.models import ATSResult
         cv = get_object_or_404(ExternalCV, pk=pk, user=user)
+        old_text = cv.text
         serializer = ExternalCVSerializer(cv, data=data, partial=partial)
         if serializer.is_valid():
             serializer.save()
+            new_text = cv.text
+            if old_text != new_text:
+                # Remove stale ATSResult rows tied to the old CV text.
+                ATSResult.objects.filter(user=user, cv_text=old_text).delete()
+                # Create fresh ATSResult rows for the new text against all jobs.
+                job_ads = ExternalJobAd.objects.filter(user=user)
+                for job in job_ads:
+                    _ensure_ats_result(user, new_text, job.text, cv_id=cv.id, job_id=job.id)
             return serializer.data, None
         return None, serializer.errors
 
@@ -221,10 +231,20 @@ class ExternalJobAdService:
 
     @staticmethod
     def update(pk, user, data, partial=False):
+        from apps.ai_services.models import ATSResult
         job_ad = get_object_or_404(ExternalJobAd, pk=pk, user=user)
+        old_text = job_ad.text
         serializer = ExternalJobAdSerializer(job_ad, data=data, partial=partial)
         if serializer.is_valid():
             serializer.save()
+            new_text = job_ad.text
+            if old_text != new_text:
+                # Remove stale ATSResult rows tied to the old job text.
+                ATSResult.objects.filter(user=user, job_text=old_text).delete()
+                # Create fresh ATSResult rows for the new text against all CVs.
+                cvs = ExternalCV.objects.filter(user=user)
+                for cv in cvs:
+                    _ensure_ats_result(user, cv.text, new_text, cv_id=cv.id, job_id=job_ad.id)
             return serializer.data, None
         return None, serializer.errors
 

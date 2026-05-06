@@ -378,4 +378,8 @@ CANONICAL_DISPLAY: Dict[str, str] = {
     "next js": "Next.js",
     "angularjs": "Angular",
     "java script": "JavaScript",
+    # K8s is normalised to "Kubernetes" before parsing, so this entry ensures
+    # the display name is always the full canonical form.
+    "k8s": "Kubernetes",
+    "kubernetes": "Kubernetes",
 }
