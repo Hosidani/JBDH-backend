@@ -17,6 +17,95 @@ def _name_from_text(text: str) -> str:
     return ' '.join(words)[:60] if words else 'Namnlös'
 
 
+def _get_overall_score(ats_json: dict) -> float:
+    """Extract overall score from ATS result regardless of key name."""
+    return (
+        ats_json.get('overall_score')
+        or ats_json.get('total_score')
+        or ats_json.get('totalScore')
+        or 0
+    )
+
+
+def _ensure_ats_result(user, cv_text: str, job_text: str, cv_id=None, job_id=None) -> bool:
+    """
+    Score a single CV/job pair and persist the result if it does not already exist.
+
+    Returns True if a new ATSResult was created, False if it already existed.
+    Logs and swallows ATS errors so a single failure never blocks the others.
+    """
+    from apps.ai_services.models import ATSResult
+    from core.ats_client import score_cv_job_ats
+
+    if ATSResult.objects.filter(user=user, cv_text=cv_text, job_text=job_text).exists():
+        return False
+
+    logger.info(
+        "Kör ATS-motor för user=%s, CV=%s, JOB=%s",
+        user.id, cv_id or '-', job_id or '-',
+    )
+    try:
+        ats_json = score_cv_job_ats(cv_text, job_text)
+        ATSResult.objects.create(
+            user=user,
+            cv_text=cv_text,
+            job_text=job_text,
+            ats_json=ats_json,
+            overall_score=_get_overall_score(ats_json),
+        )
+        logger.info(
+            "ATSResult skapad: user=%s, CV=%s, JOB=%s",
+            user.id, cv_id or '-', job_id or '-',
+        )
+        return True
+    except Exception as exc:
+        logger.error(
+            "ATS-matchning misslyckades för CV=%s JOB=%s: %s",
+            cv_id or '-', job_id or '-', exc,
+        )
+        return False
+
+
+# ---------------------------------------------------------------------------
+# ATSRelationService — gap-detection used by the list endpoint
+# ---------------------------------------------------------------------------
+
+class ATSRelationService:
+    """
+    Ensures that every (ExternalCV, ExternalJobAd) pair for a user has a
+    corresponding ATSResult row.  Call ensure_all_relations() before returning
+    data to the frontend so the API is always self-healing.
+    """
+
+    @staticmethod
+    def ensure_all_relations(user) -> int:
+        """
+        Compute and persist missing ATSResult rows for all CV × Job pairs
+        belonging to *user*.
+
+        Returns the number of newly created results.
+        """
+        cvs = list(ExternalCV.objects.filter(user=user))
+        jobs = list(ExternalJobAd.objects.filter(user=user))
+
+        created = 0
+        for cv in cvs:
+            for job in jobs:
+                if _ensure_ats_result(user, cv.text, job.text, cv_id=cv.id, job_id=job.id):
+                    created += 1
+
+        if created:
+            logger.info(
+                "ensure_all_relations: %d nya ATSResult skapade för user=%s",
+                created, user.id,
+            )
+        return created
+
+
+# ---------------------------------------------------------------------------
+# ExternalCVService
+# ---------------------------------------------------------------------------
+
 class ExternalCVService:
 
     @staticmethod
@@ -34,31 +123,11 @@ class ExternalCVService:
         if serializer.is_valid():
             cv_obj = serializer.save(user=user)
 
-            # --- Batch-matchning mot alla användarens jobb ---
-            from apps.ai_services.models import ExternalJobAd, ATSResult
-            from core.ats_client import score_cv_job_ats
             job_ads = ExternalJobAd.objects.filter(user=user)
-            matches_created = 0
-            for job in job_ads:
-                # Duplicate check: exact text match (startswith was too broad and
-                # caused CV 66 and CV 66(1) to be treated as identical).
-                exists = ATSResult.objects.filter(
-                    user=user,
-                    cv_text=text,
-                    job_text=job.text,
-                ).exists()
-                if not exists:
-                    logger.info(f"Kör ATS-motor för user={user.id}, CV={cv_obj.id if cv_obj else '-'}, JOB={job.id if job else '-'}")
-                    ats_json = score_cv_job_ats(text, job.text)  # eller (cv.text, text)
-                    ATSResult.objects.create(
-                        user=user,
-                        cv_text=text,
-                        job_text=job.text,
-                        ats_json=ats_json,
-                        overall_score=ats_json.get('overall_score') or ats_json.get('total_score') or ats_json.get('totalScore') or 0
-                    )
-                    matches_created += 1
-                    logger.info(f"ATSResult: Skapar matchning user={user.id} cv={cv_obj.id if cv_obj else '-'} job={job.id if job else '-'}")
+            matches_created = sum(
+                _ensure_ats_result(user, text, job.text, cv_id=cv_obj.id, job_id=job.id)
+                for job in job_ads
+            )
 
             result = serializer.data.copy()
             result['matches_created'] = matches_created
@@ -106,32 +175,16 @@ class ExternalCVService:
         display_name = name.strip() if name and name.strip() else os.path.splitext(uploaded_file.name)[0][:60]
         cv = ExternalCV.objects.create(user=user, name=display_name, text=cv_text)
 
-        # --- Batch-matchning mot alla användarens jobb ---
-        from apps.ai_services.models import ExternalJobAd, ATSResult
-        from core.ats_client import score_cv_job_ats
         job_ads = ExternalJobAd.objects.filter(user=user)
         for job in job_ads:
-            exists = ATSResult.objects.filter(
-                user=user,
-                cv_text=cv_text,
-                job_text=job.text,
-            ).exists()
-            if not exists:
-                logger.info(f"Kör ATS-motor för user={user.id}, CV={cv.id}, JOB={job.id}")
-                try:
-                    ats_json = score_cv_job_ats(cv_text, job.text)
-                    ATSResult.objects.create(
-                        user=user,
-                        cv_text=cv_text,
-                        job_text=job.text,
-                        ats_json=ats_json,
-                        overall_score=ats_json.get('total_score') or ats_json.get('overall_score') or ats_json.get('totalScore') or 0
-                    )
-                except Exception as e:
-                    logger.error(f"ATS-matchning misslyckades för CV={cv.id} JOB={job.id}: {e}")
+            _ensure_ats_result(user, cv_text, job.text, cv_id=cv.id, job_id=job.id)
 
         return ExternalCVSerializer(cv).data, None
 
+
+# ---------------------------------------------------------------------------
+# ExternalJobAdService
+# ---------------------------------------------------------------------------
 
 class ExternalJobAdService:
 
@@ -150,30 +203,11 @@ class ExternalJobAdService:
         if serializer.is_valid():
             job_obj = serializer.save(user=user)
 
-            # --- Batch-matchning mot alla användarens CV:n ---
-            from apps.ai_services.models import ExternalCV, ATSResult
-            from core.ats_client import score_cv_job_ats
             cvs = ExternalCV.objects.filter(user=user)
-            matches_created = 0
-            for cv in cvs:
-                # Duplicate check: exact text match (startswith was too broad).
-                exists = ATSResult.objects.filter(
-                    user=user,
-                    cv_text=cv.text,
-                    job_text=text,
-                ).exists()
-                if not exists:
-                    logger.info(f"Kör ATS-motor för user={user.id}, CV={cv.id if cv else '-'}, JOB={job_obj.id if job_obj else '-'}")
-                    ats_json = score_cv_job_ats(cv.text, text)  # eller (cv.text, text)
-                    ATSResult.objects.create(
-                        user=user,
-                        cv_text=cv.text,
-                        job_text=text,
-                        ats_json=ats_json,
-                        overall_score=ats_json.get('overall_score') or ats_json.get('total_score') or ats_json.get('totalScore') or 0
-                    )
-                    matches_created += 1
-                    logger.info(f"ATSResult: Skapar matchning user={user.id} cv={cv.id if cv else '-'} job={job_obj.id if job_obj else '-'}")
+            matches_created = sum(
+                _ensure_ats_result(user, cv.text, text, cv_id=cv.id, job_id=job_obj.id)
+                for cv in cvs
+            )
 
             result = serializer.data.copy()
             result['matches_created'] = matches_created

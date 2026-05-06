@@ -71,7 +71,7 @@ from rest_framework.views import APIView
 from .models import ExternalCV, ExternalJobAd
 from .serializers import ExternalCVSerializer, ExternalJobAdSerializer
 from django.shortcuts import get_object_or_404
-from apps.ai_services.services.external_cv_job_ad_service import ExternalCVService, ExternalJobAdService
+from apps.ai_services.services.external_cv_job_ad_service import ExternalCVService, ExternalJobAdService, ATSRelationService
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
@@ -201,6 +201,9 @@ class ATSResultListView(ListAPIView):
         return ATSResult.objects.filter(user=self.request.user)
 
     def list(self, request, *args, **kwargs):
+        # Ensure every CV × Job pair has a score before returning data.
+        ATSRelationService.ensure_all_relations(request.user)
+
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return api_response(success=True, message="ATS results fetched", data=serializer.data)
