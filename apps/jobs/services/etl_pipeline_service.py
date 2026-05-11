@@ -589,7 +589,7 @@ class ETLPipelineService:
         # 2️⃣ TRANSFORM - Körs ALLTID på RawJob (oberoende av extract)
         print("\n🔄 [2/3] TRANSFORM...")
         try:
-            transformed_jobs = cls.transform()
+            transformed_jobs = cls.transform_batch(start_idx=0, batch_size=3000)
             stats["transformed"] = len(transformed_jobs)
             logger.info("✅ Transform klar: %d jobb transformerade", stats["transformed"])
         except Exception as e:

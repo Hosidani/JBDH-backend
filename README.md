@@ -292,19 +292,52 @@ Always use `--project-name` flag when running multiple environments on the same 
 
 ---
 
-## 🧪 Create a test user (PowerShell)
+## 🧪 Create a test user
+
+### PowerShell (lokal terminal, Windows)
 
 ```powershell
 $body = @{
-    Email = "test@test.com"
-    Password = "test12"
-    ConfirmPassword = "test12"
+    Email = "user@example.com"
+    Password = "yourpassword"
+    ConfirmPassword = "yourpassword"
     Location = "Stockholm"
     PreferredLanguage = "sv"
     Open = $false
 } | ConvertTo-Json
 
 iwr -Uri "http://localhost:8000/api/Register/RegisterUser" -Method POST -ContentType "application/json" -Body $body
+```
+
+### curl (Linux-server via SSH)
+
+> ⚠️ `iwr` och `$body = @{...}` är PowerShell-syntax och fungerar **inte** i bash.  
+> Använd `curl` istället:
+
+```bash
+curl -s -X POST http://localhost:8000/api/Register/RegisterUser \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Email": "user@example.com",
+    "Password": "yourpassword",
+    "ConfirmPassword": "yourpassword",
+    "Location": "Stockholm",
+    "PreferredLanguage": "sv",
+    "Open": false
+  }'
+```
+
+### pgAdmin (Query Tool)
+
+> ⚠️ **Använd inte pgAdmin för att skapa användare direkt** – lösenordet sparas då i klartext och användaren kan inte logga in.  
+> pgAdmin kör bara rå SQL och kör inte Djangos lösenordshashning.  
+> Använd `curl` eller Django shell istället (se ovan).
+
+Om du ändå vill inspektera användare i pgAdmin:
+
+```sql
+-- Visa alla användare
+SELECT id, email, is_active, is_staff, last_login FROM users_customuser ORDER BY id;
 ```
 
 ---
