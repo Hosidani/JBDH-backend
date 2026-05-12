@@ -99,3 +99,7 @@ networks:
   jbdh_shared:
     name: jbdh_shared
     external: true
+
+minilm:
+    profiles:
+      - disabled  # förhindrar att minilm startas i prod-stacken (shared används istället)
