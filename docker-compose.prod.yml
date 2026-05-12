@@ -36,9 +36,10 @@ services:
 
   frontend:
     build:
+      context: ../JBDH-frontend/myapp-frontend
+      dockerfile: Dockerfile
       args:
         VITE_MODE: production
-        # Leave VITE_API_URL empty to use .env.production
     environment:
       - PGADMIN_HOST=${COMPOSE_PROJECT_NAME}_pgadmin_prod
     ports:
@@ -72,6 +73,11 @@ services:
       - jbdh_shared
     restart: unless-stopped
 
+  # Inaktivera lokala versioner av AI-tjänsterna i prod
+  minilm:
+    profiles:
+      - disabled
+
   ats:
     restart: unless-stopped
 
@@ -84,8 +90,6 @@ services:
       SCRIPT_NAME: /admin
     expose:
       - "80"
-    #ports:                       # uncomment if nginx is down and you want direct access to pgadmin
-    #- "8080:80"
     networks:
       - jbdh_network
     restart: unless-stopped
@@ -94,10 +98,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-
-  minilm:
-    profiles:
-      - disabled  # förhindrar att minilm startas i prod-stacken (shared används istället)
 
 networks:
   jbdh_shared:
