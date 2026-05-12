@@ -29,7 +29,10 @@ def extract_text_from_file(file_path: str) -> str:
         if ext in (".docx", ".doc"):
             raw = _extract_text_from_docx(file_path)
             return _normalize_extracted_text(raw)
-        logger.error("Unsupported file extension: %s. Only PDF and DOCX are supported.", ext)
+        if ext == ".txt":
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read().strip()
+        logger.error("Unsupported file extension: %s. Only PDF, DOCX and TXT are supported.", ext)
         return ""
     except Exception as e:
         logger.error("Error extracting text from %s: %s", file_path, e)
