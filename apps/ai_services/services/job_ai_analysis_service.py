@@ -28,6 +28,7 @@ class JobAIAnalysisService:
         self.api_key = getattr(settings, "DEEPSEEK_API_KEY", os.getenv("DEEPSEEK_API_KEY", ""))
         self.model = getattr(settings, "DEEPSEEK_MODEL", os.getenv("DEEPSEEK_MODEL", "deepseek-chat"))
 
+    # TODo: In future, we want to support update of existing analysis (currently only missing/incomplete are processed). When a job is updated in the system, we want to be able to re-run the analysis and update the existing JobAIResponse row instead of creating a new one. This method should be flexible enough to support both "get candidates for new analysis" and "get candidates for update" modes.
     def get_all_job_urls_from_database(
         self,
         keyword: Optional[str] = None,
@@ -236,7 +237,7 @@ class JobAIAnalysisService:
             },
         )
 
-        # Skip if already completed with a non-empty payload.
+        # Skip if already completed with a non-empty payload. TODO: In future, we want to support update of existing analysis (currently only missing/incomplete are processed). When a job is updated in the system, we want to be able to re-run the analysis and update the existing JobAIResponse row instead of creating a new one. This check should be flexible enough to support both "get candidates for new analysis" and "get candidates for update" modes.
         if (
             row
             and row.status == JobAIResponse.JobStatus.COMPLETED
