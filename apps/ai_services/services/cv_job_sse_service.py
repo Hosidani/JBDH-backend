@@ -7,7 +7,7 @@ from django.conf import settings
 
 from apps.ai_services.services.file_text_extraction_service import extract_text_from_file
 from apps.ai_services.services.minilm_embedding_service import cosine_similarity
-from apps.ai_services.services.cv_job_analysis_service import extract_cv_job_analysis
+from apps.ai_services.services.cv_job_analysis_service import extract_cv_job_analysis, extract_field_analysis
 from core.ats_client import score_cv_job_ats
 from core.utils import vectorize_text
 
@@ -69,72 +69,59 @@ class CVJobSSEService:
         )
 
     @staticmethod
+    def _build_weighted_skill_string(skills: List[Dict]) -> str:
+        """Repeat skill names by importance so MiniLM weighs high-importance skills more.
+        importance 5 → 3x, 4 → 2x, 3 → 1x, <3 → excluded.
+        Sorted DESC so critical skills survive 256-token truncation.
+        """
+        if not isinstance(skills, list):
+            return ""
+        sorted_skills = sorted(skills, key=lambda s: s.get("importance", 3), reverse=True)
+        parts: List[str] = []
+        for skill in sorted_skills:
+            name = skill.get("name", "").strip()
+            importance = skill.get("importance", 3)
+            if not name or importance < 3:
+                continue
+            repeats = importance - 2  # 3→1, 4→2, 5→3
+            parts.extend([name] * repeats)
+        return " ".join(parts)
+
+    @staticmethod
     def _safe_similarity_percent(left_text: str, right_text: str) -> float:
         if not left_text.strip() or not right_text.strip():
             return 0.0
         return round(cosine_similarity(vectorize_text(left_text), vectorize_text(right_text)) * 100, 2)
 
-    def generate_events(self, request) -> Iterable[str]:
-        yield self._build_event(progress=10, message="🔄 Laddar CV...")
-
+    @staticmethod
+    def _load_cv_text(request) -> tuple[str | None, str | None]:
+        """Extract CV text from the request. Returns (cv_text, error_message)."""
         cv_file = request.FILES.get("CvPath")
         external_cv_id = (
             request.POST.get("external_cv_id")
             or getattr(request, "data", {}).get("external_cv_id")
         )
-        job_ad_text = (
-            getattr(request, "data", {}).get("JobAdText")
-            or request.POST.get("JobAdText")
-            or ""
-        ).strip()
-
-        if not job_ad_text:
-            yield self._build_event(progress=100, error="CV och Jobbtext krävs.")
-            return
-
         if external_cv_id:
             from apps.ai_services.models import ExternalCV
             try:
                 cv_obj = ExternalCV.objects.get(pk=int(external_cv_id), user=request.user)
-                cv_text = cv_obj.text.strip()
+                return cv_obj.text.strip(), None
             except (ExternalCV.DoesNotExist, ValueError, TypeError):
-                yield self._build_event(progress=100, error="Valt CV hittades inte.")
-                return
+                return None, "Valt CV hittades inte."
         elif cv_file:
-            cv_text = self._save_and_extract_cv_text(cv_file)
+            cv_text = CVJobSSEService._save_and_extract_cv_text(cv_file)
+            if not cv_text:
+                return None, "Kunde inte extrahera CV-text."
+            return cv_text, None
         else:
-            yield self._build_event(progress=100, error="CV och Jobbtext krävs.")
-            return
+            return None, "CV och Jobbtext krävs."
 
-        if not cv_text:
-            yield self._build_event(progress=100, error="Kunde inte extrahera CV-text.")
-            return
-
-        try:
-            cv_vector = vectorize_text(cv_text)
-            job_ad_vector = vectorize_text(job_ad_text)
-            vector_similarity = round(cosine_similarity(cv_vector, job_ad_vector) * 100, 2)
-            vector_result = {
-                "similarityScore": vector_similarity,
-                "cvVectorSize": len(cv_vector),
-                "jobAdVectorSize": len(job_ad_vector),
-            }
-            yield self._build_event(
-                progress=25,
-                message=f"⚡ Vektoranalys klar: {vector_similarity}%",
-                vector_result=vector_result,
-            )
-        except Exception as exc:
-            logger.exception("On-the-fly CV vs JobAd vector compare failed: %s", exc)
-            yield self._build_event(progress=100, error="Vektoranalys misslyckades.")
-            return
-
-        yield self._build_event(progress=40, message="📋 ATS-analys pågår...")
-
-        ats_result: Dict | None = None
+    @staticmethod
+    def _run_ats(cv_text: str, job_ad_text: str) -> Dict | None:
+        """Run ATS scoring. Returns structured ATS payload or None on failure."""
         try:
             raw_ats = score_cv_job_ats(cv_text, job_ad_text)
-            ats_result = {
+            return {
                 "totalScore": raw_ats.get("total_score"),
                 "breakdown": raw_ats.get("breakdown"),
                 "matchedSkills": raw_ats.get("matched_skills", []),
@@ -142,13 +129,68 @@ class CVJobSSEService:
                 "bonusSkills": raw_ats.get("bonus_skills", []),
                 "recommendations": raw_ats.get("recommendations", []),
             }
-            yield self._build_event(
-                progress=60,
-                message=f"📋 ATS-poäng: {raw_ats.get('total_score')}%",
-                ats_result=ats_result,
-            )
         except Exception as exc:
             logger.warning("ATS-analys misslyckades (fortsätter utan den): %s", exc)
+            return None
+
+    @staticmethod
+    def _build_t5_payload(result_json: Dict) -> tuple[Dict, str, str, str, str]:
+        """Compute vector similarities and build the frontend result payload.
+        Returns (payload, cv_profession_str, cv_skills_str, job_profession_str, job_requirements_str).
+        """
+        cv_profession_str = CVJobSSEService._join_profession_fields(result_json.get("cv_profession", {}))
+        job_profession_str = CVJobSSEService._join_profession_fields(result_json.get("job_profession", {}))
+        profession_vector_similarity = CVJobSSEService._safe_similarity_percent(cv_profession_str, job_profession_str)
+
+        cv_weighted_skills = CVJobSSEService._build_weighted_skill_string(result_json.get("cv_skills", []))
+        job_weighted_requirements = CVJobSSEService._build_weighted_skill_string(result_json.get("job_requirements", []))
+        skills_vector_similarity = CVJobSSEService._safe_similarity_percent(cv_weighted_skills, job_weighted_requirements)
+
+        # Plain skill strings for Template 6 (readable, not repeated)
+        cv_skills_str = CVJobSSEService._join_skill_names(result_json.get("cv_skills", []))
+        job_requirements_str = CVJobSSEService._join_skill_names(result_json.get("job_requirements", []))
+
+        payload: Dict = {
+            "summary": result_json.get("summary", ""),
+            "matching_skills": result_json.get("matching_skills", []),
+            "missing_requirements": result_json.get("gaps", []),
+            "relevant_experiences": result_json.get("relevant_experiences", []),
+            "education_and_certifications": result_json.get("education_and_certifications", []),
+            "strengths": result_json.get("strengths", []),
+            "gaps": result_json.get("gaps", []),
+            "profession_vector_similarity": profession_vector_similarity,
+            "skills_vector_similarity": skills_vector_similarity,
+        }
+        return payload, cv_profession_str, cv_skills_str, job_profession_str, job_requirements_str
+
+    def generate_events(self, request) -> Iterable[str]:
+        """Orchestrates the SSE flow: CV load → ATS → T5 → field analysis → done."""
+        yield self._build_event(progress=10, message="🔄 Laddar CV...")
+
+        job_ad_text = (
+            getattr(request, "data", {}).get("JobAdText")
+            or request.POST.get("JobAdText")
+            or ""
+        ).strip()
+        if not job_ad_text:
+            yield self._build_event(progress=100, error="CV och Jobbtext krävs.")
+            return
+
+        cv_text, cv_error = self._load_cv_text(request)
+        if cv_error:
+            yield self._build_event(progress=100, error=cv_error)
+            return
+
+        yield self._build_event(progress=30, message="📋 ATS-analys pågår...")
+
+        ats_result = self._run_ats(cv_text, job_ad_text)
+        if ats_result:
+            yield self._build_event(
+                progress=60,
+                message=f"📋 ATS-poäng: {ats_result.get('totalScore')}%",
+                ats_result=ats_result,
+            )
+        else:
             yield self._build_event(progress=60, message="⚠️ ATS-analys ej tillgänglig.")
 
         yield self._build_event(progress=70, message="🧠 DeepSeek analyserar...")
@@ -158,25 +200,23 @@ class CVJobSSEService:
             yield self._build_event(progress=100, error="AI-analys misslyckades.")
             return
 
-        cv_profession_str = self._join_profession_fields(result_json.get("cv_profession", {}))
-        job_profession_str = self._join_profession_fields(result_json.get("job_profession", {}))
-        profession_vector_similarity = self._safe_similarity_percent(cv_profession_str, job_profession_str)
+        frontend_payload, cv_profession_str, cv_skills_str, job_profession_str, job_requirements_str = (
+            self._build_t5_payload(result_json)
+        )
 
-        cv_skills_str = self._join_skill_names(result_json.get("cv_skills", []))
-        job_requirements_str = self._join_skill_names(result_json.get("job_requirements", []))
-        skills_vector_similarity = self._safe_similarity_percent(cv_skills_str, job_requirements_str)
+        yield self._build_event(progress=90, message="🔍 Fältanalys pågår...")
 
-        frontend_payload = {
-            "summary": result_json.get("summary", ""),
-            "matching_skills": result_json.get("cv_skills", []),
-            "missing_requirements": result_json.get("gaps", []),
-            "relevant_experiences": result_json.get("relevant_experiences", []),
-            "education_and_certifications": result_json.get("education_and_certifications", []),
-            "strengths": result_json.get("strengths", []),
-            "gaps": result_json.get("gaps", []),
-            "profession_vector_similarity": profession_vector_similarity,
-            "skills_vector_similarity": skills_vector_similarity,
-        }
+        try:
+            field_analysis = extract_field_analysis(
+                cv_profession=cv_profession_str,
+                cv_skills=cv_skills_str,
+                job_profession=job_profession_str,
+                job_requirements=job_requirements_str,
+            )
+            if field_analysis:
+                frontend_payload["field_analysis"] = field_analysis
+        except Exception as exc:
+            logger.warning("Fältanalys misslyckades (fortsätter utan den): %s", exc)
 
         yield self._build_event(
             progress=100,

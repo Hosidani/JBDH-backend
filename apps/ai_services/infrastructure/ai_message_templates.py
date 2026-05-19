@@ -71,7 +71,17 @@ class AIMessageTemplates:
             "IMPORTANT:\n"
             "- Return ONLY valid JSON\n"
             "- Do not include explanations, do NOT use markdown, code blocks, or extra formatting\n"
-            "- Keep the structure simple and consistent, If the response is too long, shorten lists or summarize, but always return valid, complete JSON.\n\n"
+            "- Keep the structure simple and consistent\n\n"
+            "CRITICAL RULES FOR CV PARSING:\n"
+            "- Treat EVERY word in the CV as intentional. If the candidate has written phrases like "
+            "'startup experience explicitly mentioned', 'long experience with X', 'expert system design', "
+            "or 'long term experience in modeling expertise' – these are HIGH SIGNAL and MUST be extracted.\n"
+            "- Do NOT assume a skill is missing just because it's not in a 'Technical Skills' section. "
+            "Skills can appear anywhere: in summary, experience bullet points, or even as standalone phrases.\n"
+            "- For each skill/experience mentioned in CV, ask: 'Is this relevant to backend/fullstack/cloud roles?' "
+            "If yes, include it with appropriate importance (4-5 for explicitly claimed expertise).\n"
+            "- When the CV says 'experience with X' -> importance 3. 'strong experience' -> 4. "
+            "'expert', 'long experience', 'explicitly mentioned' -> 5.\n\n"
             "Extract the following:\n\n"
             "1. cv_profession:\n"
             "   - main\n"
@@ -80,8 +90,8 @@ class AIMessageTemplates:
             "2. cv_skills:\n"
             "   - list of objects with:\n"
             "     - name\n"
-            "     - category (skill | tool | technology)\n"
-            "     - importance (1-5)\n\n"
+            "     - category (skill | tool | technology | domain_experience)\n"
+            "     - importance (1-5, where 5 = explicitly claimed expertise or 'long experience')\n\n"
             "3. job_profession:\n"
             "   - main\n"
             "   - sub\n"
@@ -89,15 +99,21 @@ class AIMessageTemplates:
             "4. job_requirements:\n"
             "   - list of objects with:\n"
             "     - name\n"
-            "     - category (skill | tool | technology)\n"
+            "     - category (skill | tool | technology | domain_experience)\n"
             "     - importance (1-5)\n\n"
-            "5. relevant_experiences: []\n"
-            "6. summary:\n"
+            "5. matching_skills:\n"
+            "   - ONLY skills that appear in BOTH the CV and the job ad\n"
+            "   - For domain experiences (e.g., 'startup experience', 'system design'), use semantic matching "
+            "     – if CV says 'startup experience' and job wants 'startup background', that's a match.\n"
+            "   - list of objects: name, category, importance (from CV's perspective)\n\n"
+            "6. relevant_experiences: []\n\n"
+            "7. summary:\n"
             "   - short 1-2 sentence summary of fit\n\n"
-            "7. strengths:\n"
+            "8. strengths:\n"
             "   - list (max 5)\n\n"
-            "8. gaps:\n"
-            "   - list (max 5)\n\n"
+            "9. gaps:\n"
+            "   - list (max 5) – ONLY include if the CV genuinely lacks something the job REQUIRES\n"
+            "   - Do NOT claim something is missing if the CV contains it anywhere (including explicit mentions)\n\n"
             "Return JSON in this format:\n\n"
             "{{{{\n"
             '  "cv_profession": {{{{ "main": "", "sub": "", "specialty": "" }}}},\n'
@@ -108,6 +124,9 @@ class AIMessageTemplates:
             '  "job_requirements": [\n'
             '    {{{{ "name": "", "category": "", "importance": 4 }}}}\n'
             "  ],\n"
+            '  "matching_skills": [\n'
+            '    {{{{ "name": "", "category": "", "importance": 3 }}}}\n'
+            "  ],\n"
             '  "relevant_experiences": [],\n'
             '  "summary": "",\n'
             '  "strengths": [],\n'
@@ -115,6 +134,37 @@ class AIMessageTemplates:
             "}}}}\n\n"
             "CV:\n{cv_text}\n\n"
             "Job:\n{job_ad_text}\n"
+        ),
+        # Template 6: Field analysis — pure data extraction, no compatibility judgement.
+        # Call this AFTER template 5 to enrich the result with concrete evidence and gaps.
+        # Input: cv_profession (str), cv_skills (str), job_profession (str), job_requirements (str)
+        6: (
+            "You are a precise data extractor. You do NOT make judgements or give opinions.\n\n"
+            "You are given structured data extracted from a CV and a job advertisement.\n\n"
+            "Your ONLY task is to extract factual, concrete data points about the overlap and distance "
+            "between the candidate's profile and the job requirements.\n\n"
+            "RULES:\n"
+            "- Do NOT write opinions, verdicts, or recommendations.\n"
+            "- Do NOT invent soft-skill bridges like 'leadership' or 'communication' to fill match_evidence.\n"
+            "- match_evidence: ONLY concrete hard skills or domain knowledge that appear in BOTH CV and job.\n"
+            "- critical_gaps: ONLY hard requirements the job demands that the CV does NOT show.\n"
+            "- transferable_skills: CV skills adjacent to job requirements but not a direct match "
+            "(e.g. CI/CD experience for a DevOps role, or statistical modeling for a data science role).\n"
+            "- field_overlap_score: integer 0-100 based solely on hard skill overlap — "
+            "0 means zero shared domain, 100 means identical field. Do NOT inflate.\n"
+            "- field_distance_note: one factual sentence stating what the CV field is and what the job field is.\n\n"
+            "Return ONLY valid JSON with exactly these keys:\n"
+            "{{\n"
+            '  "field_overlap_score": integer 0-100,\n'
+            '  "field_distance_note": "factual one-sentence description of domain distance",\n'
+            '  "match_evidence": ["max 5 concrete overlapping hard skills or domain knowledge"],\n'
+            '  "critical_gaps": ["max 5 hard requirements in job that CV does not show"],\n'
+            '  "transferable_skills": ["max 5 CV skills adjacent to but not directly matching job requirements"]\n'
+            "}}\n\n"
+            "CV profession: {cv_profession}\n"
+            "CV skills: {cv_skills}\n\n"
+            "Job profession: {job_profession}\n"
+            "Job requirements: {job_requirements}\n"
         ),
         # Template 7: CV → Profession + Requirements (same structure as job extraction)
         7: (
