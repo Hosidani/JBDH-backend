@@ -30,6 +30,10 @@ FRAMEWORKS: List[str] = [
     "Gatsby", "Celery", "GraphQL", "REST API", "gRPC",
     "Pandas", "NumPy", "Scikit-learn", "TensorFlow", "PyTorch", "Keras",
     "Hugging Face", "LangChain", "Transformers",
+    # AI/ML generic terms
+    "Machine Learning", "Deep Learning", "Artificial Intelligence",
+    "Natural Language Processing", "NLP", "Computer Vision",
+    "Data Science", "MLOps", "LLM",
     # Missing – very common in Swedish IT ads
     "Blazor", "SignalR", "Entity Framework", "EF Core",
     "Spring", "Spring MVC", "Spring Security", "Hibernate",
@@ -75,6 +79,9 @@ CLOUD_DEVOPS: List[str] = [
     "SonarQube", "SonarCloud", "Snyk", "Trivy",
     "Podman", "Buildah", "Skaffold",
     "Platform Engineering", "SRE",
+    # IoT
+    "IoT", "Internet of Things", "IoT-lösningar", "IoT solutions",
+    "Edge computing", "MQTT", "OPC-UA",
 ]
 
 # ---------------------------------------------------------------------------
@@ -92,6 +99,13 @@ TOOLS_METHODOLOGY: List[str] = [
     "CQRS", "Event Sourcing", "Saga pattern", "Hexagonal Architecture",
     "Domain-Driven Design", "Test-Driven Development", "Behavior-Driven Development",
     "SAFe", "Lean", "OKR",
+    # Agile team (English forms missing before)
+    "Agile team", "Agile teams", "agilt arbetssätt", "agila team",
+    # Code review
+    "code review", "code reviews", "kodgranskning", "kodgranskningar",
+    "pull request", "pull requests",
+    # AI/ML alias (for normalization)
+    "aiml",
     "k6", "JMeter", "Gatling", "Locust",
     # Swedish Agile inflections – appear verbatim in Swedish job ads
     "agilt", "agila", "agilt team", "sprintplanering", "sprintplanering",
@@ -127,6 +141,8 @@ SOFT_SKILLS: List[str] = [
     # Swedish soft skill inflections – appear verbatim in job ads
     "ansvarstagande", "resultatorienterad", "nyfiken", "strukturerat",
     "samarbetsvilligt", "självständigt",
+    # Swedish agile adjective inflections (agil/agila/agilt all appear in job ads)
+    "agil", "agila", "agilt",
     # Swedish job-ad phrases (multi-word formulations)
     "god samarbetsförmåga", "har lätt för att samarbeta",
     "arbetar självständigt", "tar ansvar", "trivs i team",
@@ -186,12 +202,52 @@ DOMAIN_SKILLS: List[str] = [
     "livscykelhantering", "förbättringsarbete", "förändringsarbete",
     "driftsansvar", "förändringsledning", "uppföljning",
     "problemhantering", "kravanalys", "kravarbete",
+    # Product ownership – Swedish
+    "produktägarskap", "produktägare", "produktledning",
+    "produktstrategi", "produktvision", "produktutveckling",
+    "backlog", "backloghantering", "backlog management",
+    "sprint", "sprintplanering", "sprint planning",
+    "roadmap", "releaseplan", "prioritering", "prioriteringar",
+    "epics", "user stories", "acceptanskriterier",
+    "intressenthantering", "intressenter",
+    "systemförståelse", "verksamhetsförståelse",
+    "domänkunskap", "affärsförståelse",
+    # Product ownership – English
+    "product owner", "product ownership", "product management",
+    "product strategy", "product vision", "product roadmap",
+    "backlog refinement", "sprint review", "sprint retrospective",
+    "stakeholder management", "stakeholder communication",
+    "user story", "acceptance criteria", "definition of done",
+    "go-to-market", "value delivery",
     # English equivalents
     "deployment", "maintenance", "system maintenance",
     "business development", "process improvement",
     "quality assurance", "requirements management",
     "release management", "incident management", "change management",
     "solution architecture", "enterprise architecture",
+    # IT architecture (Swedish compound form)
+    "IT-arkitektur", "IT architecture", "IT-arkitekt",
+    # Public sector
+    "offentlig sektor", "offentliga sektorn", "public sector",
+    "offentlig förvaltning", "myndighet", "myndigheter", "kommunal",
+    # C-ITS / transport
+    "C-ITS", "Cooperative Intelligent Transport Systems",
+    "V2X", "V2I", "V2V", "intelligenta transportsystem",
+    # Fintech / banking / enterprise
+    "fintech", "banking", "bank", "finansiell sektor", "finansiella system",
+    "financial systems", "bank/fintech", "finansteknik",
+    "enterprise systems", "enterprise-system", "affärssystem",
+    # Code review & architecture discussions
+    "arkitekturdiskussioner", "architecture discussions",
+    "teknisk skuld", "technical debt",
+    # Stakeholders
+    "affärsintressenter", "business stakeholders", "verksamhetsintressenter",
+    "intressentdialog",
+    # Data
+    "data modeling", "data modelling", "datamodellering",
+    "dataarkitektur", "data architecture", "dataanalys", "data analysis",
+    # AI/ML
+    "AI/ML", "AI-kunskap", "ML-kunskap",
 ]
 
 # ---------------------------------------------------------------------------
@@ -228,6 +284,10 @@ FRAMEWORK_ALIASES: List[str] = [
     "continuous integration", "continuous delivery", "continuous deployment",
     "java script",
     "frontend", "back end",
+    # AI/ML alias
+    "aiml", "ai ml",
+    # C-ITS alias (for normalization)
+    "cits",
 ]
 
 # ---------------------------------------------------------------------------
@@ -284,6 +344,10 @@ BUSINESS_SYSTEMS: List[str] = [
     "Business systems", "Internal systems",
     "Case management", "Workflow", "Process management",
     "Business intelligence", "BI", "Reporting",
+    # Enterprise & financial
+    "Enterprise architecture", "enterprise integration",
+    "core banking", "banking system", "payment systems",
+    "financial software", "regulatory compliance",
 ]
 
 # ---------------------------------------------------------------------------
@@ -382,4 +446,7 @@ CANONICAL_DISPLAY: Dict[str, str] = {
     # the display name is always the full canonical form.
     "k8s": "Kubernetes",
     "kubernetes": "Kubernetes",
+    "cits": "C-ITS",
+    "aiml": "AI/ML",
+    "ai ml": "AI/ML",
 }
