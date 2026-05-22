@@ -128,10 +128,16 @@ class AIMessageTemplates:
             '    {{{{ "name": "", "category": "", "importance": 3 }}}}\n'
             "  ],\n"
             '  "relevant_experiences": [],\n'
-            '  "summary": "",\n'
-            '  "strengths": [],\n'
-            '  "gaps": []\n'
+            '  "summary": {{"sv": "", "en": ""}},\n'
+            '  "strengths": [{{"sv": "", "en": ""}}],\n'
+            '  "gaps": [{{"sv": "", "en": ""}}]\n'
             "}}}}\n\n"
+            "BILINGUAL RULES:\n"
+            "- summary: object with \"sv\" (Swedish) and \"en\" (English) keys. 1-2 sentences each.\n"
+            "- strengths: list of objects, each with \"sv\" and \"en\" keys. Max 5 items.\n"
+            "- gaps: list of objects, each with \"sv\" and \"en\" keys. Max 5 items. Only real gaps.\n"
+            "- All other fields (cv_profession, cv_skills, job_requirements, matching_skills, "
+            "relevant_experiences) stay as-is — no bilingual needed.\n\n"
             "CV:\n{cv_text}\n\n"
             "Job:\n{job_ad_text}\n"
         ),
@@ -156,11 +162,15 @@ class AIMessageTemplates:
             "Return ONLY valid JSON with exactly these keys:\n"
             "{{\n"
             '  "field_overlap_score": integer 0-100,\n'
-            '  "field_distance_note": "factual one-sentence description of domain distance",\n'
-            '  "match_evidence": ["max 5 concrete overlapping hard skills or domain knowledge"],\n'
-            '  "critical_gaps": ["max 5 hard requirements in job that CV does not show"],\n'
-            '  "transferable_skills": ["max 5 CV skills adjacent to but not directly matching job requirements"]\n'
+            '  "field_distance_note": {{"sv": "faktamening på svenska", "en": "factual sentence in English"}},\n'
+            '  "match_evidence": [{{"sv": "...", "en": "..."}}],\n'
+            '  "critical_gaps": [{{"sv": "...", "en": "..."}}],\n'
+            '  "transferable_skills": [{{"sv": "...", "en": "..."}}]\n'
             "}}\n\n"
+            "BILINGUAL RULES:\n"
+            "- field_distance_note: object with sv/en keys. One factual sentence each.\n"
+            "- match_evidence, critical_gaps, transferable_skills: lists of objects with sv/en keys. Max 5 each.\n"
+            "- field_overlap_score is a plain integer — no bilingual.\n\n"
             "CV profession: {cv_profession}\n"
             "CV skills: {cv_skills}\n\n"
             "Job profession: {job_profession}\n"

@@ -79,6 +79,11 @@ _NORMALIZATIONS: List[Tuple[re.Pattern, str]] = [
     # as identical so CV/job comparisons always match regardless of which form
     # the author chose.
     (re.compile(r"\bK8s\b", re.IGNORECASE), "Kubernetes"),
+    # C-ITS: spaCy splits on hyphens inconsistently; normalise to a single token
+    (re.compile(r"\bC-ITS\b", re.IGNORECASE), "cits"),
+    # AI/ML: slash prevents PhraseMatcher from matching; collapse to one token
+    (re.compile(r"\bAI/ML\b", re.IGNORECASE), "aiml"),
+    (re.compile(r"\bAI\s*/\s*ML\b", re.IGNORECASE), "aiml"),
 ]
 
 
