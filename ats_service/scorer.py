@@ -291,8 +291,10 @@ def score(
             }
         skills_raw: float = kw_raw  # keyword fallback is the only signal
     elif len(job_tech) <= 2 and kw_raw is not None:
-        # Sparse DB coverage: blend to reduce over-reliance on 1-2 matched terms
-        skills_raw = round(0.6 * db_skills_raw + 0.4 * kw_raw, 4)
+        # Sparse tech DB coverage: for non-tech roles (product owner, analyst etc.)
+        # the job ad contains few programming/framework keywords. Blend more
+        # aggressively toward keyword_coverage so the score reflects domain overlap.
+        skills_raw = round(0.4 * db_skills_raw + 0.6 * kw_raw, 4)
     else:
         skills_raw = db_skills_raw  # DB has good coverage – trust it
 
