@@ -8,6 +8,7 @@ from django.conf import settings
 from apps.ai_services.services.file_text_extraction_service import extract_text_from_file
 from apps.ai_services.services.minilm_embedding_service import cosine_similarity
 from apps.ai_services.services.cv_job_analysis_service import extract_cv_job_analysis, extract_field_analysis
+from apps.ai_services.services.cv_anonymization_service import CVAnonymizationService
 from core.ats_client import score_cv_job_ats
 from core.utils import vectorize_text
 
@@ -180,6 +181,16 @@ class CVJobSSEService:
         if cv_error:
             yield self._build_event(progress=100, error=cv_error)
             return
+
+        # --- GDPR / AI Act: anonymize PII before sending to any AI model ---
+        logger.info("CV-text INNAN anonymisering (första 300 tecken):\n%s", cv_text[:300])
+        try:
+            anon_result = CVAnonymizationService.anonymize_raw_text(cv_text)
+            cv_text = anon_result.anonymized_text
+            logger.info("CV anonymiserat innan AI-anrop: %s", anon_result.audit_summary())
+            logger.info("CV-text EFTER anonymisering (första 300 tecken):\n%s", cv_text[:300])
+        except Exception as exc:
+            logger.warning("Anonymisering misslyckades (fortsätter med original): %s", exc)
 
         yield self._build_event(progress=30, message="📋 ATS-analys pågår...")
 
