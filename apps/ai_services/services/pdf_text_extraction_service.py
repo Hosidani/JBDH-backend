@@ -41,7 +41,17 @@ class PDFTextExtractionService:
         try:
             import fitz  # pymupdf
             doc = fitz.open(pdf_path)
-            pages = [page.get_text("text") for page in doc]
+            pages = []
+            for page in doc:
+                # sort=True reads blocks in visual order (top→bottom, left→right).
+                # This captures sidebar text (name, email, phone) that content-stream
+                # order misses for two-column CV layouts.
+                blocks = page.get_text("blocks", sort=True)
+                text_blocks = [
+                    b[4].strip() for b in blocks
+                    if b[6] == 0 and b[4].strip()  # type 0 = text, skip image blocks
+                ]
+                pages.append("\n".join(text_blocks))
             doc.close()
             return "\n".join(pages)
         except Exception as e:

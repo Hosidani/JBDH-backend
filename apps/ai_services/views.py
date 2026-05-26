@@ -36,6 +36,14 @@ def ats_score_view(request):
     except Exception:
         return Response({'error': 'Kunde inte läsa CV-filen som text.'}, status=400)
 
+    # --- GDPR / AI Act: anonymize PII before ATS scoring and DB storage ---
+    try:
+        from apps.ai_services.services.cv_anonymization_service import CVAnonymizationService
+        anon = CVAnonymizationService.anonymize_raw_text(cv_text)
+        cv_text = anon.anonymized_text
+    except Exception as exc:
+        logger.warning("Anonymisering misslyckades (fortsätter med original): %s", exc)
+
     ats_result = score_cv_job_ats(cv_text, job_ad_text)
 
     # --- Spara ATS-resultat till DB ---

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from ats_service.parser import parse_cv, parse_job
 from ats_service.scorer import score
+from ats_service.anonymizer import anonymize
 
 app = FastAPI(title="ATS Service", version="1.0.0")
 
@@ -80,3 +81,15 @@ def score_endpoint(req: ScoreRequest) -> dict:
     result["cv_parsed"] = cv_parsed
     result["job_parsed"] = job_parsed
     return result
+
+
+@app.post("/anonymize/text")
+def anonymize_text_endpoint(req: ParseRequest) -> dict:
+    """
+    Anonymize PII from CV text.
+    Uses spaCy NER (PERSON) + regex (email, phone, URL, personnummer, address).
+    Returns anonymized text and an audit log – originals are never stored.
+    """
+    if not req.text.strip():
+        raise HTTPException(status_code=422, detail="Text får inte vara tomt.")
+    return anonymize(req.text)

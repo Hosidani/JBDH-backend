@@ -55,3 +55,22 @@ def score_cv_job_ats(cv_text: str, job_text: str) -> Dict:
     )
     response.raise_for_status()
     return response.json()
+
+
+def anonymize_cv_text(text: str) -> Dict:
+    """
+    Call ATS service to anonymize PII in CV text.
+    Uses spaCy NER (PERSON) + regex (email, phone, URL, personnummer, address).
+
+    Returns:
+        anonymized_text    str  – text with PII replaced
+        audit_log          list – what was found (no originals stored)
+        total_replacements int
+    """
+    response = requests.post(
+        f"{ATS_URL}/anonymize/text",
+        json={"text": text},
+        timeout=_TIMEOUT,
+    )
+    response.raise_for_status()
+    return response.json()
