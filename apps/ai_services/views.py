@@ -27,8 +27,15 @@ def ats_score_view(request):
     """
     cv_file = request.FILES.get('CvPath')
     job_ad_text = request.data.get('JobAdText', '')
+    cv_name = request.data.get('CvName', '').strip()
+    job_name = request.data.get('JobName', '').strip()
     if not cv_file or not job_ad_text.strip():
         return Response({'error': 'CV och jobbannons krävs.'}, status=400)
+
+    # Derive cv_name from filename if not explicitly provided
+    if not cv_name and cv_file.name:
+        import os
+        cv_name = os.path.splitext(cv_file.name)[0]
 
     # För framtida utökning: hantera olika filtyper
     try:
@@ -44,6 +51,8 @@ def ats_score_view(request):
         user=request.user,
         cv_text=cv_text,
         job_text=job_ad_text,
+        cv_name=cv_name,
+        job_name=job_name,
         ats_json=ats_result,
         overall_score=ats_result.get('overall_score') or ats_result.get('total_score') or ats_result.get('totalScore') or 0
     )
@@ -72,7 +81,7 @@ from .models import ExternalCV, ExternalJobAd
 from .serializers import ExternalCVSerializer, ExternalJobAdSerializer
 from django.shortcuts import get_object_or_404
 from apps.ai_services.services.external_cv_job_ad_service import ExternalCVService, ExternalJobAdService, ATSRelationService
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
 from .models import ATSResult
@@ -182,14 +191,11 @@ class ATSResultListView(ListAPIView):
         return ATSResult.objects.filter(user=self.request.user)
 
     def list(self, request, *args, **kwargs):
-        # Ensure every CV × Job pair has a score before returning data.
-        ATSRelationService.ensure_all_relations(request.user)
-
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return api_response(success=True, message="ATS results fetched", data=serializer.data)
 
-class ATSResultDetailView(RetrieveAPIView):
+class ATSResultDetailView(RetrieveDestroyAPIView):
     serializer_class = ATSResultDetailSerializer
     permission_classes = [IsAuthenticated]
 

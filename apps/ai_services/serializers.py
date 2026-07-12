@@ -11,10 +11,14 @@ class ATSResultPreviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'job_name', 'cv_name', 'overall_score', 'created_at']
 
     def get_job_name(self, obj):
+        if obj.job_name:
+            return obj.job_name
         job = ExternalJobAd.objects.filter(user=obj.user, text=obj.job_text).first()
         return job.name if job else ""
 
     def get_cv_name(self, obj):
+        if obj.cv_name:
+            return obj.cv_name
         cv = ExternalCV.objects.filter(user=obj.user, text=obj.cv_text).first()
         return cv.name if cv else ""
 
@@ -37,10 +41,14 @@ class ATSResultDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_job_name(self, obj):
+        if obj.job_name:
+            return obj.job_name
         job = ExternalJobAd.objects.filter(user=obj.user, text=obj.job_text).first()
         return job.name if job else ""
 
     def get_cv_name(self, obj):
+        if obj.cv_name:
+            return obj.cv_name
         cv = ExternalCV.objects.filter(user=obj.user, text=obj.cv_text).first()
         return cv.name if cv else ""
 

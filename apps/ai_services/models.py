@@ -9,6 +9,8 @@ class ATSResult(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ats_results')
     cv_text = models.TextField()
     job_text = models.TextField()
+    cv_name = models.CharField(max_length=255, default='')
+    job_name = models.CharField(max_length=255, default='')
     ats_json = models.JSONField()
     overall_score = models.FloatField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)

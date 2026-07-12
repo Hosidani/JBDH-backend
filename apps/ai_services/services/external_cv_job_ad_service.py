@@ -119,15 +119,8 @@ class ExternalCVService:
         serializer = ExternalCVSerializer(data={'text': text, 'name': name})
         if serializer.is_valid():
             cv_obj = serializer.save(user=user)
-
-            job_ads = ExternalJobAd.objects.filter(user=user)
-            matches_created = sum(
-                _ensure_ats_result(user, text, job.text, cv_id=cv_obj.id, job_id=job.id)
-                for job in job_ads
-            )
-
             result = serializer.data.copy()
-            result['matches_created'] = matches_created
+            result['matches_created'] = 0
             return result, None
         return None, serializer.errors
 
@@ -183,15 +176,8 @@ class ExternalJobAdService:
         serializer = ExternalJobAdSerializer(data={'text': text, 'name': name})
         if serializer.is_valid():
             job_obj = serializer.save(user=user)
-
-            cvs = ExternalCV.objects.filter(user=user)
-            matches_created = sum(
-                _ensure_ats_result(user, cv.text, text, cv_id=cv.id, job_id=job_obj.id)
-                for cv in cvs
-            )
-
             result = serializer.data.copy()
-            result['matches_created'] = matches_created
+            result['matches_created'] = 0
             return result, None
         return None, serializer.errors
 
